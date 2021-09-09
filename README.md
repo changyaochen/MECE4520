@@ -19,7 +19,7 @@ This course aims to provide the students a general introduction of data science 
 Linear algebra. Knowledge of basic computer programming (_e.g._, Python, Matlab, R, Java).
 
 ## Course format and grading policy
-The course will delivered as a series of 2.5-hour long lectures. The grading will be 60% homework, and 40% final project. There will be in total 3 homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic (details TBD).
+The course will delivered as a series of 2.5-hour long lectures. The grading will be 60% homework, and 40% final project. There will be in total 4 homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic (details TBD).
 
 ## Syllabus
 |  **Date**  | **Topic(s)**                                                 | **Optional Readings** | **Due that day**        |
