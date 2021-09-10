@@ -12,6 +12,7 @@ pillow = "==7.1.2"
 scikit-learn = "==0.22.2.post1"
 scipy = "==1.4.1"
 statsmodels = "==0.10.2"
+tqdm = "==4.62.0"
 
 [dev-packages]
 
