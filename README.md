@@ -1,5 +1,5 @@
 # Data Science for Mechanical Systems
-_Last update: 2021-09-05_.
+_Last update: 2021-09-12_.
 
 This repo contains the materials for the course "MECE 4520: Data Science for Mechanical Systems", offered by the Department of Mechanical Engineering at Columbia University, during the Fall 2021 term. [Link](http://www.columbia.edu/cu/bulletin/uwb/#/cu/bulletin/uwb/subj/MECE/E4520-20213-001/) on Directory of Classes.
 
@@ -8,7 +8,7 @@ This course aims to provide the students a general introduction of data science 
 
 ## Time and location
 * Lectures: Tuesday 1:10 PM ~ 3:40 PM.
-* Location Ren Kraft Center.
+* Location: Zoom until further notice.
 * Office Hours: TBD.
 
 ## Staffs
@@ -24,9 +24,9 @@ The course will delivered as a series of 2.5-hour long lectures. The grading wil
 ## Syllabus
 |  **Date**  | **Topic(s)**                                                 | **Optional Readings** | **Due that day**        |
 | :--------: | :----------------------------------------------------------- | :-------------------- | :---------------------- |
-| 2021-09-14 | Lecture 1: Introduction and linear algebra.                  |                       |                         |
-| 2021-09-21 | Lecture 2: Statistic primer.                                 |
-| 2021-09-28 | Lecture 3: Linear regression.                                |                       | HW #1                   |
+| 2021-09-14 | Lecture 1: Introduction and linear algebra.                  | DDSE 1.1, 1.2         |                         |
+| 2021-09-21 | Lecture 2: Statistic primer.                                 | ISE 2.1               |
+| 2021-09-28 | Lecture 3: Linear regression.                                | ISE 3.1, 3.2          | HW #1                   |
 | 2021-10-05 | Lecture 4: Classification and logistic regression.           |
 | 2021-10-12 | Lecture 5: Feature selection, regularization.                |                       | HW #2                   |
 | 2021-10-19 | Lecture 6: (Mid-term week) Dimension reduction.              |                       |                         |
@@ -39,12 +39,13 @@ The course will delivered as a series of 2.5-hour long lectures. The grading wil
 | 2021-12-07 | Final project presentations, part II.                        |
 
 \* DDSE is short for Data-Driven Science and Engineering
+\* ISL is short for An Introduction to Statistical Learning
 
 ## Reference
 ### Text book:
 * Data-Driven Science and Engineering ([link](http://www.databookuw.com/))
 ### Data science
-* An Introduction to Statistical Learning ([link](https://www.statlearning.com/))
+* An Introduction to Statistical Learning, First edition ([link](https://www.statlearning.com/), [pdf](https://static1.squarespace.com/static/5ff2adbe3fe4fe33db902812/t/6009dd9fa7bc363aa822d2c7/1611259312432/ISLR+Seventh+Printing.pdf))
 * The Elements of
 Statistical Learning ([link](https://web.stanford.edu/~hastie/ElemStatLearn/))
 * Python for Data Analysis ([link](https://www.oreilly.com/library/view/python-for-data/9781449323592/))
