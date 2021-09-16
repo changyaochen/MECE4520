@@ -1,5 +1,5 @@
 # Data Science for Mechanical Systems
-_Last update: 2021-09-12_.
+_Last update: 2021-09-14_.
 
 This repo contains the materials for the course "MECE 4520: Data Science for Mechanical Systems", offered by the Department of Mechanical Engineering at Columbia University, during the Fall 2021 term. [Link](http://www.columbia.edu/cu/bulletin/uwb/#/cu/bulletin/uwb/subj/MECE/E4520-20213-001/) on Directory of Classes.
 
@@ -22,24 +22,48 @@ Linear algebra. Knowledge of basic computer programming (_e.g._, Python, Matlab,
 The course will delivered as a series of 2.5-hour long lectures. The grading will be 60% homework, and 40% final project. There will be in total 4 homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic (details TBD).
 
 ## Syllabus
-|  **Date**  | **Topic(s)**                                                 | **Optional Readings** | **Due that day**        |
-| :--------: | :----------------------------------------------------------- | :-------------------- | :---------------------- |
-| 2021-09-14 | Lecture 1: Introduction and linear algebra.                  | DDSE 1.1, 1.2         |                         |
-| 2021-09-21 | Lecture 2: Statistic primer.                                 | ISE 2.1               |
-| 2021-09-28 | Lecture 3: Linear regression.                                | ISE 3.1, 3.2          | HW #1                   |
-| 2021-10-05 | Lecture 4: Classification and logistic regression.           |
-| 2021-10-12 | Lecture 5: Feature selection, regularization.                |                       | HW #2                   |
-| 2021-10-19 | Lecture 6: (Mid-term week) Dimension reduction.              |                       |                         |
-| 2021-10-26 | Lecture 7: Tree-based models.                                |
-| 2021-11-02 | No class (Election Day, University Holiday).                 |                       | HW #3                   |
-| 2021-11-09 | Lecture 8: Neural Networks.                                  |                       | Final project selection |
-| 2021-11-16 | Lecture 9: Unsupervised learning and reinforcement learning. |
-| 2021-11-23 | Lecture 10: (Thanksgiving week) Dynamical system.            |                       |                         |
-| 2021-11-30 | Final project presentations, part I.                         |                       | HW #4                   |
-| 2021-12-07 | Final project presentations, part II.                        |
+|  **Date**  | **Subject**                                                             | **Optional Readings** | **Due that day**        |
+| :--------: | :---------------------------------------------------------------------- | :-------------------- | :---------------------- |
+| 2021-09-14 | Lecture 1: Introduction and linear algebra.                             | DDSE 1.1, 1.2         |                         |
+| 2021-09-21 | Lecture 2: Statistic primer.                                            | ISE 2.1               |
+| 2021-09-28 | Lecture 3: Linear regression.                                           | ISE 3.1, 3.2          | HW #1                   |
+| 2021-10-05 | Lecture 4: Classification and sampling methods.                         |
+| 2021-10-12 | Lecture 5: Feature selection, regularization.                           |                       | HW #2                   |
+| 2021-10-19 | Lecture 6: (Mid-term week) Dimension reduction. Final project workshop. |                       |                         |
+| 2021-10-26 | Lecture 7: Tree-based models.                                           |
+| 2021-11-02 | No class (Election Day, University Holiday).                            |                       | HW #3                   |
+| 2021-11-09 | Lecture 8: Neural Networks.                                             |                       | Final project selection |
+| 2021-11-16 | Lecture 9: Unsupervised learning and reinforcement learning.            |
+| 2021-11-23 | Lecture 10: (Thanksgiving week) Dynamical system.                       |                       |                         |
+| 2021-11-30 | Final project presentations, part I.                                    |                       | HW #4                   |
+| 2021-12-07 | Final project presentations, part II.                                   |
 
 \* DDSE is short for Data-Driven Science and Engineering
+
 \* ISL is short for An Introduction to Statistical Learning
+
+## Topics to cover
+In this course, we encourage the participants to get hands-on experience as much as possible. Therefore, we will prepare Jupyter Notebooks that correspond to each lecture's content, and recommend the students to make the most of them.
+
+**Introduction and linear algebra**: General course structure. Introduction to Python (with lab session using [Google Colab](https://colab.research.google.com/notebooks/intro.ipynb)). Linear algebra review: vector, matrix properties and operations, eigenvalue and eigenvector, Single Value Decomposition).
+
+**Statistic primer**: Probability review. Descriptive statistics. Central limit theorem. Point estimation and confidence interval. Hypothesis test concept, and two sample hypothesis test.
+
+**Linear regression**: Simple linear regression. Residual analysis. Identification and handling of multicolinearity. Multi-variable linear regression. Normal equation.
+
+**Classification and sampling methods**: Logistic regression. Maximum likelihood estimation. Overfitting, cross-validation and bootstrap.
+
+**Feature selection, regularization**: Best subset, forward, backward selection. L1 (Lasso) and L2 (Ridge) regularization.
+
+**Dimension reduction**: Revisit of SVD. Principle Component Analysis.
+
+**Tree-based models**: Single decision tree with recursive binary splitting approach. Bagging, Random Forest and Boosting.
+
+**Neural Networks**: Feed-forward Neural Networks (NN). Back propagation. Introduction of Convolutional NN and Recurrent NN.
+
+**Unsupervised learning and reinforcement learning**: Clustering methods (k-means, kd-tree, spectral clustering). Multi-arm bandit. Greedy, epsilon-greedy, and upper confidence bound policies.
+
+**Dynamical system**: Fourier transform. Linear control theory, and data-driven dynamical system.
 
 ## Reference
 ### Text book:
