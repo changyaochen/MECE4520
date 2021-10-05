@@ -22,20 +22,20 @@ Linear algebra. Knowledge of basic computer programming (_e.g._, Python, Matlab,
 The course will delivered as a series of 2.5-hour long lectures. The grading will be 60% homework, and 40% final project. There will be in total 4 homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic (details TBD).
 
 ## Syllabus
-|  **Date**  | **Subject**                                                             | **Optional Readings**   | **Due that day**        |
-| :--------: | :---------------------------------------------------------------------- | :---------------------- | :---------------------- |
-| 2021-09-14 | Lecture 1: Introduction and linear algebra.                             | DDSE 1.1, 1.2           |                         |
+|  **Date**  | **Subject**                                                             | **Optional Readings**   | **Due that day**               |
+| :--------: | :---------------------------------------------------------------------- | :---------------------- | :----------------------------- |
+| 2021-09-14 | Lecture 1: Introduction and linear algebra.                             | DDSE 1.1, 1.2           |                                |
 | 2021-09-21 | Lecture 2: Statistic primer.                                            | ISE 2.1                 |
-| 2021-09-28 | Lecture 3: Linear regression.                                           | ISE 3.1, 3.2            |                         |
-| 2021-10-05 | Lecture 4: Classification.                                              | DDSE 4.1, ISE 4.1 - 4.3 | HW #1                   |
-| 2021-10-12 | Lecture 5: Gradient descent. Feature selection, regularization.         |                         |                         |
-| 2021-10-19 | Lecture 6: (Mid-term week) Dimension reduction. Final project workshop. |                         | HW #2                   |
+| 2021-09-28 | Lecture 3: Linear regression.                                           | ISE 3.1, 3.2            |                                |
+| 2021-10-05 | Lecture 4: Classification.                                              | DDSE 4.1, ISE 4.1 - 4.3 | HW #1                          |
+| 2021-10-12 | Lecture 5: Gradient descent. Feature selection, regularization.         |                         |                                |
+| 2021-10-19 | Lecture 6: (Mid-term week) Dimension reduction. Final project workshop. |                         | HW #2                          |
 | 2021-10-26 | Lecture 7: Tree-based models.                                           |
-| 2021-11-02 | No class (Election Day, University Holiday).                            |                         | HW #3                   |
-| 2021-11-09 | Lecture 8: Neural Networks.                                             |                         | Final project selection |
+| 2021-11-02 | No class (Election Day, University Holiday).                            |                         |                                |
+| 2021-11-09 | Lecture 8: Neural Networks.                                             |                         | HW #3, Final project selection |
 | 2021-11-16 | Lecture 9: Unsupervised learning and reinforcement learning.            |
-| 2021-11-23 | Lecture 10: (Thanksgiving week) Dynamical system.                       |                         |                         |
-| 2021-11-30 | Final project presentations, part I.                                    |                         | HW #4                   |
+| 2021-11-23 | Lecture 10: (Thanksgiving week) Dynamical system.                       |                         |                                |
+| 2021-11-30 | Final project presentations, part I.                                    |                         | HW #4                          |
 | 2021-12-07 | Final project presentations, part II.                                   |
 
 \* DDSE is short for Data-Driven Science and Engineering
