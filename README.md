@@ -1,5 +1,5 @@
 # Data Science for Mechanical Systems
-_Last update: 2021-10-11_.
+_Last update: 2021-10-23_.
 
 This repo contains the materials for the course "MECE 4520: Data Science for Mechanical Systems", offered by the Department of Mechanical Engineering at Columbia University, during the Fall 2021 term. [Link](http://www.columbia.edu/cu/bulletin/uwb/#/cu/bulletin/uwb/subj/MECE/E4520-20213-001/) on Directory of Classes.
 
@@ -30,7 +30,7 @@ The course will delivered as a series of 2.5-hour long lectures. The grading wil
 | 2021-10-05 | Lecture 4: Classification.                                                                                 | DDSE 4.1, ISE 4.1 - 4.3 | HW #1                          |
 | 2021-10-12 | Lecture 5: Gradient descent.                                                                               |                         |                                |
 | 2021-10-19 | Lecture 6: (Mid-term week) Regularization. Feature selection. Dimension reduction. Final project workshop. |                         | HW #2                          |
-| 2021-10-26 | Lecture 7: Tree-based models.                                                                              |
+| 2021-10-26 | Lecture 7: Tree-based models.                                                                              | ISL 8.1, 8.2            |
 | 2021-11-02 | No class (Election Day, University Holiday).                                                               |                         |                                |
 | 2021-11-09 | Lecture 8: Neural Networks.                                                                                |                         | HW #3, Final project selection |
 | 2021-11-16 | Lecture 9: Unsupervised learning and reinforcement learning.                                               |
