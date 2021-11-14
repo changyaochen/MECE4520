@@ -35,8 +35,8 @@ The course will delivered as a series of 2.5-hour long lectures. The grading wil
 | 2021-11-09 | Lecture 8: Neural Networks.                                                                                |                         | HW #3, Final project selection |
 | 2021-11-16 | Lecture 9: Unsupervised learning and reinforcement learning.                                               |
 | 2021-11-23 | Lecture 10: (Thanksgiving week) Dynamical system. Course summary.                                          |                         |                                |
-| 2021-11-30 | Final project presentations, part I.                                                                       |                         | HW #4                          |
-| 2021-12-07 | Final project presentations, part II.                                                                      |
+| 2021-11-30 | Final project presentations, part I.                                                                       |                         |                                |
+| 2021-12-07 | Final project presentations, part II.                                                                      |                         | HW #4                          |
 
 \* DDSE is short for Data-Driven Science and Engineering
 
