@@ -25,9 +25,9 @@ The course will delivered as a series of 2.5-hour long lectures. The grading wil
 |  **Date**  | **Subject**                                                                                                | **Optional Readings**   | **Due that day**               |
 | :--------: | :--------------------------------------------------------------------------------------------------------- | :---------------------- | :----------------------------- |
 | 2021-09-14 | Lecture 1: Introduction and linear algebra.                                                                | DDSE 1.1, 1.2           |                                |
-| 2021-09-21 | Lecture 2: Statistic primer.                                                                               | ISE 2.1                 |
-| 2021-09-28 | Lecture 3: Linear regression.                                                                              | ISE 3.1, 3.2            |                                |
-| 2021-10-05 | Lecture 4: Classification.                                                                                 | DDSE 4.1, ISE 4.1 - 4.3 | HW #1                          |
+| 2021-09-21 | Lecture 2: Statistic primer.                                                                               | ISL 2.1                 |
+| 2021-09-28 | Lecture 3: Linear regression.                                                                              | ISL 3.1, 3.2            |                                |
+| 2021-10-05 | Lecture 4: Classification.                                                                                 | DDSE 4.1, ISL 4.1 - 4.3 | HW #1                          |
 | 2021-10-12 | Lecture 5: Gradient descent.                                                                               |                         |                                |
 | 2021-10-19 | Lecture 6: (Mid-term week) Regularization. Feature selection. Dimension reduction. Final project workshop. |                         | HW #2                          |
 | 2021-10-26 | Lecture 7: Tree-based models.                                                                              | ISL 8.1, 8.2            |
