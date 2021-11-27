@@ -1,5 +1,5 @@
 # Data Science for Mechanical Systems
-_Last update: 2021-10-23_.
+_Last update: 2021-11-26_.
 
 This repo contains the materials for the course "MECE 4520: Data Science for Mechanical Systems", offered by the Department of Mechanical Engineering at Columbia University, during the Fall 2021 term. [Link](http://www.columbia.edu/cu/bulletin/uwb/#/cu/bulletin/uwb/subj/MECE/E4520-20213-001/) on Directory of Classes.
 
@@ -33,8 +33,8 @@ The course will delivered as a series of 2.5-hour long lectures. The grading wil
 | 2021-10-26 | Lecture 7: Tree-based models.                                                                              | ISL 8.1, 8.2            |
 | 2021-11-02 | No class (Election Day, University Holiday).                                                               |                         |                                |
 | 2021-11-09 | Lecture 8: Neural Networks.                                                                                |                         | HW #3, Final project selection |
-| 2021-11-16 | Lecture 9: Unsupervised learning and reinforcement learning.                                               |
-| 2021-11-23 | Lecture 10: (Thanksgiving week) Dynamical system. Course summary.                                          |                         |                                |
+| 2021-11-16 | Lecture 9: Unsupervised learning.                                                                          |
+| 2021-11-23 | Lecture 10: (Thanksgiving week) Reinforcement learning. Course summary.                                    |                         |                                |
 | 2021-11-30 | Final project presentations, part I.                                                                       |                         |                                |
 | 2021-12-07 | Final project presentations, part II.                                                                      |                         | HW #4                          |
 
@@ -61,9 +61,10 @@ In this course, we encourage the participants to get hands-on experience as much
 
 **Neural Networks**: Feed-forward Neural Networks (NN). Back propagation. Introduction of Convolutional NN and Recurrent NN.
 
-**Unsupervised learning and reinforcement learning**: Clustering methods (k-means, kd-tree, spectral clustering). Multi-arm bandit. Greedy, epsilon-greedy, and upper confidence bound policies.
+**Unsupervised learning**: Clustering methods (k-means, kd-tree, spectral clustering).
 
-**Dynamical system**: Fourier transform. Linear control theory, and data-driven dynamical system.
+**Reinforcement learning**: Multi-arm bandit. Greedy, epsilon-greedy, and upper confidence bound policies.
+
 
 ## Reference
 ### Text book:
