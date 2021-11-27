@@ -33,7 +33,7 @@ The course will delivered as a series of 2.5-hour long lectures. The grading wil
 | 2021-10-26 | Lecture 7: Tree-based models.                                                                              | ISL 8.1, 8.2            |
 | 2021-11-02 | No class (Election Day, University Holiday).                                                               |                         |                                |
 | 2021-11-09 | Lecture 8: Neural Networks.                                                                                |                         | HW #3, Final project selection |
-| 2021-11-16 | Lecture 9: Unsupervised learning.                                                                          |
+| 2021-11-16 | Lecture 9: Unsupervised learning.                                                                          | ISL 10.3                |
 | 2021-11-23 | Lecture 10: (Thanksgiving week) Reinforcement learning. Course summary.                                    |                         |                                |
 | 2021-11-30 | Final project presentations, part I.                                                                       |                         |                                |
 | 2021-12-07 | Final project presentations, part II.                                                                      |                         | HW #4                          |
