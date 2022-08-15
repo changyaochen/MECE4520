@@ -1,19 +1,19 @@
 # Data Science for Mechanical Systems
-_Last update: 2021-11-26_.
+_Last update: 2022-08-14_.
 
-This repo contains the materials for the course "MECE 4520: Data Science for Mechanical Systems", offered by the Department of Mechanical Engineering at Columbia University, during the Fall 2021 term. [Link](http://www.columbia.edu/cu/bulletin/uwb/#/cu/bulletin/uwb/subj/MECE/E4520-20213-001/) on Directory of Classes.
+This repo contains the materials for the course "MECE 4520: Data Science for Mechanical Systems", offered by the Department of Mechanical Engineering at Columbia University, during the Fall 2022 term. [Link](http://www.columbia.edu/cu/bulletin/uwb/#/cu/bulletin/uwb/subj/MECE/E4520-20223-001/) on Directory of Classes.
 
 ## Objective
 This course aims to provide the students a general introduction of data science and machine learning, with hands-on exercises and applications in mechanical system. The main topics to cover includes supervised learning problems, such as linear regressions and classifications; unsupervised learning problems such as clustering; and reinforcement learning problems. At the end of the course, the students should be equipped with basic concepts data science, and comfortable of applying them to practical problems.
 
 ## Time and location
 * Lectures: Tuesday 1:10 PM ~ 3:40 PM.
-* Location: Rennert Hall at Kraft Center.
-* Office Hours: Thursday via Zoom
+* Location: TBD.
+* Office Hours: TBD.
 
 ## Staffs
-* Lecturer: Changyao Chen (cc2759@columbia.edu)
-* TA: Xin Meng (xm2216@columbia.edu)
+* Lecturer: Changyao Chen (cc2759@columbia.edu).
+* TA: TBD.
 
 ## Prerequisites
 Linear algebra. Knowledge of basic computer programming (_e.g._, Python, Matlab, R, Java).
@@ -24,19 +24,19 @@ The course will delivered as a series of 2.5-hour long lectures. The grading wil
 ## Syllabus
 |  **Date**  | **Subject**                                                                                                | **Optional Readings**   | **Due that day**               |
 | :--------: | :--------------------------------------------------------------------------------------------------------- | :---------------------- | :----------------------------- |
-| 2021-09-14 | Lecture 1: Introduction and linear algebra.                                                                | DDSE 1.1, 1.2           |                                |
-| 2021-09-21 | Lecture 2: Statistic primer.                                                                               | ISL 2.1                 |
-| 2021-09-28 | Lecture 3: Linear regression.                                                                              | ISL 3.1, 3.2            |                                |
-| 2021-10-05 | Lecture 4: Classification.                                                                                 | DDSE 4.1, ISL 4.1 - 4.3 | HW #1                          |
-| 2021-10-12 | Lecture 5: Gradient descent.                                                                               |                         |                                |
-| 2021-10-19 | Lecture 6: (Mid-term week) Regularization. Feature selection. Dimension reduction. Final project workshop. |                         | HW #2                          |
-| 2021-10-26 | Lecture 7: Tree-based models.                                                                              | ISL 8.1, 8.2            |
-| 2021-11-02 | No class (Election Day, University Holiday).                                                               |                         |                                |
-| 2021-11-09 | Lecture 8: Neural Networks.                                                                                |                         | HW #3, Final project selection |
-| 2021-11-16 | Lecture 9: Unsupervised learning.                                                                          | ISL 10.3                |
-| 2021-11-23 | Lecture 10: (Thanksgiving week) Reinforcement learning. Course summary.                                    |                         |                                |
-| 2021-11-30 | Final project presentations, part I.                                                                       |                         |                                |
-| 2021-12-07 | Final project presentations, part II.                                                                      |                         | HW #4                          |
+| 2022-09-13 | Lecture 1: Introduction and linear algebra.                                                                | DDSE 1.1, 1.2           |                                |
+| 2022-09-20 | Lecture 2: Statistic primer.                                                                               | ISL 2.1                 |
+| 2022-09-27 | Lecture 3: Linear regression.                                                                              | ISL 3.1, 3.2            |                                |
+| 2022-10-04 | Lecture 4: Classification.                                                                                 | DDSE 4.1, ISL 4.1 - 4.3 | HW #1                          |
+| 2022-10-11 | Lecture 5: Gradient descent.                                                                               |                         |                                |
+| 2022-10-18 | Lecture 6: (Mid-term week) Regularization. Feature selection. Dimension reduction. Final project workshop. |                         | HW #2                          |
+| 2022-10-25 | Lecture 7: Tree-based models.                                                                              | ISL 8.1, 8.2            |
+| 2022-11-01 | No class (Election Day, University Holiday).                                                               |                         |                                |
+| 2022-11-08 | Lecture 8: Neural Networks.                                                                                |                         | HW #3, Final project selection |
+| 2022-11-15 | Lecture 9: Unsupervised learning.                                                                          | ISL 10.3                |
+| 2022-11-22 | Lecture 10: (Thanksgiving week) Reinforcement learning. Course summary.                                    |                         |                                |
+| 2022-11-29 | Final project presentations, part I.                                                                       |                         |                                |
+| 2022-12-06 | Final project presentations, part II.                                                                      |                         | HW #4                          |
 
 \* DDSE is short for Data-Driven Science and Engineering
 
