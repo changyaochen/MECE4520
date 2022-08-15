@@ -8,7 +8,7 @@ Python environment management is known to be notorious confusing (_e.g._, see [h
 ## Virtual environment management
 To handle both issues at once, we use a tool called `pipenv` ([link](https://pipenv.pypa.io/en/latest/)). Please follow the [instruction](https://pipenv.pypa.io/en/latest/#install-pipenv-today) on the website to complete the installation.
 
-In our course, we highly recommend to use Python interpreter with version >= 3.7. (_e.g._, 3.7.11). For the Python libraries, please refer to the `Pipeflie` file.
+In our course, we highly recommend to use Python interpreter with version >= 3.7. (_e.g._, 3.7.13). For the Python libraries, please refer to the `Pipeflie` file.
 
 To use `pipenv`, we will create a new virtual environment and run our codes within. To do so: open a new session in Terminal, and run:
 ```sh
