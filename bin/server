@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+image=$(docker image ls | grep mece4520)
+if [ -z $image ]
+then
+	echo "The docker image is not found."
+	echo "Have you run `make build` yet?"
+fi
+
+# docker run
