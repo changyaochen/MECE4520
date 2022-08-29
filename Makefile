@@ -1,10 +1,13 @@
-.PHONY: setup build server
+.PHONY: build serve
 
-setup:
+init:
+	@chmod +x bin/setup.sh bin/build.sh bin/serve.sh
+
+setup: init
 	@bin/setup.sh
 
 build: setup
 	@bin/build.sh
 
-server: setup
-	@bin/server.sh
+serve: setup
+	@bin/serve.sh
