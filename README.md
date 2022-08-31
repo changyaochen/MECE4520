@@ -13,7 +13,7 @@ This course aims to provide the students a general introduction of data science 
 
 ## Staffs
 * Lecturer: Changyao Chen (cc2759@columbia.edu).
-* TA: TBD.
+* TA: Yuhang Hu (yh3187@columbia.edu).
 
 ## Prerequisites
 Linear algebra. Knowledge of basic computer programming (_e.g._, Python, Matlab, R, Java).
