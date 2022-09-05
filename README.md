@@ -22,10 +22,10 @@ Linear algebra. Knowledge of basic computer programming (_e.g._, Python, Matlab,
 The course will delivered as a series of 2.5-hour long lectures. The grading will be 60% homework, and 40% final project. There will be in total 4 homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic (details TBD).
 
 ## Syllabus
-|  **Week** | **Subject**                                  | **Optional Readings**   | **Due that day**               |
+|  **Week** | **Subject**                                  | **Optional Readings**   | **Due that week**              |
 | --------: | :------------------------------------------- | :---------------------- | :----------------------------- |
 |  1 (half) | Introduction                                 | DDSE 1.1, 1.2           |                                |
-|         2 | Linear algebra. Statistic primer.            | ISL 2.1                 |
+|         2 | Linear algebra. Statistic primer.            | ISL 2.1                 | HW #0                          |
 |         3 | Statistic primer. Linear regression.         | ISL 3.1, 3.2            |                                |
 |         4 | Linear regression.                           | DDSE 4.1, ISL 4.1 - 4.3 | HW #1                          |
 |         5 | Classification. Gradient descent.            |                         |                                |
@@ -68,10 +68,9 @@ In this course, we encourage the participants to get hands-on experience as much
 
 
 ## Reference
-### Text book:
-* Data-Driven Science and Engineering ([link](http://www.databookuw.com/))
 ### Data science
 * An Introduction to Statistical Learning, First edition ([link](https://www.statlearning.com/), [pdf](https://static1.squarespace.com/static/5ff2adbe3fe4fe33db902812/t/6009dd9fa7bc363aa822d2c7/1611259312432/ISLR+Seventh+Printing.pdf))
+* Data-Driven Science and Engineering ([link](http://www.databookuw.com/))
 * The Elements of
 Statistical Learning ([link](https://web.stanford.edu/~hastie/ElemStatLearn/))
 * Python for Data Analysis ([link](https://www.oreilly.com/library/view/python-for-data/9781449323592/))
