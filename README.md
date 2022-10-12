@@ -31,8 +31,8 @@ The course will delivered as a series of lectures. The grading will be 60% homew
 |         5 | Classification. Gradient descent.            |                         |                                |
 |         6 | Regularization. Feature selection.           |                         | HW #2                          |
 |         7 | Dimension reduction. Final project workshop. | ISL 8.1, 8.2            |
-|         8 | Tree-based models.                           |                         |                                |
-|         9 | Neural Networks.                             |                         | HW #3, Final project selection |
+|         8 | Tree-based models.                           |                         | HW #3                          |
+|         9 | Neural Networks.                             |                         | Final project selection        |
 | 10 (half) | Unsupervised learning.                       | ISL 10.3                |
 |        11 | Reinforcement learning.                      |                         |                                |
 | 12 (half) | Course summary.                              |                         |                                |
