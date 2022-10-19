@@ -22,22 +22,22 @@ Linear algebra. Knowledge of basic computer programming (_e.g._, Python, Matlab,
 The course will delivered as a series of lectures. The grading will be 60% homework, and 40% final project. There will be in total 5 homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic (details TBD).
 
 ## Syllabus
-|  **Week** | **Subject**                                  | **Optional Readings**   | **Due that week**              |
-| --------: | :------------------------------------------- | :---------------------- | :----------------------------- |
-|  1 (half) | Introduction                                 | DDSE 1.1, 1.2           |                                |
-|         2 | Linear algebra. Statistic primer.            | ISL 2.1                 | HW #0                          |
-|         3 | Statistic primer. Linear regression.         | ISL 3.1, 3.2            |                                |
-|         4 | Linear regression.                           | DDSE 4.1, ISL 4.1 - 4.3 | HW #1                          |
-|         5 | Classification. Gradient descent.            |                         |                                |
-|         6 | Regularization. Feature selection.           |                         | HW #2                          |
+|  **Week** | **Subject**                                  | **Optional Readings**   | **Due that week**       |
+| --------: | :------------------------------------------- | :---------------------- | :---------------------- |
+|  1 (half) | Introduction                                 | DDSE 1.1, 1.2           |                         |
+|         2 | Linear algebra. Statistic primer.            | ISL 2.1                 | HW #0                   |
+|         3 | Statistic primer. Linear regression.         | ISL 3.1, 3.2            |                         |
+|         4 | Linear regression.                           | DDSE 4.1, ISL 4.1 - 4.3 | HW #1                   |
+|         5 | Classification. Gradient descent.            |                         |                         |
+|         6 | Regularization. Feature selection.           |                         | HW #2                   |
 |         7 | Dimension reduction. Final project workshop. | ISL 8.1, 8.2            |
-|         8 | Tree-based models.                           |                         | HW #3                          |
-|         9 | Neural Networks.                             |                         | Final project selection        |
-| 10 (half) | Unsupervised learning.                       | ISL 10.3                |
-|        11 | Reinforcement learning.                      |                         |                                |
-| 12 (half) | Course summary.                              |                         |                                |
-|        13 | Final project presentations, part I.         |                         |                                |
-|        14 | Final project presentations, part II.        |                         | HW #4                          |
+|         8 | Tree-based models.                           |                         | HW #3                   |
+|         9 | Neural Networks.                             |                         | HW #4                   |
+| 10 (half) | Unsupervised learning.                       | ISL 10.3                | Final project selection |
+|        11 | Reinforcement learning.                      |                         | HW #5                   |
+| 12 (half) | Course summary.                              |                         |                         |
+|        13 | Final project presentations, part I.         |                         | HW #6                   |
+|        14 | Final project presentations, part II.        |                         |                         |
 
 \* DDSE is short for Data-Driven Science and Engineering
 
