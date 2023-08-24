@@ -1,19 +1,19 @@
 # Data Science for Mechanical Systems
-_Last update: 2022-08-28_.
+_Last update: 2023-08-23_.
 
-This repo contains the materials for the course "MECE 4520: Data Science for Mechanical Systems", offered by the Department of Mechanical Engineering at Columbia University, during the Fall 2022 term. [Link](http://www.columbia.edu/cu/bulletin/uwb/#/cu/bulletin/uwb/subj/MECE/E4520-20223-001/) on Directory of Classes.
+This repo contains the materials for the course "MECE 4520: Data Science for Mechanical Systems", offered by the Department of Mechanical Engineering at Columbia University, during the Fall 2023 term. [Link](http://www.columbia.edu/cu/bulletin/uwb/#subj/MECE/E4520-20233-001/) on Directory of Classes.
 
 ## Objective
 This course aims to provide the students a general introduction of data science and machine learning, with hands-on exercises and applications in mechanical system. The main topics to cover includes supervised learning problems, such as linear regressions and classifications; unsupervised learning problems such as clustering; and reinforcement learning problems. At the end of the course, the students should be equipped with basic concepts data science, and comfortable of applying them to practical problems.
 
 ## Time and location
 * Lectures: Monday and Wednesday, 8:40am-9:55am.
-* Location: 417 International Affairs Building.
+* Location: 501 Northwest Corner Building.
 * Office Hours: TBD.
 
 ## Staffs
 * Lecturer: Changyao Chen (cc2759@columbia.edu).
-* TA: Yuhang Hu (yh3187@columbia.edu).
+* TA: TBD.
 
 ## Prerequisites
 Linear algebra. Knowledge of basic computer programming (_e.g._, Python, Matlab, R, Java).
