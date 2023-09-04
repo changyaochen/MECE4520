@@ -1,4 +1,4 @@
-FROM jupyter/datascience-notebook:ubuntu-22.04
+FROM jupyter/datascience-notebook:python-3.10.11
 
 USER root
 RUN apt-get update && apt-get -y install graphviz

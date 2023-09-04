@@ -20,11 +20,7 @@ This course aims to provide the students with a general introduction to data sci
 * Knowledge of basic computer programming (_e.g._, Python, Matlab, R, Java).
 
 ## Course format and grading policy
-<<<<<<< HEAD
-The course will delivered as a series of lectures. The grading will be 60% homework, and 40% final project. There will be in total **7** homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic (details TBD).
-=======
 The course will delivered as a series of lectures. The grading will be **60%** homework and **40%** final project. There will be in total **7** homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic (details TBD).
->>>>>>> master
 
 ## Syllabus
 |  **Week** | **Subject**                                  | **Optional Readings**   | **Due that week**       |
