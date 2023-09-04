@@ -47,7 +47,7 @@ The course will delivered as a series of lectures. The grading will be **60%** h
 ## Topics to cover
 In this course, we encourage the participants to get hands-on experience as much as possible. Therefore, we will prepare Jupyter Notebooks that correspond to each lecture's content, and recommend the students to make the most of them.
 
-**Introduction and linear algebra**: General course structure. Introduction to Python (with lab session using [Google Colab](https://colab.research.google.com/notebooks/intro.ipynb)). Linear algebra review: vector, matrix properties and operations, eigenvalue and eigenvector, Single Value Decomposition).
+**Introduction and linear algebra**: General course structure. Introduction to Python (with lab session using [Google Colab](https://colab.research.google.com/notebooks/intro.ipynb)). Linear algebra review: vector, matrix properties and operations, eigenvalue and eigenvector, Single Value Decomposition.
 
 **Statistic primer**: Probability review. Descriptive statistics. Central limit theorem. Point estimation and confidence interval. Hypothesis test concept, and two sample hypothesis test.
 
