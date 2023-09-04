@@ -21,21 +21,24 @@ All of the Jupyter notebook examples used in the class will be pushed to Github,
 ### Local development with Docker
 [Docker](https://www.docker.com/) is a framework to allow for portable and reproducible programing environments. For this course, we provide a Docker image to launch a Jupyter server on your local machine.
 
+Only choose this option if you are familiar with Docker, or you want to learn Docker.
+
 1. Install [Git](https://git-scm.com/downloads) and [Docker Engine](https://docs.docker.com/engine/install/).
 2. Pull this repository to your local machine, by running command in terminal:
     ```sh
     cd <directory_of_your_choice>
     git clone git@github.com:changyaochen/MECE4520.git
     ```
-3. Run the following commands in terminal:
+3. Start the Docker Engine.
+4. Run the following commands in terminal:
    ```sh
    cd MECE4520
    make build  # only needed for the first-time use, it can take a few minutes
    make serve
    ```
-4. If things go smoothly, you should see many lines printed to the terminal. Open a browser, and go to `localhost:8888`. It should show you the JupyterLab interface.
-5. To shut down the Jupyter server, go back to the terminal session where you launch the server, and press "cmd + C" ("control + C" for Windows and Linux).
+5. If things go smoothly, you should see many lines printed to the terminal. Open a browser, and go to `localhost:8888`. It should show you the JupyterLab interface.
+6. To shut down the Jupyter server, go back to the terminal session where you launch the server, and press "cmd + C" ("control + C" for Windows and Linux).
 
 ## Troubleshooting
 
-Try Google with the error message, usually someone already has the answer.
+Try Google or ChatGPT with the error message, usually someone already has the answer.

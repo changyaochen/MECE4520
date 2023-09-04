@@ -19,7 +19,7 @@ This course aims to provide the students a general introduction of data science 
 Linear algebra. Knowledge of basic computer programming (_e.g._, Python, Matlab, R, Java).
 
 ## Course format and grading policy
-The course will delivered as a series of lectures. The grading will be 60% homework, and 40% final project. There will be in total 5 homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic (details TBD).
+The course will delivered as a series of lectures. The grading will be 60% homework, and 40% final project. There will be in total **7** homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic (details TBD).
 
 ## Syllabus
 |  **Week** | **Subject**                                  | **Optional Readings**   | **Due that week**       |
@@ -46,7 +46,7 @@ The course will delivered as a series of lectures. The grading will be 60% homew
 ## Topics to cover
 In this course, we encourage the participants to get hands-on experience as much as possible. Therefore, we will prepare Jupyter Notebooks that correspond to each lecture's content, and recommend the students to make the most of them.
 
-**Introduction and linear algebra**: General course structure. Introduction to Python (with lab session using [Google Colab](https://colab.research.google.com/notebooks/intro.ipynb)). Linear algebra review: vector, matrix properties and operations, eigenvalue and eigenvector, Single Value Decomposition).
+**Introduction and linear algebra**: General course structure. Introduction to Python (with lab session using [Google Colab](https://colab.research.google.com/notebooks/intro.ipynb)). Linear algebra review: vector, matrix properties and operations, eigenvalue and eigenvector, Single Value Decomposition.
 
 **Statistic primer**: Probability review. Descriptive statistics. Central limit theorem. Point estimation and confidence interval. Hypothesis test concept, and two sample hypothesis test.
 
