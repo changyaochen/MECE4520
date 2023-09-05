@@ -57,11 +57,11 @@ In this course, we encourage the participants to get hands-on experience as much
 
 **Gradient descent**: Gradient descent: batch, stochastic, mini-batch.
 
-**Regularization. Feature selection. Dimension reduction**: Overfitting, cross-validation and bootstrap. Best subset, forward, backward selection. L1 (Lasso) and L2 (Ridge) regularization. Revisit of SVD. Principle Component Analysis.
+**Regularization. Feature selection. Dimension reduction**: Overfitting, cross-validation, and bootstrap. Best subset, forward, backward selection. L1 (Lasso) and L2 (Ridge) regularization. Revisit of SVD. Principle Component Analysis.
 
-**Tree-based models**: Single decision tree with recursive binary splitting approach. Bagging, Random Forest and Boosting.
+**Tree-based models**: Single decision tree with recursive binary splitting approach. Bagging, Random Forest, and Boosting.
 
-**Neural Networks**: Feed-forward Neural Networks (NN). Back propagation. Introduction of Convolutional NN and Recurrent NN.
+**Neural Networks**: Feed-forward Neural Networks (NN). Backpropagation. Introduction of Convolutional NN and Recurrent NN.
 
 **Unsupervised learning**: Clustering methods (k-means, kd-tree, spectral clustering).
 
@@ -70,7 +70,7 @@ In this course, we encourage the participants to get hands-on experience as much
 
 ## Reference
 ### Data science
-* An Introduction to Statistical Learning, First edition ([link](https://www.statlearning.com/), [pdf](https://static1.squarespace.com/static/5ff2adbe3fe4fe33db902812/t/6009dd9fa7bc363aa822d2c7/1611259312432/ISLR+Seventh+Printing.pdf))
+* An Introduction to Statistical Learning with Application in Python ([link](https://www.statlearning.com/), [pdf](https://hastie.su.domains/ISLP/ISLP_website.pdf))
 * Data-Driven Science and Engineering ([link](http://www.databookuw.com/))
 * The Elements of
 Statistical Learning ([link](https://web.stanford.edu/~hastie/ElemStatLearn/))
