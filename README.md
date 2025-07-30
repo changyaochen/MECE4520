@@ -1,7 +1,7 @@
 # Data Science for Mechanical Systems
-_Last update: 2024-01-07_.
+_Last update: 2025-07-29_.
 
-This repo contains the materials for the course "MECE 4520: Data Science for Mechanical Systems", offered by the Department of Mechanical Engineering at Columbia University, during the Fall 2023 term. [Link](http://www.columbia.edu/cu/bulletin/uwb/#subj/MECE/E4520-20233-001/) on Directory of Classes.
+This repo contains the materials for the course "MECE 4520: Data Science for Mechanical Systems", offered by the Department of Mechanical Engineering at Columbia University, during the Fall 2025 term. [Link](https://doc.sis.columbia.edu/#subj/MECE/E4520-20253-001/) on Directory of Classes.
 
 Past course evaluations (5-point scale): 4.6 (2023), 4.5 (2022), 4.2 (2021).
 
@@ -9,13 +9,13 @@ Past course evaluations (5-point scale): 4.6 (2023), 4.5 (2022), 4.2 (2021).
 This course aims to give the students a general introduction to data science and machine learning, with hands-on exercises and applications in mechanical systems. The main topics to cover include supervised learning problems, such as linear regressions and classifications; unsupervised learning problems such as clustering; and reinforcement learning problems. At the end of the course, the students should be equipped with basic concepts of data science, and comfortable applying them to practical problems.
 
 ## Time and location
-* Lectures: Monday and Wednesday, 8:40 AM - 9:55 AM.
-* Location: 501 Northwest Corner Building.
+* Lectures: Tuesday and Thursday, 10:10 AM - 11:25 AM.
+* Location: TBD.
 * Office Hours: TBD.
 
 ## Staffs
 * Lecturer: Changyao Chen (cc2759).
-* TA: Shadia Sarmin (ss6703), Li Yuan (ly2596).
+* TA: TBD.
 
 ## Prerequisites
 * Linear algebra.
@@ -24,7 +24,7 @@ This course aims to give the students a general introduction to data science and
 ## Course format and grading policy
 The course will delivered as a series of lectures. The grading will be **60%** homework and **40%** final project. There will be in total **7** homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic.
 
-## Syllabus
+## Prelimiarly Syllabus
 |  **Week** | **Subject**                                  | **Optional Readings**   | **Due that week**       |
 | --------: | :------------------------------------------- | :---------------------- | :---------------------- |
 |  1 (half) | Introduction                                 | DDSE 1.1, 1.2           |                         |
