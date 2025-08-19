@@ -33,6 +33,7 @@ If you choose to use your own machine to run the code (Jupyter notebooks), you c
    make setup  # only needed for the first-time use, it can take a few minutes
    make jupyter
    ```
+   Behind the scene, the `make setup` command will install the Python 3.11 via `pyenv`, and the Python package manager `uv`.
 5. If things go smoothly, you should see many lines printed to the terminal. Open a browser, and go to `localhost:8888`. It should show you the JupyterLab interface.
 6. To shut down the Jupyter server, go back to the terminal session where you launch the server, and press "cmd + C" ("control + C" for Windows and Linux).
 
