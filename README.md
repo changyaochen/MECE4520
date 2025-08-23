@@ -10,7 +10,7 @@ This course aims to give the students a general introduction to data science and
 
 ## Time and location
 * Lectures: Tuesday and Thursday, 10:10 AM - 11:25 AM.
-* Location: TBD.
+* Location: 501 Schermerhorn Hall.
 * Office Hours: TBD.
 
 ## Staffs
