@@ -1,13 +1,22 @@
-.PHONY: build serve
+.PHONY: build serve install-python install-uv
 
-init:
-	@chmod +x bin/setup.sh bin/build.sh bin/serve.sh
+install-python:
+	@echo "🐍 Installing Python 3.10 via pyenv..."
+	@bin/install_python.sh
 
-setup: init
-	@bin/setup.sh
+install-uv:
+	@echo "📦 Installing uv package manager..."
+	@bin/install_uv.sh
 
-build: setup
-	@bin/build.sh
+setup: install-python install-uv
+	@echo "🚀 Setting up the project..."
+	@uv sync
 
-serve: setup
-	@bin/serve.sh
+jupyter:
+	@bin/check_env.sh
+	@echo "🚀 Starting Jupyter server..."
+	@source .venv/bin/activate && jupyter lab
+
+
+
+

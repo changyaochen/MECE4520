@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mece4520"
+version = "0.1.0"
+description = "MECE4520 Course"
+authors = [
+    {name = "Changyao Chen", email = "cc2759@columbia.edu"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    # Core scientific computing
+    "numpy>=2.0.2",
+    "pandas>=2.2.2",
+    "scipy>=1.16.1",
+    "scikit-learn>=1.6.1",
+    # Deep learning
+    "tensorflow>=2.19.0",
+    "keras>=3.10.0",
+    # Visualization
+    "matplotlib>=3.10.0",
+    "seaborn>=0.13.2",
+    "graphviz",
+    # Jupyter ecosystem
+    "jupyter-client>=6.1.12",
+    "jupyter-console>=6.1.0",
+    "jupyter-core>=5.8.1",
+    "jupyter-kernel-gateway>=2.5.2",
+    "jupyter-leaflet>=0.20.0",
+    "jupyter-server>=1.16.0",
+    "jupyterlab-pygments>=0.3.0",
+    "jupyterlab-widgets>=3.0.15",
+    "jupyter>=1.1.1",
+    "gymnasium>=1.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/mece4520"
+Repository = "https://github.com/yourusername/mece4520.git"
+Issues = "https://github.com/yourusername/mece4520/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+exclude = ["tests*", "docs*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
