@@ -17,69 +17,90 @@ This course aims to give the students a general introduction to data science and
 * Lecturer: Changyao Chen (cc2759).
 * TA: TBD.
 
-## Prerequisites
-* Linear algebra.
-* Knowledge of basic computer programming (_e.g._, Python, Matlab, R, Java).
-
 ## Course format and grading policy
-The course will delivered as a series of lectures. The grading will be **60%** homework and **40%** final project. There will be in total **7** homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic.
+The course will delivered as a series of lectures. The grading will be **60%** homework and **40%** final project. There will be in total **about 7** homework (HW) assignments, which are due throughout the course. The final project will be a group-based, 5-minute presentation of a selected topic.
 
-## Prelimiarly Syllabus
-|  **Week** | **Subject**                                  | **Optional Readings**   | **Due that week**       |
-| --------: | :------------------------------------------- | :---------------------- | :---------------------- |
-|  1 (half) | Introduction                                 | DDSE 1.1, 1.2           |                         |
-|         2 | Linear algebra. Statistic primer.            | ISL 2.1                 | HW #0                   |
-|         3 | Statistic primer. Linear regression.         | ISL 3.1, 3.2            |                         |
-|         4 | Linear regression.                           | DDSE 4.1, ISL 4.1 - 4.3 | HW #1                   |
-|         5 | Classification. Gradient descent.            |                         |                         |
-|         6 | Regularization. Feature selection.           |                         | HW #2                   |
-|         7 | Dimension reduction. Final project workshop. | ISL 8.1, 8.2            |
-|         8 | Tree-based models.                           |                         | HW #3                   |
-|         9 | Neural Networks.                             |                         | HW #4                   |
-| 10 (half) | Unsupervised learning.                       | ISL 10.3                | Final project selection |
-|        11 | Reinforcement learning.                      |                         | HW #5                   |
-| 12 (half) | Course summary.                              |                         |                         |
-|        13 | Final project presentations, part I.         |                         | HW #6                   |
-|        14 | Final project presentations, part II.        |                         |                         |
+## Preliminary Syllabus
+| **Week** | **Subject**                                   | **Optional Readings** | **Due that week**       |
+|--------: | :-------------------------------------------- | :-------------------- | :---------------------- |
+|        1 | Introduction and linear algebra primer        | ISL 2.1               |                         |
+|        2 | Statistic primer                              |                       | HW #0                   |
+|        3 | Linear regression                             | ISL 3.1, 3.2          |                         |
+|        4 | Linear regression                             |                       | HW #1                   |
+|        5 | Classification. Gradient descent              | ISL 4.3               |                         |
+|        6 | Regularization. Feature selection             | ISL 6.1, 6.2          | HW #2                   |
+|        7 | Dimension reduction. Final project workshop   |                       |                         |
+|        8 | Tree-based models                             | ISL 8.1, 8.2          | HW #3                   |
+|        9 | Neural Networks                               |                       | HW #4                   |
+|       10 | Unsupervised learning                         | ISL 12.2              | Final project selection |
+|       11 | Reinforcement learning                        |                       | HW #5                   |
+|       12 | Course summary                                |                       |                         |
+|       13 | Final project presentations, part I           |                       | HW #6                   |
+|       14 | Final project presentations, part II          |                       |                         |
 
-\* The homework is due at Tuesday 11:59 PM of the given week.
+\* The homework is due at Monday 11:59 PM of the given week
 
-\* DDSE is short for Data-Driven Science and Engineering
-
-\* ISL is short for An Introduction to Statistical Learning
+\* ISL is short for An Introduction to Statistical Learning with application in Python ([link](https://www.statlearning.com/))
 
 ## Topics to cover
-In this course, we encourage the participants to get hands-on experience as much as possible. Therefore, we will prepare Jupyter Notebooks that correspond to each lecture's content, and recommend the students to make the most of them.
+In this course, we encourage the students to get hands-on experience as much as possible.
+Therefore, we will prepare Jupyter Notebooks that correspond to each lecture's content,
+and recommend the students to make the most of them.
 
-**Introduction and linear algebra**: General course structure. Introduction to Python (with lab session using [Google Colab](https://colab.research.google.com/notebooks/intro.ipynb)). Linear algebra review: vector, matrix properties and operations, eigenvalue and eigenvector, Single Value Decomposition.
+**Introduction and linear algebra**:
+General course structure. Introduction to Python (with lab session using [Google Colab](https://colab.research.google.com/notebooks/intro.ipynb)).
+Linear algebra review: vector, matrix properties and operations, eigenvalue and eigenvector.
+Single Value Decomposition (SVD).
 
-**Statistic primer**: Probability review. Descriptive statistics. Central limit theorem. Point estimation and confidence interval. Hypothesis test concept, and two sample hypothesis test.
+**Statistic primer**:
+Probability review. Descriptive statistics. Central limit theorem.
+Point estimation and confidence interval.
+Hypothesis test concept, and two sample hypothesis test.
 
-**Linear regression**: Simple linear regression. Residual analysis. Identification and handling of multi-collinearity. Multi-variable linear regression. Normal equation.
+**Linear regression**:
+Simple linear regression. Residual analysis. Identification and handling of multicollinearity.
+Multi-variable linear regression. Normal equation.
 
-**Classification**: Logistic regression. Maximum likelihood estimation.
+**Classification**:
+Logistic regression. Maximum likelihood estimation.
 
-**Gradient descent**: Gradient descent: batch, stochastic, mini-batch.
+**Gradient descent**: Batch, stochastic, mini-batch gradient descent.
 
-**Regularization. Feature selection. Dimension reduction**: Overfitting, cross-validation, and bootstrap. Best subset, forward, backward selection. L1 (Lasso) and L2 (Ridge) regularization. Revisit of SVD. Principle Component Analysis.
+**Regularization. Feature selection. Dimension reduction**:
+Overfitting, cross-validation, and bootstrap.
+Best subset, forward, backward selection.
+L1 (Lasso) and L2 (Ridge) regularization.
+Revisit of SVD.
+Principle Component Analysis (PCA).
 
-**Tree-based models**: Single decision tree with recursive binary splitting approach. Bagging, Random Forest, and Boosting.
+**Tree-based models**:
+Single decision tree with recursive binary splitting approach.
+Bagging, Random Forest, and Boosting.
 
-**Neural Networks**: Feed-forward Neural Networks (NN). Back-propagation. Introduction of Convolutional NN and Recurrent NN.
+**Neural Networks**:
+Feed-forward Neural Networks (NN). Back-propagation.
+Introduction of Convolutional Neural Networks (CNN) and Recurrent Neural Networks (RNN), and Transformer.
 
-**Unsupervised learning**: Clustering methods (k-means, kd-tree, spectral clustering).
+**Unsupervised learning**:
+Clustering methods (k-means, kd-tree, spectral clustering).
 
-**Reinforcement learning**: Multi-arm bandit. Greedy, epsilon-greedy, and upper confidence bound policies.
+**Reinforcement learning**:
+Multi-arm bandit. Greedy, epsilon-greedy, and upper confidence bound policies.
+Q-learning.
 
 
 ## Reference
+While the course will follow the syllabus and the materials provided,
+the following references are recommended for further reading.
+
 ### Data science
-* An Introduction to Statistical Learning with Application in Python ([link](https://www.statlearning.com/), [pdf](https://hastie.su.domains/ISLP/ISLP_website.pdf))
-* Data-Driven Science and Engineering ([link](http://www.databookuw.com/))
+* An Introduction to Statistical Learning with Application in Python ([link](https://www.statlearning.com/))
+* Data-Driven Science and Engineering, 2nd edition ([link](http://www.databookuw.com/))
 * The Elements of
 Statistical Learning ([link](https://web.stanford.edu/~hastie/ElemStatLearn/))
 * Python for Data Analysis ([link](https://www.oreilly.com/library/view/python-for-data/9781449323592/))
 * Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow ([link](https://www.oreilly.com/library/view/hands-on-machine-learning/9781492032632/))
+
 ### Python and general programming
 * Python Crash Course ([link](https://nostarch.com/pythoncrashcourse2e))
 * Real Python ([link](https://realpython.com/))
