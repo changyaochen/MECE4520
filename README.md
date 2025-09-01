@@ -1,5 +1,5 @@
 # Data Science for Mechanical Systems
-_Last update: 2025-07-29_.
+_Last update: 2025-08-29_.
 
 This repo contains the materials for the course "MECE 4520: Data Science for Mechanical Systems", offered by the Department of Mechanical Engineering at Columbia University, during the Fall 2025 term. [Link](https://doc.sis.columbia.edu/#subj/MECE/E4520-20253-001/) on Directory of Classes.
 
