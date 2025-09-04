@@ -44,6 +44,8 @@ dependencies = [
     "jupyterlab-widgets>=3.0.15",
     "jupyter>=1.1.1",
     "gymnasium>=1.2.0",
+    "torch>=2.8.0",
+    "transformers>=4.56.0",
 ]
 
 [project.urls]
