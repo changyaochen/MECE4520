@@ -65,9 +65,11 @@ setup_pyenv_env() {
         export PATH="$PYENV_ROOT/bin:$PATH"
     fi
 
-    # Initialize pyenv if available
-    if command -v pyenv >/dev/null 2>&1; then
-        eval "$(pyenv init -)"
+    # Only initialize pyenv if it's not already a function
+    if ! type pyenv 2>/dev/null | grep -q "function"; then
+        if command -v pyenv >/dev/null 2>&1; then
+            eval "$(pyenv init -)"
+        fi
     fi
 }
 
@@ -125,8 +127,13 @@ install_python_version() {
     else
         echo "📥 Installing Python ${PYTHON_VERSION} (using pre-built binary if available)..."
 
-        # Install with pyenv (will use pre-built if available)
-        pyenv install "${PYTHON_VERSION}"
+        # Use python-build directly to avoid any shell function issues
+        PYENV_ROOT="${PYENV_ROOT:-$HOME/.pyenv}"
+        if [ -x "$PYENV_ROOT/plugins/python-build/bin/python-build" ]; then
+            "$PYENV_ROOT/plugins/python-build/bin/python-build" "${PYTHON_VERSION}" "$PYENV_ROOT/versions/${PYTHON_VERSION}"
+        else
+            pyenv install "${PYTHON_VERSION}"
+        fi
         echo "✅ Python ${PYTHON_VERSION} installed successfully"
     fi
 
