@@ -10,7 +10,7 @@ install-uv:
 
 setup: install-python install-uv
 	@echo "🚀 Setting up the project..."
-	@uv sync
+	@$$HOME/.local/bin/uv sync || uv sync
 
 jupyter:
 	@bin/check_env.sh
