@@ -46,6 +46,7 @@ dependencies = [
     "gymnasium>=1.2.0",
     "torch>=2.8.0",
     "transformers>=4.56.0",
+    "statsmodels>=0.14.5",
 ]
 
 [project.urls]
