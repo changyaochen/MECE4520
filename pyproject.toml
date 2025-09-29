@@ -47,6 +47,7 @@ dependencies = [
     "torch>=2.8.0",
     "transformers>=4.56.0",
     "statsmodels>=0.14.5",
+    "plotly>=6.3.0",
 ]
 
 [project.urls]
