@@ -45,4 +45,14 @@ Initial website pilot:
 - PCA/clustering notebook
 - reinforcement-learning notebook
 
+## Website implementation
+
+- The Quarto project lives in `site/`.
+- Edit `.qmd`, `_quarto.yml`, and theme/source assets in `site/`.
+- Do not commit rendered `site/_site/` output or Quarto cache files.
+- The GitHub Actions workflow in `.github/workflows/publish.yml` publishes
+  `site/` from `master` to GitHub Pages.
+- Keep the first public version focused on the homepage, grading policy, and
+  syllabus; add notebooks after the pilot structure has been evaluated.
+
 Do not reorganize the entire repository until the pilot has been evaluated.
