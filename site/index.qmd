@@ -1,0 +1,66 @@
+---
+title: "Data Science for Mechanical Systems"
+subtitle: "Columbia University · MECE 4520 · Fall 2026"
+---
+
+MECE 4520 introduces data science and machine learning through real engineering systems.
+
+::: {.course-status}
+- Location: TBD
+- Time: TBD
+- Lecturer: Changyao Chen (cc2759@columbia.edu)
+- TA: TBD
+- Office hours: TBD
+:::
+
+Course materials and source files are available on [GitHub](https://github.com/changyaochen/MECE4520).
+
+## Course focus
+
+Rather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:
+
+> **understand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems**
+
+Students will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data.
+
+## Grading policy
+
+The course grade is based on:
+
+| Component | Weight |
+|:--|--:|
+| Homework assignments | 60% |
+| Final project | 40% |
+
+Students should expect approximately seven homework assignments over the semester. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.
+
+## Syllabus
+
+This syllabus may evolve as the Fall 2026 course is finalized.
+
+| Week | Topic | Main data or system |
+|--:|:--|:--|
+| 0 / Pre-course | Python, NumPy/Pandas, linear algebra, and probability refresher | Short exercises |
+| 1 | Engineering data, EDA, measurement variability, and essential statistics | Gas turbine |
+| 2 | Simple and multiple linear regression | Gas turbine |
+| 3 | Statistical inference for regression, prediction intervals, and regularization | Gas turbine |
+| 4 | Logistic regression and classification metrics | CNC tool wear |
+| 5 | Validation, leakage, grouped splits, and temporal train/test splits | Gas turbine + CNC |
+| 6 | Decision trees, random forests, and gradient boosting | Gas turbine + CNC |
+| 7 | PCA, dimensionality reduction, and clustering | Gas turbine + CNC |
+| 8 | Neural networks and nonlinear function approximation | Gas turbine + CNC |
+| 9 | Sequential data, degradation, and optional signal processing | CNC tool wear |
+| 10 | Reinforcement-learning foundations: bandits, states, actions, rewards, and MDPs | Mechanical decision examples |
+| 11 | Bellman equations, dynamic programming, Q-learning, and SARSA | Gridworld + simple physical systems |
+| 12 | Function approximation and deep Q-networks | CartPole + mechanical control |
+| 13 | Policy gradients, PPO, continuous control, and RL versus classical control | Pendulum + control systems |
+| 14 | Final project presentations | Student-selected engineering system |
+
+## A note on the prerequisites
+
+Introductory statistics will be taught primarily in the context of modeling
+problems rather than as a long standalone sequence.
+
+Reinforcement learning and sequential decision-making will receive expanded coverage,
+ including when RL is—and is not—a sensible choice compared with
+ classical-control approaches.
