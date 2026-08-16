@@ -1,0 +1,24 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "MECE 4520"
+  site-url: "https://changyaochen.github.io/MECE4520/"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+  page-footer:
+    left: "MECE 4520 · Data Science for Mechanical Systems"
+    right: "Fall 2026"
+
+format:
+  html:
+    theme: materia
+    toc: true
+    toc-location: body
+    toc-title: "On this page"
+    toc-depth: 2
+    toc-expand: false
+    smooth-scroll: true
