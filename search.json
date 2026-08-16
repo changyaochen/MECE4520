@@ -1,0 +1,37 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Data Science for Mechanical Systems",
+    "section": "",
+    "text": "MECE 4520 introduces data science and machine learning through real engineering systems.\nCourse materials and source files are available on GitHub."
+  },
+  {
+    "objectID": "index.html#course-focus",
+    "href": "index.html#course-focus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Course focus",
+    "text": "Course focus\nRather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:\n\nunderstand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems\n\nStudents will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data."
+  },
+  {
+    "objectID": "index.html#grading-policy",
+    "href": "index.html#grading-policy",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Grading policy",
+    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n60%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately seven homework assignments over the semester. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic."
+  },
+  {
+    "objectID": "index.html#syllabus",
+    "href": "index.html#syllabus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Syllabus",
+    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\n\nWeek\nTopic\nMain data or system\n\n\n\n\n0 / Pre-course\nPython, NumPy/Pandas, linear algebra, and probability refresher\nShort exercises\n\n\n1\nEngineering data, EDA, measurement variability, and essential statistics\nGas turbine\n\n\n2\nSimple and multiple linear regression\nGas turbine\n\n\n3\nStatistical inference for regression, prediction intervals, and regularization\nGas turbine\n\n\n4\nLogistic regression and classification metrics\nCNC tool wear\n\n\n5\nValidation, leakage, grouped splits, and temporal train/test splits\nGas turbine + CNC\n\n\n6\nDecision trees, random forests, and gradient boosting\nGas turbine + CNC\n\n\n7\nPCA, dimensionality reduction, and clustering\nGas turbine + CNC\n\n\n8\nNeural networks and nonlinear function approximation\nGas turbine + CNC\n\n\n9\nSequential data, degradation, and optional signal processing\nCNC tool wear\n\n\n10\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\nMechanical decision examples\n\n\n11\nBellman equations, dynamic programming, Q-learning, and SARSA\nGridworld + simple physical systems\n\n\n12\nFunction approximation and deep Q-networks\nCartPole + mechanical control\n\n\n13\nPolicy gradients, PPO, continuous control, and RL versus classical control\nPendulum + control systems\n\n\n14\nFinal project presentations\nStudent-selected engineering system"
+  },
+  {
+    "objectID": "index.html#a-note-on-the-prerequisites",
+    "href": "index.html#a-note-on-the-prerequisites",
+    "title": "Data Science for Mechanical Systems",
+    "section": "A note on the prerequisites",
+    "text": "A note on the prerequisites\nIntroductory statistics will be taught primarily in the context of modeling problems rather than as a long standalone sequence.\nReinforcement learning and sequential decision-making will receive expanded coverage, including when RL is—and is not—a sensible choice compared with classical-control approaches."
+  }
+]
