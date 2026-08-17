@@ -6,9 +6,12 @@ website:
   title: "MECE 4520"
   site-url: "https://changyaochen.github.io/MECE4520/"
   navbar:
+    title: "⚙️"
     left:
       - href: index.qmd
         text: Home
+      - href: foundations/index.qmd
+        text: Foundations
   page-footer:
     left: "MECE 4520 · Data Science for Mechanical Systems"
     right: "Fall 2026"

@@ -23,3 +23,19 @@ This branch is the working area for a redesigned MECE 4520 course site for Fall 
 - The home page’s Fall 2026 course information, syllabus, and key dates.
 - The format and location of new learning materials.
 - The deployment and publishing workflow.
+
+## Asynchronous foundations pilot
+
+The September 8 class will be asynchronous. Its first implementation is a
+Quarto landing page with three short, standalone Jupyter notebooks:
+
+1. Course tools and Python foundations.
+2. A first look at the gas-turbine emissions data.
+3. Variability, sampling, and evidence.
+
+The notebooks deliberately use the same gas-turbine dataset as the later
+regression material. They can be read as part of the Quarto site or run in
+Google Colab. Each carries its own setup cell so a student can begin from a
+fresh Colab runtime. The statistical notebook covers the minimum conceptual
+foundation for later regression inference without restoring a standalone,
+extended introductory-statistics sequence.

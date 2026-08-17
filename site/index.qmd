@@ -7,7 +7,7 @@ MECE 4520 introduces data science and machine learning through real engineering 
 
 ::: {.course-status}
 - Location: TBD
-- Time: TBD
+- Time: **Tuesday & Thursday** 10:10am - 11:25am
 - Lecturer: Changyao Chen (cc2759@columbia.edu)
 - TA: TBD
 - Office hours: TBD
@@ -38,23 +38,23 @@ Students should expect approximately seven homework assignments over the semeste
 
 This syllabus may evolve as the Fall 2026 course is finalized.
 
-| Week | Topic | Main data or system |
-|--:|:--|:--|
-| 0 / Pre-course | Python, NumPy/Pandas, linear algebra, and probability refresher | Short exercises |
-| 1 | Engineering data, EDA, measurement variability, and essential statistics | Gas turbine |
-| 2 | Simple and multiple linear regression | Gas turbine |
-| 3 | Statistical inference for regression, prediction intervals, and regularization | Gas turbine |
-| 4 | Logistic regression and classification metrics | CNC tool wear |
-| 5 | Validation, leakage, grouped splits, and temporal train/test splits | Gas turbine + CNC |
-| 6 | Decision trees, random forests, and gradient boosting | Gas turbine + CNC |
-| 7 | PCA, dimensionality reduction, and clustering | Gas turbine + CNC |
-| 8 | Neural networks and nonlinear function approximation | Gas turbine + CNC |
-| 9 | Sequential data, degradation, and optional signal processing | CNC tool wear |
-| 10 | Reinforcement-learning foundations: bandits, states, actions, rewards, and MDPs | Mechanical decision examples |
-| 11 | Bellman equations, dynamic programming, Q-learning, and SARSA | Gridworld + simple physical systems |
-| 12 | Function approximation and deep Q-networks | CartPole + mechanical control |
-| 13 | Policy gradients, PPO, continuous control, and RL versus classical control | Pendulum + control systems |
-| 14 | Final project presentations | Student-selected engineering system |
+| Class dates (2026) | Topic | Main data or system |
+|:--|:--|:--|
+| Before Sep. 8 | Python, NumPy/Pandas, linear algebra, and probability refresher | Short exercises |
+| Sep. 8 — asynchronous<br>Sep. 10 | Course launch, Python/data foundations, engineering EDA, and measurement variability | Gas turbine |
+| Sep. 15 & 17 | Simple and multiple linear regression | Gas turbine |
+| Sep. 22 & 24 | Statistical inference for regression, prediction intervals, and regularization | Gas turbine |
+| Sep. 29 & Oct. 1 | Logistic regression and classification metrics | CNC tool wear |
+| Oct. 6 & 8 | Validation, leakage, grouped splits, and temporal train/test splits | Gas turbine + CNC |
+| Oct. 13 & 15 | Decision trees, random forests, and gradient boosting | Gas turbine + CNC |
+| Oct. 20 & 22 | PCA, dimensionality reduction, and clustering | Gas turbine + CNC |
+| Oct. 27 & 29 | Neural networks and nonlinear function approximation | Gas turbine + CNC |
+| Nov. 3 — Election Day (no class)<br>Nov. 5 | Sequential data, degradation, and optional signal processing | CNC tool wear |
+| Nov. 10 & 12 | Reinforcement-learning foundations: bandits, states, actions, rewards, and MDPs | Mechanical decision examples |
+| Nov. 17 & 19 | Bellman equations, dynamic programming, Q-learning, and SARSA | Gridworld + simple physical systems |
+| Nov. 24<br>Nov. 26 — Thanksgiving (no class) | Function approximation and deep Q-networks | CartPole + mechanical control |
+| Dec. 1 & 3 | Policy gradients, PPO, continuous control, and RL versus classical control | Pendulum + control systems |
+| Dec. 8 & 10 | Final project presentations | Student-selected engineering system |
 
 ## A note on the prerequisites
 
