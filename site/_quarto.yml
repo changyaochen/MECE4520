@@ -19,6 +19,7 @@ website:
 format:
   html:
     theme: materia
+    css: styles.css
     toc: true
     toc-location: body
     toc-title: "On this page"

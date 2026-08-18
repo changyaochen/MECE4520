@@ -1,16 +1,15 @@
 ---
 title: "Foundations: Getting started with engineering data"
-subtitle: "Asynchronous class · Tuesday, September 8"
 ---
 
-Complete these materials before our first live class on Thursday, September 10.
-They establish the shared computational and statistical vocabulary we will use
-throughout MECE 4520, using the course's recurring gas-turbine emissions
-dataset. Plan for approximately 2.5–3 hours in total.
+These materials establish the shared computational and statistical vocabulary
+used throughout MECE 4520, using the course's recurring gas-turbine emissions
+dataset. Complete them in order before beginning the course's modeling units.
+Plan for approximately 2.5–3 hours in total.
 
-You can work in a local Jupyter environment or use the **Open in Colab** links.
-Each notebook installs its only additional package and downloads the public
-dataset itself, so it can be run independently in a fresh Colab session.
+You can work in a local Jupyter environment. The notebooks use the pinned
+course copy of the gas-turbine dataset; if opened independently in a fresh
+environment, they download that same copy from this repository.
 
 ## 1. Course tools and Python foundations
 
@@ -19,8 +18,7 @@ dataset itself, so it can be run independently in a fresh Colab session.
 Learn the minimal NumPy and Pandas workflow used in the course: loading data,
 selecting variables, filtering observations, and making a first plot.
 
-[View the notebook](01-course-tools.ipynb) ·
-[Open in Colab](https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/foundations/01-course-tools.ipynb)
+[View the notebook](01-course-tools.ipynb)
 
 ## 2. A first look at gas-turbine emissions data
 
@@ -29,8 +27,7 @@ selecting variables, filtering observations, and making a first plot.
 Explore the measurements, variables, distributions, and simple physical
 questions in the Gas Turbine CO and NOx Emissions dataset.
 
-[View the notebook](02-gas-turbine-data.ipynb) ·
-[Open in Colab](https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/foundations/02-gas-turbine-data.ipynb)
+[View the notebook](02-gas-turbine-data.ipynb)
 
 ## 3. Variability, sampling, and evidence
 
@@ -39,14 +36,7 @@ questions in the Gas Turbine CO and NOx Emissions dataset.
 Use the same dataset to build intuition for sampling distributions, bootstrap
 intervals, null hypotheses, and p-values—ideas that will return in regression.
 
-[View the notebook](03-variability-and-inference.ipynb) ·
-[Open in Colab](https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/foundations/03-variability-and-inference.ipynb)
-
-## Before September 10
-
-- Run every code cell in each notebook.
-- Answer the questions marked **Check-in** in your own notes.
-- Bring one observation or question about the gas-turbine data to the first live class.
+[View the notebook](03-variability-and-inference.ipynb)
 
 ## Dataset source
 
