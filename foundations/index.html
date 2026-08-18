@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Mechanical Systems – MECE 4520</title>
+<title>Foundations: Getting started with engineering data – MECE 4520</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -29,23 +29,23 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-ab54b746ce990a9bed7a755e4ce4e940.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-ab54b746ce990a9bed7a755e4ce4e940.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -76,7 +76,7 @@ ul.task-list li input[type="checkbox"] {
 <style>html{ scroll-behavior: smooth; }</style>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../styles.css">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -86,7 +86,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">⚙️</span>
     </a>
   </div>
@@ -97,11 +97,11 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./foundations/index.html"> 
+    <a class="nav-link active" href="../foundations/index.html" aria-current="page"> 
 <span class="menu-text">Foundations</span></a>
   </li>  
 </ul>
@@ -122,8 +122,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Data Science for Mechanical Systems</h1>
-<p class="subtitle lead">Columbia University · MECE 4520 · Fall 2026</p>
+<h1 class="title">Foundations: Getting started with engineering data</h1>
 </div>
 
 
@@ -143,153 +142,35 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#course-focus" id="toc-course-focus">Course focus</a></li>
-  <li><a href="#grading-policy" id="toc-grading-policy">Grading policy</a></li>
-  <li><a href="#syllabus" id="toc-syllabus">Syllabus</a></li>
-  <li><a href="#a-note-on-the-prerequisites" id="toc-a-note-on-the-prerequisites">A note on the prerequisites</a></li>
+  <li><a href="#course-tools-and-python-foundations" id="toc-course-tools-and-python-foundations">1. Course tools and Python foundations</a></li>
+  <li><a href="#a-first-look-at-gas-turbine-emissions-data" id="toc-a-first-look-at-gas-turbine-emissions-data">2. A first look at gas-turbine emissions data</a></li>
+  <li><a href="#variability-sampling-and-evidence" id="toc-variability-sampling-and-evidence">3. Variability, sampling, and evidence</a></li>
+  <li><a href="#dataset-source" id="toc-dataset-source">Dataset source</a></li>
   </ul>
 </nav>
-<p>MECE 4520 introduces data science and machine learning through real engineering systems.</p>
-<div class="course-status">
-<ul>
-<li>Location: TBD</li>
-<li>Time: <strong>Tuesday &amp; Thursday</strong> 10:10am - 11:25am</li>
-<li>Lecturer: Changyao Chen (cc2759@columbia.edu)</li>
-<li>TA: TBD</li>
-<li>Office hours: TBD</li>
-</ul>
-</div>
-<p>Course materials and source files are available on <a href="https://github.com/changyaochen/MECE4520">GitHub</a>.</p>
-<section id="course-focus" class="level2">
-<h2 class="anchored" data-anchor-id="course-focus">Course focus</h2>
-<p>Rather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:</p>
-<blockquote class="blockquote">
-<p><strong>understand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems</strong></p>
-</blockquote>
-<p>Students will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data.</p>
+<p>These materials establish the shared computational and statistical vocabulary used throughout MECE 4520, using the course’s recurring gas-turbine emissions dataset. Complete them in order before beginning the course’s modeling units. Plan for approximately 2.5–3 hours in total.</p>
+<p>You can work in a local Jupyter environment. The notebooks use the pinned course copy of the gas-turbine dataset; if opened independently in a fresh environment, they download that same copy from this repository.</p>
+<section id="course-tools-and-python-foundations" class="level2">
+<h2 class="anchored" data-anchor-id="course-tools-and-python-foundations">1. Course tools and Python foundations</h2>
+<p><strong>Estimated time:</strong> 45–60 minutes</p>
+<p>Learn the minimal NumPy and Pandas workflow used in the course: loading data, selecting variables, filtering observations, and making a first plot.</p>
+<p><a href="../foundations/01-course-tools.html">View the notebook</a></p>
 </section>
-<section id="grading-policy" class="level2">
-<h2 class="anchored" data-anchor-id="grading-policy">Grading policy</h2>
-<p>The course grade is based on:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: left;">Component</th>
-<th style="text-align: right;">Weight</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Homework assignments</td>
-<td style="text-align: right;">60%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Final project</td>
-<td style="text-align: right;">40%</td>
-</tr>
-</tbody>
-</table>
-<p>Students should expect approximately seven homework assignments over the semester. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.</p>
+<section id="a-first-look-at-gas-turbine-emissions-data" class="level2">
+<h2 class="anchored" data-anchor-id="a-first-look-at-gas-turbine-emissions-data">2. A first look at gas-turbine emissions data</h2>
+<p><strong>Estimated time:</strong> 45–60 minutes</p>
+<p>Explore the measurements, variables, distributions, and simple physical questions in the Gas Turbine CO and NOx Emissions dataset.</p>
+<p><a href="../foundations/02-gas-turbine-data.html">View the notebook</a></p>
 </section>
-<section id="syllabus" class="level2">
-<h2 class="anchored" data-anchor-id="syllabus">Syllabus</h2>
-<p>This syllabus may evolve as the Fall 2026 course is finalized.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Class dates (2026)</th>
-<th style="text-align: left;">Topic</th>
-<th style="text-align: left;">Main data or system</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Before Sep.&nbsp;8</td>
-<td style="text-align: left;">Python, NumPy/Pandas, linear algebra, and probability refresher</td>
-<td style="text-align: left;">Short exercises</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Sep.&nbsp;8 — asynchronous<br>Sep.&nbsp;10</td>
-<td style="text-align: left;">Course launch, Python/data foundations, engineering EDA, and measurement variability</td>
-<td style="text-align: left;">Gas turbine</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Sep.&nbsp;15 &amp; 17</td>
-<td style="text-align: left;">Simple and multiple linear regression</td>
-<td style="text-align: left;">Gas turbine</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Sep.&nbsp;22 &amp; 24</td>
-<td style="text-align: left;">Statistical inference for regression, prediction intervals, and regularization</td>
-<td style="text-align: left;">Gas turbine</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Sep.&nbsp;29 &amp; Oct.&nbsp;1</td>
-<td style="text-align: left;">Logistic regression and classification metrics</td>
-<td style="text-align: left;">CNC tool wear</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Oct.&nbsp;6 &amp; 8</td>
-<td style="text-align: left;">Validation, leakage, grouped splits, and temporal train/test splits</td>
-<td style="text-align: left;">Gas turbine + CNC</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Oct.&nbsp;13 &amp; 15</td>
-<td style="text-align: left;">Decision trees, random forests, and gradient boosting</td>
-<td style="text-align: left;">Gas turbine + CNC</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Oct.&nbsp;20 &amp; 22</td>
-<td style="text-align: left;">PCA, dimensionality reduction, and clustering</td>
-<td style="text-align: left;">Gas turbine + CNC</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Oct.&nbsp;27 &amp; 29</td>
-<td style="text-align: left;">Neural networks and nonlinear function approximation</td>
-<td style="text-align: left;">Gas turbine + CNC</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Nov.&nbsp;3 — Election Day (no class)<br>Nov.&nbsp;5</td>
-<td style="text-align: left;">Sequential data, degradation, and optional signal processing</td>
-<td style="text-align: left;">CNC tool wear</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Nov.&nbsp;10 &amp; 12</td>
-<td style="text-align: left;">Reinforcement-learning foundations: bandits, states, actions, rewards, and MDPs</td>
-<td style="text-align: left;">Mechanical decision examples</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Nov.&nbsp;17 &amp; 19</td>
-<td style="text-align: left;">Bellman equations, dynamic programming, Q-learning, and SARSA</td>
-<td style="text-align: left;">Gridworld + simple physical systems</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Nov.&nbsp;24<br>Nov.&nbsp;26 — Thanksgiving (no class)</td>
-<td style="text-align: left;">Function approximation and deep Q-networks</td>
-<td style="text-align: left;">CartPole + mechanical control</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Dec.&nbsp;1 &amp; 3</td>
-<td style="text-align: left;">Policy gradients, PPO, continuous control, and RL versus classical control</td>
-<td style="text-align: left;">Pendulum + control systems</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Dec.&nbsp;8 &amp; 10</td>
-<td style="text-align: left;">Final project presentations</td>
-<td style="text-align: left;">Student-selected engineering system</td>
-</tr>
-</tbody>
-</table>
+<section id="variability-sampling-and-evidence" class="level2">
+<h2 class="anchored" data-anchor-id="variability-sampling-and-evidence">3. Variability, sampling, and evidence</h2>
+<p><strong>Estimated time:</strong> 45–60 minutes</p>
+<p>Use the same dataset to build intuition for sampling distributions, bootstrap intervals, null hypotheses, and p-values—ideas that will return in regression.</p>
+<p><a href="../foundations/03-variability-and-inference.html">View the notebook</a></p>
 </section>
-<section id="a-note-on-the-prerequisites" class="level2">
-<h2 class="anchored" data-anchor-id="a-note-on-the-prerequisites">A note on the prerequisites</h2>
-<p>Introductory statistics will be taught primarily in the context of modeling problems rather than as a long standalone sequence.</p>
-<p>Reinforcement learning and sequential decision-making will receive expanded coverage, including when RL is—and is not—a sensible choice compared with classical-control approaches.</p>
+<section id="dataset-source" class="level2">
+<h2 class="anchored" data-anchor-id="dataset-source">Dataset source</h2>
+<p>These notebooks use the <a href="https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set">Gas Turbine CO and NOx Emissions dataset</a> from the UCI Machine Learning Repository. The data contain 36,733 hourly measurements from a gas turbine collected between 2011 and 2015 and are made available under the CC BY 4.0 license.</p>
 
 
 </section>
@@ -713,5 +594,5 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
 </body></html>

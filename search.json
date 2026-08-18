@@ -1,5 +1,96 @@
 [
   {
+    "objectID": "foundations/03-variability-and-inference.html",
+    "href": "foundations/03-variability-and-inference.html",
+    "title": "Variability, sampling, and evidence",
+    "section": "",
+    "text": "MECE 4520 · Fall 2026 · asynchronous foundations\nStatistical ideas matter in this course because engineering data vary. This notebook gives a practical introduction to sampling distributions, uncertainty intervals, null hypotheses, and p-values. We will return to these ideas when interpreting regression models.\nLearning objectives"
+  },
+  {
+    "objectID": "foundations/03-variability-and-inference.html#load-the-data",
+    "href": "foundations/03-variability-and-inference.html#load-the-data",
+    "title": "Variability, sampling, and evidence",
+    "section": "1. Load the data",
+    "text": "1. Load the data\nWe will use NOx emissions as a running example. The complete dataset is our available collection of observations; a smaller subset stands in for the limited sample often available in practice.\n\nimport numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nfrom pathlib import Path\nfrom urllib.request import urlretrieve\n\nplt.style.use(\"seaborn-v0_8-whitegrid\")\nrng = np.random.default_rng(4520)\n\nDATA_URL = (\n    \"https://raw.githubusercontent.com/changyaochen/MECE4520/master/\"\n    \"site/data/gas-turbine-emissions.csv\"\n)\ndata_path = next(\n    (path for path in [Path(\"../data/gas-turbine-emissions.csv\"), Path(\"site/data/gas-turbine-emissions.csv\"), Path(\"gas-turbine-emissions.csv\")] if path.exists()),\n    Path(\"gas-turbine-emissions.csv\"),\n)\nif not data_path.exists():\n    urlretrieve(DATA_URL, data_path)\ndata = pd.read_csv(data_path)\nnox = data[\"NOX\"].to_numpy()\n\nprint(f\"NOx observations: {len(nox):,}\")\nprint(f\"Mean NOx: {nox.mean():.2f} mg/m³\")\n\nNOx observations: 36,733\nMean NOx: 65.29 mg/m³"
+  },
+  {
+    "objectID": "foundations/03-variability-and-inference.html#sampling-distributions",
+    "href": "foundations/03-variability-and-inference.html#sampling-distributions",
+    "title": "Variability, sampling, and evidence",
+    "section": "2. Sampling distributions",
+    "text": "2. Sampling distributions\nImagine repeatedly taking 50 observations from this dataset and calculating their mean NOx. The mean changes from sample to sample. The distribution of those repeated means is called a sampling distribution.\nFor this demonstration we sample rows independently. The original observations are ordered in time, so this simplification is not always appropriate for a forecasting problem; later in the course we will handle temporal splits explicitly.\n\nsample_size = 50\nn_repetitions = 2_000\nsample_means = np.array([\n    rng.choice(nox, size=sample_size, replace=False).mean()\n    for _ in range(n_repetitions)\n])\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.hist(sample_means, bins=40, color=\"#4a90c2\", edgecolor=\"white\")\nax.axvline(nox.mean(), color=\"#c43c35\", linestyle=\"--\", label=\"mean of all observations\")\nax.set(xlabel=\"Mean NOx in a sample of 50 (mg/m³)\", ylabel=\"Repeated samples\", title=\"Sampling distribution of the mean\")\nax.legend()\nplt.show()\n\nprint(f\"Standard deviation of repeated sample means: {sample_means.std(ddof=1):.2f} mg/m³\")\n\n\n\n\n\n\n\n\nStandard deviation of repeated sample means: 1.62 mg/m³\n\n\nAlthough individual NOx readings vary substantially, sample means vary less. This is the central-limit intuition we will use later when assessing uncertainty in fitted model coefficients."
+  },
+  {
+    "objectID": "foundations/03-variability-and-inference.html#bootstrap-uncertainty-interval",
+    "href": "foundations/03-variability-and-inference.html#bootstrap-uncertainty-interval",
+    "title": "Variability, sampling, and evidence",
+    "section": "3. Bootstrap uncertainty interval",
+    "text": "3. Bootstrap uncertainty interval\nA bootstrap treats one observed sample as a stand-in for the population. We repeatedly resample that sample with replacement, recalculate the statistic, and use the resulting distribution to estimate uncertainty.\n\nobserved_sample = rng.choice(nox, size=100, replace=False)\nbootstrap_means = np.array([\n    rng.choice(observed_sample, size=len(observed_sample), replace=True).mean()\n    for _ in range(5_000)\n])\nci_low, ci_high = np.percentile(bootstrap_means, [2.5, 97.5])\n\nprint(f\"Observed sample mean: {observed_sample.mean():.2f} mg/m³\")\nprint(f\"Approximate 95% bootstrap interval: [{ci_low:.2f}, {ci_high:.2f}] mg/m³\")\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.hist(bootstrap_means, bins=40, color=\"#77a464\", edgecolor=\"white\")\nax.axvline(ci_low, color=\"#222222\", linestyle=\"--\")\nax.axvline(ci_high, color=\"#222222\", linestyle=\"--\")\nax.set(xlabel=\"Bootstrapped mean NOx (mg/m³)\", ylabel=\"Bootstrap samples\", title=\"Bootstrap distribution for one sample of 100 observations\")\nplt.show()\n\nObserved sample mean: 62.90 mg/m³\nApproximate 95% bootstrap interval: [61.01, 64.84] mg/m³\n\n\n\n\n\n\n\n\n\nThe interval quantifies sampling uncertainty under the assumptions built into the bootstrap. It does not say that every individual emission measurement lies in this interval."
+  },
+  {
+    "objectID": "foundations/03-variability-and-inference.html#a-null-model-and-a-p-value",
+    "href": "foundations/03-variability-and-inference.html#a-null-model-and-a-p-value",
+    "title": "Variability, sampling, and evidence",
+    "section": "4. A null model and a p-value",
+    "text": "4. A null model and a p-value\nSuppose we ask whether turbine inlet temperature (TIT) and NOx exhibit an association in these observations. A simple null model says that the two columns have no relationship. If that were true, shuffling NOx values across rows would produce equally plausible pairings.\nThe next cell compares the observed correlation with correlations created under that shuffled, no-association null model.\n\nanalysis_data = data[[\"TIT\", \"NOX\"]].sample(n=2_000, random_state=4520)\nx = analysis_data[\"TIT\"].to_numpy()\ny = analysis_data[\"NOX\"].to_numpy()\nobserved_correlation = np.corrcoef(x, y)[0, 1]\n\nnull_correlations = np.array([\n    np.corrcoef(x, rng.permutation(y))[0, 1]\n    for _ in range(2_000)\n])\np_value = (np.abs(null_correlations) &gt;= abs(observed_correlation)).mean()\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.hist(null_correlations, bins=40, color=\"#999999\", edgecolor=\"white\")\nax.axvline(observed_correlation, color=\"#c43c35\", linewidth=2, label=\"observed correlation\")\nax.axvline(-observed_correlation, color=\"#c43c35\", linewidth=2)\nax.set(xlabel=\"Correlation under the shuffled null model\", ylabel=\"Shuffles\", title=\"Is the observed association unusual under no association?\")\nax.legend()\nplt.show()\n\nprint(f\"Observed correlation: {observed_correlation:.3f}\")\nprint(f\"Permutation p-value (two-sided): {p_value:.4f}\")\n\n\n\n\n\n\n\n\nObserved correlation: -0.231\nPermutation p-value (two-sided): 0.0000\n\n\nA p-value is the fraction of null-model simulations at least as extreme as the observed result. It is not the probability that the null hypothesis is true, and it is not a measure of engineering importance. With thousands of observations, even a small effect can have a very small p-value.\nHere the shuffled null model also leaves out important engineering structure, including other operating variables and chronology. That is deliberate: the example is about defining a comparison model clearly, not about making a final causal claim."
+  },
+  {
+    "objectID": "foundations/03-variability-and-inference.html#check-in",
+    "href": "foundations/03-variability-and-inference.html#check-in",
+    "title": "Variability, sampling, and evidence",
+    "section": "Check-in",
+    "text": "Check-in\n\nWhy is the sampling distribution of the mean narrower than the distribution of individual NOx measurements?\nWhat does the bootstrap interval describe, and what does it not describe?\nWhy does a small p-value not, by itself, establish a practically important or causal effect?\n\nKeep your answers in your own notes. In the regression unit, we will revisit uncertainty and hypothesis tests in the context of fitted coefficients and predictions.\nReturn to the Foundations page"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html",
+    "href": "foundations/01-course-tools.html",
+    "title": "Course tools and Python foundations",
+    "section": "",
+    "text": "MECE 4520 · Fall 2026 · asynchronous foundations\nThis notebook introduces the small set of Python tools used throughout the course. It is not a comprehensive Python tutorial: the goal is to be comfortable loading, inspecting, selecting, filtering, and plotting engineering data.\nLearning objectives"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#set-up-the-notebook",
+    "href": "foundations/01-course-tools.html#set-up-the-notebook",
+    "title": "Course tools and Python foundations",
+    "section": "1. Set up the notebook",
+    "text": "1. Set up the notebook\nThe next cell imports the Python tools used throughout the course and loads the pinned course copy of the gas-turbine dataset.\n\nimport numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nfrom pathlib import Path\nfrom urllib.request import urlretrieve\n\nDATA_URL = (\n    \"https://raw.githubusercontent.com/changyaochen/MECE4520/master/\"\n    \"site/data/gas-turbine-emissions.csv\"\n)\ndata_path = next(\n    (path for path in [Path(\"../data/gas-turbine-emissions.csv\"), Path(\"site/data/gas-turbine-emissions.csv\"), Path(\"gas-turbine-emissions.csv\")] if path.exists()),\n    Path(\"gas-turbine-emissions.csv\"),\n)\nif not data_path.exists():\n    urlretrieve(DATA_URL, data_path)\ndata = pd.read_csv(data_path)\n\nplt.style.use(\"seaborn-v0_8-whitegrid\")"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#numerical-arrays",
+    "href": "foundations/01-course-tools.html#numerical-arrays",
+    "title": "Course tools and Python foundations",
+    "section": "2. Numerical arrays",
+    "text": "2. Numerical arrays\nA NumPy array stores a collection of numerical values. Array operations act element-by-element, which makes calculations compact and readable.\n\ntemperatures_c = np.array([15.2, 18.7, 21.4, 24.1])\ntemperatures_k = temperatures_c + 273.15\n\nprint(\"Temperatures in K:\", temperatures_k)\nprint(f\"Mean temperature: {temperatures_c.mean():.1f} °C\")\nprint(f\"Range: {temperatures_c.min():.1f}–{temperatures_c.max():.1f} °C\")\n\nTemperatures in K: [288.35 291.85 294.55 297.25]\nMean temperature: 19.9 °C\nRange: 15.2–24.1 °C\n\n\nThe array is useful for a single quantity observed repeatedly. A table with many named variables is better represented by a Pandas DataFrame."
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#load-the-course-dataset",
+    "href": "foundations/01-course-tools.html#load-the-course-dataset",
+    "title": "Course tools and Python foundations",
+    "section": "3. Load the course dataset",
+    "text": "3. Load the course dataset\nThe Gas Turbine CO and NOx Emissions dataset contains hourly sensor measurements and emissions outcomes. features and targets are returned separately; combining them gives one analysis table.\n\nprint(f\"Rows: {len(data):,}\")\nprint(f\"Columns: {data.shape[1]}\")\ndata.head()\n\nRows: 36,733\nColumns: 11\n\n\n\n\n\n\n\n\n\nAT\nAP\nAH\nAFDP\nGTEP\nTIT\nTAT\nTEY\nCDP\nCO\nNOX\n\n\n\n\n0\n4.5878\n1018.7\n83.675\n3.5758\n23.979\n1086.2\n549.83\n134.67\n11.898\n0.32663\n81.952\n\n\n1\n4.2932\n1018.3\n84.235\n3.5709\n23.951\n1086.1\n550.05\n134.67\n11.892\n0.44784\n82.377\n\n\n2\n3.9045\n1018.4\n84.858\n3.5828\n23.990\n1086.5\n550.19\n135.10\n12.042\n0.45144\n83.776\n\n\n3\n3.7436\n1018.3\n85.434\n3.5808\n23.911\n1086.5\n550.17\n135.03\n11.990\n0.23107\n82.505\n\n\n4\n3.7516\n1017.8\n85.182\n3.5781\n23.917\n1085.9\n550.00\n134.67\n11.910\n0.26747\n82.028\n\n\n\n\n\n\n\nA good first habit is to inspect the column names and units before modeling. The dictionary below records the variables we will use most often.\n\nvariable_notes = {\n    \"AT\": \"ambient temperature (°C)\",\n    \"AP\": \"ambient pressure (mbar)\",\n    \"AH\": \"ambient humidity (%)\",\n    \"TIT\": \"turbine inlet temperature (°C)\",\n    \"TEY\": \"turbine energy yield (MWh)\",\n    \"CO\": \"carbon monoxide emissions (mg/m³)\",\n    \"NOX\": \"nitrogen oxides emissions (mg/m³)\",\n}\n\npd.Series(variable_notes, name=\"meaning\")\n\nAT              ambient temperature (°C)\nAP               ambient pressure (mbar)\nAH                  ambient humidity (%)\nTIT       turbine inlet temperature (°C)\nTEY           turbine energy yield (MWh)\nCO     carbon monoxide emissions (mg/m³)\nNOX    nitrogen oxides emissions (mg/m³)\nName: meaning, dtype: object"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#select-and-filter-data",
+    "href": "foundations/01-course-tools.html#select-and-filter-data",
+    "title": "Course tools and Python foundations",
+    "section": "4. Select and filter data",
+    "text": "4. Select and filter data\nUse a list of column names to select several variables. Use a Boolean condition inside square brackets to retain rows meeting a condition.\n\nselected = data[[\"AT\", \"TIT\", \"TEY\", \"CO\", \"NOX\"]]\nwarm_conditions = selected[selected[\"AT\"] &gt; selected[\"AT\"].median()]\n\nprint(\"Selected variables:\")\ndisplay(selected.head())\nprint(f\"Rows above the median ambient temperature: {len(warm_conditions):,}\")\nwarm_conditions.describe().loc[[\"mean\", \"std\", \"min\", \"max\"]]\n\nSelected variables:\n\n\n\n\n\n\n\n\n\nAT\nTIT\nTEY\nCO\nNOX\n\n\n\n\n0\n4.5878\n1086.2\n134.67\n0.32663\n81.952\n\n\n1\n4.2932\n1086.1\n134.67\n0.44784\n82.377\n\n\n2\n3.9045\n1086.5\n135.10\n0.45144\n83.776\n\n\n3\n3.7436\n1086.5\n135.03\n0.23107\n82.505\n\n\n4\n3.7516\n1085.9\n134.67\n0.26747\n82.028\n\n\n\n\n\n\n\nRows above the median ambient temperature: 18,365\n\n\n\n\n\n\n\n\n\nAT\nTIT\nTEY\nCO\nNOX\n\n\n\n\nmean\n24.005367\n1083.897964\n132.012501\n2.057256\n59.22925\n\n\nstd\n3.905948\n15.765051\n13.316517\n1.602460\n7.97456\n\n\nmin\n17.802000\n1024.800000\n100.040000\n0.001594\n25.90500\n\n\nmax\n37.103000\n1100.900000\n160.370000\n37.746000\n119.91000"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#make-a-first-plot",
+    "href": "foundations/01-course-tools.html#make-a-first-plot",
+    "title": "Course tools and Python foundations",
+    "section": "5. Make a first plot",
+    "text": "5. Make a first plot\nA scatter plot helps us inspect whether two variables move together. Each point below is one hourly observation. We draw only a random subset so the plot remains readable.\n\nplot_data = data.sample(n=2_000, random_state=4520)\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.scatter(plot_data[\"TIT\"], plot_data[\"NOX\"], alpha=0.25, s=12)\nax.set(\n    xlabel=\"Turbine inlet temperature, TIT (°C)\",\n    ylabel=\"NOx emissions (mg/m³)\",\n    title=\"A first view of turbine inlet temperature and NOx emissions\",\n)\nplt.show()"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#check-in",
+    "href": "foundations/01-course-tools.html#check-in",
+    "title": "Course tools and Python foundations",
+    "section": "Check-in",
+    "text": "Check-in\n\nChange the plotting code to use AT or TEY on the horizontal axis. What pattern do you see?\nWhat is one question you would ask before interpreting this plot as a causal relationship?\nIn one sentence, explain the difference between a NumPy array and a Pandas DataFrame.\n\nKeep your answers in your own notes. We will build on this dataset in the next notebook.\nReturn to the Foundations page"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Data Science for Mechanical Systems",
@@ -25,7 +116,7 @@
     "href": "index.html#syllabus",
     "title": "Data Science for Mechanical Systems",
     "section": "Syllabus",
-    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\n\nWeek\nTopic\nMain data or system\n\n\n\n\n0 / Pre-course\nPython, NumPy/Pandas, linear algebra, and probability refresher\nShort exercises\n\n\n1\nEngineering data, EDA, measurement variability, and essential statistics\nGas turbine\n\n\n2\nSimple and multiple linear regression\nGas turbine\n\n\n3\nStatistical inference for regression, prediction intervals, and regularization\nGas turbine\n\n\n4\nLogistic regression and classification metrics\nCNC tool wear\n\n\n5\nValidation, leakage, grouped splits, and temporal train/test splits\nGas turbine + CNC\n\n\n6\nDecision trees, random forests, and gradient boosting\nGas turbine + CNC\n\n\n7\nPCA, dimensionality reduction, and clustering\nGas turbine + CNC\n\n\n8\nNeural networks and nonlinear function approximation\nGas turbine + CNC\n\n\n9\nSequential data, degradation, and optional signal processing\nCNC tool wear\n\n\n10\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\nMechanical decision examples\n\n\n11\nBellman equations, dynamic programming, Q-learning, and SARSA\nGridworld + simple physical systems\n\n\n12\nFunction approximation and deep Q-networks\nCartPole + mechanical control\n\n\n13\nPolicy gradients, PPO, continuous control, and RL versus classical control\nPendulum + control systems\n\n\n14\nFinal project presentations\nStudent-selected engineering system"
+    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\nMain data or system\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\nShort exercises\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\nGas turbine\n\n\nSep. 15 & 17\nSimple and multiple linear regression\nGas turbine\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\nGas turbine\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\nCNC tool wear\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\nGas turbine + CNC\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\nGas turbine + CNC\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\nGas turbine + CNC\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\nGas turbine + CNC\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\nCNC tool wear\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\nMechanical decision examples\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\nGridworld + simple physical systems\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\nCartPole + mechanical control\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\nPendulum + control systems\n\n\nDec. 8 & 10\nFinal project presentations\nStudent-selected engineering system"
   },
   {
     "objectID": "index.html#a-note-on-the-prerequisites",
@@ -33,5 +124,89 @@
     "title": "Data Science for Mechanical Systems",
     "section": "A note on the prerequisites",
     "text": "A note on the prerequisites\nIntroductory statistics will be taught primarily in the context of modeling problems rather than as a long standalone sequence.\nReinforcement learning and sequential decision-making will receive expanded coverage, including when RL is—and is not—a sensible choice compared with classical-control approaches."
+  },
+  {
+    "objectID": "foundations/02-gas-turbine-data.html",
+    "href": "foundations/02-gas-turbine-data.html",
+    "title": "A first look at gas-turbine emissions data",
+    "section": "",
+    "text": "MECE 4520 · Fall 2026 · asynchronous foundations\nThis notebook introduces our primary recurring dataset. Before fitting a model, engineers should understand what was measured, what each observation represents, and which patterns are plausible.\nLearning objectives"
+  },
+  {
+    "objectID": "foundations/02-gas-turbine-data.html#load-the-data",
+    "href": "foundations/02-gas-turbine-data.html#load-the-data",
+    "title": "A first look at gas-turbine emissions data",
+    "section": "1. Load the data",
+    "text": "1. Load the data\nThe UCI dataset contains 36,733 hourly observations from a gas turbine, measured between 2011 and 2015. Its rows are chronologically ordered, although individual timestamps are not supplied.\n\nimport numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nfrom pathlib import Path\nfrom urllib.request import urlretrieve\n\nplt.style.use(\"seaborn-v0_8-whitegrid\")\n\nDATA_URL = (\n    \"https://raw.githubusercontent.com/changyaochen/MECE4520/master/\"\n    \"site/data/gas-turbine-emissions.csv\"\n)\ndata_path = next(\n    (path for path in [Path(\"../data/gas-turbine-emissions.csv\"), Path(\"site/data/gas-turbine-emissions.csv\"), Path(\"gas-turbine-emissions.csv\")] if path.exists()),\n    Path(\"gas-turbine-emissions.csv\"),\n)\nif not data_path.exists():\n    urlretrieve(DATA_URL, data_path)\ndata = pd.read_csv(data_path)\ndata.head()\n\n\n\n\n\n\n\n\nAT\nAP\nAH\nAFDP\nGTEP\nTIT\nTAT\nTEY\nCDP\nCO\nNOX\n\n\n\n\n0\n4.5878\n1018.7\n83.675\n3.5758\n23.979\n1086.2\n549.83\n134.67\n11.898\n0.32663\n81.952\n\n\n1\n4.2932\n1018.3\n84.235\n3.5709\n23.951\n1086.1\n550.05\n134.67\n11.892\n0.44784\n82.377\n\n\n2\n3.9045\n1018.4\n84.858\n3.5828\n23.990\n1086.5\n550.19\n135.10\n12.042\n0.45144\n83.776\n\n\n3\n3.7436\n1018.3\n85.434\n3.5808\n23.911\n1086.5\n550.17\n135.03\n11.990\n0.23107\n82.505\n\n\n4\n3.7516\n1017.8\n85.182\n3.5781\n23.917\n1085.9\n550.00\n134.67\n11.910\n0.26747\n82.028"
+  },
+  {
+    "objectID": "foundations/02-gas-turbine-data.html#what-is-in-the-table",
+    "href": "foundations/02-gas-turbine-data.html#what-is-in-the-table",
+    "title": "A first look at gas-turbine emissions data",
+    "section": "2. What is in the table?",
+    "text": "2. What is in the table?\nEach row is an hourly operating observation. Variables include ambient conditions, pressure and temperature measurements, turbine energy yield, and the emissions outcomes CO and NOx.\n\nprint(f\"Observations: {data.shape[0]:,}\")\nprint(f\"Variables: {data.shape[1]}\")\n\nsummary = pd.DataFrame({\n    \"dtype\": data.dtypes.astype(str),\n    \"missing\": data.isna().sum(),\n    \"unique values\": data.nunique(),\n})\nsummary\n\nObservations: 36,733\nVariables: 11\n\n\n\n\n\n\n\n\n\ndtype\nmissing\nunique values\n\n\n\n\nAT\nfloat64\n0\n22523\n\n\nAP\nfloat64\n0\n791\n\n\nAH\nfloat64\n0\n25708\n\n\nAFDP\nfloat64\n0\n20495\n\n\nGTEP\nfloat64\n0\n12967\n\n\nTIT\nfloat64\n0\n799\n\n\nTAT\nfloat64\n0\n2769\n\n\nTEY\nfloat64\n0\n6236\n\n\nCDP\nfloat64\n0\n4447\n\n\nCO\nfloat64\n0\n26185\n\n\nNOX\nfloat64\n0\n23637\n\n\n\n\n\n\n\nThere are no missing values in this version of the dataset. That is convenient for teaching, but it should not be treated as normal: checking missingness is an essential first step in every real analysis."
+  },
+  {
+    "objectID": "foundations/02-gas-turbine-data.html#summarize-key-measurements",
+    "href": "foundations/02-gas-turbine-data.html#summarize-key-measurements",
+    "title": "A first look at gas-turbine emissions data",
+    "section": "3. Summarize key measurements",
+    "text": "3. Summarize key measurements\nThe mean alone is rarely enough. The standard deviation and quantiles describe how much a measurement varies across observed operating conditions.\n\nkey_variables = [\"AT\", \"AP\", \"AH\", \"TIT\", \"TEY\", \"CO\", \"NOX\"]\ndata[key_variables].describe().T[[\"mean\", \"std\", \"min\", \"25%\", \"50%\", \"75%\", \"max\"]]\n\n\n\n\n\n\n\n\nmean\nstd\nmin\n25%\n50%\n75%\nmax\n\n\n\n\nAT\n17.712726\n7.447451\n-6.234800\n11.7810\n17.8010\n23.6650\n37.103\n\n\nAP\n1013.070165\n6.463346\n985.850000\n1008.8000\n1012.6000\n1017.0000\n1036.600\n\n\nAH\n77.867015\n14.461355\n24.085000\n68.1880\n80.4700\n89.3760\n100.200\n\n\nTIT\n1081.428084\n17.536373\n1000.800000\n1071.8000\n1085.9000\n1097.0000\n1100.900\n\n\nTEY\n133.506404\n15.618634\n100.020000\n124.4500\n133.7300\n144.0800\n179.500\n\n\nCO\n2.372468\n2.262672\n0.000388\n1.1824\n1.7135\n2.8429\n44.103\n\n\nNOX\n65.293067\n11.678357\n25.905000\n57.1620\n63.8490\n71.5480\n119.910"
+  },
+  {
+    "objectID": "foundations/02-gas-turbine-data.html#distribution-of-an-emissions-outcome",
+    "href": "foundations/02-gas-turbine-data.html#distribution-of-an-emissions-outcome",
+    "title": "A first look at gas-turbine emissions data",
+    "section": "4. Distribution of an emissions outcome",
+    "text": "4. Distribution of an emissions outcome\nA histogram shows how frequently a range of values occurs. The distribution of NOx is not perfectly symmetric, so reporting only a mean can hide useful information about high-emission observations.\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.hist(data[\"NOX\"], bins=50, color=\"#4a90c2\", edgecolor=\"white\")\nax.axvline(data[\"NOX\"].mean(), color=\"#c43c35\", linestyle=\"--\", label=\"mean\")\nax.axvline(data[\"NOX\"].median(), color=\"#222222\", linestyle=\":\", label=\"median\")\nax.set(xlabel=\"NOx emissions (mg/m³)\", ylabel=\"Number of hourly observations\", title=\"Distribution of NOx emissions\")\nax.legend()\nplt.show()"
+  },
+  {
+    "objectID": "foundations/02-gas-turbine-data.html#explore-associations",
+    "href": "foundations/02-gas-turbine-data.html#explore-associations",
+    "title": "A first look at gas-turbine emissions data",
+    "section": "5. Explore associations",
+    "text": "5. Explore associations\nA correlation table is a compact overview of linear associations. It is useful for asking questions, not for deciding that one variable causes another. Sensors can be related because they respond to the same operating state.\n\ncorrelations = data[key_variables].corr(numeric_only=True)\ncorrelations.round(2)\n\n\n\n\n\n\n\n\nAT\nAP\nAH\nTIT\nTEY\nCO\nNOX\n\n\n\n\nAT\n1.00\n-0.41\n-0.48\n0.18\n-0.09\n-0.17\n-0.56\n\n\nAP\n-0.41\n1.00\n-0.02\n-0.01\n0.12\n0.07\n0.19\n\n\nAH\n-0.48\n-0.02\n1.00\n-0.22\n-0.14\n0.11\n0.16\n\n\nTIT\n0.18\n-0.01\n-0.22\n1.00\n0.91\n-0.71\n-0.21\n\n\nTEY\n-0.09\n0.12\n-0.14\n0.91\n1.00\n-0.57\n-0.12\n\n\nCO\n-0.17\n0.07\n0.11\n-0.71\n-0.57\n1.00\n0.34\n\n\nNOX\n-0.56\n0.19\n0.16\n-0.21\n-0.12\n0.34\n1.00\n\n\n\n\n\n\n\n\nplot_data = data.sample(n=3_000, random_state=4520)\n\nfig, axes = plt.subplots(1, 2, figsize=(11, 4.2), constrained_layout=True)\naxes[0].scatter(plot_data[\"TIT\"], plot_data[\"NOX\"], alpha=0.2, s=10)\naxes[0].set(xlabel=\"Turbine inlet temperature, TIT (°C)\", ylabel=\"NOx (mg/m³)\", title=\"Temperature and NOx\")\n\naxes[1].scatter(plot_data[\"TEY\"], plot_data[\"CO\"], alpha=0.2, s=10, color=\"#c43c35\")\naxes[1].set(xlabel=\"Turbine energy yield, TEY (MWh)\", ylabel=\"CO (mg/m³)\", title=\"Energy yield and CO\")\n\nplt.show()"
+  },
+  {
+    "objectID": "foundations/02-gas-turbine-data.html#check-in",
+    "href": "foundations/02-gas-turbine-data.html#check-in",
+    "title": "A first look at gas-turbine emissions data",
+    "section": "Check-in",
+    "text": "Check-in\n\nWhich variable has the most obvious association with NOx in the plots or correlation table?\nWhat operating conditions might create a relationship between two sensors even if neither directly causes the other?\nWhy might chronology matter when we later split these observations into training and test sets?\n\nKeep your answers in your own notes. The next notebook uses the same measurements to study variability and statistical evidence.\nReturn to the Foundations page"
+  },
+  {
+    "objectID": "foundations/index.html",
+    "href": "foundations/index.html",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "",
+    "text": "These materials establish the shared computational and statistical vocabulary used throughout MECE 4520, using the course’s recurring gas-turbine emissions dataset. Complete them in order before beginning the course’s modeling units. Plan for approximately 2.5–3 hours in total.\nYou can work in a local Jupyter environment. The notebooks use the pinned course copy of the gas-turbine dataset; if opened independently in a fresh environment, they download that same copy from this repository."
+  },
+  {
+    "objectID": "foundations/index.html#course-tools-and-python-foundations",
+    "href": "foundations/index.html#course-tools-and-python-foundations",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "1. Course tools and Python foundations",
+    "text": "1. Course tools and Python foundations\nEstimated time: 45–60 minutes\nLearn the minimal NumPy and Pandas workflow used in the course: loading data, selecting variables, filtering observations, and making a first plot.\nView the notebook"
+  },
+  {
+    "objectID": "foundations/index.html#a-first-look-at-gas-turbine-emissions-data",
+    "href": "foundations/index.html#a-first-look-at-gas-turbine-emissions-data",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "2. A first look at gas-turbine emissions data",
+    "text": "2. A first look at gas-turbine emissions data\nEstimated time: 45–60 minutes\nExplore the measurements, variables, distributions, and simple physical questions in the Gas Turbine CO and NOx Emissions dataset.\nView the notebook"
+  },
+  {
+    "objectID": "foundations/index.html#variability-sampling-and-evidence",
+    "href": "foundations/index.html#variability-sampling-and-evidence",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "3. Variability, sampling, and evidence",
+    "text": "3. Variability, sampling, and evidence\nEstimated time: 45–60 minutes\nUse the same dataset to build intuition for sampling distributions, bootstrap intervals, null hypotheses, and p-values—ideas that will return in regression.\nView the notebook"
+  },
+  {
+    "objectID": "foundations/index.html#dataset-source",
+    "href": "foundations/index.html#dataset-source",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "Dataset source",
+    "text": "Dataset source\nThese notebooks use the Gas Turbine CO and NOx Emissions dataset from the UCI Machine Learning Repository. The data contain 36,733 hourly measurements from a gas turbine collected between 2011 and 2015 and are made available under the CC BY 4.0 license."
   }
 ]

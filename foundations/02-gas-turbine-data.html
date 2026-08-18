@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>A first look at gas-turbine emissions data – MECE 4520</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-ab54b746ce990a9bed7a755e4ce4e940.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">⚙️</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../foundations/index.html"> 
+<span class="menu-text">Foundations</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">A first look at gas-turbine emissions data</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#load-the-data" id="toc-load-the-data">1. Load the data</a></li>
+  <li><a href="#what-is-in-the-table" id="toc-what-is-in-the-table">2. What is in the table?</a></li>
+  <li><a href="#summarize-key-measurements" id="toc-summarize-key-measurements">3. Summarize key measurements</a></li>
+  <li><a href="#distribution-of-an-emissions-outcome" id="toc-distribution-of-an-emissions-outcome">4. Distribution of an emissions outcome</a></li>
+  <li><a href="#explore-associations" id="toc-explore-associations">5. Explore associations</a></li>
+  <li><a href="#check-in" id="toc-check-in">Check-in</a></li>
+  </ul>
+</nav>
+<p><strong>MECE 4520 · Fall 2026 · asynchronous foundations</strong></p>
+<p><a target="_blank" href="https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/foundations/02-gas-turbine-data.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"> </a></p>
+<p>This notebook introduces our primary recurring dataset. Before fitting a model, engineers should understand what was measured, what each observation represents, and which patterns are plausible.</p>
+<p><strong>Learning objectives</strong></p>
+<ul>
+<li>Inspect a dataset for size, variable types, and missing values.</li>
+<li>Summarize measurements with appropriate descriptive statistics.</li>
+<li>Use plots to ask physical questions about a system.</li>
+<li>Distinguish an observed association from a causal conclusion.</li>
+</ul>
+<section id="load-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-the-data">1. Load the data</h2>
+<p>The UCI dataset contains 36,733 hourly observations from a gas turbine, measured between 2011 and 2015. Its rows are chronologically ordered, although individual timestamps are not supplied.</p>
+<div id="3152d0aa" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> urllib.request <span class="im">import</span> urlretrieve</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"seaborn-v0_8-whitegrid"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>DATA_URL <span class="op">=</span> (</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/changyaochen/MECE4520/master/"</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"site/data/gas-turbine-emissions.csv"</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> <span class="bu">next</span>(</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    (path <span class="cf">for</span> path <span class="kw">in</span> [Path(<span class="st">"../data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"site/data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"gas-turbine-emissions.csv"</span>)] <span class="cf">if</span> path.exists()),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"gas-turbine-emissions.csv"</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_path.exists():</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    urlretrieve(DATA_URL, data_path)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(data_path)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>data.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AT</th>
+<th data-quarto-table-cell-role="th">AP</th>
+<th data-quarto-table-cell-role="th">AH</th>
+<th data-quarto-table-cell-role="th">AFDP</th>
+<th data-quarto-table-cell-role="th">GTEP</th>
+<th data-quarto-table-cell-role="th">TIT</th>
+<th data-quarto-table-cell-role="th">TAT</th>
+<th data-quarto-table-cell-role="th">TEY</th>
+<th data-quarto-table-cell-role="th">CDP</th>
+<th data-quarto-table-cell-role="th">CO</th>
+<th data-quarto-table-cell-role="th">NOX</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>4.5878</td>
+<td>1018.7</td>
+<td>83.675</td>
+<td>3.5758</td>
+<td>23.979</td>
+<td>1086.2</td>
+<td>549.83</td>
+<td>134.67</td>
+<td>11.898</td>
+<td>0.32663</td>
+<td>81.952</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>4.2932</td>
+<td>1018.3</td>
+<td>84.235</td>
+<td>3.5709</td>
+<td>23.951</td>
+<td>1086.1</td>
+<td>550.05</td>
+<td>134.67</td>
+<td>11.892</td>
+<td>0.44784</td>
+<td>82.377</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>3.9045</td>
+<td>1018.4</td>
+<td>84.858</td>
+<td>3.5828</td>
+<td>23.990</td>
+<td>1086.5</td>
+<td>550.19</td>
+<td>135.10</td>
+<td>12.042</td>
+<td>0.45144</td>
+<td>83.776</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>3.7436</td>
+<td>1018.3</td>
+<td>85.434</td>
+<td>3.5808</td>
+<td>23.911</td>
+<td>1086.5</td>
+<td>550.17</td>
+<td>135.03</td>
+<td>11.990</td>
+<td>0.23107</td>
+<td>82.505</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>3.7516</td>
+<td>1017.8</td>
+<td>85.182</td>
+<td>3.5781</td>
+<td>23.917</td>
+<td>1085.9</td>
+<td>550.00</td>
+<td>134.67</td>
+<td>11.910</td>
+<td>0.26747</td>
+<td>82.028</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="what-is-in-the-table" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-in-the-table">2. What is in the table?</h2>
+<p>Each row is an hourly operating observation. Variables include ambient conditions, pressure and temperature measurements, turbine energy yield, and the emissions outcomes CO and NOx.</p>
+<div id="7a598cd6" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Observations: </span><span class="sc">{</span>data<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Variables: </span><span class="sc">{</span>data<span class="sc">.</span>shape[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>summary <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dtype"</span>: data.dtypes.astype(<span class="bu">str</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"missing"</span>: data.isna().<span class="bu">sum</span>(),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"unique values"</span>: data.nunique(),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>summary</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Observations: 36,733
+Variables: 11</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">dtype</th>
+<th data-quarto-table-cell-role="th">missing</th>
+<th data-quarto-table-cell-role="th">unique values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">AT</th>
+<td>float64</td>
+<td>0</td>
+<td>22523</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">AP</th>
+<td>float64</td>
+<td>0</td>
+<td>791</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">AH</th>
+<td>float64</td>
+<td>0</td>
+<td>25708</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">AFDP</th>
+<td>float64</td>
+<td>0</td>
+<td>20495</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">GTEP</th>
+<td>float64</td>
+<td>0</td>
+<td>12967</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">TIT</th>
+<td>float64</td>
+<td>0</td>
+<td>799</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">TAT</th>
+<td>float64</td>
+<td>0</td>
+<td>2769</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">TEY</th>
+<td>float64</td>
+<td>0</td>
+<td>6236</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">CDP</th>
+<td>float64</td>
+<td>0</td>
+<td>4447</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">CO</th>
+<td>float64</td>
+<td>0</td>
+<td>26185</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">NOX</th>
+<td>float64</td>
+<td>0</td>
+<td>23637</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>There are no missing values in this version of the dataset. That is convenient for teaching, but it should not be treated as normal: checking missingness is an essential first step in every real analysis.</p>
+</section>
+<section id="summarize-key-measurements" class="level2">
+<h2 class="anchored" data-anchor-id="summarize-key-measurements">3. Summarize key measurements</h2>
+<p>The mean alone is rarely enough. The standard deviation and quantiles describe how much a measurement varies across observed operating conditions.</p>
+<div id="0ea335fe" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>key_variables <span class="op">=</span> [<span class="st">"AT"</span>, <span class="st">"AP"</span>, <span class="st">"AH"</span>, <span class="st">"TIT"</span>, <span class="st">"TEY"</span>, <span class="st">"CO"</span>, <span class="st">"NOX"</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>data[key_variables].describe().T[[<span class="st">"mean"</span>, <span class="st">"std"</span>, <span class="st">"min"</span>, <span class="st">"25%"</span>, <span class="st">"50%"</span>, <span class="st">"75%"</span>, <span class="st">"max"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">std</th>
+<th data-quarto-table-cell-role="th">min</th>
+<th data-quarto-table-cell-role="th">25%</th>
+<th data-quarto-table-cell-role="th">50%</th>
+<th data-quarto-table-cell-role="th">75%</th>
+<th data-quarto-table-cell-role="th">max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">AT</th>
+<td>17.712726</td>
+<td>7.447451</td>
+<td>-6.234800</td>
+<td>11.7810</td>
+<td>17.8010</td>
+<td>23.6650</td>
+<td>37.103</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">AP</th>
+<td>1013.070165</td>
+<td>6.463346</td>
+<td>985.850000</td>
+<td>1008.8000</td>
+<td>1012.6000</td>
+<td>1017.0000</td>
+<td>1036.600</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">AH</th>
+<td>77.867015</td>
+<td>14.461355</td>
+<td>24.085000</td>
+<td>68.1880</td>
+<td>80.4700</td>
+<td>89.3760</td>
+<td>100.200</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">TIT</th>
+<td>1081.428084</td>
+<td>17.536373</td>
+<td>1000.800000</td>
+<td>1071.8000</td>
+<td>1085.9000</td>
+<td>1097.0000</td>
+<td>1100.900</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">TEY</th>
+<td>133.506404</td>
+<td>15.618634</td>
+<td>100.020000</td>
+<td>124.4500</td>
+<td>133.7300</td>
+<td>144.0800</td>
+<td>179.500</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">CO</th>
+<td>2.372468</td>
+<td>2.262672</td>
+<td>0.000388</td>
+<td>1.1824</td>
+<td>1.7135</td>
+<td>2.8429</td>
+<td>44.103</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">NOX</th>
+<td>65.293067</td>
+<td>11.678357</td>
+<td>25.905000</td>
+<td>57.1620</td>
+<td>63.8490</td>
+<td>71.5480</td>
+<td>119.910</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="distribution-of-an-emissions-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="distribution-of-an-emissions-outcome">4. Distribution of an emissions outcome</h2>
+<p>A histogram shows how frequently a range of values occurs. The distribution of NOx is not perfectly symmetric, so reporting only a mean can hide useful information about high-emission observations.</p>
+<div id="b96778c4" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ax.hist(data[<span class="st">"NOX"</span>], bins<span class="op">=</span><span class="dv">50</span>, color<span class="op">=</span><span class="st">"#4a90c2"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>ax.axvline(data[<span class="st">"NOX"</span>].mean(), color<span class="op">=</span><span class="st">"#c43c35"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"mean"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ax.axvline(data[<span class="st">"NOX"</span>].median(), color<span class="op">=</span><span class="st">"#222222"</span>, linestyle<span class="op">=</span><span class="st">":"</span>, label<span class="op">=</span><span class="st">"median"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"NOx emissions (mg/m³)"</span>, ylabel<span class="op">=</span><span class="st">"Number of hourly observations"</span>, title<span class="op">=</span><span class="st">"Distribution of NOx emissions"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02-gas-turbine-data_files/figure-html/cell-5-output-1.png" width="592" height="405" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="explore-associations" class="level2">
+<h2 class="anchored" data-anchor-id="explore-associations">5. Explore associations</h2>
+<p>A correlation table is a compact overview of linear associations. It is useful for asking questions, not for deciding that one variable causes another. Sensors can be related because they respond to the same operating state.</p>
+<div id="d2cca5b0" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>correlations <span class="op">=</span> data[key_variables].corr(numeric_only<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>correlations.<span class="bu">round</span>(<span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AT</th>
+<th data-quarto-table-cell-role="th">AP</th>
+<th data-quarto-table-cell-role="th">AH</th>
+<th data-quarto-table-cell-role="th">TIT</th>
+<th data-quarto-table-cell-role="th">TEY</th>
+<th data-quarto-table-cell-role="th">CO</th>
+<th data-quarto-table-cell-role="th">NOX</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">AT</th>
+<td>1.00</td>
+<td>-0.41</td>
+<td>-0.48</td>
+<td>0.18</td>
+<td>-0.09</td>
+<td>-0.17</td>
+<td>-0.56</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">AP</th>
+<td>-0.41</td>
+<td>1.00</td>
+<td>-0.02</td>
+<td>-0.01</td>
+<td>0.12</td>
+<td>0.07</td>
+<td>0.19</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">AH</th>
+<td>-0.48</td>
+<td>-0.02</td>
+<td>1.00</td>
+<td>-0.22</td>
+<td>-0.14</td>
+<td>0.11</td>
+<td>0.16</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">TIT</th>
+<td>0.18</td>
+<td>-0.01</td>
+<td>-0.22</td>
+<td>1.00</td>
+<td>0.91</td>
+<td>-0.71</td>
+<td>-0.21</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">TEY</th>
+<td>-0.09</td>
+<td>0.12</td>
+<td>-0.14</td>
+<td>0.91</td>
+<td>1.00</td>
+<td>-0.57</td>
+<td>-0.12</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">CO</th>
+<td>-0.17</td>
+<td>0.07</td>
+<td>0.11</td>
+<td>-0.71</td>
+<td>-0.57</td>
+<td>1.00</td>
+<td>0.34</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">NOX</th>
+<td>-0.56</td>
+<td>0.19</td>
+<td>0.16</td>
+<td>-0.21</td>
+<td>-0.12</td>
+<td>0.34</td>
+<td>1.00</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="4fe398b7" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="op">=</span> data.sample(n<span class="op">=</span><span class="dv">3_000</span>, random_state<span class="op">=</span><span class="dv">4520</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="fl">4.2</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].scatter(plot_data[<span class="st">"TIT"</span>], plot_data[<span class="st">"NOX"</span>], alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Turbine inlet temperature, TIT (°C)"</span>, ylabel<span class="op">=</span><span class="st">"NOx (mg/m³)"</span>, title<span class="op">=</span><span class="st">"Temperature and NOx"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].scatter(plot_data[<span class="st">"TEY"</span>], plot_data[<span class="st">"CO"</span>], alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">"#c43c35"</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Turbine energy yield, TEY (MWh)"</span>, ylabel<span class="op">=</span><span class="st">"CO (mg/m³)"</span>, title<span class="op">=</span><span class="st">"Energy yield and CO"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02-gas-turbine-data_files/figure-html/cell-7-output-1.png" width="1067" height="414" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="check-in" class="level2">
+<h2 class="anchored" data-anchor-id="check-in">Check-in</h2>
+<ol type="1">
+<li>Which variable has the most obvious association with NOx in the plots or correlation table?</li>
+<li>What operating conditions might create a relationship between two sensors even if neither directly causes the other?</li>
+<li>Why might chronology matter when we later split these observations into training and test sets?</li>
+</ol>
+<p>Keep your answers in your own notes. The next notebook uses the same measurements to study variability and statistical evidence.</p>
+<p><a href="../foundations/index.html">Return to the Foundations page</a></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/changyaochen\.github\.io\/MECE4520\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>MECE 4520 · Data Science for Mechanical Systems</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Fall 2026</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
