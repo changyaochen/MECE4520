@@ -2,6 +2,8 @@
 .vscode/
 sandbox/
 **/data/
+!site/data/
+!site/data/gas-turbine-emissions.csv
 
 # private folders
 private/**/*

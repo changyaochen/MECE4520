@@ -1,0 +1,11 @@
+/* Keep the course navigation compact without changing the Material theme. */
+#quarto-header .navbar {
+  min-height: 2.8rem;
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+}
+
+#quarto-header .navbar-brand {
+  padding-top: 0;
+  padding-bottom: 0;
+}
