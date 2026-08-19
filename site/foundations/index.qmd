@@ -4,12 +4,16 @@ title: "Foundations: Getting started with engineering data"
 
 These materials establish the shared computational and statistical vocabulary
 used throughout MECE 4520, using the course's recurring gas-turbine emissions
-dataset. Complete them in order before beginning the course's modeling units.
+dataset. Complete them in order before beginning the course's main modules.
 Plan for approximately 2.5–3 hours in total.
 
-You can work in a local Jupyter environment. The notebooks use the pinned
-course copy of the gas-turbine dataset; if opened independently in a fresh
-environment, they download that same copy from this repository.
+We highly recommend working with Google Colab.
+This allows you to run the notebooks in the cloud without tedious local setup.
+At the end of each notebook, there is a "Check-in" section that encourages you
+to try out what you've learned.
+
+The notebooks use the pinned course copy of the gas-turbine dataset;
+if opened independently in a fresh environment, they download that same copy from this repository.
 
 ## 1. Course tools and Python foundations
 
