@@ -31,11 +31,13 @@ Quarto landing page with three short, standalone Jupyter notebooks:
 
 1. Course tools and Python foundations.
 2. A first look at the gas-turbine emissions data.
-3. Variability, sampling, and evidence.
+3. Probability distributions and simulation.
 
 The notebooks deliberately use the same gas-turbine dataset as the later
 regression material. They can be read as part of the Quarto site or run in
 Google Colab. Each carries its own setup cell so a student can begin from a
-fresh Colab runtime. The statistical notebook covers the minimum conceptual
-foundation for later regression inference without restoring a standalone,
-extended introductory-statistics sequence.
+fresh Colab runtime. The third notebook introduces NumPy-based simulation and
+distribution shapes as preparation for the September 10 in-class CLT and
+hypothesis-testing discussion. Sampling distributions, bootstrap intervals,
+and p-values are deliberately taught with instructor guidance rather than
+assigned for asynchronous exploration.

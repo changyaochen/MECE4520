@@ -17,7 +17,7 @@ if opened independently in a fresh environment, they download that same copy fro
 
 ## 1. Course tools and Python foundations
 
-**Estimated time:** 45–60 minutes
+**Estimated time:** 30–45 minutes
 
 Learn the minimal NumPy and Pandas workflow used in the course: loading data,
 selecting variables, filtering observations, and making a first plot.
@@ -33,12 +33,12 @@ questions in the Gas Turbine CO and NOx Emissions dataset.
 
 [View the notebook](02-gas-turbine-data.ipynb)
 
-## 3. Variability, sampling, and evidence
+## 3. Probability distributions and simulation
 
 **Estimated time:** 45–60 minutes
 
-Use the same dataset to build intuition for sampling distributions, bootstrap
-intervals, null hypotheses, and p-values—ideas that will return in regression.
+Practice drawing and visualizing simulated normal, uniform, and exponential
+data, and connect their shapes to familiar and engineering situations.
 
 [View the notebook](03-variability-and-inference.ipynb)
 
