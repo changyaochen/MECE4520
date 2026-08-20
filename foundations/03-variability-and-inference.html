@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Variability, sampling, and evidence – MECE 4520</title>
+<title>Probability distributions and simulation – MECE 4520</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -157,7 +157,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Variability, sampling, and evidence</h1>
+<h1 class="title">Probability distributions and simulation</h1>
 </div>
 
 
@@ -177,173 +177,129 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#load-the-data" id="toc-load-the-data">1. Load the data</a></li>
-  <li><a href="#sampling-distributions" id="toc-sampling-distributions">2. Sampling distributions</a></li>
-  <li><a href="#bootstrap-uncertainty-interval" id="toc-bootstrap-uncertainty-interval">3. Bootstrap uncertainty interval</a></li>
-  <li><a href="#a-null-model-and-a-p-value" id="toc-a-null-model-and-a-p-value">4. A null model and a p-value</a></li>
+  <li><a href="#set-up-a-simulation" id="toc-set-up-a-simulation">1. Set up a simulation</a></li>
+  <li><a href="#draw-samples-from-probability-distributions" id="toc-draw-samples-from-probability-distributions">2. Draw samples from probability distributions</a></li>
   <li><a href="#check-in" id="toc-check-in">Check-in</a></li>
   </ul>
 </nav>
-<p><strong>MECE 4520 · Fall 2026 · asynchronous foundations</strong></p>
 <p><a target="_blank" href="https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/foundations/03-variability-and-inference.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"> </a></p>
-<p>Statistical ideas matter in this course because engineering data vary. This notebook gives a practical introduction to sampling distributions, uncertainty intervals, null hypotheses, and p-values. We will return to these ideas when interpreting regression models.</p>
+<p>Engineers use probability distributions to describe quantities that vary: a manufacturing dimension, a load, a sensor reading, or an emission measurement. In this notebook, you will use NumPy to simulate and visualize a few common distributions.</p>
+<p>This is preparation for our in-class discussion of the central limit theorem (CLT). We will discuss sampling distributions, formal hypothesis tests, and p-values together in class.</p>
 <p><strong>Learning objectives</strong></p>
 <ul>
-<li>Explain why repeated samples give different numerical summaries.</li>
-<li>Use resampling to estimate uncertainty in a mean.</li>
-<li>Interpret a p-value as evidence relative to a specified null model.</li>
-<li>Separate statistical evidence from engineering importance.</li>
+<li>Draw random samples from normal, uniform, and exponential distributions with NumPy.</li>
+<li>Use histograms to compare the shapes of simulated distributions.</li>
+<li>Calculate and interpret a sample mean and standard deviation.</li>
+<li>Relate a distribution to both a familiar situation and a possible engineering application.</li>
 </ul>
-<section id="load-the-data" class="level2">
-<h2 class="anchored" data-anchor-id="load-the-data">1. Load the data</h2>
-<p>We will use NOx emissions as a running example. The complete dataset is our available collection of observations; a smaller subset stands in for the limited sample often available in practice.</p>
-<div id="caccb295" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<section id="set-up-a-simulation" class="level2">
+<h2 class="anchored" data-anchor-id="set-up-a-simulation">1. Set up a simulation</h2>
+<p>A simulation creates artificial observations according to rules we specify. This lets us isolate one statistical idea at a time before working with messier engineering measurements.</p>
+<div id="setup-code" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># NumPy generates random samples; Matplotlib displays them.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> urllib.request <span class="im">import</span> urlretrieve</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"seaborn-v0_8-whitegrid"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">4520</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>DATA_URL <span class="op">=</span> (</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/changyaochen/MECE4520/master/"</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"site/data/gas-turbine-emissions.csv"</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> <span class="bu">next</span>(</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    (path <span class="cf">for</span> path <span class="kw">in</span> [Path(<span class="st">"../data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"site/data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"gas-turbine-emissions.csv"</span>)] <span class="cf">if</span> path.exists()),</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"gas-turbine-emissions.csv"</span>),</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_path.exists():</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    urlretrieve(DATA_URL, data_path)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(data_path)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>nox <span class="op">=</span> data[<span class="st">"NOX"</span>].to_numpy()</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"NOx observations: </span><span class="sc">{</span><span class="bu">len</span>(nox)<span class="sc">:,}</span><span class="ss">"</span>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Mean NOx: </span><span class="sc">{</span>nox<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss"> mg/m³"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>NOx observations: 36,733
-Mean NOx: 65.29 mg/m³</code></pre>
-</div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"seaborn-v0_8-whitegrid"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># A fixed seed makes the examples reproducible: everyone sees the same draw.</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">4520</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="sampling-distributions" class="level2">
-<h2 class="anchored" data-anchor-id="sampling-distributions">2. Sampling distributions</h2>
-<p>Imagine repeatedly taking 50 observations from this dataset and calculating their mean NOx. The mean changes from sample to sample. The distribution of those repeated means is called a <strong>sampling distribution</strong>.</p>
-<p>For this demonstration we sample rows independently. The original observations are ordered in time, so this simplification is not always appropriate for a forecasting problem; later in the course we will handle temporal splits explicitly.</p>
-<div id="a52025a2" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>sample_size <span class="op">=</span> <span class="dv">50</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>n_repetitions <span class="op">=</span> <span class="dv">2_000</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>sample_means <span class="op">=</span> np.array([</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    rng.choice(nox, size<span class="op">=</span>sample_size, replace<span class="op">=</span><span class="va">False</span>).mean()</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_repetitions)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>ax.hist(sample_means, bins<span class="op">=</span><span class="dv">40</span>, color<span class="op">=</span><span class="st">"#4a90c2"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>ax.axvline(nox.mean(), color<span class="op">=</span><span class="st">"#c43c35"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"mean of all observations"</span>)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Mean NOx in a sample of 50 (mg/m³)"</span>, ylabel<span class="op">=</span><span class="st">"Repeated samples"</span>, title<span class="op">=</span><span class="st">"Sampling distribution of the mean"</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Standard deviation of repeated sample means: </span><span class="sc">{</span>sample_means<span class="sc">.</span>std(ddof<span class="op">=</span><span class="dv">1</span>)<span class="sc">:.2f}</span><span class="ss"> mg/m³"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="draw-samples-from-probability-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="draw-samples-from-probability-distributions">2. Draw samples from probability distributions</h2>
+<p>A <strong>distribution</strong> describes the values a variable can take and how frequently different values occur. We will begin with three useful distribution shapes. These are useful approximations, not automatic labels for every engineering variable: choosing a distribution should be guided by the physical mechanism and by observed data.</p>
+<section id="normal-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="normal-distribution">Normal distribution</h3>
+<p>A normal distribution is symmetric around a typical value and is often useful when many small, independent sources of variation add together. A familiar example is adult height within a relatively homogeneous population. An engineering example is repeated measurements of a machined part’s diameter when the process is stable.</p>
+<p><code>rng.normal(loc, scale, size)</code> draws <code>size</code> observations with mean <code>loc</code> and standard deviation <code>scale</code>.</p>
+<div id="normal-code" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulate 1,000 measurements centered at 50 with a spread of 8.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>normal_sample <span class="op">=</span> rng.normal(loc<span class="op">=</span><span class="dv">50</span>, scale<span class="op">=</span><span class="dv">8</span>, size<span class="op">=</span><span class="dv">1_000</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>ax.hist(normal_sample, bins<span class="op">=</span><span class="dv">30</span>, color<span class="op">=</span><span class="st">"#4a90c2"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"Simulated measurement"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"Number of observations"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"A simulated normal distribution"</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Sample mean: </span><span class="sc">{</span>normal_sample<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Sample standard deviation: </span><span class="sc">{</span>normal_sample<span class="sc">.</span>std(ddof<span class="op">=</span><span class="dv">1</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="03-variability-and-inference_files/figure-html/cell-3-output-1.png" width="586" height="405" class="figure-img"></p>
+<p><img src="03-variability-and-inference_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Standard deviation of repeated sample means: 1.62 mg/m³</code></pre>
+<pre><code>Sample mean: 49.76
+Sample standard deviation: 7.84</code></pre>
 </div>
 </div>
-<p>Although individual NOx readings vary substantially, sample means vary less. This is the central-limit intuition we will use later when assessing uncertainty in fitted model coefficients.</p>
 </section>
-<section id="bootstrap-uncertainty-interval" class="level2">
-<h2 class="anchored" data-anchor-id="bootstrap-uncertainty-interval">3. Bootstrap uncertainty interval</h2>
-<p>A bootstrap treats one observed sample as a stand-in for the population. We repeatedly resample that sample <strong>with replacement</strong>, recalculate the statistic, and use the resulting distribution to estimate uncertainty.</p>
-<div id="53dfdf88" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>observed_sample <span class="op">=</span> rng.choice(nox, size<span class="op">=</span><span class="dv">100</span>, replace<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>bootstrap_means <span class="op">=</span> np.array([</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    rng.choice(observed_sample, size<span class="op">=</span><span class="bu">len</span>(observed_sample), replace<span class="op">=</span><span class="va">True</span>).mean()</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5_000</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>ci_low, ci_high <span class="op">=</span> np.percentile(bootstrap_means, [<span class="fl">2.5</span>, <span class="fl">97.5</span>])</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Observed sample mean: </span><span class="sc">{</span>observed_sample<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss"> mg/m³"</span>)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Approximate 95% bootstrap interval: [</span><span class="sc">{</span>ci_low<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>ci_high<span class="sc">:.2f}</span><span class="ss">] mg/m³"</span>)</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>ax.hist(bootstrap_means, bins<span class="op">=</span><span class="dv">40</span>, color<span class="op">=</span><span class="st">"#77a464"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>ax.axvline(ci_low, color<span class="op">=</span><span class="st">"#222222"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>ax.axvline(ci_high, color<span class="op">=</span><span class="st">"#222222"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Bootstrapped mean NOx (mg/m³)"</span>, ylabel<span class="op">=</span><span class="st">"Bootstrap samples"</span>, title<span class="op">=</span><span class="st">"Bootstrap distribution for one sample of 100 observations"</span>)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Observed sample mean: 62.90 mg/m³
-Approximate 95% bootstrap interval: [61.01, 64.84] mg/m³</code></pre>
+<section id="try-it" class="level3">
+<h3 class="anchored" data-anchor-id="try-it">Try it</h3>
+<p>Draw a normal sample centered at 100 with a standard deviation of 15. How do its histogram and sample summary differ from the one above?</p>
+<div id="try-normal-code" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># my_sample = rng.normal(loc=..., scale=..., size=...)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># print(my_sample.mean())</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># print(my_sample.std(ddof=1))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+</section>
+<section id="uniform-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="uniform-distribution">Uniform distribution</h3>
+<p>In a uniform distribution, every value in an interval is equally likely. A familiar example is an ideal random-number generator that returns any number from 0 to 1. An engineering simulation might choose an initial shaft angle at random between two limits, or sample evenly across an allowable tolerance range.</p>
+<p><code>rng.uniform(low, high, size)</code> draws values evenly between two limits. Unlike the normal distribution, it has no single central value that is more likely than another within that interval.</p>
+<div id="uniform-code" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw 5,000 values with equal probability anywhere from 0 to 10.</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>uniform <span class="op">=</span> rng.uniform(low<span class="op">=</span><span class="dv">0</span>, high<span class="op">=</span><span class="dv">10</span>, size<span class="op">=</span><span class="dv">5_000</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>ax.hist(uniform, bins<span class="op">=</span><span class="dv">35</span>, density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"#77a464"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(title<span class="op">=</span><span class="st">"A simulated uniform distribution"</span>, xlabel<span class="op">=</span><span class="st">"Value"</span>, ylabel<span class="op">=</span><span class="st">"Density"</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="03-variability-and-inference_files/figure-html/cell-4-output-2.png" width="584" height="405" class="figure-img"></p>
+<p><img src="03-variability-and-inference_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>The interval quantifies sampling uncertainty under the assumptions built into the bootstrap. It does <strong>not</strong> say that every individual emission measurement lies in this interval.</p>
 </section>
-<section id="a-null-model-and-a-p-value" class="level2">
-<h2 class="anchored" data-anchor-id="a-null-model-and-a-p-value">4. A null model and a p-value</h2>
-<p>Suppose we ask whether turbine inlet temperature (TIT) and NOx exhibit an association in these observations. A simple null model says that the two columns have no relationship. If that were true, shuffling NOx values across rows would produce equally plausible pairings.</p>
-<p>The next cell compares the observed correlation with correlations created under that shuffled, no-association null model.</p>
-<div id="3ff44230" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>analysis_data <span class="op">=</span> data[[<span class="st">"TIT"</span>, <span class="st">"NOX"</span>]].sample(n<span class="op">=</span><span class="dv">2_000</span>, random_state<span class="op">=</span><span class="dv">4520</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> analysis_data[<span class="st">"TIT"</span>].to_numpy()</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> analysis_data[<span class="st">"NOX"</span>].to_numpy()</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>observed_correlation <span class="op">=</span> np.corrcoef(x, y)[<span class="dv">0</span>, <span class="dv">1</span>]</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>null_correlations <span class="op">=</span> np.array([</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    np.corrcoef(x, rng.permutation(y))[<span class="dv">0</span>, <span class="dv">1</span>]</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2_000</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>p_value <span class="op">=</span> (np.<span class="bu">abs</span>(null_correlations) <span class="op">&gt;=</span> <span class="bu">abs</span>(observed_correlation)).mean()</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>ax.hist(null_correlations, bins<span class="op">=</span><span class="dv">40</span>, color<span class="op">=</span><span class="st">"#999999"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>ax.axvline(observed_correlation, color<span class="op">=</span><span class="st">"#c43c35"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"observed correlation"</span>)</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="op">-</span>observed_correlation, color<span class="op">=</span><span class="st">"#c43c35"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Correlation under the shuffled null model"</span>, ylabel<span class="op">=</span><span class="st">"Shuffles"</span>, title<span class="op">=</span><span class="st">"Is the observed association unusual under no association?"</span>)</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Observed correlation: </span><span class="sc">{</span>observed_correlation<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Permutation p-value (two-sided): </span><span class="sc">{</span>p_value<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="exponential-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="exponential-distribution">Exponential distribution</h3>
+<p>An exponential distribution is nonnegative and right-skewed, so it is often used to model waiting times. A familiar example is the waiting time until the next customer arrives when arrivals occur independently at a roughly constant average rate. In engineering, it can model the lifetime of one component when its instantaneous failure rate is assumed constant: a component that has already operated for 10 hours is, under this simplified model, no more or less likely to fail in the next hour than a new one.</p>
+<p><code>rng.exponential(scale, size)</code> draws nonnegative, right-skewed values. Its average is approximately <code>scale</code>; most draws are relatively small, but occasionally a much larger value occurs.</p>
+<div id="exponential-code" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw 5,000 waiting times with an average value of 2.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>exponential <span class="op">=</span> rng.exponential(scale<span class="op">=</span><span class="dv">2</span>, size<span class="op">=</span><span class="dv">5_000</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>ax.hist(exponential, bins<span class="op">=</span><span class="dv">35</span>, density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"#d9903d"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(title<span class="op">=</span><span class="st">"A simulated exponential distribution"</span>, xlabel<span class="op">=</span><span class="st">"Value"</span>, ylabel<span class="op">=</span><span class="st">"Density"</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="03-variability-and-inference_files/figure-html/cell-5-output-1.png" width="584" height="405" class="figure-img"></p>
+<p><img src="03-variability-and-inference_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Observed correlation: -0.231
-Permutation p-value (two-sided): 0.0000</code></pre>
 </div>
-</div>
-<p>A p-value is the fraction of null-model simulations at least as extreme as the observed result. It is <strong>not</strong> the probability that the null hypothesis is true, and it is not a measure of engineering importance. With thousands of observations, even a small effect can have a very small p-value.</p>
-<p>Here the shuffled null model also leaves out important engineering structure, including other operating variables and chronology. That is deliberate: the example is about defining a comparison model clearly, not about making a final causal claim.</p>
+</section>
 </section>
 <section id="check-in" class="level2">
 <h2 class="anchored" data-anchor-id="check-in">Check-in</h2>
 <ol type="1">
-<li>Why is the sampling distribution of the mean narrower than the distribution of individual NOx measurements?</li>
-<li>What does the bootstrap interval describe, and what does it not describe?</li>
-<li>Why does a small p-value not, by itself, establish a practically important or causal effect?</li>
+<li>Which simulated distribution is symmetric? Which is right-skewed?</li>
+<li>In <code>rng.normal(loc, scale, size)</code>, what does each argument control?</li>
+<li>Give one setting in which a uniform distribution would be a reasonable model, and one in which it would not.</li>
 </ol>
-<p>Keep your answers in your own notes. In the regression unit, we will revisit uncertainty and hypothesis tests in the context of fitted coefficients and predictions.</p>
+<p>Keep your answers in your own notes. Bring your questions about these distributions and the CLT to class.</p>
 <p><a href="../foundations/index.html">Return to the Foundations page</a></p>
 
 

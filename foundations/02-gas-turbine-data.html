@@ -181,48 +181,50 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#load-the-data" id="toc-load-the-data">1. Load the data</a></li>
-  <li><a href="#what-is-in-the-table" id="toc-what-is-in-the-table">2. What is in the table?</a></li>
+  <li><a href="#inspect-the-table" id="toc-inspect-the-table">2. Inspect the table</a></li>
   <li><a href="#summarize-key-measurements" id="toc-summarize-key-measurements">3. Summarize key measurements</a></li>
-  <li><a href="#distribution-of-an-emissions-outcome" id="toc-distribution-of-an-emissions-outcome">4. Distribution of an emissions outcome</a></li>
-  <li><a href="#explore-associations" id="toc-explore-associations">5. Explore associations</a></li>
+  <li><a href="#ask-a-distribution-question" id="toc-ask-a-distribution-question">4. Ask a distribution question</a></li>
+  <li><a href="#screen-for-associations" id="toc-screen-for-associations">5. Screen for associations</a></li>
   <li><a href="#check-in" id="toc-check-in">Check-in</a></li>
   </ul>
 </nav>
-<p><strong>MECE 4520 · Fall 2026 · asynchronous foundations</strong></p>
 <p><a target="_blank" href="https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/foundations/02-gas-turbine-data.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"> </a></p>
-<p>This notebook introduces our primary recurring dataset. Before fitting a model, engineers should understand what was measured, what each observation represents, and which patterns are plausible.</p>
+<p>This notebook develops an exploratory data analysis (EDA) workflow for our primary recurring dataset. Before fitting a model, engineers should understand what was measured, which values are plausible, and which patterns deserve further investigation.</p>
 <p><strong>Learning objectives</strong></p>
 <ul>
-<li>Inspect a dataset for size, variable types, and missing values.</li>
-<li>Summarize measurements with appropriate descriptive statistics.</li>
-<li>Use plots to ask physical questions about a system.</li>
+<li>Inspect a dataset for size, variable types, missing values, and plausible ranges.</li>
+<li>Summarize measurements before deciding which patterns need a plot.</li>
+<li>Use plots to answer physical questions about a system.</li>
 <li>Distinguish an observed association from a causal conclusion.</li>
 </ul>
 <section id="load-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="load-the-data">1. Load the data</h2>
-<p>The UCI dataset contains 36,733 hourly observations from a gas turbine, measured between 2011 and 2015. Its rows are chronologically ordered, although individual timestamps are not supplied.</p>
-<div id="3152d0aa" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<p>You loaded this dataset in the previous notebook. Run the setup cell below to make this notebook self-contained, then use it to ask four EDA questions: What is in the table? Are the values usable? What does NOx look like? Which associations deserve a closer look?</p>
+<div id="3152d0aa" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:51.820735Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:51.820570Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.625423Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.625171Z&quot;}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This setup cell is repeated so the notebook also runs independently in Colab.</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> urllib.request <span class="im">import</span> urlretrieve</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"seaborn-v0_8-whitegrid"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>DATA_URL <span class="op">=</span> (</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/changyaochen/MECE4520/master/"</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"site/data/gas-turbine-emissions.csv"</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> <span class="bu">next</span>(</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    (path <span class="cf">for</span> path <span class="kw">in</span> [Path(<span class="st">"../data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"site/data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"gas-turbine-emissions.csv"</span>)] <span class="cf">if</span> path.exists()),</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"gas-turbine-emissions.csv"</span>),</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_path.exists():</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    urlretrieve(DATA_URL, data_path)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(data_path)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>data.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Use a consistent visual style across the course notebooks.</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"seaborn-v0_8-whitegrid"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Point to the pinned course copy, rather than a changing external data source.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>DATA_URL <span class="op">=</span> (</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/changyaochen/MECE4520/master/"</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"site/data/gas-turbine-emissions.csv"</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Prefer a nearby file when working locally; download the same file in a fresh runtime.</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> <span class="bu">next</span>(</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    (path <span class="cf">for</span> path <span class="kw">in</span> [Path(<span class="st">"../data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"site/data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"gas-turbine-emissions.csv"</span>)] <span class="cf">if</span> path.exists()),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"gas-turbine-emissions.csv"</span>),</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_path.exists():</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    urlretrieve(DATA_URL, data_path)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(data_path)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>data.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
 <div>
 
 
@@ -321,24 +323,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="what-is-in-the-table" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-in-the-table">2. What is in the table?</h2>
-<p>Each row is an hourly operating observation. Variables include ambient conditions, pressure and temperature measurements, turbine energy yield, and the emissions outcomes CO and NOx.</p>
-<div id="7a598cd6" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Observations: </span><span class="sc">{</span>data<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss">"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Variables: </span><span class="sc">{</span>data<span class="sc">.</span>shape[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>summary <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dtype"</span>: data.dtypes.astype(<span class="bu">str</span>),</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"missing"</span>: data.isna().<span class="bu">sum</span>(),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"unique values"</span>: data.nunique(),</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>summary</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="inspect-the-table" class="level2">
+<h2 class="anchored" data-anchor-id="inspect-the-table">2. Inspect the table</h2>
+<p>Start with a quick audit before interpreting any pattern. We want to confirm the dataset has the expected number of observations and variables, identify missing values, and notice whether a variable is continuous or nearly categorical.</p>
+<div id="7a598cd6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.627056Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.626955Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.636900Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.636687Z&quot;}}" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the basic shape before assuming one row means what we think it means.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Observations: </span><span class="sc">{</span>data<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Variables: </span><span class="sc">{</span>data<span class="sc">.</span>shape[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Build a compact audit table for types, missing values, and measurement resolution.</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>summary <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dtype"</span>: data.dtypes.astype(<span class="bu">str</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"missing"</span>: data.isna().<span class="bu">sum</span>(),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"unique values"</span>: data.nunique(),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>summary</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Observations: 36,733
 Variables: 11</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="2">
+<div class="cell-output cell-output-display" data-execution_count="10">
 <div>
 
 
@@ -424,15 +428,24 @@ Variables: 11</code></pre>
 </div>
 </div>
 </div>
-<p>There are no missing values in this version of the dataset. That is convenient for teaching, but it should not be treated as normal: checking missingness is an essential first step in every real analysis.</p>
+<p>There are no missing values in this version of the dataset. That is made specially so for teaching/learning purpose, but it should not be treated as normal: checking missingness is an essential first step in every real analysis, and real world data almost always has missing values!</p>
+<p><strong>Try it:</strong> Which column has the fewest unique values? Does that make it a categorical variable, or could it still be a rounded numerical measurement?</p>
+<div id="c17d5d02" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.638056Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.637982Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.639348Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.639136Z&quot;}}" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the columns with the fewest distinct values.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># data.nunique().sort_values().head()</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect the values in one candidate column before deciding how to treat it.</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># data["&lt;COLUMN_NAME&gt;"].value_counts().head()</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </section>
 <section id="summarize-key-measurements" class="level2">
 <h2 class="anchored" data-anchor-id="summarize-key-measurements">3. Summarize key measurements</h2>
-<p>The mean alone is rarely enough. The standard deviation and quantiles describe how much a measurement varies across observed operating conditions.</p>
-<div id="0ea335fe" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>key_variables <span class="op">=</span> [<span class="st">"AT"</span>, <span class="st">"AP"</span>, <span class="st">"AH"</span>, <span class="st">"TIT"</span>, <span class="st">"TEY"</span>, <span class="st">"CO"</span>, <span class="st">"NOX"</span>]</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>data[key_variables].describe().T[[<span class="st">"mean"</span>, <span class="st">"std"</span>, <span class="st">"min"</span>, <span class="st">"25%"</span>, <span class="st">"50%"</span>, <span class="st">"75%"</span>, <span class="st">"max"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<p>Next ask: what operating ranges does this turbine occupy? The mean alone is rarely enough; the standard deviation and quantiles show how much a measurement varies across observed conditions and help reveal implausible values.</p>
+<div id="0ea335fe" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.640480Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.640419Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.657108Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.656861Z&quot;}}" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Focus the first summary on interpretable ambient, turbine, energy, and emissions variables.</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>key_variables <span class="op">=</span> [<span class="st">"AT"</span>, <span class="st">"AP"</span>, <span class="st">"AH"</span>, <span class="st">"TIT"</span>, <span class="st">"TEY"</span>, <span class="st">"CO"</span>, <span class="st">"NOX"</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>data[key_variables].describe().T[[<span class="st">"mean"</span>, <span class="st">"std"</span>, <span class="st">"min"</span>, <span class="st">"25%"</span>, <span class="st">"50%"</span>, <span class="st">"75%"</span>, <span class="st">"max"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
 <div>
 
 
@@ -527,141 +540,101 @@ Variables: 11</code></pre>
 </div>
 </div>
 </section>
-<section id="distribution-of-an-emissions-outcome" class="level2">
-<h2 class="anchored" data-anchor-id="distribution-of-an-emissions-outcome">4. Distribution of an emissions outcome</h2>
-<p>A histogram shows how frequently a range of values occurs. The distribution of NOx is not perfectly symmetric, so reporting only a mean can hide useful information about high-emission observations.</p>
-<div id="b96778c4" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ax.hist(data[<span class="st">"NOX"</span>], bins<span class="op">=</span><span class="dv">50</span>, color<span class="op">=</span><span class="st">"#4a90c2"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>ax.axvline(data[<span class="st">"NOX"</span>].mean(), color<span class="op">=</span><span class="st">"#c43c35"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"mean"</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ax.axvline(data[<span class="st">"NOX"</span>].median(), color<span class="op">=</span><span class="st">"#222222"</span>, linestyle<span class="op">=</span><span class="st">":"</span>, label<span class="op">=</span><span class="st">"median"</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"NOx emissions (mg/m³)"</span>, ylabel<span class="op">=</span><span class="st">"Number of hourly observations"</span>, title<span class="op">=</span><span class="st">"Distribution of NOx emissions"</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="ask-a-distribution-question" class="level2">
+<h2 class="anchored" data-anchor-id="ask-a-distribution-question">4. Ask a distribution question</h2>
+<p>Our question is: <strong>how common are high-NOx operating hours?</strong> A histogram shows how frequently a range of values occurs. If the distribution is not symmetric, reporting only a mean can hide useful information about high-emission observations.</p>
+<div id="b96778c4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.658359Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.658273Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.739880Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.739665Z&quot;}}" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare the mean and median to see whether a single center summarizes NOx well.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ax.hist(data[<span class="st">"NOX"</span>], bins<span class="op">=</span><span class="dv">50</span>, color<span class="op">=</span><span class="st">"#4a90c2"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>ax.axvline(data[<span class="st">"NOX"</span>].mean(), color<span class="op">=</span><span class="st">"#c43c35"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"mean"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>ax.axvline(data[<span class="st">"NOX"</span>].median(), color<span class="op">=</span><span class="st">"#222222"</span>, linestyle<span class="op">=</span><span class="st">":"</span>, label<span class="op">=</span><span class="st">"median"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"NOx emissions (mg/m³)"</span>, ylabel<span class="op">=</span><span class="st">"Number of hourly observations"</span>, title<span class="op">=</span><span class="st">"Distribution of NOx emissions"</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02-gas-turbine-data_files/figure-html/cell-5-output-1.png" width="592" height="405" class="figure-img"></p>
+<p><img src="02-gas-turbine-data_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="a-compact-view-boxplot" class="level3">
+<h3 class="anchored" data-anchor-id="a-compact-view-boxplot">A compact view: boxplot</h3>
+<p>A boxplot compresses the same distribution into a few robust summaries. The line inside the box is the median, and the box spans the middle 50% of observations (the interquartile range, IQR). By the usual 1.5 × IQR convention used here, each whisker reaches the most extreme observed value still within 1.5 IQR below the first quartile or above the third quartile; points beyond the whiskers are potential outliers. Boxplots are especially useful when comparing distributions across variables or operating groups later in the course.</p>
+<div id="cf67f6e4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.741163Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.741081Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.765032Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.764820Z&quot;}}" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A horizontal boxplot makes the center, spread, and unusually high NOx values easy to compare.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">2.5</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>ax.boxplot(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    data[<span class="st">"NOX"</span>],</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    vert<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    patch_artist<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    boxprops<span class="op">=</span>{<span class="st">"facecolor"</span>: <span class="st">"#4a90c2"</span>, <span class="st">"alpha"</span>: <span class="fl">0.7</span>},</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"NOx emissions (mg/m³)"</span>, title<span class="op">=</span><span class="st">"Boxplot of NOx emissions"</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02-gas-turbine-data_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="explore-associations" class="level2">
-<h2 class="anchored" data-anchor-id="explore-associations">5. Explore associations</h2>
-<p>A correlation table is a compact overview of linear associations. It is useful for asking questions, not for deciding that one variable causes another. Sensors can be related because they respond to the same operating state.</p>
-<div id="d2cca5b0" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>correlations <span class="op">=</span> data[key_variables].corr(numeric_only<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>correlations.<span class="bu">round</span>(<span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">AT</th>
-<th data-quarto-table-cell-role="th">AP</th>
-<th data-quarto-table-cell-role="th">AH</th>
-<th data-quarto-table-cell-role="th">TIT</th>
-<th data-quarto-table-cell-role="th">TEY</th>
-<th data-quarto-table-cell-role="th">CO</th>
-<th data-quarto-table-cell-role="th">NOX</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">AT</th>
-<td>1.00</td>
-<td>-0.41</td>
-<td>-0.48</td>
-<td>0.18</td>
-<td>-0.09</td>
-<td>-0.17</td>
-<td>-0.56</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">AP</th>
-<td>-0.41</td>
-<td>1.00</td>
-<td>-0.02</td>
-<td>-0.01</td>
-<td>0.12</td>
-<td>0.07</td>
-<td>0.19</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">AH</th>
-<td>-0.48</td>
-<td>-0.02</td>
-<td>1.00</td>
-<td>-0.22</td>
-<td>-0.14</td>
-<td>0.11</td>
-<td>0.16</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">TIT</th>
-<td>0.18</td>
-<td>-0.01</td>
-<td>-0.22</td>
-<td>1.00</td>
-<td>0.91</td>
-<td>-0.71</td>
-<td>-0.21</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">TEY</th>
-<td>-0.09</td>
-<td>0.12</td>
-<td>-0.14</td>
-<td>0.91</td>
-<td>1.00</td>
-<td>-0.57</td>
-<td>-0.12</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">CO</th>
-<td>-0.17</td>
-<td>0.07</td>
-<td>0.11</td>
-<td>-0.71</td>
-<td>-0.57</td>
-<td>1.00</td>
-<td>0.34</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">NOX</th>
-<td>-0.56</td>
-<td>0.19</td>
-<td>0.16</td>
-<td>-0.21</td>
-<td>-0.12</td>
-<td>0.34</td>
-<td>1.00</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div id="4fe398b7" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="op">=</span> data.sample(n<span class="op">=</span><span class="dv">3_000</span>, random_state<span class="op">=</span><span class="dv">4520</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="fl">4.2</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].scatter(plot_data[<span class="st">"TIT"</span>], plot_data[<span class="st">"NOX"</span>], alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Turbine inlet temperature, TIT (°C)"</span>, ylabel<span class="op">=</span><span class="st">"NOx (mg/m³)"</span>, title<span class="op">=</span><span class="st">"Temperature and NOx"</span>)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].scatter(plot_data[<span class="st">"TEY"</span>], plot_data[<span class="st">"CO"</span>], alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">"#c43c35"</span>)</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Turbine energy yield, TEY (MWh)"</span>, ylabel<span class="op">=</span><span class="st">"CO (mg/m³)"</span>, title<span class="op">=</span><span class="st">"Energy yield and CO"</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="screen-for-associations" class="level2">
+<h2 class="anchored" data-anchor-id="screen-for-associations">5. Screen for associations</h2>
+<p>Now ask: <strong>which measurements move together strongly enough to investigate?</strong> A correlation heatmap is a compact screen for linear associations. It helps us choose questions and plots; it does not establish a causal mechanism, because sensors can respond to the same operating state.</p>
+<div id="d2cca5b0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.898952Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.898850Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.906334Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.906082Z&quot;}}" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Correlations describe linear association; they do not establish a causal mechanism.</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>correlations <span class="op">=</span> data[key_variables].corr(numeric_only<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># A shared color scale makes strong positive and negative associations easy to spot.</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">6</span>))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>heatmap <span class="op">=</span> ax.imshow(correlations, cmap<span class="op">=</span><span class="st">"coolwarm"</span>, vmin<span class="op">=-</span><span class="dv">1</span>, vmax<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Disable the notebook-wide white grid so it does not draw over the heatmap cells.</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">False</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(<span class="bu">range</span>(<span class="bu">len</span>(key_variables)), key_variables, rotation<span class="op">=</span><span class="dv">45</span>, ha<span class="op">=</span><span class="st">"right"</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>ax.set_yticks(<span class="bu">range</span>(<span class="bu">len</span>(key_variables)), key_variables)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Correlation heatmap for selected gas-turbine variables"</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Label each cell so the heatmap remains useful when printed or viewed in grayscale.</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(key_variables)):</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> column <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(key_variables)):</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> correlations.iloc[row, column]</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        text_color <span class="op">=</span> <span class="st">"white"</span> <span class="cf">if</span> <span class="bu">abs</span>(value) <span class="op">&gt;</span> <span class="fl">0.5</span> <span class="cf">else</span> <span class="st">"black"</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        ax.text(column, row, <span class="ss">f"</span><span class="sc">{</span>value<span class="sc">:.2f}</span><span class="ss">"</span>, ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"center"</span>, color<span class="op">=</span>text_color)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>fig.colorbar(heatmap, ax<span class="op">=</span>ax, label<span class="op">=</span><span class="st">"Pearson correlation"</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02-gas-turbine-data_files/figure-html/cell-7-output-1.png" width="1067" height="414" class="figure-img"></p>
+<p><img src="02-gas-turbine-data_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="4fe398b7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.907523Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.907451Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:53.007949Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:53.007702Z&quot;}}" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use a fixed random subset to keep the scatter plots legible and reproducible.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plot_data <span class="op">=</span> data.sample(n<span class="op">=</span><span class="dv">3_000</span>, random_state<span class="op">=</span><span class="dv">4520</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect two candidate associations visually before drawing conclusions from a correlation value.</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="fl">4.2</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].scatter(plot_data[<span class="st">"TIT"</span>], plot_data[<span class="st">"NOX"</span>], alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Turbine inlet temperature, TIT (°C)"</span>, ylabel<span class="op">=</span><span class="st">"NOx (mg/m³)"</span>, title<span class="op">=</span><span class="st">"Temperature and NOx"</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].scatter(plot_data[<span class="st">"TEY"</span>], plot_data[<span class="st">"CO"</span>], alpha<span class="op">=</span><span class="fl">0.2</span>, s<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">"#c43c35"</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Turbine energy yield, TEY (MWh)"</span>, ylabel<span class="op">=</span><span class="st">"CO (mg/m³)"</span>, title<span class="op">=</span><span class="st">"Energy yield and CO"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02-gas-turbine-data_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
@@ -670,6 +643,7 @@ Variables: 11</code></pre>
 <section id="check-in" class="level2">
 <h2 class="anchored" data-anchor-id="check-in">Check-in</h2>
 <ol type="1">
+<li>What is one range or summary statistic that you would check for plausibility with an engineer familiar with this turbine?</li>
 <li>Which variable has the most obvious association with NOx in the plots or correlation table?</li>
 <li>What operating conditions might create a relationship between two sensors even if neither directly causes the other?</li>
 <li>Why might chronology matter when we later split these observations into training and test sets?</li>

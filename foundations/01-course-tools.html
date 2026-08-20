@@ -180,7 +180,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#set-up-the-notebook" id="toc-set-up-the-notebook">1. Set up the notebook</a></li>
+  <li><a href="#import-the-python-libraries" id="toc-import-the-python-libraries">1. Import the Python libraries</a></li>
   <li><a href="#numerical-arrays" id="toc-numerical-arrays">2. Numerical arrays</a></li>
   <li><a href="#load-the-course-dataset" id="toc-load-the-course-dataset">3. Load the course dataset</a></li>
   <li><a href="#select-and-filter-data" id="toc-select-and-filter-data">4. Select and filter data</a></li>
@@ -188,7 +188,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#check-in" id="toc-check-in">Check-in</a></li>
   </ul>
 </nav>
-<p><strong>MECE 4520 · Fall 2026 · asynchronous foundations</strong></p>
 <p><a target="_blank" href="https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/foundations/01-course-tools.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"> </a></p>
 <p>This notebook introduces the small set of Python tools used throughout the course. It is not a comprehensive Python tutorial: the goal is to be comfortable loading, inspecting, selecting, filtering, and plotting engineering data.</p>
 <p><strong>Learning objectives</strong></p>
@@ -198,41 +197,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Select columns and filter rows using clear, readable code.</li>
 <li>Make and interpret a simple engineering-data plot.</li>
 </ul>
-<section id="set-up-the-notebook" class="level2">
-<h2 class="anchored" data-anchor-id="set-up-the-notebook">1. Set up the notebook</h2>
-<p>The next cell imports the Python tools used throughout the course and loads the pinned course copy of the gas-turbine dataset.</p>
-<div id="e10bbe9c" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> urllib.request <span class="im">import</span> urlretrieve</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>DATA_URL <span class="op">=</span> (</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/changyaochen/MECE4520/master/"</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"site/data/gas-turbine-emissions.csv"</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> <span class="bu">next</span>(</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    (path <span class="cf">for</span> path <span class="kw">in</span> [Path(<span class="st">"../data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"site/data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"gas-turbine-emissions.csv"</span>)] <span class="cf">if</span> path.exists()),</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"gas-turbine-emissions.csv"</span>),</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_path.exists():</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    urlretrieve(DATA_URL, data_path)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(data_path)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"seaborn-v0_8-whitegrid"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="import-the-python-libraries" class="level2">
+<h2 class="anchored" data-anchor-id="import-the-python-libraries">1. Import the Python libraries</h2>
+<p>The next cell demonstrates how to import a Python library.</p>
+<p><code>import numpy as np</code> makes the NumPy library available in this notebook. The <code>as</code> keyword assigns the short alias <code>np</code> to NumPy’s namespace, so we can write <code>np.array(...)</code> instead of the longer <code>numpy.array(...)</code>. Using <code>np</code> is a common convention in scientific Python.</p>
+<div id="e10bbe9c" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import NumPy first: it is the numerical-array tool used in this section.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="numerical-arrays" class="level2">
 <h2 class="anchored" data-anchor-id="numerical-arrays">2. Numerical arrays</h2>
 <p>A NumPy array stores a collection of numerical values. Array operations act element-by-element, which makes calculations compact and readable.</p>
 <div id="de41a6cd" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>temperatures_c <span class="op">=</span> np.array([<span class="fl">15.2</span>, <span class="fl">18.7</span>, <span class="fl">21.4</span>, <span class="fl">24.1</span>])</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>temperatures_k <span class="op">=</span> temperatures_c <span class="op">+</span> <span class="fl">273.15</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Temperatures in K:"</span>, temperatures_k)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Mean temperature: </span><span class="sc">{</span>temperatures_c<span class="sc">.</span>mean()<span class="sc">:.1f}</span><span class="ss"> °C"</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Range: </span><span class="sc">{</span>temperatures_c<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:.1f}</span><span class="ss">–</span><span class="sc">{</span>temperatures_c<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.1f}</span><span class="ss"> °C"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Store repeated temperature measurements in a one-dimensional numerical array.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>temperatures_c <span class="op">=</span> np.array([<span class="fl">15.2</span>, <span class="fl">18.7</span>, <span class="fl">21.4</span>, <span class="fl">24.1</span>])</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># NumPy applies this unit conversion to every element of the array at once.</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>temperatures_k <span class="op">=</span> temperatures_c <span class="op">+</span> <span class="fl">273.15</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Temperatures in K:"</span>, temperatures_k)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Mean temperature: </span><span class="sc">{</span>temperatures_c<span class="sc">.</span>mean()<span class="sc">:.1f}</span><span class="ss"> °C"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Range: </span><span class="sc">{</span>temperatures_c<span class="sc">.</span><span class="bu">min</span>()<span class="sc">:.1f}</span><span class="ss">–</span><span class="sc">{</span>temperatures_c<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.1f}</span><span class="ss"> °C"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Temperatures in K: [288.35 291.85 294.55 297.25]
 Mean temperature: 19.9 °C
@@ -240,14 +225,42 @@ Range: 15.2–24.1 °C</code></pre>
 </div>
 </div>
 <p>The array is useful for a single quantity observed repeatedly. A table with many named variables is better represented by a Pandas <strong>DataFrame</strong>.</p>
+<p>Compared with a native Python list, a NumPy array is designed for numerical work. It supports vectorized calculations—such as adding <code>273.15</code> to every temperature—in one clear operation, stores values efficiently, and is much faster for the large arrays used in data analysis and machine learning.</p>
 </section>
 <section id="load-the-course-dataset" class="level2">
 <h2 class="anchored" data-anchor-id="load-the-course-dataset">3. Load the course dataset</h2>
-<p>The Gas Turbine CO and NOx Emissions dataset contains hourly sensor measurements and emissions outcomes. <code>features</code> and <code>targets</code> are returned separately; combining them gives one analysis table.</p>
-<div id="b2f98b95" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Rows: </span><span class="sc">{</span><span class="bu">len</span>(data)<span class="sc">:,}</span><span class="ss">"</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Columns: </span><span class="sc">{</span>data<span class="sc">.</span>shape[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>data.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The Gas Turbine CO and NOx Emissions dataset records the operation of a gas turbine between 2011 and 2015. It combines ambient conditions, turbine sensor measurements, energy yield, and two emissions outcomes: carbon monoxide (CO) and nitrogen oxides (NOx).</p>
+<p>Each row represents one hourly observation of the system: the measured operating and environmental conditions during that hour, together with the emissions observed at that time. This course returns to the same dataset repeatedly so that the modeling choices remain connected to a physical system.</p>
+<p>The original data and documentation are available from the <a href="https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set">UCI Machine Learning Repository</a>.</p>
+<div id="b2f98b95" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pandas represents a table with named columns as a DataFrame.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> urllib.request <span class="im">import</span> urlretrieve</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the committed course copy so everyone analyzes the same measurements.</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>DATA_URL <span class="op">=</span> (</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/changyaochen/MECE4520/master/"</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"site/data/gas-turbine-emissions.csv"</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Prefer a local copy; otherwise download it when this notebook runs independently.</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> <span class="bu">next</span>(</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    (path <span class="cf">for</span> path <span class="kw">in</span> [</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        Path(<span class="st">"../data/gas-turbine-emissions.csv"</span>),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        Path(<span class="st">"site/data/gas-turbine-emissions.csv"</span>),</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        Path(<span class="st">"gas-turbine-emissions.csv"</span>)]</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> path.exists()</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"gas-turbine-emissions.csv"</span>),</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_path.exists():</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    urlretrieve(DATA_URL, data_path)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(data_path)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect the dataset size before selecting variables or fitting a model.</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Rows: </span><span class="sc">{</span><span class="bu">len</span>(data)<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Columns: </span><span class="sc">{</span>data<span class="sc">.</span>shape[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>data.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 36,733
 Columns: 11</code></pre>
@@ -350,42 +363,75 @@ Columns: 11</code></pre>
 </div>
 </div>
 </div>
-<p>A good first habit is to inspect the column names and units before modeling. The dictionary below records the variables we will use most often.</p>
-<div id="dce6da14" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>variable_notes <span class="op">=</span> {</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AT"</span>: <span class="st">"ambient temperature (°C)"</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AP"</span>: <span class="st">"ambient pressure (mbar)"</span>,</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AH"</span>: <span class="st">"ambient humidity (%)"</span>,</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"TIT"</span>: <span class="st">"turbine inlet temperature (°C)"</span>,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"TEY"</span>: <span class="st">"turbine energy yield (MWh)"</span>,</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"CO"</span>: <span class="st">"carbon monoxide emissions (mg/m³)"</span>,</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"NOX"</span>: <span class="st">"nitrogen oxides emissions (mg/m³)"</span>,</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>pd.Series(variable_notes, name<span class="op">=</span><span class="st">"meaning"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>AT              ambient temperature (°C)
-AP               ambient pressure (mbar)
-AH                  ambient humidity (%)
-TIT       turbine inlet temperature (°C)
-TEY           turbine energy yield (MWh)
-CO     carbon monoxide emissions (mg/m³)
-NOX    nitrogen oxides emissions (mg/m³)
-Name: meaning, dtype: object</code></pre>
-</div>
-</div>
+<p>A good first habit is to inspect the column names and units before modeling. This data dictionary identifies every column in the course dataset.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>AT</code></td>
+<td style="text-align: left;">Ambient temperature (°C)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>AP</code></td>
+<td style="text-align: left;">Ambient pressure (mbar)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>AH</code></td>
+<td style="text-align: left;">Ambient humidity (%)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>AFDP</code></td>
+<td style="text-align: left;">Air filter differential pressure (mbar)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>GTEP</code></td>
+<td style="text-align: left;">Gas turbine exhaust pressure (mbar)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>TIT</code></td>
+<td style="text-align: left;">Turbine inlet temperature (°C)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>TAT</code></td>
+<td style="text-align: left;">Turbine after temperature (°C)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>TEY</code></td>
+<td style="text-align: left;">Turbine energy yield (MWh)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>CDP</code></td>
+<td style="text-align: left;">Compressor discharge pressure (mbar)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>CO</code></td>
+<td style="text-align: left;">Carbon monoxide emissions (mg/m³)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>NOX</code></td>
+<td style="text-align: left;">Nitrogen oxides emissions (mg/m³)</td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="select-and-filter-data" class="level2">
 <h2 class="anchored" data-anchor-id="select-and-filter-data">4. Select and filter data</h2>
-<p>Use a list of column names to select several variables. Use a Boolean condition inside square brackets to retain rows meeting a condition.</p>
+<p>Data analysis often begins with two simple operations: selecting the <strong>columns</strong> (variables) relevant to a question and filtering the <strong>rows</strong> (observations) that meet a condition. The next cell demonstrates both operations on the gas-turbine data.</p>
 <div id="0fc1f7a2" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>selected <span class="op">=</span> data[[<span class="st">"AT"</span>, <span class="st">"TIT"</span>, <span class="st">"TEY"</span>, <span class="st">"CO"</span>, <span class="st">"NOX"</span>]]</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>warm_conditions <span class="op">=</span> selected[selected[<span class="st">"AT"</span>] <span class="op">&gt;</span> selected[<span class="st">"AT"</span>].median()]</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Selected variables:"</span>)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>display(selected.head())</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Rows above the median ambient temperature: </span><span class="sc">{</span><span class="bu">len</span>(warm_conditions)<span class="sc">:,}</span><span class="ss">"</span>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>warm_conditions.describe().loc[[<span class="st">"mean"</span>, <span class="st">"std"</span>, <span class="st">"min"</span>, <span class="st">"max"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Select a small set of ambient, turbine, and emissions variables for inspection.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>selected <span class="op">=</span> data[[<span class="st">"AT"</span>, <span class="st">"TIT"</span>, <span class="st">"TEY"</span>, <span class="st">"CO"</span>, <span class="st">"NOX"</span>]]</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the median to divide the observations into relatively warmer and cooler conditions.</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>warm_conditions <span class="op">=</span> selected[selected[<span class="st">"AT"</span>] <span class="op">&gt;</span> selected[<span class="st">"AT"</span>].median()]</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Selected variables:"</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>display(selected.head())</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Rows above the median ambient temperature: </span><span class="sc">{</span><span class="bu">len</span>(warm_conditions)<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>warm_conditions.describe().loc[[<span class="st">"mean"</span>, <span class="st">"std"</span>, <span class="st">"min"</span>, <span class="st">"max"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Selected variables:</code></pre>
 </div>
@@ -511,21 +557,30 @@ Name: meaning, dtype: object</code></pre>
 <section id="make-a-first-plot" class="level2">
 <h2 class="anchored" data-anchor-id="make-a-first-plot">5. Make a first plot</h2>
 <p>A scatter plot helps us inspect whether two variables move together. Each point below is one hourly observation. We draw only a random subset so the plot remains readable.</p>
-<div id="acc1ef3a" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="op">=</span> data.sample(n<span class="op">=</span><span class="dv">2_000</span>, random_state<span class="op">=</span><span class="dv">4520</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>ax.scatter(plot_data[<span class="st">"TIT"</span>], plot_data[<span class="st">"NOX"</span>], alpha<span class="op">=</span><span class="fl">0.25</span>, s<span class="op">=</span><span class="dv">12</span>)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"Turbine inlet temperature, TIT (°C)"</span>,</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"NOx emissions (mg/m³)"</span>,</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"A first view of turbine inlet temperature and NOx emissions"</span>,</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="acc1ef3a" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import Matplotlib only when we are ready to make a figure.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Use a readable plotting style for the exploratory figure below.</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"seaborn-v0_8-whitegrid"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot a reproducible subset so overlapping points do not hide the overall pattern.</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># This is useful for large datasets.</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>plot_data <span class="op">=</span> data.sample(n<span class="op">=</span><span class="dv">2_000</span>, random_state<span class="op">=</span><span class="dv">4520</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Each point represents one hourly turbine observation.</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>ax.scatter(plot_data[<span class="st">"TIT"</span>], plot_data[<span class="st">"NOX"</span>], alpha<span class="op">=</span><span class="fl">0.25</span>, s<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"Turbine inlet temperature, TIT (°C)"</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"NOx emissions (mg/m³)"</span>,</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"A first view of turbine inlet temperature and NOx emissions"</span>,</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01-course-tools_files/figure-html/cell-7-output-1.png" width="584" height="405" class="figure-img"></p>
+<p><img src="01-course-tools_files/figure-html/cell-6-output-1.png" width="584" height="405" class="figure-img"></p>
 </figure>
 </div>
 </div>
