@@ -29,10 +29,14 @@ The course grade is based on:
 
 | Component | Weight |
 |:--|--:|
-| Homework assignments | 60% |
+| Homework assignments | 40% |
+| In-class quizzes | 20% |
 | Final project | 40% |
 
-Students should expect approximately seven homework assignments over the semester. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.
+Students should expect approximately seven homework assignments and regular
+in-class quizzes over the semester. The final project will be completed in
+groups and presented as a five-minute presentation on a selected
+engineering-data topic.
 
 ## Syllabus
 
