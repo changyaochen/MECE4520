@@ -95,7 +95,7 @@
     "href": "index.html#grading-policy",
     "title": "Data Science for Mechanical Systems",
     "section": "Grading policy",
-    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n60%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately seven homework assignments over the semester. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic."
+    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n40%\n\n\nIn-class quizzes\n20%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately seven homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.\n\nIn-class quizzes\nExpect a short, time-limited quiz about once each week. At the end of the semester, your 3 lowest quiz scores will be dropped.\nWe will use Poll Everywhere for in-class quizzes. You need to sign in Poll Everywhere with your Columbia UNI before the first quiz."
   },
   {
     "objectID": "index.html#syllabus",
@@ -103,13 +103,6 @@
     "title": "Data Science for Mechanical Systems",
     "section": "Syllabus",
     "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\nMain data or system\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\nShort exercises\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\nGas turbine\n\n\nSep. 15 & 17\nSimple and multiple linear regression\nGas turbine\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\nGas turbine\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\nCNC tool wear\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\nGas turbine + CNC\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\nGas turbine + CNC\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\nGas turbine + CNC\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\nGas turbine + CNC\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\nCNC tool wear\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\nMechanical decision examples\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\nGridworld + simple physical systems\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\nCartPole + mechanical control\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\nPendulum + control systems\n\n\nDec. 8 & 10\nFinal project presentations\nStudent-selected engineering system"
-  },
-  {
-    "objectID": "index.html#a-note-on-the-prerequisites",
-    "href": "index.html#a-note-on-the-prerequisites",
-    "title": "Data Science for Mechanical Systems",
-    "section": "A note on the prerequisites",
-    "text": "A note on the prerequisites\nIntroductory statistics will be taught primarily in the context of modeling problems rather than as a long standalone sequence.\nReinforcement learning and sequential decision-making will receive expanded coverage, including when RL is—and is not—a sensible choice compared with classical-control approaches."
   },
   {
     "objectID": "foundations/02-gas-turbine-data.html",
