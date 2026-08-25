@@ -131,6 +131,9 @@ venv.bak/
 /site/_site/
 /site/.quarto/
 
+# Quarto/Jupyter generated sidecar assets: <source-stem>_files/
+*_files/
+
 # mypy
 .mypy_cache/
 .dmypy.json

@@ -29,10 +29,23 @@ The course grade is based on:
 
 | Component | Weight |
 |:--|--:|
-| Homework assignments | 60% |
+| Homework assignments | 40% |
+| In-class quizzes | 20% |
 | Final project | 40% |
 
-Students should expect approximately seven homework assignments over the semester. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.
+Students should expect approximately seven homework assignments. The final
+project will be completed in groups and presented as a five-minute presentation
+on a selected engineering-data topic.
+
+### In-class quizzes
+
+Expect a short, time-limited quiz about once each week.
+At the end of the semester, your **3 lowest quiz scores**
+will be dropped.
+
+We will use Poll Everywhere for in-class quizzes. You need to sign in
+[Poll Everywhere with your Columbia UNI](https://www.polleverywhere.com/auth/saml/columbia)
+before the first quiz.
 
 ## Syllabus
 
@@ -55,12 +68,3 @@ This syllabus may evolve as the Fall 2026 course is finalized.
 | Nov. 24<br>Nov. 26 — Thanksgiving (no class) | Function approximation and deep Q-networks | CartPole + mechanical control |
 | Dec. 1 & 3 | Policy gradients, PPO, continuous control, and RL versus classical control | Pendulum + control systems |
 | Dec. 8 & 10 | Final project presentations | Student-selected engineering system |
-
-## A note on the prerequisites
-
-Introductory statistics will be taught primarily in the context of modeling
-problems rather than as a long standalone sequence.
-
-Reinforcement learning and sequential decision-making will receive expanded coverage,
- including when RL is—and is not—a sensible choice compared with
- classical-control approaches.
