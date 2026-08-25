@@ -50,6 +50,9 @@ Initial website pilot:
 - The Quarto project lives in `site/`.
 - Edit `.qmd`, `_quarto.yml`, and theme/source assets in `site/`.
 - Do not commit rendered `site/_site/` output or Quarto cache files.
+- Treat `<source-stem>_files/` as the standard name for generated
+  Quarto/Jupyter sidecar assets. Do not commit these directories; use a
+  deliberately named asset directory for hand-authored files.
 - The GitHub Actions workflow in `.github/workflows/publish.yml` publishes
   `site/` from `master` to GitHub Pages.
 - Keep the first public version focused on the homepage, grading policy, and
