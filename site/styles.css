@@ -9,3 +9,199 @@
   padding-top: 0;
   padding-bottom: 0;
 }
+
+/* Central Limit Theorem interactive. */
+.clt-explorer {
+  margin: 1.5rem 0 2rem;
+}
+
+.clt-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  align-items: end;
+  padding: 1.25rem;
+  background: #f5f7f8;
+  border: 1px solid #d9e1e5;
+  border-radius: 0.35rem;
+}
+
+.clt-controls label {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.clt-controls label > span {
+  white-space: nowrap;
+}
+
+.clt-controls input,
+.clt-controls select {
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #9daeb8;
+  border-radius: 0.2rem;
+  background: #fff;
+}
+
+.clt-controls select {
+  appearance: none;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 6 5 5 5-5' fill='none' stroke='%234c5961' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75'/%3E%3C/svg%3E");
+  background-position: right 0.7rem center;
+  background-repeat: no-repeat;
+  background-size: 0.85rem;
+}
+
+.clt-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+}
+
+.clt-buttons button {
+  min-height: 2.35rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #457eaa;
+  border-radius: 999px;
+  background: #fff;
+  color: #355766;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.clt-buttons button:hover:not(:disabled) {
+  background: #e7f0f5;
+  color: #23495f;
+}
+
+.clt-buttons #clt-add {
+  background: #457eaa;
+  color: #fff;
+}
+
+.clt-buttons #clt-add:hover:not(:disabled) {
+  background: #355f80;
+  color: #fff;
+}
+
+.clt-buttons button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.clt-status {
+  margin: 0.9rem 0;
+  color: #4c5961;
+}
+
+.clt-plots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.clt-plot {
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid #d9e1e5;
+  border-radius: 0.35rem;
+}
+
+.clt-plot figcaption {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.clt-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: 0.55rem;
+  color: #4c5961;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.clt-legend-bar {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  background: #d77732;
+}
+
+.clt-legend-line {
+  display: inline-block;
+  width: 1rem;
+  border-top: 2px solid #457eaa;
+}
+
+.clt-plot svg {
+  display: block;
+  width: 100%;
+  height: 250px;
+  overflow: visible;
+}
+
+.clt-axis {
+  stroke: #6d7980;
+  stroke-width: 1;
+}
+
+.clt-tick,
+.clt-annotation,
+.clt-empty-message {
+  fill: #4c5961;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.clt-annotation {
+  font-size: 11px;
+}
+
+.clt-current-bar {
+  fill: #d77732;
+  opacity: 0.8;
+}
+
+.clt-means-bar {
+  fill: #457eaa;
+}
+
+.clt-mean-line {
+  stroke: #355766;
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+
+.clt-current-mean-line {
+  stroke: #b65420;
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+
+.clt-theory-curve {
+  fill: none;
+  stroke: #457eaa;
+  stroke-width: 2.5;
+}
+
+.clt-theory-stem {
+  stroke: #457eaa;
+  stroke-width: 2;
+}
+
+.clt-theory-point {
+  fill: #457eaa;
+}
+
+@media (max-width: 700px) {
+  .clt-plots {
+    grid-template-columns: 1fr;
+  }
+}
