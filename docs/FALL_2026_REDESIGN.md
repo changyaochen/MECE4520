@@ -50,5 +50,5 @@ comparison: the most recent sample is shown as a histogram overlaid with the
 theoretical population density or probability mass function, and the other
 shows the accumulated sample means. The page is designed for use in the
 September 10 class and for later review; it does not require a Python
-installation or a server-side application. A companion Jupyter notebook remains
-a future option for the corresponding reproducible Python and Colab exercise.
+installation or a server-side application. A companion Jupyter notebook provides
+the corresponding reproducible Python and Colab exercise.

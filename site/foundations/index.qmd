@@ -44,19 +44,21 @@ data, and connect their shapes to familiar and engineering situations.
 
 [View the notebook](03-variability-and-inference.ipynb)
 
-## 4. Central Limit Theorem: interactive simulation
+## 4. Central Limit Theorem: interactive simulation and notebook
 
 **Estimated time:** 20–30 minutes
 
-Build a sampling distribution one batch at a time, then see how the sample
-size changes its shape and spread. This interactive accompanies the first
-in-class discussion of the central limit theorem.
+Build a distribution of sample means one batch at a time, then see how the
+sample size changes its shape and spread. The interactive and companion
+notebook accompany the first in-class discussion of the central limit theorem.
 
-[Open the interactive simulation](04-central-limit-theorem.qmd)
+[Interactive simulation](04-central-limit-theorem.qmd)
+
+[View the notebook](04-central-limit-theorem-notebook.ipynb)
 
 ## Dataset source
 
-These notebooks use the [Gas Turbine CO and NOx Emissions dataset](https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set)
+We primarily use the [Gas Turbine CO and NOx Emissions dataset](https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set)
 from the UCI Machine Learning Repository. The data contain 36,733 hourly
 measurements from a gas turbine collected between 2011 and 2015 and are made
 available under the CC BY 4.0 license.

@@ -26,6 +26,7 @@ view of that same sampling distribution.
       <select id="clt-distribution">
         <option value="uniform">Uniform (0, 1)</option>
         <option value="binomial">Binomial (10, 0.2)</option>
+        <option value="poisson">Poisson (λ = 3)</option>
         <option value="exponential">Exponential (mean 1)</option>
         <option value="normal">Normal (0, 1)</option>
       </select>
@@ -107,6 +108,16 @@ view of that same sampling distribution.
         for (let i = 0; i < 10; i += 1) successes += Math.random() < 0.2 ? 1 : 0;
         return successes;
       }
+      case "poisson": {
+        const threshold = Math.exp(-3);
+        let product = 1;
+        let count = 0;
+        do {
+          count += 1;
+          product *= Math.random();
+        } while (product > threshold);
+        return count - 1;
+      }
       case "exponential":
         return -Math.log(1 - Math.random());
       case "normal":
@@ -119,6 +130,7 @@ view of that same sampling distribution.
   function populationMoments() {
     switch (distributionInput.value) {
       case "binomial": return { mean: 2, sd: Math.sqrt(1.6), domain: [-0.5, 10.5] };
+      case "poisson": return { mean: 3, sd: Math.sqrt(3), domain: [-0.5, 14.5] };
       case "exponential": return { mean: 1, sd: 1, domain: [0, 7] };
       case "normal": return { mean: 0, sd: 1, domain: [-4, 4] };
       default: return { mean: 0.5, sd: Math.sqrt(1 / 12), domain: [-0.1, 1.1] };
@@ -182,7 +194,15 @@ view of that same sampling distribution.
       svg.append(svgElement("line", { x1: tickX, y1: y(0), x2: tickX, y2: y(0) + 4, class: "clt-axis" }));
       addText(svg, Number(value.toFixed(2)).toString(), tickX, height - 12, { class: "clt-tick", "text-anchor": "middle" });
     }
-    addText(svg, yLabel, 12, margin.top + 4, { class: "clt-tick" });
+    if (yLabel) {
+      const labelX = 14;
+      const labelY = margin.top + plotHeight / 2;
+      addText(svg, yLabel, labelX, labelY, {
+        class: "clt-tick",
+        "text-anchor": "middle",
+        transform: `rotate(-90 ${labelX} ${labelY})`
+      });
+    }
     return { x, y, plotWidth, plotHeight };
   }
 
@@ -212,15 +232,25 @@ view of that same sampling distribution.
     return coefficient * (0.2 ** k) * (0.8 ** (10 - k));
   }
 
+  function poissonMass(k) {
+    if (k < 0 || k > 14 || !Number.isInteger(k)) return 0;
+    let mass = Math.exp(-3);
+    for (let i = 1; i <= k; i += 1) mass *= 3 / i;
+    return mass;
+  }
+
   function drawCurrentSample() {
     const chart = prepareSvg("clt-current-sample");
     const moments = populationMoments();
     const domain = moments.domain;
-    const binCount = distributionInput.value === "binomial" ? 11 : 16;
+    const isDiscrete = ["binomial", "poisson"].includes(distributionInput.value);
+    const binCount = distributionInput.value === "binomial" ? 11 : distributionInput.value === "poisson" ? 15 : 16;
     const { bins, width: binWidth } = histogram(currentSample, domain, binCount);
     const n = currentSample.length || getSampleSize();
     const theoreticalCounts = distributionInput.value === "binomial"
       ? Array.from({ length: 11 }, (_, k) => n * binomialMass(k))
+      : distributionInput.value === "poisson"
+        ? Array.from({ length: 15 }, (_, k) => n * poissonMass(k))
       : Array.from({ length: 101 }, (_, i) => n * binWidth * density(domain[0] + (i / 100) * (domain[1] - domain[0])));
     const maximum = Math.max(...bins, ...theoreticalCounts, 1) * 1.12;
     const { svg, width, height, margin } = chart;
@@ -237,7 +267,7 @@ view of that same sampling distribution.
       }));
     });
 
-    if (distributionInput.value === "binomial") {
+    if (isDiscrete) {
       theoreticalCounts.forEach((count, k) => {
         const pointX = x(k);
         svg.append(svgElement("line", { x1: pointX, y1: y(0), x2: pointX, y2: y(count), class: "clt-theory-stem" }));
