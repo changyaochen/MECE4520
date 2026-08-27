@@ -1,6 +1,6 @@
 ---
 title: "Data Science for Mechanical Systems"
-subtitle: "Columbia University · MECE 4520 · Fall 2026"
+subtitle: "Columbia University · MECE 4520 · Fall 2026 · [Vergil](https://vergil.columbia.edu/vergil/search?term=20263&course=13397)"
 ---
 
 MECE 4520 introduces data science and machine learning through real engineering systems.
@@ -9,7 +9,6 @@ MECE 4520 introduces data science and machine learning through real engineering 
 - Location: 717 Hamilton Hall
 - Time: **Tuesday & Thursday** 10:10am - 11:25am
 - Lecturer: Changyao Chen (cc2759@columbia.edu)
-- [Vergil](https://vergil.columbia.edu/vergil/search?term=20263&course=13397)
 - TA: TBD
 - Office hours: TBD
 :::
