@@ -51,20 +51,20 @@ before the first quiz.
 
 This syllabus may evolve as the Fall 2026 course is finalized.
 
-| Class dates (2026) | Topic | Main data or system |
-|:--|:--|:--|
-| Before Sep. 8 | Python, NumPy/Pandas, linear algebra, and probability refresher | Short exercises |
-| Sep. 8 — asynchronous<br>Sep. 10 | Course launch, Python/data foundations, engineering EDA, and measurement variability | Gas turbine |
-| Sep. 15 & 17 | Simple and multiple linear regression | Gas turbine |
-| Sep. 22 & 24 | Statistical inference for regression, prediction intervals, and regularization | Gas turbine |
-| Sep. 29 & Oct. 1 | Logistic regression and classification metrics | CNC tool wear |
-| Oct. 6 & 8 | Validation, leakage, grouped splits, and temporal train/test splits | Gas turbine + CNC |
-| Oct. 13 & 15 | Decision trees, random forests, and gradient boosting | Gas turbine + CNC |
-| Oct. 20 & 22 | PCA, dimensionality reduction, and clustering | Gas turbine + CNC |
-| Oct. 27 & 29 | Neural networks and nonlinear function approximation | Gas turbine + CNC |
-| Nov. 3 — Election Day (no class)<br>Nov. 5 | Sequential data, degradation, and optional signal processing | CNC tool wear |
-| Nov. 10 & 12 | Reinforcement-learning foundations: bandits, states, actions, rewards, and MDPs | Mechanical decision examples |
-| Nov. 17 & 19 | Bellman equations, dynamic programming, Q-learning, and SARSA | Gridworld + simple physical systems |
-| Nov. 24<br>Nov. 26 — Thanksgiving (no class) | Function approximation and deep Q-networks | CartPole + mechanical control |
-| Dec. 1 & 3 | Policy gradients, PPO, continuous control, and RL versus classical control | Pendulum + control systems |
-| Dec. 8 & 10 | Final project presentations | Student-selected engineering system |
+| Class dates (2026) | Topic |
+|:--|:--|
+| Before Sep. 8 | Python, NumPy/Pandas, linear algebra, and probability refresher |
+| Sep. 8 — asynchronous<br>Sep. 10 | Course launch, Python/data foundations, engineering EDA, and measurement variability |
+| Sep. 15<br>Sep. 17 — asynchronous | Simple and multiple linear regression |
+| Sep. 22 & 24 | Statistical inference for regression, prediction intervals, and regularization |
+| Sep. 29 & Oct. 1 | Logistic regression and classification metrics |
+| Oct. 6 & 8 | Validation, leakage, grouped splits, and temporal train/test splits |
+| Oct. 13 & 15 | Decision trees, random forests, and gradient boosting |
+| Oct. 20 & 22 | PCA, dimensionality reduction, and clustering |
+| Oct. 27 & 29 | Neural networks and nonlinear function approximation |
+| Nov. 3 — Election Day (no class)<br>Nov. 5 | Sequential data, degradation, and optional signal processing |
+| Nov. 10 & 12 | Reinforcement-learning foundations: bandits, states, actions, rewards, and MDPs |
+| Nov. 17 & 19 | Bellman equations, dynamic programming, Q-learning, and SARSA |
+| Nov. 24<br>Nov. 26 — Thanksgiving (no class) | Function approximation and deep Q-networks |
+| Dec. 1 & 3 | Policy gradients, PPO, continuous control, and RL versus classical control |
+| Dec. 8 & 10 | Final project presentations |
