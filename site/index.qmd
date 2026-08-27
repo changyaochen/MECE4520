@@ -6,9 +6,10 @@ subtitle: "Columbia University · MECE 4520 · Fall 2026"
 MECE 4520 introduces data science and machine learning through real engineering systems.
 
 ::: {.course-status}
-- Location: TBD
+- Location: 717 Hamilton Hall
 - Time: **Tuesday & Thursday** 10:10am - 11:25am
 - Lecturer: Changyao Chen (cc2759@columbia.edu)
+- [Vergil](https://vergil.columbia.edu/vergil/search?term=20263&course=13397)
 - TA: TBD
 - Office hours: TBD
 :::
