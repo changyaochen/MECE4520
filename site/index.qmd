@@ -9,7 +9,7 @@ MECE 4520 introduces data science and machine learning through real engineering 
 - Location: 717 Hamilton Hall
 - Time: **Tuesday & Thursday** 10:10am - 11:25am
 - Lecturer: Changyao Chen (cc2759@columbia.edu)
-- TA: TBD
+- TAs: Mai Al Shaaban (ma5070) and Vlad Pyltsov (vp2517)
 - Office hours: TBD
 :::
 
