@@ -3,7 +3,7 @@
 sandbox/
 **/data/
 !site/data/
-!site/data/gas-turbine-emissions.csv
+!site/data/gas-turbine-course.csv
 
 # private folders
 private/**/*

@@ -12,8 +12,10 @@ This allows you to run the notebooks in the cloud without tedious local setup.
 At the end of each notebook, there is a "Check-in" section that encourages you
 to try out what you've learned.
 
-The notebooks use the pinned course copy of the gas-turbine dataset;
-if opened independently in a fresh environment, they download that same copy from this repository.
+The notebooks use the course version of the gas-turbine dataset. It retains
+the original measurements while adding a `campaign_year` field and documented
+missing values for later data-pipeline exercises. If opened independently in a
+fresh environment, they download that same course version from this repository.
 
 ## 1. Course tools and Python foundations
 
@@ -44,7 +46,9 @@ data, and connect their shapes to familiar and engineering situations.
 
 ## Dataset source
 
-These notebooks use the [Gas Turbine CO and NOx Emissions dataset](https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set)
-from the UCI Machine Learning Repository. The data contain 36,733 hourly
+The underlying measurements come from the [Gas Turbine CO and NOx Emissions
+dataset](https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set)
+at the UCI Machine Learning Repository. The source data contain 36,733 hourly
 measurements from a gas turbine collected between 2011 and 2015 and are made
-available under the CC BY 4.0 license.
+available under the CC BY 4.0 license. The clean UCI files are not stored in
+this repository.

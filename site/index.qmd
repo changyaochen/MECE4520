@@ -29,8 +29,8 @@ The course grade is based on:
 
 | Component | Weight |
 |:--|--:|
-| Homework assignments | 40% |
-| In-class quizzes | 20% |
+| Homework assignments | 30% |
+| In-class quizzes | 30% |
 | Final project | 40% |
 
 Students should expect approximately five homework assignments. The final
