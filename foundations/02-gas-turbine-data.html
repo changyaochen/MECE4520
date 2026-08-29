@@ -200,7 +200,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="load-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="load-the-data">1. Load the data</h2>
 <p>You loaded this dataset in the previous notebook. Run the setup cell below to make this notebook self-contained, then use it to ask four EDA questions: What is in the table? Are the values usable? What does NOx look like? Which associations deserve a closer look?</p>
-<div id="3152d0aa" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:51.820735Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:51.820570Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.625423Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.625171Z&quot;}}" data-execution_count="9">
+<div id="3152d0aa" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-29T11:38:11.808143Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-29T11:38:11.807785Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-29T11:38:12.331346Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-29T11:38:12.331016Z&quot;}}" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This setup cell is repeated so the notebook also runs independently in Colab.</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -210,21 +210,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Use a consistent visual style across the course notebooks.</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"seaborn-v0_8-whitegrid"</span>)</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Point to the pinned course copy, rather than a changing external data source.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Point to the documented course version, rather than a changing external source.</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>DATA_URL <span class="op">=</span> (</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/changyaochen/MECE4520/master/"</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"site/data/gas-turbine-emissions.csv"</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"site/data/gas-turbine-course.csv"</span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Prefer a nearby file when working locally; download the same file in a fresh runtime.</span></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> <span class="bu">next</span>(</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    (path <span class="cf">for</span> path <span class="kw">in</span> [Path(<span class="st">"../data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"site/data/gas-turbine-emissions.csv"</span>), Path(<span class="st">"gas-turbine-emissions.csv"</span>)] <span class="cf">if</span> path.exists()),</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"gas-turbine-emissions.csv"</span>),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    (path <span class="cf">for</span> path <span class="kw">in</span> [Path(<span class="st">"../data/gas-turbine-course.csv"</span>), Path(<span class="st">"site/data/gas-turbine-course.csv"</span>), Path(<span class="st">"gas-turbine-course.csv"</span>)] <span class="cf">if</span> path.exists()),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"gas-turbine-course.csv"</span>),</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_path.exists():</span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    urlretrieve(DATA_URL, data_path)</span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(data_path)</span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>data.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="9">
+<div class="cell-output cell-output-display" data-execution_count="1">
 <div>
 
 
@@ -232,6 +232,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">campaign_year</th>
 <th data-quarto-table-cell-role="th">AT</th>
 <th data-quarto-table-cell-role="th">AP</th>
 <th data-quarto-table-cell-role="th">AH</th>
@@ -248,6 +249,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">0</th>
+<td>2011</td>
 <td>4.5878</td>
 <td>1018.7</td>
 <td>83.675</td>
@@ -262,6 +264,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">1</th>
+<td>2011</td>
 <td>4.2932</td>
 <td>1018.3</td>
 <td>84.235</td>
@@ -276,6 +279,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">2</th>
+<td>2011</td>
 <td>3.9045</td>
 <td>1018.4</td>
 <td>84.858</td>
@@ -290,6 +294,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <th data-quarto-table-cell-role="th">3</th>
+<td>2011</td>
 <td>3.7436</td>
 <td>1018.3</td>
 <td>85.434</td>
@@ -304,6 +309,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">4</th>
+<td>2011</td>
 <td>3.7516</td>
 <td>1017.8</td>
 <td>85.182</td>
@@ -326,7 +332,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="inspect-the-table" class="level2">
 <h2 class="anchored" data-anchor-id="inspect-the-table">2. Inspect the table</h2>
 <p>Start with a quick audit before interpreting any pattern. We want to confirm the dataset has the expected number of observations and variables, identify missing values, and notice whether a variable is continuous or nearly categorical.</p>
-<div id="7a598cd6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.627056Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.626955Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.636900Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.636687Z&quot;}}" data-execution_count="10">
+<div id="7a598cd6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-29T11:38:12.333462Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-29T11:38:12.333334Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-29T11:38:12.342865Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-29T11:38:12.342564Z&quot;}}" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the basic shape before assuming one row means what we think it means.</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Observations: </span><span class="sc">{</span>data<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">:,}</span><span class="ss">"</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Variables: </span><span class="sc">{</span>data<span class="sc">.</span>shape[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
@@ -340,9 +346,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>summary</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Observations: 36,733
-Variables: 11</code></pre>
+Variables: 12</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="10">
+<div class="cell-output cell-output-display" data-execution_count="2">
 <div>
 
 
@@ -357,66 +363,72 @@ Variables: 11</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
+<th data-quarto-table-cell-role="th">campaign_year</th>
+<td>int64</td>
+<td>0</td>
+<td>5</td>
+</tr>
+<tr class="even">
 <th data-quarto-table-cell-role="th">AT</th>
 <td>float64</td>
 <td>0</td>
 <td>22523</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <th data-quarto-table-cell-role="th">AP</th>
 <td>float64</td>
 <td>0</td>
 <td>791</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <th data-quarto-table-cell-role="th">AH</th>
 <td>float64</td>
-<td>0</td>
-<td>25708</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">AFDP</th>
-<td>float64</td>
-<td>0</td>
-<td>20495</td>
+<td>1102</td>
+<td>25183</td>
 </tr>
 <tr class="odd">
+<th data-quarto-table-cell-role="th">AFDP</th>
+<td>float64</td>
+<td>240</td>
+<td>20425</td>
+</tr>
+<tr class="even">
 <th data-quarto-table-cell-role="th">GTEP</th>
 <td>float64</td>
 <td>0</td>
 <td>12967</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <th data-quarto-table-cell-role="th">TIT</th>
 <td>float64</td>
 <td>0</td>
 <td>799</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <th data-quarto-table-cell-role="th">TAT</th>
 <td>float64</td>
 <td>0</td>
 <td>2769</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <th data-quarto-table-cell-role="th">TEY</th>
 <td>float64</td>
 <td>0</td>
 <td>6236</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <th data-quarto-table-cell-role="th">CDP</th>
 <td>float64</td>
 <td>0</td>
 <td>4447</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <th data-quarto-table-cell-role="th">CO</th>
 <td>float64</td>
 <td>0</td>
 <td>26185</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <th data-quarto-table-cell-role="th">NOX</th>
 <td>float64</td>
 <td>0</td>
@@ -430,7 +442,7 @@ Variables: 11</code></pre>
 </div>
 <p>There are no missing values in this version of the dataset. That is made specially so for teaching/learning purpose, but it should not be treated as normal: checking missingness is an essential first step in every real analysis, and real world data almost always has missing values!</p>
 <p><strong>Try it:</strong> Which column has the fewest unique values? Does that make it a categorical variable, or could it still be a rounded numerical measurement?</p>
-<div id="c17d5d02" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.638056Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.637982Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.639348Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.639136Z&quot;}}" data-execution_count="11">
+<div id="c17d5d02" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-29T11:38:12.344480Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-29T11:38:12.344379Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-29T11:38:12.346113Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-29T11:38:12.345827Z&quot;}}" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the columns with the fewest distinct values.</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># data.nunique().sort_values().head()</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -441,11 +453,11 @@ Variables: 11</code></pre>
 <section id="summarize-key-measurements" class="level2">
 <h2 class="anchored" data-anchor-id="summarize-key-measurements">3. Summarize key measurements</h2>
 <p>Next ask: what operating ranges does this turbine occupy? The mean alone is rarely enough; the standard deviation and quantiles show how much a measurement varies across observed conditions and help reveal implausible values.</p>
-<div id="0ea335fe" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.640480Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.640419Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.657108Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.656861Z&quot;}}" data-execution_count="12">
+<div id="0ea335fe" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-29T11:38:12.347553Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-29T11:38:12.347450Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-29T11:38:12.361208Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-29T11:38:12.360935Z&quot;}}" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Focus the first summary on interpretable ambient, turbine, energy, and emissions variables.</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>key_variables <span class="op">=</span> [<span class="st">"AT"</span>, <span class="st">"AP"</span>, <span class="st">"AH"</span>, <span class="st">"TIT"</span>, <span class="st">"TEY"</span>, <span class="st">"CO"</span>, <span class="st">"NOX"</span>]</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>data[key_variables].describe().T[[<span class="st">"mean"</span>, <span class="st">"std"</span>, <span class="st">"min"</span>, <span class="st">"25%"</span>, <span class="st">"50%"</span>, <span class="st">"75%"</span>, <span class="st">"max"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="12">
+<div class="cell-output cell-output-display" data-execution_count="4">
 <div>
 
 
@@ -485,12 +497,12 @@ Variables: 11</code></pre>
 </tr>
 <tr class="odd">
 <th data-quarto-table-cell-role="th">AH</th>
-<td>77.867015</td>
-<td>14.461355</td>
+<td>77.877059</td>
+<td>14.468821</td>
 <td>24.085000</td>
-<td>68.1880</td>
-<td>80.4700</td>
-<td>89.3760</td>
+<td>68.2115</td>
+<td>80.4880</td>
+<td>89.3920</td>
 <td>100.200</td>
 </tr>
 <tr class="even">
@@ -543,7 +555,7 @@ Variables: 11</code></pre>
 <section id="ask-a-distribution-question" class="level2">
 <h2 class="anchored" data-anchor-id="ask-a-distribution-question">4. Ask a distribution question</h2>
 <p>Our question is: <strong>how common are high-NOx operating hours?</strong> A histogram shows how frequently a range of values occurs. If the distribution is not symmetric, reporting only a mean can hide useful information about high-emission observations.</p>
-<div id="b96778c4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.658359Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.658273Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.739880Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.739665Z&quot;}}" data-execution_count="13">
+<div id="b96778c4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-29T11:38:12.362771Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-29T11:38:12.362673Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-29T11:38:12.466013Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-29T11:38:12.465749Z&quot;}}" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare the mean and median to see whether a single center summarizes NOx well.</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ax.hist(data[<span class="st">"NOX"</span>], bins<span class="op">=</span><span class="dv">50</span>, color<span class="op">=</span><span class="st">"#4a90c2"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
@@ -563,7 +575,7 @@ Variables: 11</code></pre>
 <section id="a-compact-view-boxplot" class="level3">
 <h3 class="anchored" data-anchor-id="a-compact-view-boxplot">A compact view: boxplot</h3>
 <p>A boxplot compresses the same distribution into a few robust summaries. The line inside the box is the median, and the box spans the middle 50% of observations (the interquartile range, IQR). By the usual 1.5 × IQR convention used here, each whisker reaches the most extreme observed value still within 1.5 IQR below the first quartile or above the third quartile; points beyond the whiskers are potential outliers. Boxplots are especially useful when comparing distributions across variables or operating groups later in the course.</p>
-<div id="cf67f6e4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.741163Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.741081Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.765032Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.764820Z&quot;}}" data-execution_count="14">
+<div id="cf67f6e4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-29T11:38:12.467554Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-29T11:38:12.467457Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-29T11:38:12.506899Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-29T11:38:12.506661Z&quot;}}" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A horizontal boxplot makes the center, spread, and unusually high NOx values easy to compare.</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">2.5</span>))</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>ax.boxplot(</span>
@@ -587,7 +599,7 @@ Variables: 11</code></pre>
 <section id="screen-for-associations" class="level2">
 <h2 class="anchored" data-anchor-id="screen-for-associations">5. Screen for associations</h2>
 <p>Now ask: <strong>which measurements move together strongly enough to investigate?</strong> A correlation heatmap is a compact screen for linear associations. It helps us choose questions and plots; it does not establish a causal mechanism, because sensors can respond to the same operating state.</p>
-<div id="d2cca5b0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.898952Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.898850Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:52.906334Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:52.906082Z&quot;}}" data-execution_count="15">
+<div id="d2cca5b0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-29T11:38:12.508364Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-29T11:38:12.508282Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-29T11:38:12.626629Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-29T11:38:12.626355Z&quot;}}" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Correlations describe linear association; they do not establish a causal mechanism.</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>correlations <span class="op">=</span> data[key_variables].corr(numeric_only<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -618,7 +630,7 @@ Variables: 11</code></pre>
 </div>
 </div>
 </div>
-<div id="4fe398b7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-19T14:13:52.907523Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-19T14:13:52.907451Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-19T14:13:53.007949Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-19T14:13:53.007702Z&quot;}}" data-execution_count="16">
+<div id="4fe398b7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-08-29T11:38:12.628188Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-08-29T11:38:12.628078Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-08-29T11:38:12.782681Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-08-29T11:38:12.782426Z&quot;}}" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use a fixed random subset to keep the scatter plots legible and reproducible.</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plot_data <span class="op">=</span> data.sample(n<span class="op">=</span><span class="dv">3_000</span>, random_state<span class="op">=</span><span class="dv">4520</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
