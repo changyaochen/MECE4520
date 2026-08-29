@@ -41,3 +41,14 @@ distribution shapes as preparation for the September 10 in-class CLT and
 hypothesis-testing discussion. Sampling distributions, bootstrap intervals,
 and p-values are deliberately taught with instructor guidance rather than
 assigned for asynchronous exploration.
+
+The CLT is supported by a separate browser-side Quarto interactive. It lets
+students choose an underlying population, a sample size, and a total number of
+repeated trials, then build the sampling distribution incrementally or complete
+the remaining trials at once. Two side-by-side charts keep the focus on the
+comparison: the most recent sample is shown as a histogram overlaid with the
+theoretical population density or probability mass function, and the other
+shows the accumulated sample means. The page is designed for use in the
+September 10 class and for later review; it does not require a Python
+installation or a server-side application. A companion Jupyter notebook provides
+the corresponding reproducible Python and Colab exercise.

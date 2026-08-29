@@ -4,8 +4,10 @@ title: "Foundations: Getting started with engineering data"
 
 These materials establish the shared computational and statistical vocabulary
 used throughout MECE 4520, using the course's recurring gas-turbine emissions
-dataset. Complete them in order before beginning the course's main modules.
-Plan for approximately 2.5–3 hours in total.
+dataset. Complete the first three notebooks in order before beginning the
+course's main modules; plan for approximately 2.5–3 hours in total. The CLT
+interactive is a companion to the first in-class discussion and can be revisited
+as needed.
 
 We highly recommend working with Google Colab.
 This allows you to run the notebooks in the cloud without tedious local setup.
@@ -42,9 +44,21 @@ data, and connect their shapes to familiar and engineering situations.
 
 [View the notebook](03-variability-and-inference.ipynb)
 
+## 4. Central Limit Theorem: interactive simulation and notebook
+
+**Estimated time:** 20–30 minutes
+
+Build a distribution of sample means one batch at a time, then see how the
+sample size changes its shape and spread. The interactive and companion
+notebook accompany the first in-class discussion of the central limit theorem.
+
+[Interactive simulation](04-central-limit-theorem.qmd)
+
+[View the notebook](04-central-limit-theorem-notebook.ipynb)
+
 ## Dataset source
 
-These notebooks use the [Gas Turbine CO and NOx Emissions dataset](https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set)
+We primarily use the [Gas Turbine CO and NOx Emissions dataset](https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set)
 from the UCI Machine Learning Repository. The data contain 36,733 hourly
 measurements from a gas turbine collected between 2011 and 2015 and are made
 available under the CC BY 4.0 license.
