@@ -56,6 +56,16 @@ notebook accompany the first in-class discussion of the central limit theorem.
 
 [View the notebook](04-central-limit-theorem-notebook.ipynb)
 
+## 5. Confidence intervals: interactive coverage simulation
+
+**Estimated time:** 10–15 minutes
+
+Repeatedly draw samples from a known normal population and construct a 95%
+confidence interval for each. See why 95% refers to the long-run coverage of
+the procedure, rather than a guarantee for one interval.
+
+[Interactive simulation](05-confidence-interval-coverage.qmd)
+
 ## Dataset source
 
 We primarily use the [Gas Turbine CO and NOx Emissions dataset](https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set)
