@@ -1,0 +1,210 @@
+---
+title: "Confidence intervals: an interactive coverage simulation"
+toc: false
+page-layout: full
+---
+
+This simulation uses a population we completely know: a normal distribution
+with population mean $\mu = 0$ and standard deviation $\sigma = 1$.
+Each trial draws a new random sample, calculates its sample mean, and creates
+an approximate 95% confidence interval for $\mu$.
+
+Throughout this page, $\mu$ denotes the fixed population mean (the quantity we
+want to learn), while $\bar{X}$ denotes the sample mean (our estimate of it).
+
+The dashed vertical line marks the true population mean. Blue intervals contain
+it; red intervals miss it. A 95% confidence level describes the *long-run
+behavior of this procedure*: across many independently constructed intervals,
+about 95% should contain $\mu$. It does not guarantee that any particular
+interval will do so.
+
+For each sample, the simulation constructs the approximate 95% confidence
+interval
+
+$$
+\bar{X} \pm 1.96 \frac{S}{\sqrt{n}},
+$$
+
+where $\bar{X}$ is the sample mean, $S$ is the sample standard deviation, and
+$n$ is the sample size. The sample standard deviation is calculated from the
+same $n$ observations:
+
+$$
+S = \sqrt{\frac{1}{n - 1}\sum_{i=1}^{n}\left(X_i - \bar{X}\right)^2}.
+$$
+
+::: {.callout-tip}
+## Try this
+
+Begin with a few intervals, then add more. The occasional red interval makes
+the meaning of “95% confidence” visible. Reset and repeat: the exact number of
+misses changes each time, while the long-run pattern remains near 95% coverage.
+:::
+
+```{=html}
+<div id="ci-explorer" class="ci-explorer" aria-label="Confidence interval coverage simulation">
+  <div class="ci-controls">
+    <label>
+      <span>Sample size, <i>n</i> (2–500)</span>
+      <input id="ci-sample-size" type="number" min="2" max="500" step="1" value="30" inputmode="numeric">
+    </label>
+    <label>
+      <span>Intervals to show, <i>B</i> (1–100)</span>
+      <input id="ci-total-intervals" type="number" min="1" max="100" step="1" value="100" inputmode="numeric">
+    </label>
+    <label>
+      Add intervals
+      <select id="ci-batch-size">
+        <option value="1">1</option>
+        <option value="5" selected>5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="ci-buttons" aria-label="Simulation controls">
+    <button id="ci-add" type="button">Add intervals</button>
+    <button id="ci-run" type="button">Run remaining intervals</button>
+    <button id="ci-reset" type="button">Reset</button>
+  </div>
+
+  <p id="ci-status" class="ci-status" aria-live="polite">No intervals yet. Add a small batch to begin.</p>
+
+  <figure class="ci-plot">
+    <figcaption>Confidence intervals for the population mean <span class="ci-legend"><span class="ci-legend-covered"></span>contains &mu; <span class="ci-legend-missed"></span>misses &mu;</span></figcaption>
+    <svg id="ci-interval-plot" role="img" aria-label="Repeated 95 percent confidence intervals and the true population mean"></svg>
+  </figure>
+</div>
+```
+
+<a href="index.qmd">← Return to Foundations</a>
+
+<script>
+(() => {
+  const root = document.getElementById("ci-explorer");
+  if (!root) return;
+
+  const populationMean = 0;
+  const confidenceMultiplier = 1.96;
+  const sampleSizeInput = document.getElementById("ci-sample-size");
+  const totalIntervalsInput = document.getElementById("ci-total-intervals");
+  const batchSizeInput = document.getElementById("ci-batch-size");
+  const addButton = document.getElementById("ci-add");
+  const runButton = document.getElementById("ci-run");
+  const resetButton = document.getElementById("ci-reset");
+  const status = document.getElementById("ci-status");
+  const plot = document.getElementById("ci-interval-plot");
+
+  let intervals = [];
+
+  const clamp = (value, lower, upper) => Math.max(lower, Math.min(upper, value));
+  const getSampleSize = () => clamp(Number.parseInt(sampleSizeInput.value, 10) || 30, 2, 500);
+  const getTotalIntervals = () => clamp(Number.parseInt(totalIntervalsInput.value, 10) || 100, 1, 100);
+
+  function normalRandom() {
+    const u = 1 - Math.random();
+    const v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function createInterval() {
+    const n = getSampleSize();
+    const sample = Array.from({ length: n }, normalRandom);
+    const mean = sample.reduce((sum, value) => sum + value, 0) / n;
+    const sumSquaredDeviations = sample.reduce((sum, value) => sum + (value - mean) ** 2, 0);
+    const standardError = Math.sqrt(sumSquaredDeviations / (n - 1)) / Math.sqrt(n);
+    const margin = confidenceMultiplier * standardError;
+    const lower = mean - margin;
+    const upper = mean + margin;
+    return { mean, lower, upper, containsMean: lower <= populationMean && populationMean <= upper };
+  }
+
+  function svgElement(tag, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function addText(text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    plot.append(element);
+  }
+
+  function renderPlot() {
+    const width = Math.max(320, Math.round(plot.getBoundingClientRect().width || 900));
+    const rowHeight = 6;
+    const margin = { top: 30, right: 26, bottom: 34, left: 46 };
+    const height = Math.max(250, margin.top + margin.bottom + Math.max(intervals.length, 20) * rowHeight);
+    const visibleIntervals = intervals;
+    const extremes = visibleIntervals.flatMap(interval => [interval.lower, interval.upper]);
+    const extent = extremes.length ? Math.max(0.5, ...extremes.map(value => Math.abs(value))) : 0.5;
+    const domainExtent = Math.ceil((extent + 0.08) * 2) / 2;
+    const domain = [-domainExtent, domainExtent];
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const x = value => margin.left + ((value - domain[0]) / (domain[1] - domain[0])) * plotWidth;
+    const y = index => margin.top + (index + 0.5) * (plotHeight / Math.max(visibleIntervals.length, 20));
+
+    plot.replaceChildren();
+    plot.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    plot.setAttribute("preserveAspectRatio", "none");
+    plot.append(svgElement("line", { x1: margin.left, y1: height - margin.bottom, x2: width - margin.right, y2: height - margin.bottom, class: "ci-axis" }));
+    plot.append(svgElement("line", { x1: x(populationMean), y1: margin.top, x2: x(populationMean), y2: height - margin.bottom, class: "ci-population-line" }));
+
+    for (let i = 0; i <= 4; i += 1) {
+      const value = domain[0] + (i / 4) * (domain[1] - domain[0]);
+      const tickX = x(value);
+      plot.append(svgElement("line", { x1: tickX, y1: height - margin.bottom, x2: tickX, y2: height - margin.bottom + 4, class: "ci-axis" }));
+      addText(Number(value.toFixed(1)).toString(), tickX, height - 12, { class: "ci-tick", "text-anchor": "middle" });
+    }
+    addText("true population mean, μ = 0", Math.min(x(populationMean) + 5, width - 145), 16, { class: "ci-annotation" });
+
+    visibleIntervals.forEach((interval, index) => {
+      const rowY = y(index);
+      const className = interval.containsMean ? "ci-covered" : "ci-missed";
+      plot.append(svgElement("line", { x1: x(interval.lower), y1: rowY, x2: x(interval.upper), y2: rowY, class: className }));
+      plot.append(svgElement("circle", { cx: x(interval.mean), cy: rowY, r: 2.2, class: `${className}-point` }));
+    });
+
+    if (!visibleIntervals.length) {
+      addText("Each new trial will add one 95% confidence interval here.", width / 2, height / 2, { class: "ci-empty-message", "text-anchor": "middle" });
+    }
+  }
+
+  function render() {
+    const total = getTotalIntervals();
+    const completed = intervals.length;
+    const covered = intervals.filter(interval => interval.containsMean).length;
+    const remaining = total - completed;
+    renderPlot();
+    status.textContent = completed
+      ? `${covered} of ${completed} intervals contain μ = 0 (${(100 * covered / completed).toFixed(1)}% coverage).`
+      : "No intervals yet. Add a small batch to begin.";
+    addButton.disabled = remaining <= 0;
+    runButton.disabled = remaining <= 0;
+  }
+
+  function addIntervals(requested) {
+    const total = getTotalIntervals();
+    const numberToAdd = Math.min(requested, Math.max(0, total - intervals.length));
+    for (let index = 0; index < numberToAdd; index += 1) intervals.push(createInterval());
+    render();
+  }
+
+  function reset() {
+    sampleSizeInput.value = getSampleSize();
+    totalIntervalsInput.value = getTotalIntervals();
+    intervals = [];
+    render();
+  }
+
+  addButton.addEventListener("click", () => addIntervals(Number.parseInt(batchSizeInput.value, 10)));
+  runButton.addEventListener("click", () => addIntervals(getTotalIntervals() - intervals.length));
+  resetButton.addEventListener("click", reset);
+  [sampleSizeInput, totalIntervalsInput].forEach(input => input.addEventListener("change", reset));
+  window.addEventListener("resize", render);
+  reset();
+})();
+</script>

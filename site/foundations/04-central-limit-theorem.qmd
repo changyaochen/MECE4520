@@ -1,0 +1,348 @@
+---
+title: "Central Limit Theorem: an interactive simulation"
+toc: false
+page-layout: full
+---
+
+The central limit theorem (CLT) concerns the *sample mean*, not the
+shape of the individual observations. Use the controls below to draw many
+independent samples from one population. Each trial contributes one sample
+mean to the plot on the right.
+
+::: {.callout-tip}
+## What to compare
+
+Keep the distribution and number of trials fixed, then increase the sample
+size. The distribution of sample means should become narrower and more nearly
+bell-shaped. In contrast, increasing the number of trials only gives a clearer
+view of that same sampling distribution.
+:::
+
+```{=html}
+<div id="clt-explorer" class="clt-explorer" aria-label="Central limit theorem interactive simulation">
+  <div class="clt-controls">
+    <label>
+      Underlying distribution
+      <select id="clt-distribution">
+        <option value="uniform">Uniform (0, 1)</option>
+        <option value="binomial">Binomial (10, 0.2)</option>
+        <option value="poisson">Poisson (λ = 3)</option>
+        <option value="exponential">Exponential (mean 1)</option>
+        <option value="normal">Normal (0, 1)</option>
+      </select>
+    </label>
+    <label>
+      <span>Sample size, <i>n</i> (1–1,000)</span>
+      <input id="clt-sample-size" type="number" min="1" max="1000" step="1" value="10" inputmode="numeric">
+    </label>
+    <label>
+      <span>Total trials, <i>B</i> (1–2,000)</span>
+      <input id="clt-total-trials" type="number" min="1" max="2000" step="1" value="500" inputmode="numeric">
+    </label>
+    <label>
+      Add trials
+      <select id="clt-batch-size">
+        <option value="1">1</option>
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="clt-buttons" aria-label="Simulation controls">
+    <button id="clt-add" type="button">Add trials</button>
+    <button id="clt-run" type="button">Run remaining trials</button>
+    <button id="clt-reset" type="button">Reset</button>
+  </div>
+
+  <p id="clt-status" class="clt-status" aria-live="polite">No trials yet. Add a small batch to begin.</p>
+
+  <div class="clt-plots">
+    <figure class="clt-plot">
+      <figcaption>Most recent sample <span class="clt-legend"><span class="clt-legend-bar"></span>observations <span class="clt-legend-line"></span>theoretical population</span></figcaption>
+      <svg id="clt-current-sample" role="img" aria-label="Most recent random sample"></svg>
+    </figure>
+    <figure class="clt-plot">
+      <figcaption>Distribution of sample means</figcaption>
+      <svg id="clt-sample-means" role="img" aria-label="Histogram of sample means"></svg>
+    </figure>
+  </div>
+</div>
+```
+
+<a href="index.qmd">← Return to Foundations</a>
+
+<script>
+(() => {
+  const root = document.getElementById("clt-explorer");
+  if (!root) return;
+
+  const distributionInput = document.getElementById("clt-distribution");
+  const sampleSizeInput = document.getElementById("clt-sample-size");
+  const totalTrialsInput = document.getElementById("clt-total-trials");
+  const batchSizeInput = document.getElementById("clt-batch-size");
+  const addButton = document.getElementById("clt-add");
+  const runButton = document.getElementById("clt-run");
+  const resetButton = document.getElementById("clt-reset");
+  const status = document.getElementById("clt-status");
+
+  let means = [];
+  let currentSample = [];
+
+  const clamp = (value, lower, upper) => Math.max(lower, Math.min(upper, value));
+  const getSampleSize = () => clamp(Number.parseInt(sampleSizeInput.value, 10) || 10, 1, 1000);
+  const getTotalTrials = () => clamp(Number.parseInt(totalTrialsInput.value, 10) || 500, 1, 2000);
+
+  function normalRandom() {
+    const u = 1 - Math.random();
+    const v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function drawObservation() {
+    switch (distributionInput.value) {
+      case "binomial": {
+        let successes = 0;
+        for (let i = 0; i < 10; i += 1) successes += Math.random() < 0.2 ? 1 : 0;
+        return successes;
+      }
+      case "poisson": {
+        const threshold = Math.exp(-3);
+        let product = 1;
+        let count = 0;
+        do {
+          count += 1;
+          product *= Math.random();
+        } while (product > threshold);
+        return count - 1;
+      }
+      case "exponential":
+        return -Math.log(1 - Math.random());
+      case "normal":
+        return normalRandom();
+      default:
+        return Math.random();
+    }
+  }
+
+  function populationMoments() {
+    switch (distributionInput.value) {
+      case "binomial": return { mean: 2, sd: Math.sqrt(1.6), domain: [-0.5, 10.5] };
+      case "poisson": return { mean: 3, sd: Math.sqrt(3), domain: [-0.5, 14.5] };
+      case "exponential": return { mean: 1, sd: 1, domain: [0, 7] };
+      case "normal": return { mean: 0, sd: 1, domain: [-4, 4] };
+      default: return { mean: 0.5, sd: Math.sqrt(1 / 12), domain: [-0.1, 1.1] };
+    }
+  }
+
+  function reset() {
+    sampleSizeInput.value = getSampleSize();
+    totalTrialsInput.value = getTotalTrials();
+    means = [];
+    currentSample = [];
+    render();
+  }
+
+  function addTrials(requested) {
+    const total = getTotalTrials();
+    const numberToAdd = Math.min(requested, Math.max(0, total - means.length));
+    const n = getSampleSize();
+
+    for (let trial = 0; trial < numberToAdd; trial += 1) {
+      currentSample = Array.from({ length: n }, drawObservation);
+      means.push(currentSample.reduce((sum, value) => sum + value, 0) / n);
+    }
+    render();
+  }
+
+  function svgElement(tag, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function prepareSvg(id) {
+    const svg = document.getElementById(id);
+    const width = Math.max(300, Math.round(svg.getBoundingClientRect().width || 560));
+    const height = 250;
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+    return { svg, width, height, margin: { top: 16, right: 18, bottom: 34, left: 42 } };
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    svg.append(element);
+  }
+
+  function addAxes(chart, domain, maximum, yLabel = "count") {
+    const { svg, width, height, margin } = chart;
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const x = value => margin.left + ((value - domain[0]) / (domain[1] - domain[0])) * plotWidth;
+    const y = value => margin.top + plotHeight - (value / maximum) * plotHeight;
+
+    svg.append(svgElement("line", { x1: margin.left, y1: y(0), x2: width - margin.right, y2: y(0), class: "clt-axis" }));
+    svg.append(svgElement("line", { x1: margin.left, y1: margin.top, x2: margin.left, y2: y(0), class: "clt-axis" }));
+    for (let i = 0; i <= 4; i += 1) {
+      const value = domain[0] + (i / 4) * (domain[1] - domain[0]);
+      const tickX = x(value);
+      svg.append(svgElement("line", { x1: tickX, y1: y(0), x2: tickX, y2: y(0) + 4, class: "clt-axis" }));
+      addText(svg, Number(value.toFixed(2)).toString(), tickX, height - 12, { class: "clt-tick", "text-anchor": "middle" });
+    }
+    if (yLabel) {
+      const labelX = 14;
+      const labelY = margin.top + plotHeight / 2;
+      addText(svg, yLabel, labelX, labelY, {
+        class: "clt-tick",
+        "text-anchor": "middle",
+        transform: `rotate(-90 ${labelX} ${labelY})`
+      });
+    }
+    return { x, y, plotWidth, plotHeight };
+  }
+
+  function histogram(values, domain, binCount) {
+    const bins = Array.from({ length: binCount }, () => 0);
+    const width = (domain[1] - domain[0]) / binCount;
+    values.forEach(value => {
+      const index = clamp(Math.floor((value - domain[0]) / width), 0, binCount - 1);
+      bins[index] += 1;
+    });
+    return { bins, width };
+  }
+
+  function density(value) {
+    switch (distributionInput.value) {
+      case "exponential": return value >= 0 ? Math.exp(-value) : 0;
+      case "normal": return Math.exp(-(value ** 2) / 2) / Math.sqrt(2 * Math.PI);
+      case "uniform": return value >= 0 && value <= 1 ? 1 : 0;
+      default: return 0;
+    }
+  }
+
+  function binomialMass(k) {
+    if (k < 0 || k > 10 || !Number.isInteger(k)) return 0;
+    let coefficient = 1;
+    for (let i = 1; i <= k; i += 1) coefficient *= (11 - i) / i;
+    return coefficient * (0.2 ** k) * (0.8 ** (10 - k));
+  }
+
+  function poissonMass(k) {
+    if (k < 0 || k > 14 || !Number.isInteger(k)) return 0;
+    let mass = Math.exp(-3);
+    for (let i = 1; i <= k; i += 1) mass *= 3 / i;
+    return mass;
+  }
+
+  function drawCurrentSample() {
+    const chart = prepareSvg("clt-current-sample");
+    const moments = populationMoments();
+    const domain = moments.domain;
+    const isDiscrete = ["binomial", "poisson"].includes(distributionInput.value);
+    const binCount = distributionInput.value === "binomial" ? 11 : distributionInput.value === "poisson" ? 15 : 16;
+    const { bins, width: binWidth } = histogram(currentSample, domain, binCount);
+    const n = currentSample.length || getSampleSize();
+    const theoreticalCounts = distributionInput.value === "binomial"
+      ? Array.from({ length: 11 }, (_, k) => n * binomialMass(k))
+      : distributionInput.value === "poisson"
+        ? Array.from({ length: 15 }, (_, k) => n * poissonMass(k))
+      : Array.from({ length: 101 }, (_, i) => n * binWidth * density(domain[0] + (i / 100) * (domain[1] - domain[0])));
+    const maximum = Math.max(...bins, ...theoreticalCounts, 1) * 1.12;
+    const { svg, width, height, margin } = chart;
+    const { x, y } = addAxes(chart, domain, maximum, "observations");
+
+    bins.forEach((count, index) => {
+      const start = domain[0] + index * binWidth;
+      svg.append(svgElement("rect", {
+        x: x(start) + 1,
+        y: y(count),
+        width: Math.max(1, x(start + binWidth) - x(start) - 2),
+        height: y(0) - y(count),
+        class: "clt-current-bar"
+      }));
+    });
+
+    if (isDiscrete) {
+      theoreticalCounts.forEach((count, k) => {
+        const pointX = x(k);
+        svg.append(svgElement("line", { x1: pointX, y1: y(0), x2: pointX, y2: y(count), class: "clt-theory-stem" }));
+        svg.append(svgElement("circle", { cx: pointX, cy: y(count), r: 3.5, class: "clt-theory-point" }));
+      });
+    } else {
+      const path = theoreticalCounts.map((count, index) => {
+        const value = domain[0] + (index / 100) * (domain[1] - domain[0]);
+        return `${index === 0 ? "M" : "L"}${x(value)},${y(count)}`;
+      }).join(" ");
+      svg.append(svgElement("path", { d: path, class: "clt-theory-curve" }));
+    }
+
+    if (!currentSample.length) {
+      addText(svg, "The theoretical population is shown in blue. Add trials to draw a sample.", width / 2, height / 2, { class: "clt-empty-message", "text-anchor": "middle" });
+      return;
+    }
+
+    const latestMean = means.at(-1);
+    const meanX = x(latestMean);
+    svg.append(svgElement("line", { x1: meanX, y1: margin.top, x2: meanX, y2: y(0), class: "clt-current-mean-line" }));
+    addText(svg, `sample mean = ${latestMean.toFixed(3)}`, Math.min(meanX + 5, width - 105), margin.top + 12, { class: "clt-annotation" });
+  }
+
+  function drawSampleMeans() {
+    const chart = prepareSvg("clt-sample-means");
+    const moments = populationMoments();
+    const n = getSampleSize();
+    const theoreticalSd = moments.sd / Math.sqrt(n);
+    const spread = Math.max(4 * theoreticalSd, 0.08 * (moments.domain[1] - moments.domain[0]));
+    const observedMin = means.length ? Math.min(...means) : moments.mean - spread;
+    const observedMax = means.length ? Math.max(...means) : moments.mean + spread;
+    const domain = [Math.min(moments.mean - spread, observedMin - 0.08 * spread), Math.max(moments.mean + spread, observedMax + 0.08 * spread)];
+    const { bins, width: binWidth } = histogram(means, domain, 28);
+    const maximum = Math.max(...bins, 1);
+    const { svg, width, margin } = chart;
+    const { x, y } = addAxes(chart, domain, maximum);
+
+    bins.forEach((count, index) => {
+      const start = domain[0] + index * binWidth;
+      svg.append(svgElement("rect", {
+        x: x(start) + 1,
+        y: y(count),
+        width: Math.max(1, x(start + binWidth) - x(start) - 2),
+        height: y(0) - y(count),
+        class: "clt-means-bar"
+      }));
+    });
+    const meanX = x(moments.mean);
+    svg.append(svgElement("line", { x1: meanX, y1: margin.top, x2: meanX, y2: y(0), class: "clt-mean-line" }));
+    addText(svg, "population mean", Math.min(meanX + 4, width - 95), margin.top + 12, { class: "clt-annotation" });
+
+    if (!means.length) {
+      addText(svg, "The sample means will appear here.", width / 2, 125, { class: "clt-empty-message", "text-anchor": "middle" });
+    }
+  }
+
+  function render() {
+    const total = getTotalTrials();
+    const completed = means.length;
+    const remaining = total - completed;
+    drawCurrentSample();
+    drawSampleMeans();
+    status.textContent = completed
+      ? `${completed} of ${total} trials completed. The most recent sample contains ${getSampleSize()} observations.`
+      : "No trials yet. Add a small batch to begin.";
+    addButton.disabled = remaining <= 0;
+    runButton.disabled = remaining <= 0;
+  }
+
+  addButton.addEventListener("click", () => addTrials(Number.parseInt(batchSizeInput.value, 10)));
+  runButton.addEventListener("click", () => addTrials(getTotalTrials() - means.length));
+  resetButton.addEventListener("click", reset);
+  [distributionInput, sampleSizeInput, totalTrialsInput].forEach(input => input.addEventListener("change", reset));
+  window.addEventListener("resize", render);
+  reset();
+})();
+</script>
