@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Mechanical Systems – MECE 4520</title>
+<title>Confidence intervals: an interactive coverage simulation – MECE 4520</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -29,23 +29,23 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-ba30dbf98e5757c4190503d6529193d5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-ba30dbf98e5757c4190503d6529193d5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -75,8 +75,37 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="styles.css">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -86,7 +115,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">⚙️</span>
     </a>
   </div>
@@ -97,11 +126,11 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./foundations/index.html"> 
+    <a class="nav-link" href="../foundations/index.html"> 
 <span class="menu-text">Foundations</span></a>
   </li>  
 </ul>
@@ -112,23 +141,21 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content column-page" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Data Science for Mechanical Systems</h1>
-<p class="subtitle lead">Columbia University · MECE 4520 · Fall 2026 · <a href="https://vergil.columbia.edu/vergil/search?term=20263&amp;course=13397">Vergil</a></p>
+<h1 class="title">Confidence intervals: an interactive coverage simulation</h1>
 </div>
 
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page">
 
     
   
@@ -139,146 +166,196 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<nav id="TOC" role="doc-toc">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#course-focus" id="toc-course-focus">Course focus</a></li>
-  <li><a href="#grading-policy" id="toc-grading-policy">Grading policy</a></li>
-  <li><a href="#syllabus" id="toc-syllabus">Syllabus</a></li>
-  </ul>
-</nav>
-<p>MECE 4520 introduces data science and machine learning through real engineering systems.</p>
-<div class="course-status">
-<ul>
-<li>Location: 717 Hamilton Hall</li>
-<li>Time: <strong>Tuesday &amp; Thursday</strong> 10:10am - 11:25am</li>
-<li>Lecturer: Changyao Chen (cc2759@columbia.edu)</li>
-<li>TAs: Mai Al Shaaban (ma5070) and Vlad Pyltsov (vp2517)</li>
-<li>Office hours: TBD</li>
-</ul>
+
+<p>This simulation uses a population we completely know: a normal distribution with population mean <span class="math inline">\(\mu = 0\)</span> and standard deviation <span class="math inline">\(\sigma = 1\)</span>. Each trial draws a new random sample, calculates its sample mean, and creates an approximate 95% confidence interval for <span class="math inline">\(\mu\)</span>.</p>
+<p>Throughout this page, <span class="math inline">\(\mu\)</span> denotes the fixed population mean (the quantity we want to learn), while <span class="math inline">\(\bar{X}\)</span> denotes the sample mean (our estimate of it).</p>
+<p>The dashed vertical line marks the true population mean. Blue intervals contain it; red intervals miss it. A 95% confidence level describes the <em>long-run behavior of this procedure</em>: across many independently constructed intervals, about 95% should contain <span class="math inline">\(\mu\)</span>. It does not guarantee that any particular interval will do so.</p>
+<p>For each sample, the simulation constructs the approximate 95% confidence interval</p>
+<p><span class="math display">\[
+\bar{X} \pm 1.96 \frac{S}{\sqrt{n}},
+\]</span></p>
+<p>where <span class="math inline">\(\bar{X}\)</span> is the sample mean, <span class="math inline">\(S\)</span> is the sample standard deviation, and <span class="math inline">\(n\)</span> is the sample size. The sample standard deviation is calculated from the same <span class="math inline">\(n\)</span> observations:</p>
+<p><span class="math display">\[
+S = \sqrt{\frac{1}{n - 1}\sum_{i=1}^{n}\left(X_i - \bar{X}\right)^2}.
+\]</span></p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
 </div>
-<p>Course materials and source files are available on <a href="https://github.com/changyaochen/MECE4520">GitHub</a>.</p>
-<section id="course-focus" class="level2">
-<h2 class="anchored" data-anchor-id="course-focus">Course focus</h2>
-<p>Rather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:</p>
-<blockquote class="blockquote">
-<p><strong>understand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems</strong></p>
-</blockquote>
-<p>Students will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data.</p>
-</section>
-<section id="grading-policy" class="level2">
-<h2 class="anchored" data-anchor-id="grading-policy">Grading policy</h2>
-<p>The course grade is based on:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: left;">Component</th>
-<th style="text-align: right;">Weight</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Homework assignments</td>
-<td style="text-align: right;">30%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">In-class quizzes</td>
-<td style="text-align: right;">30%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Final project</td>
-<td style="text-align: right;">40%</td>
-</tr>
-</tbody>
-</table>
-<p>Students should expect approximately five homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.</p>
-<section id="in-class-quizzes" class="level3">
-<h3 class="anchored" data-anchor-id="in-class-quizzes">In-class quizzes</h3>
-<p>Expect a short, time-limited quiz about once each week. At the end of the semester, your <strong>3 lowest quiz scores</strong> will be dropped.</p>
-<p>We will use Poll Everywhere for in-class quizzes. You need to sign in <a href="https://www.polleverywhere.com/auth/saml/columbia">Poll Everywhere with your Columbia UNI</a> before the first quiz.</p>
-</section>
-</section>
-<section id="syllabus" class="level2">
-<h2 class="anchored" data-anchor-id="syllabus">Syllabus</h2>
-<p>This syllabus may evolve as the Fall 2026 course is finalized.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Class dates (2026)</th>
-<th style="text-align: left;">Topic</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Before Sep.&nbsp;8</td>
-<td style="text-align: left;">Python, NumPy/Pandas, linear algebra, and probability refresher</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Sep.&nbsp;8 — asynchronous<br>Sep.&nbsp;10</td>
-<td style="text-align: left;">Course launch, Python/data foundations, engineering EDA, and measurement variability</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Sep.&nbsp;15<br>Sep.&nbsp;17 — asynchronous</td>
-<td style="text-align: left;">Simple and multiple linear regression</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Sep.&nbsp;22 &amp; 24</td>
-<td style="text-align: left;">Statistical inference for regression, prediction intervals, and regularization</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Sep.&nbsp;29 &amp; Oct.&nbsp;1</td>
-<td style="text-align: left;">Logistic regression and classification metrics</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Oct.&nbsp;6 &amp; 8</td>
-<td style="text-align: left;">Validation, leakage, grouped splits, and temporal train/test splits</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Oct.&nbsp;13 &amp; 15</td>
-<td style="text-align: left;">Decision trees, random forests, and gradient boosting</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Oct.&nbsp;20 &amp; 22</td>
-<td style="text-align: left;">PCA, dimensionality reduction, and clustering</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Oct.&nbsp;27 &amp; 29</td>
-<td style="text-align: left;">Neural networks and nonlinear function approximation</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Nov.&nbsp;3 — Election Day (no class)<br>Nov.&nbsp;5</td>
-<td style="text-align: left;">Sequential data, degradation, and optional signal processing</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Nov.&nbsp;10 &amp; 12</td>
-<td style="text-align: left;">Reinforcement-learning foundations: bandits, states, actions, rewards, and MDPs</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Nov.&nbsp;17 &amp; 19</td>
-<td style="text-align: left;">Bellman equations, dynamic programming, Q-learning, and SARSA</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Nov.&nbsp;24<br>Nov.&nbsp;26 — Thanksgiving (no class)</td>
-<td style="text-align: left;">Function approximation and deep Q-networks</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Dec.&nbsp;1 &amp; 3</td>
-<td style="text-align: left;">Policy gradients, PPO, continuous control, and RL versus classical control</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Dec.&nbsp;8 &amp; 10</td>
-<td style="text-align: left;">Final project presentations</td>
-</tr>
-</tbody>
-</table>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Try this
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Begin with a few intervals, then add more. The occasional red interval makes the meaning of “95% confidence” visible. Reset and repeat: the exact number of misses changes each time, while the long-run pattern remains near 95% coverage.</p>
+</div>
+</div>
+<div id="ci-explorer" class="ci-explorer" aria-label="Confidence interval coverage simulation">
+  <div class="ci-controls">
+    <label>
+      <span>Sample size, <i>n</i> (2–500)</span>
+      <input id="ci-sample-size" type="number" min="2" max="500" step="1" value="30" inputmode="numeric">
+    </label>
+    <label>
+      <span>Intervals to show, <i>B</i> (1–100)</span>
+      <input id="ci-total-intervals" type="number" min="1" max="100" step="1" value="100" inputmode="numeric">
+    </label>
+    <label>
+      Add intervals
+      <select id="ci-batch-size">
+        <option value="1">1</option>
+        <option value="5" selected="">5</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="ci-buttons" aria-label="Simulation controls">
+    <button id="ci-add" type="button">Add intervals</button>
+    <button id="ci-run" type="button">Run remaining intervals</button>
+    <button id="ci-reset" type="button">Reset</button>
+  </div>
+
+  <p id="ci-status" class="ci-status" aria-live="polite">No intervals yet. Add a small batch to begin.</p>
+
+  <figure class="ci-plot figure">
+    <figcaption>Confidence intervals for the population mean <span class="ci-legend"><span class="ci-legend-covered"></span>contains μ <span class="ci-legend-missed"></span>misses μ</span></figcaption>
+    <svg id="ci-interval-plot" role="img" aria-label="Repeated 95 percent confidence intervals and the true population mean"></svg>
+  </figure>
+</div>
+<p><a href="../foundations/index.html">← Return to Foundations</a></p>
+<script>
+(() => {
+  const root = document.getElementById("ci-explorer");
+  if (!root) return;
+
+  const populationMean = 0;
+  const confidenceMultiplier = 1.96;
+  const sampleSizeInput = document.getElementById("ci-sample-size");
+  const totalIntervalsInput = document.getElementById("ci-total-intervals");
+  const batchSizeInput = document.getElementById("ci-batch-size");
+  const addButton = document.getElementById("ci-add");
+  const runButton = document.getElementById("ci-run");
+  const resetButton = document.getElementById("ci-reset");
+  const status = document.getElementById("ci-status");
+  const plot = document.getElementById("ci-interval-plot");
+
+  let intervals = [];
+
+  const clamp = (value, lower, upper) => Math.max(lower, Math.min(upper, value));
+  const getSampleSize = () => clamp(Number.parseInt(sampleSizeInput.value, 10) || 30, 2, 500);
+  const getTotalIntervals = () => clamp(Number.parseInt(totalIntervalsInput.value, 10) || 100, 1, 100);
+
+  function normalRandom() {
+    const u = 1 - Math.random();
+    const v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function createInterval() {
+    const n = getSampleSize();
+    const sample = Array.from({ length: n }, normalRandom);
+    const mean = sample.reduce((sum, value) => sum + value, 0) / n;
+    const sumSquaredDeviations = sample.reduce((sum, value) => sum + (value - mean) ** 2, 0);
+    const standardError = Math.sqrt(sumSquaredDeviations / (n - 1)) / Math.sqrt(n);
+    const margin = confidenceMultiplier * standardError;
+    const lower = mean - margin;
+    const upper = mean + margin;
+    return { mean, lower, upper, containsMean: lower <= populationMean && populationMean <= upper };
+  }
+
+  function svgElement(tag, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function addText(text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    plot.append(element);
+  }
+
+  function renderPlot() {
+    const width = Math.max(320, Math.round(plot.getBoundingClientRect().width || 900));
+    const rowHeight = 6;
+    const margin = { top: 30, right: 26, bottom: 34, left: 46 };
+    const height = Math.max(250, margin.top + margin.bottom + Math.max(intervals.length, 20) * rowHeight);
+    const visibleIntervals = intervals;
+    const extremes = visibleIntervals.flatMap(interval => [interval.lower, interval.upper]);
+    const extent = extremes.length ? Math.max(0.5, ...extremes.map(value => Math.abs(value))) : 0.5;
+    const domainExtent = Math.ceil((extent + 0.08) * 2) / 2;
+    const domain = [-domainExtent, domainExtent];
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const x = value => margin.left + ((value - domain[0]) / (domain[1] - domain[0])) * plotWidth;
+    const y = index => margin.top + (index + 0.5) * (plotHeight / Math.max(visibleIntervals.length, 20));
+
+    plot.replaceChildren();
+    plot.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    plot.setAttribute("preserveAspectRatio", "none");
+    plot.append(svgElement("line", { x1: margin.left, y1: height - margin.bottom, x2: width - margin.right, y2: height - margin.bottom, class: "ci-axis" }));
+    plot.append(svgElement("line", { x1: x(populationMean), y1: margin.top, x2: x(populationMean), y2: height - margin.bottom, class: "ci-population-line" }));
+
+    for (let i = 0; i <= 4; i += 1) {
+      const value = domain[0] + (i / 4) * (domain[1] - domain[0]);
+      const tickX = x(value);
+      plot.append(svgElement("line", { x1: tickX, y1: height - margin.bottom, x2: tickX, y2: height - margin.bottom + 4, class: "ci-axis" }));
+      addText(Number(value.toFixed(1)).toString(), tickX, height - 12, { class: "ci-tick", "text-anchor": "middle" });
+    }
+    addText("true population mean, μ = 0", Math.min(x(populationMean) + 5, width - 145), 16, { class: "ci-annotation" });
+
+    visibleIntervals.forEach((interval, index) => {
+      const rowY = y(index);
+      const className = interval.containsMean ? "ci-covered" : "ci-missed";
+      plot.append(svgElement("line", { x1: x(interval.lower), y1: rowY, x2: x(interval.upper), y2: rowY, class: className }));
+      plot.append(svgElement("circle", { cx: x(interval.mean), cy: rowY, r: 2.2, class: `${className}-point` }));
+    });
+
+    if (!visibleIntervals.length) {
+      addText("Each new trial will add one 95% confidence interval here.", width / 2, height / 2, { class: "ci-empty-message", "text-anchor": "middle" });
+    }
+  }
+
+  function render() {
+    const total = getTotalIntervals();
+    const completed = intervals.length;
+    const covered = intervals.filter(interval => interval.containsMean).length;
+    const remaining = total - completed;
+    renderPlot();
+    status.textContent = completed
+      ? `${covered} of ${completed} intervals contain μ = 0 (${(100 * covered / completed).toFixed(1)}% coverage).`
+      : "No intervals yet. Add a small batch to begin.";
+    addButton.disabled = remaining <= 0;
+    runButton.disabled = remaining <= 0;
+  }
+
+  function addIntervals(requested) {
+    const total = getTotalIntervals();
+    const numberToAdd = Math.min(requested, Math.max(0, total - intervals.length));
+    for (let index = 0; index < numberToAdd; index += 1) intervals.push(createInterval());
+    render();
+  }
+
+  function reset() {
+    sampleSizeInput.value = getSampleSize();
+    totalIntervalsInput.value = getTotalIntervals();
+    intervals = [];
+    render();
+  }
+
+  addButton.addEventListener("click", () => addIntervals(Number.parseInt(batchSizeInput.value, 10)));
+  runButton.addEventListener("click", () => addIntervals(getTotalIntervals() - intervals.length));
+  resetButton.addEventListener("click", reset);
+  [sampleSizeInput, totalIntervalsInput].forEach(input => input.addEventListener("change", reset));
+  window.addEventListener("resize", render);
+  reset();
+})();
+</script>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -699,5 +776,5 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
 </body></html>

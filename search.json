@@ -28,83 +28,6 @@
     "text": "Check-in\n\nWhich simulated distribution is symmetric? Which is right-skewed?\nIn rng.normal(loc, scale, size), what does each argument control?\nGive one setting in which a uniform distribution would be a reasonable model, and one in which it would not.\n\nKeep your answers in your own notes. Bring your questions about these distributions and the CLT to class.\nReturn to the Foundations page"
   },
   {
-    "objectID": "foundations/01-course-tools.html",
-    "href": "foundations/01-course-tools.html",
-    "title": "Course tools and Python foundations",
-    "section": "",
-    "text": "This notebook introduces the small set of Python tools used throughout the course. It is not a comprehensive Python tutorial: the goal is to be comfortable loading, inspecting, selecting, filtering, and plotting engineering data.\nLearning objectives"
-  },
-  {
-    "objectID": "foundations/01-course-tools.html#import-the-python-libraries",
-    "href": "foundations/01-course-tools.html#import-the-python-libraries",
-    "title": "Course tools and Python foundations",
-    "section": "1. Import the Python libraries",
-    "text": "1. Import the Python libraries\nThe next cell demonstrates how to import a Python library.\nimport numpy as np makes the NumPy library available in this notebook. The as keyword assigns the short alias np to NumPy’s namespace, so we can write np.array(...) instead of the longer numpy.array(...). Using np is a common convention in scientific Python.\n\n# Import NumPy first: it is the numerical-array tool used in this section.\nimport numpy as np"
-  },
-  {
-    "objectID": "foundations/01-course-tools.html#numerical-arrays",
-    "href": "foundations/01-course-tools.html#numerical-arrays",
-    "title": "Course tools and Python foundations",
-    "section": "2. Numerical arrays",
-    "text": "2. Numerical arrays\nA NumPy array stores a collection of numerical values. Array operations act element-by-element, which makes calculations compact and readable.\n\n# Store repeated temperature measurements in a one-dimensional numerical array.\ntemperatures_c = np.array([15.2, 18.7, 21.4, 24.1])\n# NumPy applies this unit conversion to every element of the array at once.\ntemperatures_k = temperatures_c + 273.15\n\nprint(\"Temperatures in K:\", temperatures_k)\nprint(f\"Mean temperature: {temperatures_c.mean():.1f} °C\")\nprint(f\"Range: {temperatures_c.min():.1f}–{temperatures_c.max():.1f} °C\")\n\nTemperatures in K: [288.35 291.85 294.55 297.25]\nMean temperature: 19.9 °C\nRange: 15.2–24.1 °C\n\n\nThe array is useful for a single quantity observed repeatedly. A table with many named variables is better represented by a Pandas DataFrame.\nCompared with a native Python list, a NumPy array is designed for numerical work. It supports vectorized calculations—such as adding 273.15 to every temperature—in one clear operation, stores values efficiently, and is much faster for the large arrays used in data analysis and machine learning."
-  },
-  {
-    "objectID": "foundations/01-course-tools.html#load-the-course-dataset",
-    "href": "foundations/01-course-tools.html#load-the-course-dataset",
-    "title": "Course tools and Python foundations",
-    "section": "3. Load the course dataset",
-    "text": "3. Load the course dataset\nThe Gas Turbine CO and NOx Emissions dataset records the operation of a gas turbine between 2011 and 2015. It combines ambient conditions, turbine sensor measurements, energy yield, and two emissions outcomes: carbon monoxide (CO) and nitrogen oxides (NOx).\nEach row represents one hourly observation of the system: the measured operating and environmental conditions during that hour, together with the emissions observed at that time. This course returns to the same dataset repeatedly so that the modeling choices remain connected to a physical system.\nThe original data and documentation are available from the UCI Machine Learning Repository.\n\n# Pandas represents a table with named columns as a DataFrame.\nimport pandas as pd\nfrom pathlib import Path\nfrom urllib.request import urlretrieve\n\n# Use the committed course version so everyone analyzes the same data.\nDATA_URL = (\n    \"https://raw.githubusercontent.com/changyaochen/MECE4520/master/\"\n    \"site/data/gas-turbine-course.csv\"\n)\n# Prefer a local copy; otherwise download it when this notebook runs independently.\ndata_path = next(\n    (path for path in [\n        Path(\"../data/gas-turbine-course.csv\"),\n        Path(\"site/data/gas-turbine-course.csv\"),\n        Path(\"gas-turbine-course.csv\")]\n        if path.exists()\n    ),\n    Path(\"gas-turbine-course.csv\"),\n)\nif not data_path.exists():\n    urlretrieve(DATA_URL, data_path)\ndata = pd.read_csv(data_path)\n\n# Inspect the dataset size before selecting variables or fitting a model.\nprint(f\"Rows: {len(data):,}\")\nprint(f\"Columns: {data.shape[1]}\")\ndata.head()\n\nRows: 36,733\nColumns: 12\n\n\n\n\n\n\n\n\n\ncampaign_year\nAT\nAP\nAH\nAFDP\nGTEP\nTIT\nTAT\nTEY\nCDP\nCO\nNOX\n\n\n\n\n0\n2011\n4.5878\n1018.7\n83.675\n3.5758\n23.979\n1086.2\n549.83\n134.67\n11.898\n0.32663\n81.952\n\n\n1\n2011\n4.2932\n1018.3\n84.235\n3.5709\n23.951\n1086.1\n550.05\n134.67\n11.892\n0.44784\n82.377\n\n\n2\n2011\n3.9045\n1018.4\n84.858\n3.5828\n23.990\n1086.5\n550.19\n135.10\n12.042\n0.45144\n83.776\n\n\n3\n2011\n3.7436\n1018.3\n85.434\n3.5808\n23.911\n1086.5\n550.17\n135.03\n11.990\n0.23107\n82.505\n\n\n4\n2011\n3.7516\n1017.8\n85.182\n3.5781\n23.917\n1085.9\n550.00\n134.67\n11.910\n0.26747\n82.028\n\n\n\n\n\n\n\nA good first habit is to inspect the column names and units before modeling. This data dictionary identifies every column in the course dataset.\n\n\n\nVariable\nMeaning\n\n\n\n\nAT\nAmbient temperature (°C)\n\n\nAP\nAmbient pressure (mbar)\n\n\nAH\nAmbient humidity (%)\n\n\nAFDP\nAir filter differential pressure (mbar)\n\n\nGTEP\nGas turbine exhaust pressure (mbar)\n\n\nTIT\nTurbine inlet temperature (°C)\n\n\nTAT\nTurbine after temperature (°C)\n\n\nTEY\nTurbine energy yield (MWh)\n\n\nCDP\nCompressor discharge pressure (mbar)\n\n\nCO\nCarbon monoxide emissions (mg/m³)\n\n\nNOX\nNitrogen oxides emissions (mg/m³)"
-  },
-  {
-    "objectID": "foundations/01-course-tools.html#select-and-filter-data",
-    "href": "foundations/01-course-tools.html#select-and-filter-data",
-    "title": "Course tools and Python foundations",
-    "section": "4. Select and filter data",
-    "text": "4. Select and filter data\nData analysis often begins with two simple operations: selecting the columns (variables) relevant to a question and filtering the rows (observations) that meet a condition. The next cell demonstrates both operations on the gas-turbine data.\n\n# Select a small set of ambient, turbine, and emissions variables for inspection.\nselected = data[[\"AT\", \"TIT\", \"TEY\", \"CO\", \"NOX\"]]\n# Use the median to divide the observations into relatively warmer and cooler conditions.\nwarm_conditions = selected[selected[\"AT\"] &gt; selected[\"AT\"].median()]\n\nprint(\"Selected variables:\")\ndisplay(selected.head())\nprint(f\"Rows above the median ambient temperature: {len(warm_conditions):,}\")\nwarm_conditions.describe().loc[[\"mean\", \"std\", \"min\", \"max\"]]\n\nSelected variables:\n\n\n\n\n\n\n\n\n\nAT\nTIT\nTEY\nCO\nNOX\n\n\n\n\n0\n4.5878\n1086.2\n134.67\n0.32663\n81.952\n\n\n1\n4.2932\n1086.1\n134.67\n0.44784\n82.377\n\n\n2\n3.9045\n1086.5\n135.10\n0.45144\n83.776\n\n\n3\n3.7436\n1086.5\n135.03\n0.23107\n82.505\n\n\n4\n3.7516\n1085.9\n134.67\n0.26747\n82.028\n\n\n\n\n\n\n\nRows above the median ambient temperature: 18,365\n\n\n\n\n\n\n\n\n\nAT\nTIT\nTEY\nCO\nNOX\n\n\n\n\nmean\n24.005367\n1083.897964\n132.012501\n2.057256\n59.22925\n\n\nstd\n3.905948\n15.765051\n13.316517\n1.602460\n7.97456\n\n\nmin\n17.802000\n1024.800000\n100.040000\n0.001594\n25.90500\n\n\nmax\n37.103000\n1100.900000\n160.370000\n37.746000\n119.91000"
-  },
-  {
-    "objectID": "foundations/01-course-tools.html#make-a-first-plot",
-    "href": "foundations/01-course-tools.html#make-a-first-plot",
-    "title": "Course tools and Python foundations",
-    "section": "5. Make a first plot",
-    "text": "5. Make a first plot\nA scatter plot helps us inspect whether two variables move together. Each point below is one hourly observation. We draw only a random subset so the plot remains readable.\n\n# Import Matplotlib only when we are ready to make a figure.\nimport matplotlib.pyplot as plt\n\n# Use a readable plotting style for the exploratory figure below.\nplt.style.use(\"seaborn-v0_8-whitegrid\")\n\n# Plot a reproducible subset so overlapping points do not hide the overall pattern.\n# This is useful for large datasets.\nplot_data = data.sample(n=2_000, random_state=4520)\n\n# Each point represents one hourly turbine observation.\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.scatter(plot_data[\"TIT\"], plot_data[\"NOX\"], alpha=0.25, s=12)\nax.set(\n    xlabel=\"Turbine inlet temperature, TIT (°C)\",\n    ylabel=\"NOx emissions (mg/m³)\",\n    title=\"A first view of turbine inlet temperature and NOx emissions\",\n)\nplt.show()"
-  },
-  {
-    "objectID": "foundations/01-course-tools.html#check-in",
-    "href": "foundations/01-course-tools.html#check-in",
-    "title": "Course tools and Python foundations",
-    "section": "Check-in",
-    "text": "Check-in\n\nChange the plotting code to use AT or TEY on the horizontal axis. What pattern do you see?\nWhat is one question you would ask before interpreting this plot as a causal relationship?\nIn one sentence, explain the difference between a NumPy array and a Pandas DataFrame.\n\nKeep your answers in your own notes. We will build on this dataset in the next notebook.\nReturn to the Foundations page"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Data Science for Mechanical Systems",
-    "section": "",
-    "text": "MECE 4520 introduces data science and machine learning through real engineering systems.\nCourse materials and source files are available on GitHub."
-  },
-  {
-    "objectID": "index.html#course-focus",
-    "href": "index.html#course-focus",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Course focus",
-    "text": "Course focus\nRather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:\n\nunderstand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems\n\nStudents will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data."
-  },
-  {
-    "objectID": "index.html#grading-policy",
-    "href": "index.html#grading-policy",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Grading policy",
-    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n30%\n\n\nIn-class quizzes\n30%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately five homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.\n\nIn-class quizzes\nExpect a short, time-limited quiz about once each week. At the end of the semester, your 3 lowest quiz scores will be dropped.\nWe will use Poll Everywhere for in-class quizzes. You need to sign in Poll Everywhere with your Columbia UNI before the first quiz."
-  },
-  {
-    "objectID": "index.html#syllabus",
-    "href": "index.html#syllabus",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Syllabus",
-    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\n\n\nSep. 15Sep. 17 — asynchronous\nSimple and multiple linear regression\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\n\n\nDec. 8 & 10\nFinal project presentations"
-  },
-  {
     "objectID": "foundations/02-gas-turbine-data.html",
     "href": "foundations/02-gas-turbine-data.html",
     "title": "A first look at gas-turbine emissions data",
@@ -154,11 +77,18 @@
     "text": "Check-in\n\nWhat is one range or summary statistic that you would check for plausibility with an engineer familiar with this turbine?\nWhich variable has the most obvious association with NOx in the plots or correlation table?\nWhat operating conditions might create a relationship between two sensors even if neither directly causes the other?\nWhy might chronology matter when we later split these observations into training and test sets?\n\nKeep your answers in your own notes. The next notebook uses the same measurements to study variability and statistical evidence.\nReturn to the Foundations page"
   },
   {
+    "objectID": "foundations/05-confidence-interval-coverage.html",
+    "href": "foundations/05-confidence-interval-coverage.html",
+    "title": "Confidence intervals: an interactive coverage simulation",
+    "section": "",
+    "text": "This simulation uses a population we completely know: a normal distribution with population mean \\(\\mu = 0\\) and standard deviation \\(\\sigma = 1\\). Each trial draws a new random sample, calculates its sample mean, and creates an approximate 95% confidence interval for \\(\\mu\\).\nThroughout this page, \\(\\mu\\) denotes the fixed population mean (the quantity we want to learn), while \\(\\bar{X}\\) denotes the sample mean (our estimate of it).\nThe dashed vertical line marks the true population mean. Blue intervals contain it; red intervals miss it. A 95% confidence level describes the long-run behavior of this procedure: across many independently constructed intervals, about 95% should contain \\(\\mu\\). It does not guarantee that any particular interval will do so.\nFor each sample, the simulation constructs the approximate 95% confidence interval\n\\[\n\\bar{X} \\pm 1.96 \\frac{S}{\\sqrt{n}},\n\\]\nwhere \\(\\bar{X}\\) is the sample mean, \\(S\\) is the sample standard deviation, and \\(n\\) is the sample size. The sample standard deviation is calculated from the same \\(n\\) observations:\n\\[\nS = \\sqrt{\\frac{1}{n - 1}\\sum_{i=1}^{n}\\left(X_i - \\bar{X}\\right)^2}.\n\\]\n\n\n\n\n\n\nTipTry this\n\n\n\nBegin with a few intervals, then add more. The occasional red interval makes the meaning of “95% confidence” visible. Reset and repeat: the exact number of misses changes each time, while the long-run pattern remains near 95% coverage.\n\n\n\n  \n    \n      Sample size, n (2–500)\n      \n    \n    \n      Intervals to show, B (1–100)\n      \n    \n    \n      Add intervals\n      \n        1\n        5\n        10\n        20\n      \n    \n  \n\n  \n    Add intervals\n    Run remaining intervals\n    Reset\n  \n\n  No intervals yet. Add a small batch to begin.\n\n  \n    Confidence intervals for the population mean contains μ misses μ\n    \n  \n\n← Return to Foundations"
+  },
+  {
     "objectID": "foundations/index.html",
     "href": "foundations/index.html",
     "title": "Foundations: Getting started with engineering data",
     "section": "",
-    "text": "These materials establish the shared computational and statistical vocabulary used throughout MECE 4520, using the course’s recurring gas-turbine emissions dataset. Complete them in order before beginning the course’s main modules. Plan for approximately 2.5–3 hours in total.\nWe highly recommend working with Google Colab. This allows you to run the notebooks in the cloud without tedious local setup. At the end of each notebook, there is a “Check-in” section that encourages you to try out what you’ve learned.\nThe notebooks use the course version of the gas-turbine dataset. It retains the original measurements while adding a campaign_year field and documented missing values for later data-pipeline exercises. If opened independently in a fresh environment, they download that same course version from this repository."
+    "text": "These materials establish the shared computational and statistical vocabulary used throughout MECE 4520, using the course’s recurring gas-turbine emissions dataset. Complete the first three notebooks in order before beginning the course’s main modules; plan for approximately 2.5–3 hours in total. The CLT interactive is a companion to the first in-class discussion and can be revisited as needed.\nWe highly recommend working with Google Colab. This allows you to run the notebooks in the cloud without tedious local setup. At the end of each notebook, there is a “Check-in” section that encourages you to try out what you’ve learned.\nThe notebooks use the course version of the gas-turbine dataset. It retains the original measurements while adding a campaign_year field and documented missing values for later data-pipeline exercises. If opened independently in a fresh environment, they download that same course version from this repository."
   },
   {
     "objectID": "foundations/index.html#course-tools-and-python-foundations",
@@ -182,10 +112,157 @@
     "text": "3. Probability distributions and simulation\nEstimated time: 45–60 minutes\nPractice drawing and visualizing simulated normal, uniform, and exponential data, and connect their shapes to familiar and engineering situations.\nView the notebook"
   },
   {
+    "objectID": "foundations/index.html#central-limit-theorem-interactive-simulation-and-notebook",
+    "href": "foundations/index.html#central-limit-theorem-interactive-simulation-and-notebook",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "4. Central Limit Theorem: interactive simulation and notebook",
+    "text": "4. Central Limit Theorem: interactive simulation and notebook\nEstimated time: 20–30 minutes\nBuild a distribution of sample means one batch at a time, then see how the sample size changes its shape and spread. The interactive and companion notebook accompany the first in-class discussion of the central limit theorem.\nInteractive simulation\nView the notebook"
+  },
+  {
+    "objectID": "foundations/index.html#confidence-intervals-interactive-coverage-simulation",
+    "href": "foundations/index.html#confidence-intervals-interactive-coverage-simulation",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "5. Confidence intervals: interactive coverage simulation",
+    "text": "5. Confidence intervals: interactive coverage simulation\nEstimated time: 10–15 minutes\nRepeatedly draw samples from a known normal population and construct a 95% confidence interval for each. See why 95% refers to the long-run coverage of the procedure, rather than a guarantee for one interval.\nInteractive simulation"
+  },
+  {
     "objectID": "foundations/index.html#dataset-source",
     "href": "foundations/index.html#dataset-source",
     "title": "Foundations: Getting started with engineering data",
     "section": "Dataset source",
     "text": "Dataset source\nThe underlying measurements come from the Gas Turbine CO and NOx Emissions dataset at the UCI Machine Learning Repository. The source data contain 36,733 hourly measurements from a gas turbine collected between 2011 and 2015 and are made available under the CC BY 4.0 license. The clean UCI files are not stored in this repository."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Data Science for Mechanical Systems",
+    "section": "",
+    "text": "MECE 4520 introduces data science and machine learning through real engineering systems.\nCourse materials and source files are available on GitHub."
+  },
+  {
+    "objectID": "index.html#course-focus",
+    "href": "index.html#course-focus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Course focus",
+    "text": "Course focus\nRather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:\n\nunderstand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems\n\nStudents will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data."
+  },
+  {
+    "objectID": "index.html#grading-policy",
+    "href": "index.html#grading-policy",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Grading policy",
+    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n30%\n\n\nIn-class quizzes\n30%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately five homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.\n\nIn-class quizzes\nExpect a short, time-limited quiz about once each week. At the end of the semester, your 3 lowest quiz scores will be dropped.\nWe will use Poll Everywhere for in-class quizzes. You need to sign in Poll Everywhere with your Columbia UNI before the first quiz."
+  },
+  {
+    "objectID": "index.html#syllabus",
+    "href": "index.html#syllabus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Syllabus",
+    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\n\n\nSep. 15Sep. 17 — asynchronous\nSimple and multiple linear regression\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\n\n\nDec. 8 & 10\nFinal project presentations"
+  },
+  {
+    "objectID": "foundations/04-central-limit-theorem-notebook.html",
+    "href": "foundations/04-central-limit-theorem-notebook.html",
+    "title": "Central Limit Theorem: simulation in Python",
+    "section": "",
+    "text": "The central limit theorem (CLT) explains a surprising pattern: even when individual observations are skewed or discrete, the sample mean often has an approximately normal distribution when the sample size is sufficiently large.\nThis notebook uses NumPy simulations to make that pattern visible. It is a companion to the browser interactive and is designed to run directly in Google Colab."
+  },
+  {
+    "objectID": "foundations/04-central-limit-theorem-notebook.html#learning-objectives",
+    "href": "foundations/04-central-limit-theorem-notebook.html#learning-objectives",
+    "title": "Central Limit Theorem: simulation in Python",
+    "section": "Learning objectives",
+    "text": "Learning objectives\nBy the end of this notebook, you should be able to:\n\ndistinguish one observation, one sample, and a sample mean;\nsimulate repeated samples from a population;\nbuild the distribution of sample means; and\nexplain why increasing the sample size changes that distribution, while increasing the number of trials only reveals it more clearly.\n\n\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nrng = np.random.default_rng(seed=4520)"
+  },
+  {
+    "objectID": "foundations/04-central-limit-theorem-notebook.html#one-population-many-samples",
+    "href": "foundations/04-central-limit-theorem-notebook.html#one-population-many-samples",
+    "title": "Central Limit Theorem: simulation in Python",
+    "section": "1. One population, many samples",
+    "text": "1. One population, many samples\nSuppose a population produces observations denoted by \\(X\\). A sample contains \\(n\\) independent observations from that population. Its sample mean is\n\\[\\bar{x} = \\frac{1}{n} \\sum_{i=1}^{n} x_i.\\]\nTo study how \\(\\bar{x}\\) varies, we repeat the whole sampling process \\(B\\) times. This gives us \\(B\\) sample means.\n\ndef simulate_sample_means(draw_observations, sample_size, trials, rng):\n    \"\"\"Draw `trials` samples and return the samples and their means.\"\"\"\n    samples = draw_observations(rng, size=(trials, sample_size))\n    means = samples.mean(axis=1)\n    return samples, means\n\n\ndef show_clt_experiment(draw_observations, sample_size, trials, rng, title):\n    \"\"\"Plot the population, one sample, and all simulated sample means.\"\"\"\n    population_preview = draw_observations(rng, size=10_000)\n    samples, means = simulate_sample_means(\n        draw_observations, sample_size=sample_size, trials=trials, rng=rng\n    )\n\n    fig, axes = plt.subplots(1, 3, figsize=(15, 3.8), constrained_layout=True)\n    axes[0].hist(population_preview, bins=35, color=\"#70a5c8\", edgecolor=\"white\")\n    axes[0].set(title=\"Population preview\", ylabel=\"Count\")\n\n    axes[1].hist(samples[0], bins=16, color=\"#d77732\", edgecolor=\"white\")\n    axes[1].axvline(samples[0].mean(), color=\"#b65420\", linestyle=\"--\", label=\"sample mean\")\n    axes[1].set(title=f\"One sample (n = {sample_size})\")\n    axes[1].legend()\n\n    axes[2].hist(means, bins=30, color=\"#457eaa\", edgecolor=\"white\")\n    axes[2].axvline(means.mean(), color=\"#355766\", linestyle=\"--\", label=\"mean of sample means\")\n    axes[2].set(title=f\"Distribution of {trials} sample means\")\n    axes[2].legend()\n\n    fig.suptitle(title, fontsize=14)\n    plt.show()\n    return means"
+  },
+  {
+    "objectID": "foundations/04-central-limit-theorem-notebook.html#a-right-skewed-population-exponential-observations",
+    "href": "foundations/04-central-limit-theorem-notebook.html#a-right-skewed-population-exponential-observations",
+    "title": "Central Limit Theorem: simulation in Python",
+    "section": "2. A right-skewed population: exponential observations",
+    "text": "2. A right-skewed population: exponential observations\nAn exponential distribution can model a waiting time under a simple constant-rate assumption—for example, the time until the next event in a process. It is strongly right-skewed, so it is a useful CLT example.\nStart with \\(n=1\\). In this case, every sample mean is just one observation, so the rightmost plot should look much like the population.\n\ndraw_exponential = lambda rng, size: rng.exponential(scale=1, size=size)\n\nmeans_n1 = show_clt_experiment(\n    draw_exponential, sample_size=1, trials=500, rng=rng,\n    title=\"Exponential population with sample size n = 1\"\n)\n\n\n\n\n\n\n\n\nNow increase the sample size to \\(n=30\\). The individual observations are still exponential, but each point in the rightmost plot is now an average of 30 independent observations.\n\nmeans_n30 = show_clt_experiment(\n    draw_exponential, sample_size=30, trials=500, rng=rng,\n    title=\"Exponential population with sample size n = 30\"\n)"
+  },
+  {
+    "objectID": "foundations/04-central-limit-theorem-notebook.html#change-the-sample-size-not-the-population",
+    "href": "foundations/04-central-limit-theorem-notebook.html#change-the-sample-size-not-the-population",
+    "title": "Central Limit Theorem: simulation in Python",
+    "section": "3. Change the sample size, not the population",
+    "text": "3. Change the sample size, not the population\nThe CLT predicts that the distribution of sample means becomes narrower as \\(n\\) grows. The standard deviation of the sample mean is called the standard error; under the usual independent-sampling assumption, it decreases in proportion to \\(1 / \\sqrt{n}\\).\n\nsample_sizes = [1, 5, 30, 100]\ntrials = 1_000\n\nfig, axes = plt.subplots(1, len(sample_sizes), figsize=(15, 3.5), sharey=True, constrained_layout=True)\nfor ax, sample_size in zip(axes, sample_sizes):\n    _, means = simulate_sample_means(draw_exponential, sample_size, trials, rng)\n    ax.hist(means, bins=30, color=\"#457eaa\", edgecolor=\"white\")\n    ax.axvline(1, color=\"#355766\", linestyle=\"--\")\n    ax.set(title=f\"n = {sample_size}\", xlabel=\"sample mean\")\naxes[0].set_ylabel(\"Count\")\nfig.suptitle(\"Exponential population: larger samples give tighter sample means\", fontsize=14)\nplt.show()"
+  },
+  {
+    "objectID": "foundations/04-central-limit-theorem-notebook.html#a-discrete-population-poisson-counts",
+    "href": "foundations/04-central-limit-theorem-notebook.html#a-discrete-population-poisson-counts",
+    "title": "Central Limit Theorem: simulation in Python",
+    "section": "4. A discrete population: Poisson counts",
+    "text": "4. A discrete population: Poisson counts\nThe CLT does not require continuous observations. A Poisson distribution models a count of events in a fixed interval—for example, the number of detected defects or arrivals during a production interval. Here the population is discrete, but averages of repeated samples can still be approximately normal.\n\ndraw_poisson = lambda rng, size: rng.poisson(lam=3, size=size)\n\npoisson_means = show_clt_experiment(\n    draw_poisson, sample_size=30, trials=500, rng=rng,\n    title=\"Poisson population (λ = 3) with sample size n = 30\"\n)"
+  },
+  {
+    "objectID": "foundations/04-central-limit-theorem-notebook.html#check-in",
+    "href": "foundations/04-central-limit-theorem-notebook.html#check-in",
+    "title": "Central Limit Theorem: simulation in Python",
+    "section": "Check-in",
+    "text": "Check-in\n\nKeep the exponential population and set sample_size=100. How does the spread of the sample means compare with sample_size=30?\nKeep sample_size=30, but increase trials from 500 to 2,000. Does this change the spread of a sample mean, or only how clearly you see its distribution?\nReplace the Poisson draw function with rng.binomial(n=10, p=0.2, size=size). What does the distribution of sample means look like?\n\n\n# Try one modification at a time.\n# means_n100 = show_clt_experiment(\n#     draw_exponential, sample_size=100, trials=500, rng=rng,\n#     title=\"Exponential population with sample size n = 100\"\n# )\n\n# draw_binomial = lambda rng, size: rng.binomial(n=10, p=0.2, size=size)\n# binomial_means = show_clt_experiment(\n#     draw_binomial, sample_size=30, trials=500, rng=rng,\n#     title=\"Binomial population with sample size n = 30\"\n# )\n\n# Return to the Foundations page when you are finished.\n\n← Return to Foundations"
+  },
+  {
+    "objectID": "foundations/04-central-limit-theorem.html",
+    "href": "foundations/04-central-limit-theorem.html",
+    "title": "Central Limit Theorem: an interactive simulation",
+    "section": "",
+    "text": "The central limit theorem (CLT) concerns the sample mean, not the shape of the individual observations. Use the controls below to draw many independent samples from one population. Each trial contributes one sample mean to the plot on the right.\n\n\n\n\n\n\nTipWhat to compare\n\n\n\nKeep the distribution and number of trials fixed, then increase the sample size. The distribution of sample means should become narrower and more nearly bell-shaped. In contrast, increasing the number of trials only gives a clearer view of that same sampling distribution.\n\n\n\n  \n    \n      Underlying distribution\n      \n        Uniform (0, 1)\n        Binomial (10, 0.2)\n        Poisson (λ = 3)\n        Exponential (mean 1)\n        Normal (0, 1)\n      \n    \n    \n      Sample size, n (1–1,000)\n      \n    \n    \n      Total trials, B (1–2,000)\n      \n    \n    \n      Add trials\n      \n        1\n        5\n        10\n        25\n        50\n      \n    \n  \n\n  \n    Add trials\n    Run remaining trials\n    Reset\n  \n\n  No trials yet. Add a small batch to begin.\n\n  \n    \n      Most recent sample observations theoretical population\n      \n    \n    \n      Distribution of sample means\n      \n    \n  \n\n← Return to Foundations"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html",
+    "href": "foundations/01-course-tools.html",
+    "title": "Course tools and Python foundations",
+    "section": "",
+    "text": "This notebook introduces the small set of Python tools used throughout the course. It is not a comprehensive Python tutorial: the goal is to be comfortable loading, inspecting, selecting, filtering, and plotting engineering data.\nLearning objectives"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#import-the-python-libraries",
+    "href": "foundations/01-course-tools.html#import-the-python-libraries",
+    "title": "Course tools and Python foundations",
+    "section": "1. Import the Python libraries",
+    "text": "1. Import the Python libraries\nThe next cell demonstrates how to import a Python library.\nimport numpy as np makes the NumPy library available in this notebook. The as keyword assigns the short alias np to NumPy’s namespace, so we can write np.array(...) instead of the longer numpy.array(...). Using np is a common convention in scientific Python.\n\n# Import NumPy first: it is the numerical-array tool used in this section.\nimport numpy as np"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#numerical-arrays",
+    "href": "foundations/01-course-tools.html#numerical-arrays",
+    "title": "Course tools and Python foundations",
+    "section": "2. Numerical arrays",
+    "text": "2. Numerical arrays\nA NumPy array stores a collection of numerical values. Array operations act element-by-element, which makes calculations compact and readable.\n\n# Store repeated temperature measurements in a one-dimensional numerical array.\ntemperatures_c = np.array([15.2, 18.7, 21.4, 24.1])\n# NumPy applies this unit conversion to every element of the array at once.\ntemperatures_k = temperatures_c + 273.15\n\nprint(\"Temperatures in K:\", temperatures_k)\nprint(f\"Mean temperature: {temperatures_c.mean():.1f} °C\")\nprint(f\"Range: {temperatures_c.min():.1f}–{temperatures_c.max():.1f} °C\")\n\nTemperatures in K: [288.35 291.85 294.55 297.25]\nMean temperature: 19.9 °C\nRange: 15.2–24.1 °C\n\n\nThe array is useful for a single quantity observed repeatedly. A table with many named variables is better represented by a Pandas DataFrame.\nCompared with a native Python list, a NumPy array is designed for numerical work. It supports vectorized calculations—such as adding 273.15 to every temperature—in one clear operation, stores values efficiently, and is much faster for the large arrays used in data analysis and machine learning."
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#load-the-course-dataset",
+    "href": "foundations/01-course-tools.html#load-the-course-dataset",
+    "title": "Course tools and Python foundations",
+    "section": "3. Load the course dataset",
+    "text": "3. Load the course dataset\nThe Gas Turbine CO and NOx Emissions dataset records the operation of a gas turbine between 2011 and 2015. It combines ambient conditions, turbine sensor measurements, energy yield, and two emissions outcomes: carbon monoxide (CO) and nitrogen oxides (NOx).\nEach row represents one hourly observation of the system: the measured operating and environmental conditions during that hour, together with the emissions observed at that time. This course returns to the same dataset repeatedly so that the modeling choices remain connected to a physical system.\nThe original data and documentation are available from the UCI Machine Learning Repository.\n\n# Pandas represents a table with named columns as a DataFrame.\nimport pandas as pd\nfrom pathlib import Path\nfrom urllib.request import urlretrieve\n\n# Use the committed course version so everyone analyzes the same data.\nDATA_URL = (\n    \"https://raw.githubusercontent.com/changyaochen/MECE4520/master/\"\n    \"site/data/gas-turbine-course.csv\"\n)\n# Prefer a local copy; otherwise download it when this notebook runs independently.\ndata_path = next(\n    (path for path in [\n        Path(\"../data/gas-turbine-course.csv\"),\n        Path(\"site/data/gas-turbine-course.csv\"),\n        Path(\"gas-turbine-course.csv\")]\n        if path.exists()\n    ),\n    Path(\"gas-turbine-course.csv\"),\n)\nif not data_path.exists():\n    urlretrieve(DATA_URL, data_path)\ndata = pd.read_csv(data_path)\n\n# Inspect the dataset size before selecting variables or fitting a model.\nprint(f\"Rows: {len(data):,}\")\nprint(f\"Columns: {data.shape[1]}\")\ndata.head()\n\nRows: 36,733\nColumns: 12\n\n\n\n\n\n\n\n\n\ncampaign_year\nAT\nAP\nAH\nAFDP\nGTEP\nTIT\nTAT\nTEY\nCDP\nCO\nNOX\n\n\n\n\n0\n2011\n4.5878\n1018.7\n83.675\n3.5758\n23.979\n1086.2\n549.83\n134.67\n11.898\n0.32663\n81.952\n\n\n1\n2011\n4.2932\n1018.3\n84.235\n3.5709\n23.951\n1086.1\n550.05\n134.67\n11.892\n0.44784\n82.377\n\n\n2\n2011\n3.9045\n1018.4\n84.858\n3.5828\n23.990\n1086.5\n550.19\n135.10\n12.042\n0.45144\n83.776\n\n\n3\n2011\n3.7436\n1018.3\n85.434\n3.5808\n23.911\n1086.5\n550.17\n135.03\n11.990\n0.23107\n82.505\n\n\n4\n2011\n3.7516\n1017.8\n85.182\n3.5781\n23.917\n1085.9\n550.00\n134.67\n11.910\n0.26747\n82.028\n\n\n\n\n\n\n\nA good first habit is to inspect the column names and units before modeling. This data dictionary identifies every column in the course dataset.\n\n\n\nVariable\nMeaning\n\n\n\n\nAT\nAmbient temperature (°C)\n\n\nAP\nAmbient pressure (mbar)\n\n\nAH\nAmbient humidity (%)\n\n\nAFDP\nAir filter differential pressure (mbar)\n\n\nGTEP\nGas turbine exhaust pressure (mbar)\n\n\nTIT\nTurbine inlet temperature (°C)\n\n\nTAT\nTurbine after temperature (°C)\n\n\nTEY\nTurbine energy yield (MWh)\n\n\nCDP\nCompressor discharge pressure (mbar)\n\n\nCO\nCarbon monoxide emissions (mg/m³)\n\n\nNOX\nNitrogen oxides emissions (mg/m³)"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#select-and-filter-data",
+    "href": "foundations/01-course-tools.html#select-and-filter-data",
+    "title": "Course tools and Python foundations",
+    "section": "4. Select and filter data",
+    "text": "4. Select and filter data\nData analysis often begins with two simple operations: selecting the columns (variables) relevant to a question and filtering the rows (observations) that meet a condition. The next cell demonstrates both operations on the gas-turbine data.\n\n# Select a small set of ambient, turbine, and emissions variables for inspection.\nselected = data[[\"AT\", \"TIT\", \"TEY\", \"CO\", \"NOX\"]]\n# Use the median to divide the observations into relatively warmer and cooler conditions.\nwarm_conditions = selected[selected[\"AT\"] &gt; selected[\"AT\"].median()]\n\nprint(\"Selected variables:\")\ndisplay(selected.head())\nprint(f\"Rows above the median ambient temperature: {len(warm_conditions):,}\")\nwarm_conditions.describe().loc[[\"mean\", \"std\", \"min\", \"max\"]]\n\nSelected variables:\n\n\n\n\n\n\n\n\n\nAT\nTIT\nTEY\nCO\nNOX\n\n\n\n\n0\n4.5878\n1086.2\n134.67\n0.32663\n81.952\n\n\n1\n4.2932\n1086.1\n134.67\n0.44784\n82.377\n\n\n2\n3.9045\n1086.5\n135.10\n0.45144\n83.776\n\n\n3\n3.7436\n1086.5\n135.03\n0.23107\n82.505\n\n\n4\n3.7516\n1085.9\n134.67\n0.26747\n82.028\n\n\n\n\n\n\n\nRows above the median ambient temperature: 18,365\n\n\n\n\n\n\n\n\n\nAT\nTIT\nTEY\nCO\nNOX\n\n\n\n\nmean\n24.005367\n1083.897964\n132.012501\n2.057256\n59.22925\n\n\nstd\n3.905948\n15.765051\n13.316517\n1.602460\n7.97456\n\n\nmin\n17.802000\n1024.800000\n100.040000\n0.001594\n25.90500\n\n\nmax\n37.103000\n1100.900000\n160.370000\n37.746000\n119.91000"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#make-a-first-plot",
+    "href": "foundations/01-course-tools.html#make-a-first-plot",
+    "title": "Course tools and Python foundations",
+    "section": "5. Make a first plot",
+    "text": "5. Make a first plot\nA scatter plot helps us inspect whether two variables move together. Each point below is one hourly observation. We draw only a random subset so the plot remains readable.\n\n# Import Matplotlib only when we are ready to make a figure.\nimport matplotlib.pyplot as plt\n\n# Use a readable plotting style for the exploratory figure below.\nplt.style.use(\"seaborn-v0_8-whitegrid\")\n\n# Plot a reproducible subset so overlapping points do not hide the overall pattern.\n# This is useful for large datasets.\nplot_data = data.sample(n=2_000, random_state=4520)\n\n# Each point represents one hourly turbine observation.\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.scatter(plot_data[\"TIT\"], plot_data[\"NOX\"], alpha=0.25, s=12)\nax.set(\n    xlabel=\"Turbine inlet temperature, TIT (°C)\",\n    ylabel=\"NOx emissions (mg/m³)\",\n    title=\"A first view of turbine inlet temperature and NOx emissions\",\n)\nplt.show()"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#check-in",
+    "href": "foundations/01-course-tools.html#check-in",
+    "title": "Course tools and Python foundations",
+    "section": "Check-in",
+    "text": "Check-in\n\nChange the plotting code to use AT or TEY on the horizontal axis. What pattern do you see?\nWhat is one question you would ask before interpreting this plot as a causal relationship?\nIn one sentence, explain the difference between a NumPy array and a Pandas DataFrame.\n\nKeep your answers in your own notes. We will build on this dataset in the next notebook.\nReturn to the Foundations page"
   }
 ]

@@ -45,7 +45,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-ab54b746ce990a9bed7a755e4ce4e940.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-ba30dbf98e5757c4190503d6529193d5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -145,10 +145,12 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#course-tools-and-python-foundations" id="toc-course-tools-and-python-foundations">1. Course tools and Python foundations</a></li>
   <li><a href="#a-first-look-at-gas-turbine-emissions-data" id="toc-a-first-look-at-gas-turbine-emissions-data">2. A first look at gas-turbine emissions data</a></li>
   <li><a href="#probability-distributions-and-simulation" id="toc-probability-distributions-and-simulation">3. Probability distributions and simulation</a></li>
+  <li><a href="#central-limit-theorem-interactive-simulation-and-notebook" id="toc-central-limit-theorem-interactive-simulation-and-notebook">4. Central Limit Theorem: interactive simulation and notebook</a></li>
+  <li><a href="#confidence-intervals-interactive-coverage-simulation" id="toc-confidence-intervals-interactive-coverage-simulation">5. Confidence intervals: interactive coverage simulation</a></li>
   <li><a href="#dataset-source" id="toc-dataset-source">Dataset source</a></li>
   </ul>
 </nav>
-<p>These materials establish the shared computational and statistical vocabulary used throughout MECE 4520, using the course’s recurring gas-turbine emissions dataset. Complete them in order before beginning the course’s main modules. Plan for approximately 2.5–3 hours in total.</p>
+<p>These materials establish the shared computational and statistical vocabulary used throughout MECE 4520, using the course’s recurring gas-turbine emissions dataset. Complete the first three notebooks in order before beginning the course’s main modules; plan for approximately 2.5–3 hours in total. The CLT interactive is a companion to the first in-class discussion and can be revisited as needed.</p>
 <p>We highly recommend working with Google Colab. This allows you to run the notebooks in the cloud without tedious local setup. At the end of each notebook, there is a “Check-in” section that encourages you to try out what you’ve learned.</p>
 <p>The notebooks use the course version of the gas-turbine dataset. It retains the original measurements while adding a <code>campaign_year</code> field and documented missing values for later data-pipeline exercises. If opened independently in a fresh environment, they download that same course version from this repository.</p>
 <section id="course-tools-and-python-foundations" class="level2">
@@ -168,6 +170,19 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Estimated time:</strong> 45–60 minutes</p>
 <p>Practice drawing and visualizing simulated normal, uniform, and exponential data, and connect their shapes to familiar and engineering situations.</p>
 <p><a href="../foundations/03-variability-and-inference.html">View the notebook</a></p>
+</section>
+<section id="central-limit-theorem-interactive-simulation-and-notebook" class="level2">
+<h2 class="anchored" data-anchor-id="central-limit-theorem-interactive-simulation-and-notebook">4. Central Limit Theorem: interactive simulation and notebook</h2>
+<p><strong>Estimated time:</strong> 20–30 minutes</p>
+<p>Build a distribution of sample means one batch at a time, then see how the sample size changes its shape and spread. The interactive and companion notebook accompany the first in-class discussion of the central limit theorem.</p>
+<p><a href="../foundations/04-central-limit-theorem.html">Interactive simulation</a></p>
+<p><a href="../foundations/04-central-limit-theorem-notebook.html">View the notebook</a></p>
+</section>
+<section id="confidence-intervals-interactive-coverage-simulation" class="level2">
+<h2 class="anchored" data-anchor-id="confidence-intervals-interactive-coverage-simulation">5. Confidence intervals: interactive coverage simulation</h2>
+<p><strong>Estimated time:</strong> 10–15 minutes</p>
+<p>Repeatedly draw samples from a known normal population and construct a 95% confidence interval for each. See why 95% refers to the long-run coverage of the procedure, rather than a guarantee for one interval.</p>
+<p><a href="../foundations/05-confidence-interval-coverage.html">Interactive simulation</a></p>
 </section>
 <section id="dataset-source" class="level2">
 <h2 class="anchored" data-anchor-id="dataset-source">Dataset source</h2>
