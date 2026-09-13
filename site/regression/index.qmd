@@ -1,0 +1,30 @@
+---
+title: "Regression"
+---
+
+These materials introduce regression as a way to translate an observed
+engineering relationship into a quantitative prediction. We continue to use
+the course gas-turbine emissions dataset, beginning with a single, interpretable
+question before adding the complications of multiple predictors and model
+validation.
+
+We highly recommend working with Google Colab. It lets you run the notebooks
+in the cloud without local setup.
+
+## 1. A first linear regression: weather and NOx
+
+**Estimated time:** 45–60 minutes
+
+Use ambient temperature to predict NOx concentration, fit a least-squares
+line, and distinguish a statistically significant association from a causal
+claim or a complete engineering model.
+
+[View the notebook](01-weather-and-nox.ipynb)
+
+## Dataset source
+
+The underlying measurements come from the [Gas Turbine CO and NOx Emissions
+dataset](https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set)
+at the UCI Machine Learning Repository. The course version adds a
+`campaign_year` field and documented missing values for later data-pipeline
+exercises.
