@@ -12,13 +12,19 @@ website:
         text: Home
       - href: foundations/index.qmd
         text: Foundations
+      - href: regression/index.qmd
+        text: Regression
   page-footer:
     left: "MECE 4520 · Data Science for Mechanical Systems"
     right: "Fall 2026"
 
 format:
   html:
-    theme: materia
+    theme:
+      light: materia
+      dark: darkly
+    syntax-highlighting: arrow
+    respect-user-color-scheme: true
     css: styles.css
     toc: true
     toc-location: body
