@@ -1,35 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://changyaochen.github.io/MECE4520/regression/01-simple-linear-regression.html</loc>
+    <lastmod>2026-09-15T01:42:39.660Z</lastmod>
+  </url>
+  <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/03-variability-and-inference.html</loc>
-    <lastmod>2026-09-10T02:16:17.036Z</lastmod>
+    <lastmod>2026-09-15T01:42:39.652Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/02-gas-turbine-data.html</loc>
-    <lastmod>2026-09-10T02:16:17.035Z</lastmod>
+    <lastmod>2026-09-15T01:42:39.652Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/05-confidence-interval-coverage.html</loc>
-    <lastmod>2026-09-10T02:16:17.037Z</lastmod>
+    <lastmod>2026-09-15T01:42:39.654Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/index.html</loc>
-    <lastmod>2026-09-10T02:16:17.037Z</lastmod>
+    <lastmod>2026-09-15T01:42:39.654Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/index.html</loc>
-    <lastmod>2026-09-10T02:16:17.037Z</lastmod>
+    <lastmod>2026-09-15T01:42:39.654Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/04-central-limit-theorem-notebook.html</loc>
-    <lastmod>2026-09-10T02:16:17.037Z</lastmod>
+    <lastmod>2026-09-15T01:42:39.654Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/04-central-limit-theorem.html</loc>
-    <lastmod>2026-09-10T02:16:17.037Z</lastmod>
+    <lastmod>2026-09-15T01:42:39.654Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/01-course-tools.html</loc>
-    <lastmod>2026-09-10T02:16:17.033Z</lastmod>
+    <lastmod>2026-09-15T01:42:39.650Z</lastmod>
+  </url>
+  <url>
+    <loc>https://changyaochen.github.io/MECE4520/regression/index.html</loc>
+    <lastmod>2026-09-15T01:42:39.660Z</lastmod>
   </url>
 </urlset>

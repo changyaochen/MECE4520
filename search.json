@@ -1,5 +1,82 @@
 [
   {
+    "objectID": "regression/01-simple-linear-regression.html",
+    "href": "regression/01-simple-linear-regression.html",
+    "title": "A first linear regression: weather and NOx",
+    "section": "",
+    "text": "A gas-turbine operator cannot choose tomorrow’s weather, but they can observe a weather forecast before deciding how to schedule the plant. This notebook asks a deliberately simple question:\nThe goal is to build and diagnose a first regression model. It is not a complete physical model of the turbine, and it does not tell us what would happen if we intervened to change ambient temperature.\nLearning objectives"
+  },
+  {
+    "objectID": "regression/01-simple-linear-regression.html#load-the-course-dataset",
+    "href": "regression/01-simple-linear-regression.html#load-the-course-dataset",
+    "title": "A first linear regression: weather and NOx",
+    "section": "1. Load the course dataset",
+    "text": "1. Load the course dataset\nThe Foundations notebooks introduced this hourly gas-turbine dataset. We repeat the setup here so the notebook runs independently in Colab. Each row is an hourly aggregate of plant measurements.\n\nimport numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nimport statsmodels.api as sm\nfrom pathlib import Path\nfrom urllib.request import urlretrieve\n\nplt.style.use(\"seaborn-v0_8-whitegrid\")\nDATA_URL = \"https://raw.githubusercontent.com/changyaochen/MECE4520/master/site/data/gas-turbine-course.csv\"\ndata_path = next((path for path in [Path(\"../data/gas-turbine-course.csv\"), Path(\"site/data/gas-turbine-course.csv\"), Path(\"gas-turbine-course.csv\")] if path.exists()), Path(\"gas-turbine-course.csv\"))\nif not data_path.exists():\n    urlretrieve(DATA_URL, data_path)\ndata = pd.read_csv(data_path)\ndata.head()\n\n\n\n\n\n\n\n\ncampaign_year\nAT\nAP\nAH\nAFDP\nGTEP\nTIT\nTAT\nTEY\nCDP\nCO\nNOX\n\n\n\n\n0\n2011\n4.5878\n1018.7\n83.675\n3.5758\n23.979\n1086.2\n549.83\n134.67\n11.898\n0.32663\n81.952\n\n\n1\n2011\n4.2932\n1018.3\n84.235\n3.5709\n23.951\n1086.1\n550.05\n134.67\n11.892\n0.44784\n82.377\n\n\n2\n2011\n3.9045\n1018.4\n84.858\n3.5828\n23.990\n1086.5\n550.19\n135.10\n12.042\n0.45144\n83.776\n\n\n3\n2011\n3.7436\n1018.3\n85.434\n3.5808\n23.911\n1086.5\n550.17\n135.03\n11.990\n0.23107\n82.505\n\n\n4\n2011\n3.7516\n1017.8\n85.182\n3.5781\n23.917\n1085.9\n550.00\n134.67\n11.910\n0.26747\n82.028"
+  },
+  {
+    "objectID": "regression/01-simple-linear-regression.html#understand-the-measurements",
+    "href": "regression/01-simple-linear-regression.html#understand-the-measurements",
+    "title": "A first linear regression: weather and NOx",
+    "section": "2. Understand the measurements",
+    "text": "2. Understand the measurements\nBefore focusing on one relationship, orient yourself to the full system.\n\n\n\nColumn\nMeaning\n\n\n\n\ncampaign_year\nData-collection campaign year (2011–2015)\n\n\nAT\nAmbient temperature (°C)\n\n\nAP\nAmbient pressure (mbar)\n\n\nAH\nAmbient humidity (%)\n\n\nAFDP\nAir-filter differential pressure (mbar)\n\n\nGTEP\nGas-turbine exhaust pressure (mbar)\n\n\nTIT\nTurbine inlet temperature (°C)\n\n\nTAT\nTurbine-after temperature (°C)\n\n\nTEY\nTurbine energy yield (MWh)\n\n\nCDP\nCompressor discharge pressure (mbar)\n\n\nCO\nCarbon monoxide concentration (mg/m³)\n\n\nNOX\nNitrogen oxides concentration, NO + NO₂ (mg/m³)"
+  },
+  {
+    "objectID": "regression/01-simple-linear-regression.html#focus-on-ambient-temperature-and-nox",
+    "href": "regression/01-simple-linear-regression.html#focus-on-ambient-temperature-and-nox",
+    "title": "A first linear regression: weather and NOx",
+    "section": "3. Focus on ambient temperature and NOx",
+    "text": "3. Focus on ambient temperature and NOx\nFor this first model, use AT, ambient temperature in °C, as the predictor and NOX, NOx concentration in mg/m³, as the response.\n\nregression_data = data[[\"AT\", \"NOX\"]].dropna()\nprint(f\"Observations used: {len(regression_data):,}\")\nregression_data.describe()\n\nObservations used: 36,733\n\n\n\n\n\n\n\n\n\nAT\nNOX\n\n\n\n\ncount\n36733.000000\n36733.000000\n\n\nmean\n17.712726\n65.293067\n\n\nstd\n7.447451\n11.678357\n\n\nmin\n-6.234800\n25.905000\n\n\n25%\n11.781000\n57.162000\n\n\n50%\n17.801000\n63.849000\n\n\n75%\n23.665000\n71.548000\n\n\nmax\n37.103000\n119.910000"
+  },
+  {
+    "objectID": "regression/01-simple-linear-regression.html#look-before-fitting",
+    "href": "regression/01-simple-linear-regression.html#look-before-fitting",
+    "title": "A first linear regression: weather and NOx",
+    "section": "4. Look before fitting",
+    "text": "4. Look before fitting\nA scatterplot lets us see the relationship before asking a model to summarize it. The fitted model below will use every available observation.\n\nplot_data = regression_data.sample(n=3_000, random_state=4520)\nfig, ax = plt.subplots(figsize=(7.5, 4.8))\nax.scatter(plot_data[\"AT\"], plot_data[\"NOX\"], alpha=0.2, s=10, color=\"#4a90c2\")\nax.set(xlabel=\"Ambient temperature, AT (°C)\", ylabel=\"NOx concentration (mg/m³)\", title=\"Ambient temperature and NOx concentration\")\nplt.show()\n\n\n\n\n\n\n\n\nThe cloud slopes downward, but it is far from a perfect line."
+  },
+  {
+    "objectID": "regression/01-simple-linear-regression.html#state-the-model",
+    "href": "regression/01-simple-linear-regression.html#state-the-model",
+    "title": "A first linear regression: weather and NOx",
+    "section": "5. State the model",
+    "text": "5. State the model\nTreat NOx concentration as the response, \\(Y\\), and ambient temperature as the predictor, \\(X\\):\n\\[\nY_i = \\beta_0 + \\beta_1 X_i + \\varepsilon_i.\n\\]\nHere, \\(\\varepsilon_i = y_i - \\hat{y}_i\\) is the residual: the vertical difference between an observation and its prediction."
+  },
+  {
+    "objectID": "regression/01-simple-linear-regression.html#choose-a-loss-function",
+    "href": "regression/01-simple-linear-regression.html#choose-a-loss-function",
+    "title": "A first linear regression: weather and NOx",
+    "section": "6. Choose a loss function",
+    "text": "6. Choose a loss function\nA raw mean residual can cancel positive and negative errors. Mean absolute error (MAE) avoids cancellation, but its absolute-value kink makes optimization less convenient. Ordinary least squares uses mean squared error (MSE):\n\\[\n\\mathcal{L}_{\\mathrm{MSE}}(\\beta_0, \\beta_1) = \\frac{1}{n}\\sum_{i=1}^{n}\\left(y_i - \\beta_0 - \\beta_1x_i\\right)^2.\n\\]\nSquaring prevents cancellation and gives larger errors more weight.\n\nx = regression_data[\"AT\"]\ny = regression_data[\"NOX\"]\ncandidate_lines = pd.DataFrame({\"intercept\": [70.0, 80.8, 90.0], \"slope\": [-0.50, -0.88, -1.20]}, index=[\"A\", \"B\", \"C\"])\n\ndef residual_summaries(intercept, slope):\n    residual = y - (intercept + slope * x)\n    return pd.Series({\"mean residual\": residual.mean(), \"MAE\": residual.abs().mean(), \"MSE\": (residual**2).mean()})\n\nloss_table = candidate_lines.apply(lambda line: residual_summaries(line[\"intercept\"], line[\"slope\"]), axis=1)\ncandidate_lines.join(loss_table)\n\n\n\n\n\n\n\n\nintercept\nslope\nmean residual\nMAE\nMSE\n\n\n\n\nA\n70.0\n-0.50\n4.149430\n7.926254\n118.918579\n\n\nB\n80.8\n-0.88\n0.080266\n7.369149\n93.897656\n\n\nC\n90.0\n-1.20\n-3.451661\n8.248357\n111.652396"
+  },
+  {
+    "objectID": "regression/01-simple-linear-regression.html#fit-the-least-squares-line",
+    "href": "regression/01-simple-linear-regression.html#fit-the-least-squares-line",
+    "title": "A first linear regression: weather and NOx",
+    "section": "7. Fit the least-squares line",
+    "text": "7. Fit the least-squares line\nSimple linear regression has a closed-form MSE minimizer. statsmodels performs that optimization after we add a constant column for the intercept.\n\nX = sm.add_constant(x)\nmodel = sm.OLS(y, X).fit()\nintercept = model.params[\"const\"]\nslope = model.params[\"AT\"]\npd.Series({\"intercept (mg/m³)\": intercept, \"slope (mg/m³ per °C)\": slope})\n\nintercept (mg/m³)       80.796532\nslope (mg/m³ per °C)    -0.875273\ndtype: float64\n\n\n\ntemperature_grid = np.linspace(x.min(), x.max(), 200)\nfig, ax = plt.subplots(figsize=(7.5, 4.8))\nax.scatter(plot_data[\"AT\"], plot_data[\"NOX\"], alpha=0.2, s=10, color=\"#4a90c2\", label=\"Hourly observation\")\nax.plot(temperature_grid, intercept + slope * temperature_grid, color=\"#c43c35\", linewidth=2.5, label=\"Least-squares line\")\nax.set(xlabel=\"Ambient temperature, AT (°C)\", ylabel=\"NOx concentration (mg/m³)\", title=\"A one-variable model for NOx concentration\")\nax.legend()\nplt.show()\nprint(f\"Fitted line: NOx = {intercept:.2f} {slope:+.3f} × AT\")\n\n\n\n\n\n\n\n\nFitted line: NOx = 80.80 -0.875 × AT\n\n\n\nInterpret the slope\nThe fitted slope is the predicted difference in NOx concentration associated with a one-degree-Celsius difference in ambient temperature. This is an association, not an intervention claim."
+  },
+  {
+    "objectID": "regression/01-simple-linear-regression.html#inspect-the-residuals",
+    "href": "regression/01-simple-linear-regression.html#inspect-the-residuals",
+    "title": "A first linear regression: weather and NOx",
+    "section": "8. Inspect the residuals",
+    "text": "8. Inspect the residuals\nResiduals reveal the variation that the line leaves unexplained. Start with their distribution: what size error is typical, and are there unusually large errors? A residual histogram can assess whether a Normal approximation is plausible, but it cannot prove a Normal-error assumption.\n\nresidual = model.resid\nresidual_sd = residual.std(ddof=2)\nfig, ax = plt.subplots(figsize=(7.5, 4.8))\nax.hist(residual, bins=50, density=True, color=\"#4a90c2\", edgecolor=\"white\")\nax.axvline(0, color=\"#4d4d4d\", linestyle=\"--\", linewidth=1.5)\nax.set(xlabel=\"Residual = observed NOx − predicted NOx (mg/m³)\", ylabel=\"Density\", title=\"Distribution of residuals\")\nplt.show()\nprint(f\"Residual mean: {residual.mean():.3e} mg/m³\")\nprint(f\"Residual SD: {residual_sd:.2f} mg/m³\")\n\n\n\n\n\n\n\n\nResidual mean: -9.508e-15 mg/m³\nResidual SD: 9.69 mg/m³\n\n\nA residual mean near zero is guaranteed by OLS when the model includes an intercept. More revealing questions are whether the center stays near zero and whether the spread stays about the same width across the range of AT values.\n\ndiagnostic_data = regression_data.assign(residual=residual)\ndiagnostic_sample = diagnostic_data.sample(n=3_000, random_state=4520)\nbinned_residuals = diagnostic_data.assign(AT_bin=lambda frame: pd.qcut(frame[\"AT\"], 20)).groupby(\"AT_bin\", observed=True)[[\"AT\", \"residual\"]].mean()\n\nfig, ax = plt.subplots(figsize=(7.5, 4.8))\nax.scatter(diagnostic_sample[\"AT\"], diagnostic_sample[\"residual\"], alpha=0.15, s=10, color=\"#4a90c2\")\nax.plot(binned_residuals[\"AT\"], binned_residuals[\"residual\"], color=\"#c43c35\", linewidth=2.5, label=\"Mean residual in equal-count bins\")\nax.axhline(0, color=\"#4d4d4d\", linestyle=\"--\", linewidth=1.5)\nax.set(xlabel=\"Ambient temperature, AT (°C)\", ylabel=\"Residual (mg/m³)\", title=\"Residuals versus ambient temperature\")\nax.legend()\nplt.show()\n\n\n\n\n\n\n\n\nThe red line summarizes the average residual at nearby temperature values. A pattern above and below zero suggests that a straight line misses systematic structure. A changing vertical spread suggests heteroscedasticity. These diagnostics identify useful next modeling steps, such as nonlinear features, additional predictors, or time-aware validation."
+  },
+  {
+    "objectID": "regression/01-simple-linear-regression.html#summarize-fit-with-r2",
+    "href": "regression/01-simple-linear-regression.html#summarize-fit-with-r2",
+    "title": "A first linear regression: weather and NOx",
+    "section": "9. Summarize fit with \\(R^2\\)",
+    "text": "9. Summarize fit with \\(R^2\\)\nA mean-only baseline predicts every observation with \\(\\bar{y}\\). Its total squared error is the total sum of squares (TSS). The regression’s squared error is the residual sum of squares (RSS):\n\\[\nR^2 = 1 - \\frac{\\mathrm{RSS}}{\\mathrm{TSS}}.\n\\]\nThus, \\(R^2\\) is the fraction of baseline squared error that the fitted line removes. It describes in-sample fit, not causality or future predictive accuracy.\n\nmean_only_prediction = y.mean()\ntss = ((y - mean_only_prediction) ** 2).sum()\nrss = (residual**2).sum()\nr_squared = 1 - rss / tss\npd.Series({\"TSS (mean-only baseline)\": tss, \"RSS (regression line)\": rss, \"R²\": r_squared})\n\nTSS (mean-only baseline)    5.009658e+06\nRSS (regression line)       3.448860e+06\nR²                          3.115577e-01\ndtype: float64"
+  },
+  {
+    "objectID": "regression/01-simple-linear-regression.html#check-in",
+    "href": "regression/01-simple-linear-regression.html#check-in",
+    "title": "A first linear regression: weather and NOx",
+    "section": "Check-in",
+    "text": "Check-in\n\nWhy can the raw mean residual be misleading as a loss function?\nWhat would a residual-versus-AT plot look like if a straight-line conditional mean were adequate?\nIf \\(R^2 \\approx 0.31\\), what does that say about the regression line relative to the mean-only baseline?\n\nKeep your answers in your own notes. Later regression materials will introduce confidence intervals, hypothesis tests, additional predictors, and out-of-sample validation.\nReturn to the Regression page"
+  },
+  {
     "objectID": "foundations/03-variability-and-inference.html",
     "href": "foundations/03-variability-and-inference.html",
     "title": "Probability distributions and simulation",
@@ -264,5 +341,26 @@
     "title": "Course tools and Python foundations",
     "section": "Check-in",
     "text": "Check-in\n\nChange the plotting code to use AT or TEY on the horizontal axis. What pattern do you see?\nWhat is one question you would ask before interpreting this plot as a causal relationship?\nIn one sentence, explain the difference between a NumPy array and a Pandas DataFrame.\n\nKeep your answers in your own notes. We will build on this dataset in the next notebook.\nReturn to the Foundations page"
+  },
+  {
+    "objectID": "regression/index.html",
+    "href": "regression/index.html",
+    "title": "Regression",
+    "section": "",
+    "text": "These materials introduce regression as a way to translate an observed engineering relationship into a quantitative prediction. We continue to use the course gas-turbine emissions dataset, beginning with a single, interpretable question before adding the complications of multiple predictors and model validation.\nWe highly recommend working with Google Colab. It lets you run the notebooks in the cloud without local setup."
+  },
+  {
+    "objectID": "regression/index.html#simple-linear-regression-weather-and-nox",
+    "href": "regression/index.html#simple-linear-regression-weather-and-nox",
+    "title": "Regression",
+    "section": "1. Simple linear regression: weather and NOx",
+    "text": "1. Simple linear regression: weather and NOx\nEstimated time: 45–60 minutes\nUse ambient temperature to predict NOx concentration, fit a least-squares line, and distinguish a statistically significant association from a causal claim or a complete engineering model.\nView the notebook"
+  },
+  {
+    "objectID": "regression/index.html#dataset-source",
+    "href": "regression/index.html#dataset-source",
+    "title": "Regression",
+    "section": "Dataset source",
+    "text": "Dataset source\nThe underlying measurements come from the Gas Turbine CO and NOx Emissions dataset at the UCI Machine Learning Repository. The course version adds a campaign_year field and documented missing values for later data-pipeline exercises."
   }
 ]

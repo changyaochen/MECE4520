@@ -10,6 +10,25 @@
   padding-bottom: 0;
 }
 
+/* Make Quarto's light/dark control self-explanatory. */
+#quarto-header .quarto-color-scheme-toggle {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.35rem;
+  min-height: 2rem;
+  text-decoration: none;
+}
+
+#quarto-header .quarto-color-scheme-toggle::after {
+  content: "Dark mode";
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+#quarto-header .quarto-color-scheme-toggle.alternate::after {
+  content: "Light mode";
+}
+
 /* Central Limit Theorem interactive. */
 .clt-explorer {
   margin: 1.5rem 0 2rem;
@@ -382,4 +401,68 @@
 
 .ci-annotation {
   font-size: 11px;
+}
+
+/* Quarto adds .quarto-dark to the body when the reader selects dark mode. */
+.quarto-dark .clt-controls,
+.quarto-dark .ci-controls {
+  background: #2a3035;
+  border-color: #56616a;
+}
+
+.quarto-dark .clt-controls input,
+.quarto-dark .clt-controls select,
+.quarto-dark .ci-controls input,
+.quarto-dark .ci-controls select {
+  background-color: #1f2529;
+  border-color: #71808b;
+  color: #f2f4f5;
+}
+
+.quarto-dark .clt-controls select,
+.quarto-dark .ci-controls select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 6 5 5 5-5' fill='none' stroke='%23d5dde1' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75'/%3E%3C/svg%3E");
+}
+
+.quarto-dark .clt-buttons button,
+.quarto-dark .ci-buttons button {
+  background: #2a3035;
+  border-color: #79a9cc;
+  color: #dcecf5;
+}
+
+.quarto-dark .clt-buttons button:hover:not(:disabled),
+.quarto-dark .ci-buttons button:hover:not(:disabled) {
+  background: #3a4b56;
+  color: #fff;
+}
+
+.quarto-dark .clt-status,
+.quarto-dark .clt-legend,
+.quarto-dark .ci-status,
+.quarto-dark .ci-legend {
+  color: #c8d1d6;
+}
+
+.quarto-dark .clt-plot,
+.quarto-dark .ci-plot {
+  border-color: #56616a;
+}
+
+.quarto-dark .clt-axis,
+.quarto-dark .ci-axis {
+  stroke: #aebbc2;
+}
+
+.quarto-dark .clt-tick,
+.quarto-dark .clt-annotation,
+.quarto-dark .clt-empty-message,
+.quarto-dark .ci-tick,
+.quarto-dark .ci-annotation,
+.quarto-dark .ci-empty-message {
+  fill: #d5dde1;
+}
+
+.quarto-dark .ci-population-line {
+  stroke: #e6ebed;
 }
