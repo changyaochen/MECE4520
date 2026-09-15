@@ -68,11 +68,17 @@ the procedure, rather than a guarantee for one interval.
 
 [Interactive simulation](05-confidence-interval-coverage.qmd)
 
-## Dataset source
+## 6. Null hypothesis testing: evidence and decisions
 
-The underlying measurements come from the [Gas Turbine CO and NOx Emissions
-dataset](https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set)
-at the UCI Machine Learning Repository. The source data contain 36,733 hourly
-measurements from a gas turbine collected between 2011 and 2015 and are made
-available under the CC BY 4.0 license. The clean UCI files are not stored in
-this repository.
+**Estimated time:** 30–40 minutes
+
+Use a simulated machining-quality example to learn how a null hypothesis,
+null distribution, p-value, significance level, and Type-I error fit together.
+
+[View the notebook](06-null-hypothesis-testing.ipynb)
+
+**Companion interactive (10–15 minutes):** Specify either a Normal or Uniform
+null population, then simulate its sample means to see where the one observed
+mean falls in the null distribution and estimate a two-sided p-value.
+
+[Interactive simulation](06-null-distribution-simulation.qmd)

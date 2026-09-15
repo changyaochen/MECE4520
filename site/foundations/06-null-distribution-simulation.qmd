@@ -1,0 +1,351 @@
+---
+title: "Null distributions: an interactive simulation"
+toc: false
+page-layout: full
+---
+
+The null-hypothesis-testing notebook gave us one observed quality-control
+sample:
+
+$$
+n = 25,
+\qquad
+\bar{X}=20.20\text{ mm},
+\qquad
+S=0.40\text{ mm}.
+$$
+
+We want to know where that one observed sample mean would stand if the null
+claim ($H_0: \mu = 20.00\ \text{mm}$) were true. Choose a null population below, then
+generate many hypothetical samples of 25 shafts. The resulting distribution of
+sample means is the null distribution for this test.
+
+The Normal and Uniform models have different shapes for individual shaft
+diameters, but their displayed parameters give both models the same null mean
+and population SD. The simulation does not estimate these parameters; it takes
+them as the specified null model.
+
+::: {.callout-tip}
+## What to watch
+
+The dashed line marks the null mean, 20.00 mm, and the solid red line marks
+the observed mean, 20.20 mm. First build the null distribution and assess how
+unusual the observation looks. Then use **Show rejection region** to reveal
+the two-sided decision rule for a chosen $\alpha$. The simulation estimates the
+two-sided p-value by counting sample means at least as extreme as the
+observation.
+:::
+
+```{=html}
+<div id="null-test-explorer" class="clt-explorer" aria-label="Null distribution hypothesis-testing simulation">
+  <div class="clt-controls">
+    <label>
+      Null population model
+      <select id="null-test-distribution">
+        <option value="normal">Normal</option>
+        <option value="uniform">Uniform</option>
+      </select>
+    </label>
+    <label>
+      <span>Total trials, <i>B</i> (1,000–10,000)</span>
+      <input id="null-test-total-trials" type="number" min="1000" max="10000" step="1" value="5000" inputmode="numeric">
+    </label>
+    <label>
+      Add trials
+      <select id="null-test-batch-size">
+        <option value="1">1</option>
+        <option value="5">5</option>
+        <option value="25" selected>25</option>
+        <option value="100">100</option>
+        <option value="250">250</option>
+      </select>
+    </label>
+    <label id="null-test-alpha-control" hidden>
+      <span>Significance level, <i>α</i></span>
+      <select id="null-test-alpha">
+        <option value="0.10">0.10</option>
+        <option value="0.05" selected>0.05</option>
+        <option value="0.01">0.01</option>
+      </select>
+    </label>
+  </div>
+
+  <p class="null-test-summary"><strong>Observed sample:</strong>
+    <span class="math inline">\(n = 25\)</span>;
+    <span class="math inline">\(\bar{X} = 20.20\ \text{mm}\)</span>;
+    <span class="math inline">\(S = 0.40\ \text{mm}\)</span>.</p>
+
+  <div id="null-test-summary" class="null-test-summary" aria-live="polite"></div>
+
+  <div class="clt-buttons" aria-label="Simulation controls">
+    <button id="null-test-add" type="button">Add trials</button>
+    <button id="null-test-run" type="button">Run remaining trials</button>
+    <button id="null-test-reveal" type="button" aria-pressed="false">Show rejection region</button>
+    <button id="null-test-reset" type="button">Reset</button>
+  </div>
+
+  <p id="null-test-status" class="clt-status" aria-live="polite">No trials yet. Add a small batch to begin.</p>
+
+  <figure class="clt-plot null-test-plot">
+    <figcaption>Null distribution of sample means <span id="null-test-critical-legend" class="clt-legend" hidden><span class="null-test-critical-swatch"></span><span id="null-test-critical-legend-text">two-sided critical region</span></span></figcaption>
+    <svg id="null-test-sample-means" role="img" aria-label="Accumulating null distribution of sample means"></svg>
+  </figure>
+
+  <p id="null-test-decision" class="null-test-decision" aria-live="polite" hidden></p>
+</div>
+```
+
+With a Normal population, the sample mean is exactly Normal. With a Uniform
+population, the sample mean is only approximately Normal—but with 25
+observations, the central limit theorem makes the two null distributions look
+similar.
+
+<a href="index.qmd">← Return to Foundations</a>
+
+<script>
+(() => {
+  const root = document.getElementById("null-test-explorer");
+  if (!root) return;
+
+  const sampleSize = 25;
+  const observedMean = 20.20;
+  const observedSampleSd = 0.40;
+  const nullMean = 20.00;
+  const nullPopulationSd = 0.40;
+  const observedDistance = Math.abs(observedMean - nullMean);
+  const uniformLower = nullMean - Math.sqrt(3) * nullPopulationSd;
+  const uniformUpper = nullMean + Math.sqrt(3) * nullPopulationSd;
+
+  const distributionInput = document.getElementById("null-test-distribution");
+  const totalTrialsInput = document.getElementById("null-test-total-trials");
+  const batchSizeInput = document.getElementById("null-test-batch-size");
+  const alphaControl = document.getElementById("null-test-alpha-control");
+  const alphaInput = document.getElementById("null-test-alpha");
+  const addButton = document.getElementById("null-test-add");
+  const runButton = document.getElementById("null-test-run");
+  const revealButton = document.getElementById("null-test-reveal");
+  const resetButton = document.getElementById("null-test-reset");
+  const summary = document.getElementById("null-test-summary");
+  const status = document.getElementById("null-test-status");
+  const criticalLegend = document.getElementById("null-test-critical-legend");
+  const criticalLegendText = document.getElementById("null-test-critical-legend-text");
+  const decision = document.getElementById("null-test-decision");
+
+  let means = [];
+  let showRejectionRegion = false;
+
+  const clamp = (value, lower, upper) => Math.max(lower, Math.min(upper, value));
+  const getTotalTrials = () => clamp(Number.parseInt(totalTrialsInput.value, 10) || 5000, 1000, 10000);
+  const getAlpha = () => Number.parseFloat(alphaInput.value);
+
+  function criticalValues() {
+    const alpha = getAlpha();
+    const criticalZ = { 0.10: 1.6449, 0.05: 1.9600, 0.01: 2.5758 }[alpha];
+    const criticalDistance = criticalZ * nullPopulationSd / Math.sqrt(sampleSize);
+    return {
+      alpha,
+      lower: nullMean - criticalDistance,
+      upper: nullMean + criticalDistance
+    };
+  }
+
+  function normalRandom() {
+    const u = 1 - Math.random();
+    const v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function activeModel() {
+    if (distributionInput.value === "uniform") {
+      return {
+        name: "Uniform",
+        parameters: `Uniform population: lower bound = ${uniformLower.toFixed(3)} mm; upper bound = ${uniformUpper.toFixed(3)} mm`,
+        draw: () => uniformLower + Math.random() * (uniformUpper - uniformLower)
+      };
+    }
+    return {
+      name: "Normal",
+      parameters: "Normal population: mean = 20.00 mm; SD = 0.40 mm",
+      draw: () => nullMean + nullPopulationSd * normalRandom()
+    };
+  }
+
+  function svgElement(tag, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    svg.append(element);
+  }
+
+  function prepareSvg() {
+    const svg = document.getElementById("null-test-sample-means");
+    const width = Math.max(320, Math.round(svg.getBoundingClientRect().width || 920));
+    const height = 300;
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+    return { svg, width, height, margin: { top: 20, right: 22, bottom: 40, left: 48 } };
+  }
+
+  function addAxes(chart, domain, maximum) {
+    const { svg, width, height, margin } = chart;
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const x = value => margin.left + ((value - domain[0]) / (domain[1] - domain[0])) * plotWidth;
+    const y = value => margin.top + plotHeight - (value / maximum) * plotHeight;
+
+    svg.append(svgElement("line", { x1: margin.left, y1: y(0), x2: width - margin.right, y2: y(0), class: "clt-axis" }));
+    svg.append(svgElement("line", { x1: margin.left, y1: margin.top, x2: margin.left, y2: y(0), class: "clt-axis" }));
+    for (let i = 0; i <= 4; i += 1) {
+      const value = domain[0] + (i / 4) * (domain[1] - domain[0]);
+      const tickX = x(value);
+      svg.append(svgElement("line", { x1: tickX, y1: y(0), x2: tickX, y2: y(0) + 4, class: "clt-axis" }));
+      addText(svg, value.toFixed(2), tickX, height - 14, { class: "clt-tick", "text-anchor": "middle" });
+    }
+    const labelX = 14;
+    const labelY = margin.top + plotHeight / 2;
+    addText(svg, "simulated samples", labelX, labelY, {
+      class: "clt-tick",
+      "text-anchor": "middle",
+      transform: `rotate(-90 ${labelX} ${labelY})`
+    });
+    return { x, y };
+  }
+
+  function histogram(values, domain, binCount) {
+    const bins = Array.from({ length: binCount }, () => 0);
+    const width = (domain[1] - domain[0]) / binCount;
+    values.forEach(value => {
+      const index = clamp(Math.floor((value - domain[0]) / width), 0, binCount - 1);
+      bins[index] += 1;
+    });
+    return { bins, width };
+  }
+
+  function drawNullDistribution() {
+    const chart = prepareSvg();
+    const standardError = nullPopulationSd / Math.sqrt(sampleSize);
+    const { lower: lowerCritical, upper: upperCritical } = criticalValues();
+    const observedSpread = means.length ? Math.max(...means.map(mean => Math.abs(mean - nullMean))) : 0;
+    const spread = Math.max(4 * standardError, observedDistance * 1.35, observedSpread * 1.12);
+    const domain = [nullMean - spread, nullMean + spread];
+    const binCount = 64;
+    const { bins, width: binWidth } = histogram(means, domain, binCount);
+    const maximum = Math.max(...bins, 1) * 1.12;
+    const { svg, width, height, margin } = chart;
+    const { x, y } = addAxes(chart, domain, maximum);
+
+    if (showRejectionRegion) {
+      [
+        [domain[0], lowerCritical],
+        [upperCritical, domain[1]]
+      ].forEach(([start, end]) => {
+        svg.append(svgElement("rect", {
+          x: x(start),
+          y: margin.top,
+          width: Math.max(0, x(end) - x(start)),
+          height: y(0) - margin.top,
+          class: "null-test-critical-region"
+        }));
+      });
+    }
+
+    bins.forEach((count, index) => {
+      const start = domain[0] + index * binWidth;
+      const attributes = {
+        x: x(start) + 1,
+        y: y(count),
+        width: Math.max(1, x(start + binWidth) - x(start) - 2),
+        height: y(0) - y(count),
+        class: "clt-means-bar"
+      };
+      svg.append(svgElement("rect", attributes));
+    });
+
+    const nullX = x(nullMean);
+    svg.append(svgElement("line", { x1: nullX, y1: margin.top, x2: nullX, y2: y(0), class: "clt-mean-line" }));
+    addText(svg, "null mean: 20.00", Math.min(nullX + 4, width - 95), margin.top + 13, { class: "clt-annotation" });
+
+    if (showRejectionRegion) {
+      [lowerCritical, upperCritical].forEach(cutoff => {
+        const cutoffX = x(cutoff);
+        svg.append(svgElement("line", { x1: cutoffX, y1: margin.top, x2: cutoffX, y2: y(0), class: "null-test-critical-boundary" }));
+      });
+    }
+
+    const observedX = x(observedMean);
+    svg.append(svgElement("line", { x1: observedX, y1: margin.top, x2: observedX, y2: y(0), class: "null-test-observed-line" }));
+    addText(svg, "observed mean: 20.20", Math.min(observedX + 4, width - 125), margin.top + 13, { class: "clt-annotation" });
+
+    if (!means.length) {
+      addText(svg, "The simulated null distribution will appear here.", width / 2, height / 2, {
+        class: "clt-empty-message", "text-anchor": "middle"
+      });
+    }
+  }
+
+  function addTrials(requested) {
+    const total = getTotalTrials();
+    const numberToAdd = Math.min(requested, Math.max(0, total - means.length));
+    const model = activeModel();
+    for (let trial = 0; trial < numberToAdd; trial += 1) {
+      let sum = 0;
+      for (let observation = 0; observation < sampleSize; observation += 1) sum += model.draw();
+      means.push(sum / sampleSize);
+    }
+    render();
+  }
+
+  function render() {
+    const model = activeModel();
+    const total = getTotalTrials();
+    const completed = means.length;
+    const remaining = total - completed;
+    const extremeCount = means.filter(mean => Math.abs(mean - nullMean) >= observedDistance).length;
+    summary.innerHTML = `<p><strong>Selected null model:</strong> ${model.parameters}.</p>`;
+    const { alpha, lower, upper } = criticalValues();
+    const rejects = observedMean < lower || observedMean > upper;
+    alphaControl.hidden = !showRejectionRegion;
+    criticalLegend.hidden = !showRejectionRegion;
+    criticalLegendText.textContent = `two-sided critical region, α = ${alpha.toFixed(2)}`;
+    decision.hidden = !showRejectionRegion;
+    if (showRejectionRegion) {
+      const typeIError = `${(alpha * 100).toFixed(0)}%`;
+      decision.innerHTML = rejects
+        ? `<strong>Decision:</strong> With a Type-I error rate of ${typeIError}, we <strong>reject</strong> H<sub>0</sub>: the sample provides evidence that the process mean differs from 20.00 mm.`
+        : `<strong>Decision:</strong> With a Type-I error rate of ${typeIError}, we <strong>fail to reject</strong> H<sub>0</sub>: the sample does not provide sufficient evidence that the process mean differs from 20.00 mm.`;
+    }
+    drawNullDistribution();
+    status.textContent = completed
+      ? `${completed} of ${total} null samples completed. ${extremeCount} are at least as extreme as the observation (estimated two-sided p-value: ${(extremeCount / completed).toFixed(3)}).`
+      : "No trials yet. Add a small batch to begin.";
+    addButton.disabled = remaining <= 0;
+    runButton.disabled = remaining <= 0;
+  }
+
+  function reset() {
+    totalTrialsInput.value = getTotalTrials();
+    means = [];
+    render();
+  }
+
+  addButton.addEventListener("click", () => addTrials(Number.parseInt(batchSizeInput.value, 10)));
+  runButton.addEventListener("click", () => addTrials(getTotalTrials() - means.length));
+  revealButton.addEventListener("click", () => {
+    showRejectionRegion = !showRejectionRegion;
+    revealButton.textContent = showRejectionRegion ? "Hide rejection region" : "Show rejection region";
+    revealButton.setAttribute("aria-pressed", String(showRejectionRegion));
+    render();
+  });
+  resetButton.addEventListener("click", reset);
+  [distributionInput, totalTrialsInput].forEach(input => input.addEventListener("change", reset));
+  alphaInput.addEventListener("change", render);
+  window.addEventListener("resize", render);
+  reset();
+})();
+</script>
