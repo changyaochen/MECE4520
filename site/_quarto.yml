@@ -20,7 +20,11 @@ website:
 
 format:
   html:
-    theme: materia
+    theme:
+      light: materia
+      dark: darkly
+    syntax-highlighting: arrow
+    respect-user-color-scheme: true
     css: styles.css
     toc: true
     toc-location: body

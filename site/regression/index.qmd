@@ -11,7 +11,7 @@ validation.
 We highly recommend working with Google Colab. It lets you run the notebooks
 in the cloud without local setup.
 
-## 1. A first linear regression: weather and NOx
+## 1. Simple linear regression: weather and NOx
 
 **Estimated time:** 45–60 minutes
 
@@ -19,7 +19,7 @@ Use ambient temperature to predict NOx concentration, fit a least-squares
 line, and distinguish a statistically significant association from a causal
 claim or a complete engineering model.
 
-[View the notebook](01-weather-and-nox.ipynb)
+[View the notebook](01-simple-linear-regression.ipynb)
 
 ## Dataset source
 
