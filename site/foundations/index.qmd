@@ -82,3 +82,12 @@ null population, then simulate its sample means to see where the one observed
 mean falls in the null distribution and estimate a two-sided p-value.
 
 [Interactive simulation](06-null-distribution-simulation.qmd)
+
+## 7. Type-I and Type-II errors
+
+**Estimated time:** 15–20 minutes
+
+Separate a test decision from the unknown population state, then use judicial
+and medical examples to identify false positives and false negatives.
+
+[View the page](07-type-i-and-ii-errors.qmd)
