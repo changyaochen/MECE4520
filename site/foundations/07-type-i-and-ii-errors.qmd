@@ -1,0 +1,124 @@
+---
+title: "Type-I and Type-II errors: decisions under uncertainty"
+---
+
+A hypothesis test makes a decision from limited observations. The population
+state is not directly observable, so even a well-designed decision rule can
+make mistakes. This page develops the general structure of those mistakes
+before returning to the shaft-diameter example.
+
+## Learning objectives
+
+- Distinguish the actual state of the world from a test decision.
+- Locate Type-I and Type-II errors in a general $2\times2$ table.
+- Recognize the same structure in judicial and medical settings.
+
+## 1. Decisions and truth are different things
+
+A hypothesis test has two possible decisions: **reject $H_0$** or **fail to
+reject $H_0$**. Meanwhile, the population has one of two possible states:
+$H_0$ is true or $H_0$ is false. In this two-sided test, a false $H_0$
+corresponds to $H_A$ being true. The test decision is based on a sample; the
+population state is the underlying reality that generated it.
+
+In one particular application, we usually do not get to observe that reality
+with certainty. The $2\times2$ table instead describes what happens across
+many comparable decisions.
+
+One wording matters: **fail to reject $H_0$ does not mean accept $H_0$**. It
+means that the observed sample did not provide sufficient evidence against
+$H_0$ under the chosen decision rule.
+
+## 2. The general $2\times2$ table
+
+| Actual population state | Fail to reject $H_0$ | Reject $H_0$ |
+|---|---|---|
+| $H_0$ is true | Correct decision | **Type-I error**: reject a true null hypothesis |
+| $H_A$ is true | **Type-II error**: fail to reject a false null hypothesis | Correct detection |
+
+A Type-I error is a **false positive**: the procedure signals a difference
+when no difference is actually present. A Type-II error is a **false
+negative**: the procedure misses a difference that is actually present.
+
+## 3. The same structure in familiar settings
+
+The terminology becomes clearer when we identify the null hypothesis, the
+action represented by rejecting it, and the four possible outcomes.
+
+### Judicial setting
+
+Take the null hypothesis, $H_0$, to be: the defendant is innocent. Rejecting
+$H_0$ corresponds to conviction.
+
+| Actual state | Do not convict (fail to reject $H_0$) | Convict (reject $H_0$) |
+|---|---|---|
+| Defendant is innocent | Correct: do not convict | **Type-I error**: convict an innocent person |
+| Defendant is guilty | **Type-II error**: fail to convict a guilty person | Correct conviction |
+
+The language of *not guilty* parallels *fail to reject*: it is not a claim
+that the defendant is known to be innocent.
+
+### Medical screening
+
+For a screening test, take $H_0$ to be: the patient does not have the
+disease. Rejecting $H_0$ corresponds to a positive screen.
+
+| Actual state | Negative screen (fail to reject $H_0$) | Positive screen (reject $H_0$) |
+|---|---|---|
+| Patient does not have the disease | Correct negative | **Type-I error**: false positive |
+| Patient has the disease | **Type-II error**: false negative | Correct positive |
+
+Which error is more serious depends on the condition, the follow-up test,
+and the consequences of delayed treatment.
+
+### Shaft-diameter process
+
+Return now to our machining process. Take $H_0$ to be: the process mean shaft
+diameter is 20.00 mm. Rejecting $H_0$ means investigating or adjusting the
+process.
+
+| Actual process state | Continue operation (fail to reject $H_0$) | Investigate or adjust (reject $H_0$) |
+|---|---|---|
+| Process is centered at 20.00 mm | Correct: leave a stable process alone | **Type-I error**: unnecessarily interrupt a stable process |
+| Process mean has shifted | **Type-II error**: miss a real shift | Correct detection: investigate or adjust the process |
+
+## 4. From error types to error rates
+
+The $2\times2$ table names the possible outcomes of one decision. To design a
+test, we also need to describe how often its errors occur over many comparable
+samples.
+
+### Type-I error rate: $\alpha$
+
+The **significance level**, $\alpha$, is the probability of rejecting a true
+null hypothesis:
+
+$$
+\alpha = P(\text{reject } H_0 \mid H_0 \text{ is true}).
+$$
+
+We choose $\alpha$ before examining the data. With $\alpha = 0.05$, a decision
+procedure is designed to make a Type-I error about 5% of the time when $H_0$
+is true.
+
+### Type-II error rate: $\beta$
+
+The Type-II error rate is the probability of failing to reject $H_0$ when a
+particular alternative is actually true:
+
+$$
+\beta(\mu_A) = P(\text{fail to reject } H_0 \mid \mu = \mu_A).
+$$
+
+Unlike $\alpha$, $\beta$ is not one universal number. It depends on which real
+shift we are trying to detect. For the shaft process, missing a shift to
+$20.05$ mm is more likely than missing a shift to $20.30$ mm.
+
+The probability of correctly rejecting $H_0$ when that particular alternative
+is true is the **power** of the test:
+
+$$
+\text{power}(\mu_A) = 1 - \beta(\mu_A).
+$$
+
+[Return to the Foundations page](index.qmd)

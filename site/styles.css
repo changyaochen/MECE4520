@@ -198,6 +198,46 @@
   stroke-dasharray: 5 3;
 }
 
+.null-test-critical-region {
+  fill: #d77732;
+  opacity: 0.16;
+}
+
+.null-test-critical-swatch {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  background: #d77732;
+  opacity: 0.45;
+}
+
+.null-test-critical-boundary {
+  stroke: #d77732;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.null-test-observed-line {
+  stroke: #b65420;
+  stroke-width: 2.5;
+}
+
+.null-test-summary {
+  margin: 0.9rem 0;
+  color: #4c5961;
+}
+
+.null-test-summary p {
+  margin: 0.25rem 0;
+}
+
+.null-test-decision {
+  margin: 0.9rem 0 0;
+  padding: 0.8rem 1rem;
+  border-left: 4px solid #b65420;
+  background: #f8f1ed;
+}
+
 .clt-current-mean-line {
   stroke: #b65420;
   stroke-width: 2;
@@ -440,8 +480,13 @@
 .quarto-dark .clt-status,
 .quarto-dark .clt-legend,
 .quarto-dark .ci-status,
-.quarto-dark .ci-legend {
+.quarto-dark .ci-legend,
+.quarto-dark .null-test-summary {
   color: #c8d1d6;
+}
+
+.quarto-dark .null-test-decision {
+  background: #372e2a;
 }
 
 .quarto-dark .clt-plot,
