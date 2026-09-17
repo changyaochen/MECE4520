@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Foundations: Getting started with engineering data – MECE 4520</title>
+<title>Type-I and Type-II errors: decisions under uncertainty – MECE 4520</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -79,6 +79,35 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -276,7 +305,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../foundations/index.html" aria-current="page"> 
+    <a class="nav-link" href="../foundations/index.html"> 
 <span class="menu-text">Foundations</span></a>
   </li>  
   <li class="nav-item">
@@ -303,7 +332,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Foundations: Getting started with engineering data</h1>
+<h1 class="title">Type-I and Type-II errors: decisions under uncertainty</h1>
 </div>
 
 
@@ -323,64 +352,180 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#course-tools-and-python-foundations" id="toc-course-tools-and-python-foundations">1. Course tools and Python foundations</a></li>
-  <li><a href="#a-first-look-at-gas-turbine-emissions-data" id="toc-a-first-look-at-gas-turbine-emissions-data">2. A first look at gas-turbine emissions data</a></li>
-  <li><a href="#probability-distributions-and-simulation" id="toc-probability-distributions-and-simulation">3. Probability distributions and simulation</a></li>
-  <li><a href="#central-limit-theorem-interactive-simulation-and-notebook" id="toc-central-limit-theorem-interactive-simulation-and-notebook">4. Central Limit Theorem: interactive simulation and notebook</a></li>
-  <li><a href="#confidence-intervals-interactive-coverage-simulation" id="toc-confidence-intervals-interactive-coverage-simulation">5. Confidence intervals: interactive coverage simulation</a></li>
-  <li><a href="#null-hypothesis-testing-evidence-and-decisions" id="toc-null-hypothesis-testing-evidence-and-decisions">6. Null hypothesis testing: evidence and decisions</a></li>
-  <li><a href="#type-i-and-type-ii-errors" id="toc-type-i-and-type-ii-errors">7. Type-I and Type-II errors</a></li>
+  <li><a href="#learning-objectives" id="toc-learning-objectives">Learning objectives</a></li>
+  <li><a href="#decisions-and-truth-are-different-things" id="toc-decisions-and-truth-are-different-things">1. Decisions and truth are different things</a></li>
+  <li><a href="#the-general-2times2-table" id="toc-the-general-2times2-table">2. The general <span class="math inline">\(2\times2\)</span> table</a></li>
+  <li><a href="#the-same-structure-in-familiar-settings" id="toc-the-same-structure-in-familiar-settings">3. The same structure in familiar settings</a></li>
+  <li><a href="#from-error-types-to-error-rates" id="toc-from-error-types-to-error-rates">4. From error types to error rates</a></li>
   </ul>
 </nav>
-<p>These materials establish the shared computational and statistical vocabulary used throughout MECE 4520, using the course’s recurring gas-turbine emissions dataset. Complete the first three notebooks in order before beginning the course’s main modules; plan for approximately 2.5–3 hours in total. The CLT interactive is a companion to the first in-class discussion and can be revisited as needed.</p>
-<p>We highly recommend working with Google Colab. This allows you to run the notebooks in the cloud without tedious local setup. At the end of each notebook, there is a “Check-in” section that encourages you to try out what you’ve learned.</p>
-<p>The notebooks use the course version of the gas-turbine dataset. It retains the original measurements while adding a <code>campaign_year</code> field and documented missing values for later data-pipeline exercises. If opened independently in a fresh environment, they download that same course version from this repository.</p>
-<section id="course-tools-and-python-foundations" class="level2">
-<h2 class="anchored" data-anchor-id="course-tools-and-python-foundations">1. Course tools and Python foundations</h2>
-<p><strong>Estimated time:</strong> 30–45 minutes</p>
-<p>Learn the minimal NumPy and Pandas workflow used in the course: loading data, selecting variables, filtering observations, and making a first plot.</p>
-<p><a href="../foundations/01-course-tools.html">View the notebook</a></p>
+<p>A hypothesis test makes a decision from limited observations. The population state is not directly observable, so even a well-designed decision rule can make mistakes. This page develops the general structure of those mistakes before returning to the shaft-diameter example.</p>
+<section id="learning-objectives" class="level2">
+<h2 class="anchored" data-anchor-id="learning-objectives">Learning objectives</h2>
+<ul>
+<li>Distinguish the actual state of the world from a test decision.</li>
+<li>Locate Type-I and Type-II errors in a general <span class="math inline">\(2\times2\)</span> table.</li>
+<li>Recognize the same structure in judicial and medical settings.</li>
+</ul>
 </section>
-<section id="a-first-look-at-gas-turbine-emissions-data" class="level2">
-<h2 class="anchored" data-anchor-id="a-first-look-at-gas-turbine-emissions-data">2. A first look at gas-turbine emissions data</h2>
-<p><strong>Estimated time:</strong> 45–60 minutes</p>
-<p>Explore the measurements, variables, distributions, and simple physical questions in the Gas Turbine CO and NOx Emissions dataset.</p>
-<p><a href="../foundations/02-gas-turbine-data.html">View the notebook</a></p>
+<section id="decisions-and-truth-are-different-things" class="level2">
+<h2 class="anchored" data-anchor-id="decisions-and-truth-are-different-things">1. Decisions and truth are different things</h2>
+<p>A hypothesis test has two possible decisions: <strong>reject <span class="math inline">\(H_0\)</span></strong> or <strong>fail to reject <span class="math inline">\(H_0\)</span></strong>. Meanwhile, the population has one of two possible states: <span class="math inline">\(H_0\)</span> is true or <span class="math inline">\(H_0\)</span> is false. In this two-sided test, a false <span class="math inline">\(H_0\)</span> corresponds to <span class="math inline">\(H_A\)</span> being true. The test decision is based on a sample; the population state is the underlying reality that generated it.</p>
+<p>In one particular application, we usually do not get to observe that reality with certainty. The <span class="math inline">\(2\times2\)</span> table instead describes what happens across many comparable decisions.</p>
+<p>One wording matters: <strong>fail to reject <span class="math inline">\(H_0\)</span> does not mean accept <span class="math inline">\(H_0\)</span></strong>. It means that the observed sample did not provide sufficient evidence against <span class="math inline">\(H_0\)</span> under the chosen decision rule.</p>
 </section>
-<section id="probability-distributions-and-simulation" class="level2">
-<h2 class="anchored" data-anchor-id="probability-distributions-and-simulation">3. Probability distributions and simulation</h2>
-<p><strong>Estimated time:</strong> 45–60 minutes</p>
-<p>Practice drawing and visualizing simulated normal, uniform, and exponential data, and connect their shapes to familiar and engineering situations.</p>
-<p><a href="../foundations/03-variability-and-inference.html">View the notebook</a></p>
+<section id="the-general-2times2-table" class="level2">
+<h2 class="anchored" data-anchor-id="the-general-2times2-table">2. The general <span class="math inline">\(2\times2\)</span> table</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Actual population state</th>
+<th>Fail to reject <span class="math inline">\(H_0\)</span></th>
+<th>Reject <span class="math inline">\(H_0\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(H_0\)</span> is true</td>
+<td>Correct decision</td>
+<td><strong>Type-I error</strong>: reject a true null hypothesis</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(H_A\)</span> is true</td>
+<td><strong>Type-II error</strong>: fail to reject a false null hypothesis</td>
+<td>Correct detection</td>
+</tr>
+</tbody>
+</table>
+<p>A Type-I error is a <strong>false positive</strong>: the procedure signals a difference when no difference is actually present. A Type-II error is a <strong>false negative</strong>: the procedure misses a difference that is actually present.</p>
 </section>
-<section id="central-limit-theorem-interactive-simulation-and-notebook" class="level2">
-<h2 class="anchored" data-anchor-id="central-limit-theorem-interactive-simulation-and-notebook">4. Central Limit Theorem: interactive simulation and notebook</h2>
-<p><strong>Estimated time:</strong> 20–30 minutes</p>
-<p>Build a distribution of sample means one batch at a time, then see how the sample size changes its shape and spread. The interactive and companion notebook accompany the first in-class discussion of the central limit theorem.</p>
-<p><a href="../foundations/04-central-limit-theorem.html">Interactive simulation</a></p>
-<p><a href="../foundations/04-central-limit-theorem-notebook.html">View the notebook</a></p>
+<section id="the-same-structure-in-familiar-settings" class="level2">
+<h2 class="anchored" data-anchor-id="the-same-structure-in-familiar-settings">3. The same structure in familiar settings</h2>
+<p>The terminology becomes clearer when we identify the null hypothesis, the action represented by rejecting it, and the four possible outcomes.</p>
+<section id="judicial-setting" class="level3">
+<h3 class="anchored" data-anchor-id="judicial-setting">Judicial setting</h3>
+<p>Take the null hypothesis, <span class="math inline">\(H_0\)</span>, to be: the defendant is innocent. Rejecting <span class="math inline">\(H_0\)</span> corresponds to conviction.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Actual state</th>
+<th>Do not convict (fail to reject <span class="math inline">\(H_0\)</span>)</th>
+<th>Convict (reject <span class="math inline">\(H_0\)</span>)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Defendant is innocent</td>
+<td>Correct: do not convict</td>
+<td><strong>Type-I error</strong>: convict an innocent person</td>
+</tr>
+<tr class="even">
+<td>Defendant is guilty</td>
+<td><strong>Type-II error</strong>: fail to convict a guilty person</td>
+<td>Correct conviction</td>
+</tr>
+</tbody>
+</table>
+<p>The language of <em>not guilty</em> parallels <em>fail to reject</em>: it is not a claim that the defendant is known to be innocent.</p>
 </section>
-<section id="confidence-intervals-interactive-coverage-simulation" class="level2">
-<h2 class="anchored" data-anchor-id="confidence-intervals-interactive-coverage-simulation">5. Confidence intervals: interactive coverage simulation</h2>
-<p><strong>Estimated time:</strong> 10–15 minutes</p>
-<p>Repeatedly draw samples from a known normal population and construct a 95% confidence interval for each. See why 95% refers to the long-run coverage of the procedure, rather than a guarantee for one interval.</p>
-<p><a href="../foundations/05-confidence-interval-coverage.html">Interactive simulation</a></p>
+<section id="medical-screening" class="level3">
+<h3 class="anchored" data-anchor-id="medical-screening">Medical screening</h3>
+<p>For a screening test, take <span class="math inline">\(H_0\)</span> to be: the patient does not have the disease. Rejecting <span class="math inline">\(H_0\)</span> corresponds to a positive screen.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Actual state</th>
+<th>Negative screen (fail to reject <span class="math inline">\(H_0\)</span>)</th>
+<th>Positive screen (reject <span class="math inline">\(H_0\)</span>)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Patient does not have the disease</td>
+<td>Correct negative</td>
+<td><strong>Type-I error</strong>: false positive</td>
+</tr>
+<tr class="even">
+<td>Patient has the disease</td>
+<td><strong>Type-II error</strong>: false negative</td>
+<td>Correct positive</td>
+</tr>
+</tbody>
+</table>
+<p>Which error is more serious depends on the condition, the follow-up test, and the consequences of delayed treatment.</p>
 </section>
-<section id="null-hypothesis-testing-evidence-and-decisions" class="level2">
-<h2 class="anchored" data-anchor-id="null-hypothesis-testing-evidence-and-decisions">6. Null hypothesis testing: evidence and decisions</h2>
-<p><strong>Estimated time:</strong> 30–40 minutes</p>
-<p>Use a simulated machining-quality example to learn how a null hypothesis, null distribution, p-value, significance level, and Type-I error fit together.</p>
-<p><a href="../foundations/06-null-hypothesis-testing.html">View the notebook</a></p>
-<p><strong>Companion interactive (10–15 minutes):</strong> Specify either a Normal or Uniform null population, then simulate its sample means to see where the one observed mean falls in the null distribution and estimate a two-sided p-value.</p>
-<p><a href="../foundations/06-null-distribution-simulation.html">Interactive simulation</a></p>
+<section id="shaft-diameter-process" class="level3">
+<h3 class="anchored" data-anchor-id="shaft-diameter-process">Shaft-diameter process</h3>
+<p>Return now to our machining process. Take <span class="math inline">\(H_0\)</span> to be: the process mean shaft diameter is 20.00 mm. Rejecting <span class="math inline">\(H_0\)</span> means investigating or adjusting the process.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Actual process state</th>
+<th>Continue operation (fail to reject <span class="math inline">\(H_0\)</span>)</th>
+<th>Investigate or adjust (reject <span class="math inline">\(H_0\)</span>)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Process is centered at 20.00 mm</td>
+<td>Correct: leave a stable process alone</td>
+<td><strong>Type-I error</strong>: unnecessarily interrupt a stable process</td>
+</tr>
+<tr class="even">
+<td>Process mean has shifted</td>
+<td><strong>Type-II error</strong>: miss a real shift</td>
+<td>Correct detection: investigate or adjust the process</td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="type-i-and-type-ii-errors" class="level2">
-<h2 class="anchored" data-anchor-id="type-i-and-type-ii-errors">7. Type-I and Type-II errors</h2>
-<p><strong>Estimated time:</strong> 15–20 minutes</p>
-<p>Separate a test decision from the unknown population state, then use judicial and medical examples to identify false positives and false negatives.</p>
-<p><a href="../foundations/07-type-i-and-ii-errors.html">View the page</a></p>
+</section>
+<section id="from-error-types-to-error-rates" class="level2">
+<h2 class="anchored" data-anchor-id="from-error-types-to-error-rates">4. From error types to error rates</h2>
+<p>The <span class="math inline">\(2\times2\)</span> table names the possible outcomes of one decision. To design a test, we also need to describe how often its errors occur over many comparable samples.</p>
+<section id="type-i-error-rate-alpha" class="level3">
+<h3 class="anchored" data-anchor-id="type-i-error-rate-alpha">Type-I error rate: <span class="math inline">\(\alpha\)</span></h3>
+<p>The <strong>significance level</strong>, <span class="math inline">\(\alpha\)</span>, is the probability of rejecting a true null hypothesis:</p>
+<p><span class="math display">\[
+\alpha = P(\text{reject } H_0 \mid H_0 \text{ is true}).
+\]</span></p>
+<p>We choose <span class="math inline">\(\alpha\)</span> before examining the data. With <span class="math inline">\(\alpha = 0.05\)</span>, a decision procedure is designed to make a Type-I error about 5% of the time when <span class="math inline">\(H_0\)</span> is true.</p>
+</section>
+<section id="type-ii-error-rate-beta" class="level3">
+<h3 class="anchored" data-anchor-id="type-ii-error-rate-beta">Type-II error rate: <span class="math inline">\(\beta\)</span></h3>
+<p>The Type-II error rate is the probability of failing to reject <span class="math inline">\(H_0\)</span> when a particular alternative is actually true:</p>
+<p><span class="math display">\[
+\beta(\mu_A) = P(\text{fail to reject } H_0 \mid \mu = \mu_A).
+\]</span></p>
+<p>Unlike <span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span> is not one universal number. It depends on which real shift we are trying to detect. For the shaft process, missing a shift to <span class="math inline">\(20.05\)</span> mm is more likely than missing a shift to <span class="math inline">\(20.30\)</span> mm.</p>
+<p>The probability of correctly rejecting <span class="math inline">\(H_0\)</span> when that particular alternative is true is the <strong>power</strong> of the test:</p>
+<p><span class="math display">\[
+\text{power}(\mu_A) = 1 - \beta(\mu_A).
+\]</span></p>
+<p><a href="../foundations/index.html">Return to the Foundations page</a></p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

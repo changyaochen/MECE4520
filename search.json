@@ -77,32 +77,116 @@
     "text": "Check-in\n\nWhy can the raw mean residual be misleading as a loss function?\nWhat would a residual-versus-AT plot look like if a straight-line conditional mean were adequate?\nIf \\(R^2 \\approx 0.31\\), what does that say about the regression line relative to the mean-only baseline?\n\nKeep your answers in your own notes. Later regression materials will introduce confidence intervals, hypothesis tests, additional predictors, and out-of-sample validation.\nReturn to the Regression page"
   },
   {
-    "objectID": "foundations/03-variability-and-inference.html",
-    "href": "foundations/03-variability-and-inference.html",
-    "title": "Probability distributions and simulation",
+    "objectID": "foundations/06-null-hypothesis-testing.html",
+    "href": "foundations/06-null-hypothesis-testing.html",
+    "title": "Null hypothesis testing: evidence and decisions",
     "section": "",
-    "text": "Engineers use probability distributions to describe quantities that vary: a manufacturing dimension, a load, a sensor reading, or an emission measurement. In this notebook, you will use NumPy to simulate and visualize a few common distributions.\nThis is preparation for our in-class discussion of the central limit theorem (CLT). We will discuss sampling distributions, formal hypothesis tests, and p-values together in class.\nLearning objectives"
+    "text": "The data we are dealing with in practice are a finite sample from a larger – most likely infinite – population of possible observations. That population may be a physical process operating over time, manufactured parts produced under the same conditions, or outcomes that could have occurred under comparable conditions. We use the sample to infer properties of the population.\nThat inference comes with uncertainty because a different sampling trial could have produced a different result (e.g., a different collection of observations). Null hypothesis testing gives us a disciplined way to ask whether an observed result is surprising under a reference claim about the population.\nLearning objectives"
   },
   {
-    "objectID": "foundations/03-variability-and-inference.html#set-up-a-simulation",
-    "href": "foundations/03-variability-and-inference.html#set-up-a-simulation",
-    "title": "Probability distributions and simulation",
-    "section": "1. Set up a simulation",
-    "text": "1. Set up a simulation\nA simulation creates artificial observations according to rules we specify. This lets us isolate one statistical idea at a time before working with messier engineering measurements.\n\n# NumPy generates random samples; Matplotlib displays them.\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nplt.style.use(\"seaborn-v0_8-whitegrid\")\n# A fixed seed makes the examples reproducible: everyone sees the same draw.\nrng = np.random.default_rng(4520)"
+    "objectID": "foundations/06-null-hypothesis-testing.html#an-engineering-question",
+    "href": "foundations/06-null-hypothesis-testing.html#an-engineering-question",
+    "title": "Null hypothesis testing: evidence and decisions",
+    "section": "1. An engineering question",
+    "text": "1. An engineering question\nSuppose a machining process is intended to produce shafts with a diameter of 20.00 mm. Due to the inevitable variability during the manufacturing process, the diameters of the shafts produced will vary. However, we would assume the distribution of diameters is centered at 20.00 mm, i.e., the population mean is 20.00 mm. A quality engineer samples 25 shafts and obtains a sample mean of 20.20 mm, with the sample standard deviation of 0.40 mm.\nThe sample mean is above the target, but seemingly close to it. Is a difference of 0.20 mm evidence that the process (i.e., population) mean is different from 20.00 mm, or could it plausibly be ordinary sampling variation?"
   },
   {
-    "objectID": "foundations/03-variability-and-inference.html#draw-samples-from-probability-distributions",
-    "href": "foundations/03-variability-and-inference.html#draw-samples-from-probability-distributions",
-    "title": "Probability distributions and simulation",
-    "section": "2. Draw samples from probability distributions",
-    "text": "2. Draw samples from probability distributions\nA distribution describes the values a variable can take and how frequently different values occur. We will begin with three useful distribution shapes. These are useful approximations, not automatic labels for every engineering variable: choosing a distribution should be guided by the physical mechanism and by observed data.\n\nNormal distribution\nA normal distribution is symmetric around a typical value and is often useful when many small, independent sources of variation add together. A familiar example is adult height within a relatively homogeneous population. An engineering example is repeated measurements of a machined part’s diameter when the process is stable.\nrng.normal(loc, scale, size) draws size observations with mean loc and standard deviation scale.\n\n# Simulate 1,000 measurements centered at 50 with a spread of 8.\nnormal_sample = rng.normal(loc=50, scale=8, size=1_000)\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.hist(normal_sample, bins=30, color=\"#4a90c2\", edgecolor=\"white\")\nax.set(\n    xlabel=\"Simulated measurement\",\n    ylabel=\"Number of observations\",\n    title=\"A simulated normal distribution\",\n)\nplt.show()\n\nprint(f\"Sample mean: {normal_sample.mean():.2f}\")\nprint(f\"Sample standard deviation: {normal_sample.std(ddof=1):.2f}\")\n\n\n\n\n\n\n\n\nSample mean: 49.76\nSample standard deviation: 7.84\n\n\n\n\nTry it\nDraw a normal sample centered at 100 with a standard deviation of 15. How do its histogram and sample summary differ from the one above?\n\n# my_sample = rng.normal(loc=..., scale=..., size=...)\n# print(my_sample.mean())\n# print(my_sample.std(ddof=1))\n\n\n\nUniform distribution\nIn a uniform distribution, every value in an interval is equally likely. A familiar example is an ideal random-number generator that returns any number from 0 to 1. An engineering simulation might choose an initial shaft angle at random between two limits, or sample evenly across an allowable tolerance range.\nrng.uniform(low, high, size) draws values evenly between two limits. Unlike the normal distribution, it has no single central value that is more likely than another within that interval.\n\n# Draw 5,000 values with equal probability anywhere from 0 to 10.\nuniform = rng.uniform(low=0, high=10, size=5_000)\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.hist(uniform, bins=35, density=True, color=\"#77a464\", edgecolor=\"white\")\nax.set(title=\"A simulated uniform distribution\", xlabel=\"Value\", ylabel=\"Density\")\nplt.show()\n\n\n\n\n\n\n\n\n\n\nExponential distribution\nAn exponential distribution is nonnegative and right-skewed, so it is often used to model waiting times. A familiar example is the waiting time until the next customer arrives when arrivals occur independently at a roughly constant average rate. In engineering, it can model the lifetime of one component when its instantaneous failure rate is assumed constant: a component that has already operated for 10 hours is, under this simplified model, no more or less likely to fail in the next hour than a new one.\nrng.exponential(scale, size) draws nonnegative, right-skewed values. Its average is approximately scale; most draws are relatively small, but occasionally a much larger value occurs.\n\n# Draw 5,000 waiting times with an average value of 2.\nexponential = rng.exponential(scale=2, size=5_000)\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.hist(exponential, bins=35, density=True, color=\"#d9903d\", edgecolor=\"white\")\nax.set(title=\"A simulated exponential distribution\", xlabel=\"Value\", ylabel=\"Density\")\nplt.show()"
+    "objectID": "foundations/06-null-hypothesis-testing.html#from-observations-to-a-population-claim",
+    "href": "foundations/06-null-hypothesis-testing.html#from-observations-to-a-population-claim",
+    "title": "Null hypothesis testing: evidence and decisions",
+    "section": "2. From observations to a population claim",
+    "text": "2. From observations to a population claim\nThe 25 measured shafts are our sample. The quantity we want to learn about is the process’s long-run mean diameter across the much larger population of shafts it could produce. We cannot measure that entire population, so we use the sample mean to infer its mean.\nThe observed mean is 0.20 mm above the target. There are two broad explanations: ordinary sampling variation from a process still centered at 20.00 mm, or evidence that the process mean is genuinely different. Null hypothesis testing makes that comparison precise by asking how surprising this sample would be under the first explanation."
   },
   {
-    "objectID": "foundations/03-variability-and-inference.html#check-in",
-    "href": "foundations/03-variability-and-inference.html#check-in",
-    "title": "Probability distributions and simulation",
+    "objectID": "foundations/06-null-hypothesis-testing.html#state-the-competing-hypotheses",
+    "href": "foundations/06-null-hypothesis-testing.html#state-the-competing-hypotheses",
+    "title": "Null hypothesis testing: evidence and decisions",
+    "section": "3. State the competing hypotheses",
+    "text": "3. State the competing hypotheses\nLet \\(\\mu\\) be the true, long-run mean shaft diameter for this process. The null hypothesis is the reference claim we want to examine:\n\\[H_0: \\mu = 20.00\\text{ mm}\\]\nThe alternative hypothesis describes the kind of departure we care about:\n\\[H_A: \\mu \\ne 20.00\\text{ mm}\\]\nThis is a two-sided test because a mean that is too small or too large would both be evidence against the target. The hypotheses are statements about the population mean, not about the particular sample we happened to measure."
+  },
+  {
+    "objectID": "foundations/06-null-hypothesis-testing.html#simulate-the-null-world",
+    "href": "foundations/06-null-hypothesis-testing.html#simulate-the-null-world",
+    "title": "Null hypothesis testing: evidence and decisions",
+    "section": "4. Simulate the null world",
+    "text": "4. Simulate the null world\nTo assess the observed mean, imagine repeatedly taking new samples of 25 shafts in a world where \\(H_0\\) is true. For this simulation, we make a deliberate shortcut: we use the observed sample standard deviation, \\(S = 0.40\\) mm, as if it were the population standard deviation, \\(\\sigma\\).\nWe also assume that individual shaft diameters follow a normal distribution centered at 20.00 mm. We start with a Normal population because it makes the result especially clean: the mean of 25 such shafts is exactly Normally distributed. This is not a requirement for using a Normal-shaped null distribution of sample means. The central limit theorem (CLT) explains why a similar pattern can arise even when the individual diameters are not Normal.\nFor each repetition, we draw 25 individual diameters and calculate their sample mean. Repeating that process produces a null distribution: the values of the test statistic (here, the sample mean) that would arise if the process had not shifted. According to CLT, the null distribution is a Normal distribution, centered at 20.00 mm, with standard error \\(0.40 / \\sqrt{25} = 0.08\\) mm.\n\n# NumPy simulates repeated samples; Matplotlib displays their distributions.\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nplt.style.use(\"seaborn-v0_8-whitegrid\")\nrng = np.random.default_rng(4520)\n\ntarget_mean = 20.00  # mm: the null population mean\nobserved_mean = 20.20  # mm: the measured sample mean\nsample_sd = 0.40  # mm: the measured sample standard deviation\nsample_size = 25\n\n# Teaching shortcut: use the sample SD as the population SD in this simulation.\npopulation_sd = sample_sd\nstandard_error = population_sd / np.sqrt(sample_size)\n\nn_repetitions = 100_000\n# Each row is one hypothetical quality sample of 25 normally distributed shafts\n# from a process whose population mean is still the target mean.\nnormal_null_samples = rng.normal(\n    loc=target_mean,\n    scale=population_sd,\n    size=(n_repetitions, sample_size),\n)\nnull_means = normal_null_samples.mean(axis=1)\n\nfig, ax = plt.subplots(figsize=(8, 4.5))\nax.hist(null_means, bins=60, density=True, color=\"#4a90c2\", edgecolor=\"white\")\nax.axvline(target_mean, color=\"#355766\", linestyle=\"--\", linewidth=2, label=\"Null mean: 20.00 mm\")\nax.axvline(observed_mean, color=\"#b65420\", linewidth=2.5, label=\"Observed mean: 20.20 mm\")\nax.set(\n    xlabel=\"Sample mean diameter (mm)\",\n    ylabel=\"Density across repeated samples\",\n    title=\"Null distribution of sample means: normally distributed shaft diameters\",\n)\nax.legend(frameon=True)\nplt.show()"
+  },
+  {
+    "objectID": "foundations/06-null-hypothesis-testing.html#calculate-and-interpret-a-p-value",
+    "href": "foundations/06-null-hypothesis-testing.html#calculate-and-interpret-a-p-value",
+    "title": "Null hypothesis testing: evidence and decisions",
+    "section": "5. Calculate and interpret a p-value",
+    "text": "5. Calculate and interpret a p-value\nThe observed mean is 0.20 mm from the null mean. For a two-sided test, we count simulated means at least that far away in either direction. The resulting proportion is the p-value.\n\\[p\\text{-value} = P\\left(\\left|\\bar{X} - 20.00\\right| \\geq \\left|20.20 - 20.00\\right| \\;\\middle|\\; H_0\\right)\\]\nRead the vertical bar as assuming the null hypothesis is true. A p-value is not the probability that \\(H_0\\) is true. It is the probability of seeing a result at least this unusual if \\(H_0\\) were true.\n\nobserved_distance = abs(observed_mean - target_mean)\nas_extreme = abs(null_means - target_mean) &gt;= observed_distance\np_value = as_extreme.mean()\n\nbin_edges = np.linspace(null_means.min(), null_means.max(), 61)\n\nfig, ax = plt.subplots(figsize=(8, 4.5))\nax.hist(null_means, bins=bin_edges, color=\"#d6e6f1\", edgecolor=\"white\")\nax.hist(\n    null_means[as_extreme], bins=bin_edges,\n    color=\"#d77732\", edgecolor=\"white\", label=\"At least as extreme under $H_0$\"\n)\nax.axvline(target_mean, color=\"#355766\", linestyle=\"--\", linewidth=2)\nax.axvline(observed_mean, color=\"#b65420\", linewidth=2.5, label=\"Observed mean\")\nax.axvline(2 * target_mean - observed_mean, color=\"#b65420\", linewidth=2.5)\nax.set(\n    xlabel=\"Sample mean diameter (mm)\",\n    ylabel=\"Number of simulated samples\",\n    title=f\"Two-sided simulated p-value: {p_value:.3f}\",\n)\nax.legend(frameon=True)\nplt.show()\n\nprint(f\"Observed distance from the target: {observed_distance:.2f} mm\")\nprint(f\"Estimated two-sided p-value: {p_value:.3f}\")\n\n\n\n\n\n\n\n\nObserved distance from the target: 0.20 mm\nEstimated two-sided p-value: 0.013"
+  },
+  {
+    "objectID": "foundations/06-null-hypothesis-testing.html#turn-evidence-into-a-decision",
+    "href": "foundations/06-null-hypothesis-testing.html#turn-evidence-into-a-decision",
+    "title": "Null hypothesis testing: evidence and decisions",
+    "section": "6. Turn evidence into a decision",
+    "text": "6. Turn evidence into a decision\nThe p-value tells us how surprising the observed mean would be under the first explanation, i.e., Null hypothesis \\(H_0\\): ordinary sampling variation from a process still centered at 20.00 mm. To turn that evidence into a principled decision framework, we need to choose a decision threshold (for the p-value) before seeing the data.\nThis threshold is called the significance level, \\(\\alpha\\). A commonly used value is \\(\\alpha = 0.05\\). With this choice, we reject \\(H_0\\) when the p-value is below 0.05; otherwise, we fail to reject \\(H_0\\). The choice of \\(\\alpha\\) should reflect the consequence of falsely declaring that the process has shifted. If \\(H_0\\) is actually true, a rule with \\(\\alpha = 0.05\\) makes a Type-I error—a false rejection—about 5% of the time in the long run.\nThe rejection region is the set of sample-mean values for which our testing procedure rejects \\(H_0\\). Before seeing the sample outcome, we choose the test to be two-sided, choose \\(\\alpha\\), and specify the reference distribution. The numerical boundaries can still depend on an estimated quantity. Here, because the population standard deviation is unknown, we plug the observed \\(S = 0.40\\) mm into \\(\\sigma\\) to calculate them.\nIn a two-sided test with \\(\\alpha = 0.05\\), the intended rejection region contains the outer 5% of the null distribution: 2.5% in each tail. Under the null model, this gives a Type-I error rate of about 5% in the long run.\nFor this Normal/CLT reference calculation, the two-sided 5% rule uses 1.96 standard errors from the target:\n\\[\n\\bar{X} &lt; 20.00 - 1.96(0.08) = 19.843\\text{ mm}\n\\qquad\\text{or}\\qquad\n\\bar{X} &gt; 20.00 + 1.96(0.08) = 20.157\\text{ mm}.\n\\]\nThe shaded tails below are the plug-in rejection region for \\(S = 0.40\\) mm. The testing procedure is pre-specified; after obtaining \\(S\\), we calculate its numerical boundaries and check whether \\(\\bar{X}=20.20\\) mm falls inside them.\n\nalpha = 0.05\nz_critical = 1.96\ncritical_distance = z_critical * standard_error\nlower_cutoff = target_mean - critical_distance\nupper_cutoff = target_mean + critical_distance\ntype_i_error_rate = np.mean(\n    (null_means &lt;= lower_cutoff) | (null_means &gt;= upper_cutoff)\n)\n\nfig, ax = plt.subplots(figsize=(8, 4.5))\nax.hist(null_means, bins=60, density=True, color=\"#d6e6f1\", edgecolor=\"white\")\nax.axvspan(null_means.min(), lower_cutoff, color=\"#d77732\", alpha=0.45, label=\"Reject $H_0$\")\nax.axvspan(upper_cutoff, null_means.max(), color=\"#d77732\", alpha=0.45)\nax.axvline(observed_mean, color=\"#b65420\", linewidth=2.5, label=\"Observed mean\")\nax.set(\n    xlabel=\"Sample mean diameter (mm)\",\n    ylabel=\"Density across repeated samples\",\n    title=\"A 5% two-sided decision rule under the null hypothesis\",\n)\nax.legend(frameon=True)\nplt.show()\n\nprint(f\"Reject H₀ below {lower_cutoff:.3f} mm or above {upper_cutoff:.3f} mm.\")\nprint(f\"Simulated Type-I error rate: {type_i_error_rate:.3f}\")\nprint(\"Decision for this sample:\", \"reject H₀\" if p_value &lt; alpha else \"fail to reject H₀\")\n\n\n\n\n\n\n\n\nReject H₀ below 19.843 mm or above 20.157 mm.\nSimulated Type-I error rate: 0.051\nDecision for this sample: reject H₀\n\n\n\nDecision at \\(\\alpha = 0.05\\). The simulated p-value is about 0.013, below the pre-specified 5% threshold. We therefore reject \\(H_0\\): under this null model, the data provide evidence against the explanation that the process is still centered at 20.00 mm. This decision does not prove that the process mean has shifted.\n\n\nTry it\nKeep the observed difference at 0.20 mm, but change the sample size. What happens to the standard error and to the simulated p-value when you use 9, 25, or 100 shafts?\n\n# Try one sample size at a time.\n# my_sample_size = 100\n# my_standard_error = process_sd / np.sqrt(my_sample_size)\n# my_null_means = rng.normal(target_mean, my_standard_error, size=100_000)\n# my_p_value = np.mean(abs(my_null_means - target_mean) &gt;= observed_distance)\n# print(f\"Standard error: {my_standard_error:.3f} mm\")\n# print(f\"Simulated p-value: {my_p_value:.3f}\")"
+  },
+  {
+    "objectID": "foundations/06-null-hypothesis-testing.html#what-statistical-significance-doesand-does-notsay",
+    "href": "foundations/06-null-hypothesis-testing.html#what-statistical-significance-doesand-does-notsay",
+    "title": "Null hypothesis testing: evidence and decisions",
+    "section": "7. What statistical significance does—and does not—say",
+    "text": "7. What statistical significance does—and does not—say\nA small p-value is evidence that the observed result would be unusual under the null model. It does not tell us:\n\nthe probability that the null hypothesis is true;\nwhether a detected shift is large enough to matter for engineering tolerances;\nwhether one variable causes another to change.\n\nA larger sample can make a very small deviation statistically significant. Always report an estimated effect and its confidence interval alongside a p-value, then use engineering judgment to decide whether the effect matters.\nIn the Regression series, we will apply the same logic to a slope. There, the null hypothesis will be \\(H_0: \\beta_1 = 0\\): no linear association between a predictor and the response in the model."
+  },
+  {
+    "objectID": "foundations/06-null-hypothesis-testing.html#check-in",
+    "href": "foundations/06-null-hypothesis-testing.html#check-in",
+    "title": "Null hypothesis testing: evidence and decisions",
     "section": "Check-in",
-    "text": "Check-in\n\nWhich simulated distribution is symmetric? Which is right-skewed?\nIn rng.normal(loc, scale, size), what does each argument control?\nGive one setting in which a uniform distribution would be a reasonable model, and one in which it would not.\n\nKeep your answers in your own notes. Bring your questions about these distributions and the CLT to class.\nReturn to the Foundations page"
+    "text": "Check-in\n\nIn the shaft example, what population quantity does \\(\\mu\\) represent?\nIn your own words, what assumption is made when calculating the p-value?\nIf the p-value is 0.03 and \\(\\alpha = 0.05\\), what is the decision? What can you not conclude from that decision?\n\nReturn to the Foundations page"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html",
+    "href": "foundations/01-course-tools.html",
+    "title": "Course tools and Python foundations",
+    "section": "",
+    "text": "This notebook introduces the small set of Python tools used throughout the course. It is not a comprehensive Python tutorial: the goal is to be comfortable loading, inspecting, selecting, filtering, and plotting engineering data.\nLearning objectives"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#import-the-python-libraries",
+    "href": "foundations/01-course-tools.html#import-the-python-libraries",
+    "title": "Course tools and Python foundations",
+    "section": "1. Import the Python libraries",
+    "text": "1. Import the Python libraries\nThe next cell demonstrates how to import a Python library.\nimport numpy as np makes the NumPy library available in this notebook. The as keyword assigns the short alias np to NumPy’s namespace, so we can write np.array(...) instead of the longer numpy.array(...). Using np is a common convention in scientific Python.\n\n# Import NumPy first: it is the numerical-array tool used in this section.\nimport numpy as np"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#numerical-arrays",
+    "href": "foundations/01-course-tools.html#numerical-arrays",
+    "title": "Course tools and Python foundations",
+    "section": "2. Numerical arrays",
+    "text": "2. Numerical arrays\nA NumPy array stores a collection of numerical values. Array operations act element-by-element, which makes calculations compact and readable.\n\n# Store repeated temperature measurements in a one-dimensional numerical array.\ntemperatures_c = np.array([15.2, 18.7, 21.4, 24.1])\n# NumPy applies this unit conversion to every element of the array at once.\ntemperatures_k = temperatures_c + 273.15\n\nprint(\"Temperatures in K:\", temperatures_k)\nprint(f\"Mean temperature: {temperatures_c.mean():.1f} °C\")\nprint(f\"Range: {temperatures_c.min():.1f}–{temperatures_c.max():.1f} °C\")\n\nTemperatures in K: [288.35 291.85 294.55 297.25]\nMean temperature: 19.9 °C\nRange: 15.2–24.1 °C\n\n\nThe array is useful for a single quantity observed repeatedly. A table with many named variables is better represented by a Pandas DataFrame.\nCompared with a native Python list, a NumPy array is designed for numerical work. It supports vectorized calculations—such as adding 273.15 to every temperature—in one clear operation, stores values efficiently, and is much faster for the large arrays used in data analysis and machine learning."
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#load-the-course-dataset",
+    "href": "foundations/01-course-tools.html#load-the-course-dataset",
+    "title": "Course tools and Python foundations",
+    "section": "3. Load the course dataset",
+    "text": "3. Load the course dataset\nThe Gas Turbine CO and NOx Emissions dataset records the operation of a gas turbine between 2011 and 2015. It combines ambient conditions, turbine sensor measurements, energy yield, and two emissions outcomes: carbon monoxide (CO) and nitrogen oxides (NOx).\nEach row represents one hourly observation of the system: the measured operating and environmental conditions during that hour, together with the emissions observed at that time. This course returns to the same dataset repeatedly so that the modeling choices remain connected to a physical system.\nThe original data and documentation are available from the UCI Machine Learning Repository.\n\n# Pandas represents a table with named columns as a DataFrame.\nimport pandas as pd\nfrom pathlib import Path\nfrom urllib.request import urlretrieve\n\n# Use the committed course version so everyone analyzes the same data.\nDATA_URL = (\n    \"https://raw.githubusercontent.com/changyaochen/MECE4520/master/\"\n    \"site/data/gas-turbine-course.csv\"\n)\n# Prefer a local copy; otherwise download it when this notebook runs independently.\ndata_path = next(\n    (path for path in [\n        Path(\"../data/gas-turbine-course.csv\"),\n        Path(\"site/data/gas-turbine-course.csv\"),\n        Path(\"gas-turbine-course.csv\")]\n        if path.exists()\n    ),\n    Path(\"gas-turbine-course.csv\"),\n)\nif not data_path.exists():\n    urlretrieve(DATA_URL, data_path)\ndata = pd.read_csv(data_path)\n\n# Inspect the dataset size before selecting variables or fitting a model.\nprint(f\"Rows: {len(data):,}\")\nprint(f\"Columns: {data.shape[1]}\")\ndata.head()\n\nRows: 36,733\nColumns: 12\n\n\n\n\n\n\n\n\n\ncampaign_year\nAT\nAP\nAH\nAFDP\nGTEP\nTIT\nTAT\nTEY\nCDP\nCO\nNOX\n\n\n\n\n0\n2011\n4.5878\n1018.7\n83.675\n3.5758\n23.979\n1086.2\n549.83\n134.67\n11.898\n0.32663\n81.952\n\n\n1\n2011\n4.2932\n1018.3\n84.235\n3.5709\n23.951\n1086.1\n550.05\n134.67\n11.892\n0.44784\n82.377\n\n\n2\n2011\n3.9045\n1018.4\n84.858\n3.5828\n23.990\n1086.5\n550.19\n135.10\n12.042\n0.45144\n83.776\n\n\n3\n2011\n3.7436\n1018.3\n85.434\n3.5808\n23.911\n1086.5\n550.17\n135.03\n11.990\n0.23107\n82.505\n\n\n4\n2011\n3.7516\n1017.8\n85.182\n3.5781\n23.917\n1085.9\n550.00\n134.67\n11.910\n0.26747\n82.028\n\n\n\n\n\n\n\nA good first habit is to inspect the column names and units before modeling. This data dictionary identifies every column in the course dataset.\n\n\n\nVariable\nMeaning\n\n\n\n\nAT\nAmbient temperature (°C)\n\n\nAP\nAmbient pressure (mbar)\n\n\nAH\nAmbient humidity (%)\n\n\nAFDP\nAir filter differential pressure (mbar)\n\n\nGTEP\nGas turbine exhaust pressure (mbar)\n\n\nTIT\nTurbine inlet temperature (°C)\n\n\nTAT\nTurbine after temperature (°C)\n\n\nTEY\nTurbine energy yield (MWh)\n\n\nCDP\nCompressor discharge pressure (mbar)\n\n\nCO\nCarbon monoxide emissions (mg/m³)\n\n\nNOX\nNitrogen oxides emissions (mg/m³)"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#select-and-filter-data",
+    "href": "foundations/01-course-tools.html#select-and-filter-data",
+    "title": "Course tools and Python foundations",
+    "section": "4. Select and filter data",
+    "text": "4. Select and filter data\nData analysis often begins with two simple operations: selecting the columns (variables) relevant to a question and filtering the rows (observations) that meet a condition. The next cell demonstrates both operations on the gas-turbine data.\n\n# Select a small set of ambient, turbine, and emissions variables for inspection.\nselected = data[[\"AT\", \"TIT\", \"TEY\", \"CO\", \"NOX\"]]\n# Use the median to divide the observations into relatively warmer and cooler conditions.\nwarm_conditions = selected[selected[\"AT\"] &gt; selected[\"AT\"].median()]\n\nprint(\"Selected variables:\")\ndisplay(selected.head())\nprint(f\"Rows above the median ambient temperature: {len(warm_conditions):,}\")\nwarm_conditions.describe().loc[[\"mean\", \"std\", \"min\", \"max\"]]\n\nSelected variables:\n\n\n\n\n\n\n\n\n\nAT\nTIT\nTEY\nCO\nNOX\n\n\n\n\n0\n4.5878\n1086.2\n134.67\n0.32663\n81.952\n\n\n1\n4.2932\n1086.1\n134.67\n0.44784\n82.377\n\n\n2\n3.9045\n1086.5\n135.10\n0.45144\n83.776\n\n\n3\n3.7436\n1086.5\n135.03\n0.23107\n82.505\n\n\n4\n3.7516\n1085.9\n134.67\n0.26747\n82.028\n\n\n\n\n\n\n\nRows above the median ambient temperature: 18,365\n\n\n\n\n\n\n\n\n\nAT\nTIT\nTEY\nCO\nNOX\n\n\n\n\nmean\n24.005367\n1083.897964\n132.012501\n2.057256\n59.22925\n\n\nstd\n3.905948\n15.765051\n13.316517\n1.602460\n7.97456\n\n\nmin\n17.802000\n1024.800000\n100.040000\n0.001594\n25.90500\n\n\nmax\n37.103000\n1100.900000\n160.370000\n37.746000\n119.91000"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#make-a-first-plot",
+    "href": "foundations/01-course-tools.html#make-a-first-plot",
+    "title": "Course tools and Python foundations",
+    "section": "5. Make a first plot",
+    "text": "5. Make a first plot\nA scatter plot helps us inspect whether two variables move together. Each point below is one hourly observation. We draw only a random subset so the plot remains readable.\n\n# Import Matplotlib only when we are ready to make a figure.\nimport matplotlib.pyplot as plt\n\n# Use a readable plotting style for the exploratory figure below.\nplt.style.use(\"seaborn-v0_8-whitegrid\")\n\n# Plot a reproducible subset so overlapping points do not hide the overall pattern.\n# This is useful for large datasets.\nplot_data = data.sample(n=2_000, random_state=4520)\n\n# Each point represents one hourly turbine observation.\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.scatter(plot_data[\"TIT\"], plot_data[\"NOX\"], alpha=0.25, s=12)\nax.set(\n    xlabel=\"Turbine inlet temperature, TIT (°C)\",\n    ylabel=\"NOx emissions (mg/m³)\",\n    title=\"A first view of turbine inlet temperature and NOx emissions\",\n)\nplt.show()"
+  },
+  {
+    "objectID": "foundations/01-course-tools.html#check-in",
+    "href": "foundations/01-course-tools.html#check-in",
+    "title": "Course tools and Python foundations",
+    "section": "Check-in",
+    "text": "Check-in\n\nChange the plotting code to use AT or TEY on the horizontal axis. What pattern do you see?\nWhat is one question you would ask before interpreting this plot as a causal relationship?\nIn one sentence, explain the difference between a NumPy array and a Pandas DataFrame.\n\nKeep your answers in your own notes. We will build on this dataset in the next notebook.\nReturn to the Foundations page"
   },
   {
     "objectID": "foundations/02-gas-turbine-data.html",
@@ -161,83 +245,6 @@
     "text": "This simulation uses a population we completely know: a normal distribution with population mean \\(\\mu = 0\\) and standard deviation \\(\\sigma = 1\\). Each trial draws a new random sample, calculates its sample mean, and creates an approximate 95% confidence interval for \\(\\mu\\).\nThroughout this page, \\(\\mu\\) denotes the fixed population mean (the quantity we want to learn), while \\(\\bar{X}\\) denotes the sample mean (our estimate of it).\nThe dashed vertical line marks the true population mean. Blue intervals contain it; red intervals miss it. A 95% confidence level describes the long-run behavior of this procedure: across many independently constructed intervals, about 95% should contain \\(\\mu\\). It does not guarantee that any particular interval will do so.\nFor each sample, the simulation constructs the approximate 95% confidence interval\n\\[\n\\bar{X} \\pm 1.96 \\frac{S}{\\sqrt{n}},\n\\]\nwhere \\(\\bar{X}\\) is the sample mean, \\(S\\) is the sample standard deviation, and \\(n\\) is the sample size. The sample standard deviation is calculated from the same \\(n\\) observations:\n\\[\nS = \\sqrt{\\frac{1}{n - 1}\\sum_{i=1}^{n}\\left(X_i - \\bar{X}\\right)^2}.\n\\]\n\n\n\n\n\n\nTipTry this\n\n\n\nBegin with a few intervals, then add more. The occasional red interval makes the meaning of “95% confidence” visible. Reset and repeat: the exact number of misses changes each time, while the long-run pattern remains near 95% coverage.\n\n\n\n  \n    \n      Sample size, n (2–500)\n      \n    \n    \n      Intervals to show, B (1–100)\n      \n    \n    \n      Add intervals\n      \n        1\n        5\n        10\n        20\n      \n    \n  \n\n  \n    Add intervals\n    Run remaining intervals\n    Reset\n  \n\n  No intervals yet. Add a small batch to begin.\n\n  \n    Confidence intervals for the population mean contains μ misses μ\n    \n  \n\n← Return to Foundations"
   },
   {
-    "objectID": "foundations/index.html",
-    "href": "foundations/index.html",
-    "title": "Foundations: Getting started with engineering data",
-    "section": "",
-    "text": "These materials establish the shared computational and statistical vocabulary used throughout MECE 4520, using the course’s recurring gas-turbine emissions dataset. Complete the first three notebooks in order before beginning the course’s main modules; plan for approximately 2.5–3 hours in total. The CLT interactive is a companion to the first in-class discussion and can be revisited as needed.\nWe highly recommend working with Google Colab. This allows you to run the notebooks in the cloud without tedious local setup. At the end of each notebook, there is a “Check-in” section that encourages you to try out what you’ve learned.\nThe notebooks use the course version of the gas-turbine dataset. It retains the original measurements while adding a campaign_year field and documented missing values for later data-pipeline exercises. If opened independently in a fresh environment, they download that same course version from this repository."
-  },
-  {
-    "objectID": "foundations/index.html#course-tools-and-python-foundations",
-    "href": "foundations/index.html#course-tools-and-python-foundations",
-    "title": "Foundations: Getting started with engineering data",
-    "section": "1. Course tools and Python foundations",
-    "text": "1. Course tools and Python foundations\nEstimated time: 30–45 minutes\nLearn the minimal NumPy and Pandas workflow used in the course: loading data, selecting variables, filtering observations, and making a first plot.\nView the notebook"
-  },
-  {
-    "objectID": "foundations/index.html#a-first-look-at-gas-turbine-emissions-data",
-    "href": "foundations/index.html#a-first-look-at-gas-turbine-emissions-data",
-    "title": "Foundations: Getting started with engineering data",
-    "section": "2. A first look at gas-turbine emissions data",
-    "text": "2. A first look at gas-turbine emissions data\nEstimated time: 45–60 minutes\nExplore the measurements, variables, distributions, and simple physical questions in the Gas Turbine CO and NOx Emissions dataset.\nView the notebook"
-  },
-  {
-    "objectID": "foundations/index.html#probability-distributions-and-simulation",
-    "href": "foundations/index.html#probability-distributions-and-simulation",
-    "title": "Foundations: Getting started with engineering data",
-    "section": "3. Probability distributions and simulation",
-    "text": "3. Probability distributions and simulation\nEstimated time: 45–60 minutes\nPractice drawing and visualizing simulated normal, uniform, and exponential data, and connect their shapes to familiar and engineering situations.\nView the notebook"
-  },
-  {
-    "objectID": "foundations/index.html#central-limit-theorem-interactive-simulation-and-notebook",
-    "href": "foundations/index.html#central-limit-theorem-interactive-simulation-and-notebook",
-    "title": "Foundations: Getting started with engineering data",
-    "section": "4. Central Limit Theorem: interactive simulation and notebook",
-    "text": "4. Central Limit Theorem: interactive simulation and notebook\nEstimated time: 20–30 minutes\nBuild a distribution of sample means one batch at a time, then see how the sample size changes its shape and spread. The interactive and companion notebook accompany the first in-class discussion of the central limit theorem.\nInteractive simulation\nView the notebook"
-  },
-  {
-    "objectID": "foundations/index.html#confidence-intervals-interactive-coverage-simulation",
-    "href": "foundations/index.html#confidence-intervals-interactive-coverage-simulation",
-    "title": "Foundations: Getting started with engineering data",
-    "section": "5. Confidence intervals: interactive coverage simulation",
-    "text": "5. Confidence intervals: interactive coverage simulation\nEstimated time: 10–15 minutes\nRepeatedly draw samples from a known normal population and construct a 95% confidence interval for each. See why 95% refers to the long-run coverage of the procedure, rather than a guarantee for one interval.\nInteractive simulation"
-  },
-  {
-    "objectID": "foundations/index.html#dataset-source",
-    "href": "foundations/index.html#dataset-source",
-    "title": "Foundations: Getting started with engineering data",
-    "section": "Dataset source",
-    "text": "Dataset source\nThe underlying measurements come from the Gas Turbine CO and NOx Emissions dataset at the UCI Machine Learning Repository. The source data contain 36,733 hourly measurements from a gas turbine collected between 2011 and 2015 and are made available under the CC BY 4.0 license. The clean UCI files are not stored in this repository."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Data Science for Mechanical Systems",
-    "section": "",
-    "text": "MECE 4520 introduces data science and machine learning through real engineering systems.\nCourse materials and source files are available on GitHub."
-  },
-  {
-    "objectID": "index.html#course-focus",
-    "href": "index.html#course-focus",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Course focus",
-    "text": "Course focus\nRather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:\n\nunderstand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems\n\nStudents will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data."
-  },
-  {
-    "objectID": "index.html#grading-policy",
-    "href": "index.html#grading-policy",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Grading policy",
-    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n30%\n\n\nIn-class quizzes\n30%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately five homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.\n\nIn-class quizzes\nExpect a short, time-limited quiz about once each week. At the end of the semester, your 3 lowest quiz scores will be dropped.\nWe will use Poll Everywhere for in-class quizzes. You need to sign in Poll Everywhere with your Columbia UNI before the first quiz."
-  },
-  {
-    "objectID": "index.html#syllabus",
-    "href": "index.html#syllabus",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Syllabus",
-    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\n\n\nSep. 15Sep. 17 — asynchronous\nSimple and multiple linear regression\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\n\n\nDec. 8 & 10\nFinal project presentations"
-  },
-  {
     "objectID": "foundations/04-central-limit-theorem-notebook.html",
     "href": "foundations/04-central-limit-theorem-notebook.html",
     "title": "Central Limit Theorem: simulation in Python",
@@ -287,6 +294,132 @@
     "text": "Check-in\n\nKeep the exponential population and set sample_size=100. How does the spread of the sample means compare with sample_size=30?\nKeep sample_size=30, but increase trials from 500 to 2,000. Does this change the spread of a sample mean, or only how clearly you see its distribution?\nReplace the Poisson draw function with rng.binomial(n=10, p=0.2, size=size). What does the distribution of sample means look like?\n\n\n# Try one modification at a time.\n# means_n100 = show_clt_experiment(\n#     draw_exponential, sample_size=100, trials=500, rng=rng,\n#     title=\"Exponential population with sample size n = 100\"\n# )\n\n# draw_binomial = lambda rng, size: rng.binomial(n=10, p=0.2, size=size)\n# binomial_means = show_clt_experiment(\n#     draw_binomial, sample_size=30, trials=500, rng=rng,\n#     title=\"Binomial population with sample size n = 30\"\n# )\n\n# Return to the Foundations page when you are finished.\n\n← Return to Foundations"
   },
   {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Data Science for Mechanical Systems",
+    "section": "",
+    "text": "MECE 4520 introduces data science and machine learning through real engineering systems.\nCourse materials and source files are available on GitHub."
+  },
+  {
+    "objectID": "index.html#course-focus",
+    "href": "index.html#course-focus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Course focus",
+    "text": "Course focus\nRather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:\n\nunderstand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems\n\nStudents will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data."
+  },
+  {
+    "objectID": "index.html#grading-policy",
+    "href": "index.html#grading-policy",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Grading policy",
+    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n30%\n\n\nIn-class quizzes\n30%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately five homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.\n\nIn-class quizzes\nExpect a short, time-limited quiz about once each week. At the end of the semester, your 3 lowest quiz scores will be dropped.\nWe will use Poll Everywhere for in-class quizzes. You need to sign in Poll Everywhere with your Columbia UNI before the first quiz."
+  },
+  {
+    "objectID": "index.html#syllabus",
+    "href": "index.html#syllabus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Syllabus",
+    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\n\n\nSep. 15Sep. 17 — asynchronous\nSimple and multiple linear regression\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\n\n\nDec. 8 & 10\nFinal project presentations"
+  },
+  {
+    "objectID": "foundations/index.html",
+    "href": "foundations/index.html",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "",
+    "text": "These materials establish the shared computational and statistical vocabulary used throughout MECE 4520, using the course’s recurring gas-turbine emissions dataset. Complete the first three notebooks in order before beginning the course’s main modules; plan for approximately 2.5–3 hours in total. The CLT interactive is a companion to the first in-class discussion and can be revisited as needed.\nWe highly recommend working with Google Colab. This allows you to run the notebooks in the cloud without tedious local setup. At the end of each notebook, there is a “Check-in” section that encourages you to try out what you’ve learned.\nThe notebooks use the course version of the gas-turbine dataset. It retains the original measurements while adding a campaign_year field and documented missing values for later data-pipeline exercises. If opened independently in a fresh environment, they download that same course version from this repository."
+  },
+  {
+    "objectID": "foundations/index.html#course-tools-and-python-foundations",
+    "href": "foundations/index.html#course-tools-and-python-foundations",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "1. Course tools and Python foundations",
+    "text": "1. Course tools and Python foundations\nEstimated time: 30–45 minutes\nLearn the minimal NumPy and Pandas workflow used in the course: loading data, selecting variables, filtering observations, and making a first plot.\nView the notebook"
+  },
+  {
+    "objectID": "foundations/index.html#a-first-look-at-gas-turbine-emissions-data",
+    "href": "foundations/index.html#a-first-look-at-gas-turbine-emissions-data",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "2. A first look at gas-turbine emissions data",
+    "text": "2. A first look at gas-turbine emissions data\nEstimated time: 45–60 minutes\nExplore the measurements, variables, distributions, and simple physical questions in the Gas Turbine CO and NOx Emissions dataset.\nView the notebook"
+  },
+  {
+    "objectID": "foundations/index.html#probability-distributions-and-simulation",
+    "href": "foundations/index.html#probability-distributions-and-simulation",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "3. Probability distributions and simulation",
+    "text": "3. Probability distributions and simulation\nEstimated time: 45–60 minutes\nPractice drawing and visualizing simulated normal, uniform, and exponential data, and connect their shapes to familiar and engineering situations.\nView the notebook"
+  },
+  {
+    "objectID": "foundations/index.html#central-limit-theorem-interactive-simulation-and-notebook",
+    "href": "foundations/index.html#central-limit-theorem-interactive-simulation-and-notebook",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "4. Central Limit Theorem: interactive simulation and notebook",
+    "text": "4. Central Limit Theorem: interactive simulation and notebook\nEstimated time: 20–30 minutes\nBuild a distribution of sample means one batch at a time, then see how the sample size changes its shape and spread. The interactive and companion notebook accompany the first in-class discussion of the central limit theorem.\nInteractive simulation\nView the notebook"
+  },
+  {
+    "objectID": "foundations/index.html#confidence-intervals-interactive-coverage-simulation",
+    "href": "foundations/index.html#confidence-intervals-interactive-coverage-simulation",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "5. Confidence intervals: interactive coverage simulation",
+    "text": "5. Confidence intervals: interactive coverage simulation\nEstimated time: 10–15 minutes\nRepeatedly draw samples from a known normal population and construct a 95% confidence interval for each. See why 95% refers to the long-run coverage of the procedure, rather than a guarantee for one interval.\nInteractive simulation"
+  },
+  {
+    "objectID": "foundations/index.html#null-hypothesis-testing-evidence-and-decisions",
+    "href": "foundations/index.html#null-hypothesis-testing-evidence-and-decisions",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "6. Null hypothesis testing: evidence and decisions",
+    "text": "6. Null hypothesis testing: evidence and decisions\nEstimated time: 30–40 minutes\nUse a simulated machining-quality example to learn how a null hypothesis, null distribution, p-value, significance level, and Type-I error fit together.\nView the notebook\nCompanion interactive (10–15 minutes): Specify either a Normal or Uniform null population, then simulate its sample means to see where the one observed mean falls in the null distribution and estimate a two-sided p-value.\nInteractive simulation"
+  },
+  {
+    "objectID": "foundations/index.html#type-i-and-type-ii-errors",
+    "href": "foundations/index.html#type-i-and-type-ii-errors",
+    "title": "Foundations: Getting started with engineering data",
+    "section": "7. Type-I and Type-II errors",
+    "text": "7. Type-I and Type-II errors\nEstimated time: 15–20 minutes\nSeparate a test decision from the unknown population state, then use judicial and medical examples to identify false positives and false negatives.\nView the page"
+  },
+  {
+    "objectID": "foundations/07-type-i-and-ii-errors.html",
+    "href": "foundations/07-type-i-and-ii-errors.html",
+    "title": "Type-I and Type-II errors: decisions under uncertainty",
+    "section": "",
+    "text": "A hypothesis test makes a decision from limited observations. The population state is not directly observable, so even a well-designed decision rule can make mistakes. This page develops the general structure of those mistakes before returning to the shaft-diameter example."
+  },
+  {
+    "objectID": "foundations/07-type-i-and-ii-errors.html#learning-objectives",
+    "href": "foundations/07-type-i-and-ii-errors.html#learning-objectives",
+    "title": "Type-I and Type-II errors: decisions under uncertainty",
+    "section": "Learning objectives",
+    "text": "Learning objectives\n\nDistinguish the actual state of the world from a test decision.\nLocate Type-I and Type-II errors in a general \\(2\\times2\\) table.\nRecognize the same structure in judicial and medical settings."
+  },
+  {
+    "objectID": "foundations/07-type-i-and-ii-errors.html#decisions-and-truth-are-different-things",
+    "href": "foundations/07-type-i-and-ii-errors.html#decisions-and-truth-are-different-things",
+    "title": "Type-I and Type-II errors: decisions under uncertainty",
+    "section": "1. Decisions and truth are different things",
+    "text": "1. Decisions and truth are different things\nA hypothesis test has two possible decisions: reject \\(H_0\\) or fail to reject \\(H_0\\). Meanwhile, the population has one of two possible states: \\(H_0\\) is true or \\(H_0\\) is false. In this two-sided test, a false \\(H_0\\) corresponds to \\(H_A\\) being true. The test decision is based on a sample; the population state is the underlying reality that generated it.\nIn one particular application, we usually do not get to observe that reality with certainty. The \\(2\\times2\\) table instead describes what happens across many comparable decisions.\nOne wording matters: fail to reject \\(H_0\\) does not mean accept \\(H_0\\). It means that the observed sample did not provide sufficient evidence against \\(H_0\\) under the chosen decision rule."
+  },
+  {
+    "objectID": "foundations/07-type-i-and-ii-errors.html#the-general-2times2-table",
+    "href": "foundations/07-type-i-and-ii-errors.html#the-general-2times2-table",
+    "title": "Type-I and Type-II errors: decisions under uncertainty",
+    "section": "2. The general \\(2\\times2\\) table",
+    "text": "2. The general \\(2\\times2\\) table\n\n\n\n\n\n\n\n\nActual population state\nFail to reject \\(H_0\\)\nReject \\(H_0\\)\n\n\n\n\n\\(H_0\\) is true\nCorrect decision\nType-I error: reject a true null hypothesis\n\n\n\\(H_A\\) is true\nType-II error: fail to reject a false null hypothesis\nCorrect detection\n\n\n\nA Type-I error is a false positive: the procedure signals a difference when no difference is actually present. A Type-II error is a false negative: the procedure misses a difference that is actually present."
+  },
+  {
+    "objectID": "foundations/07-type-i-and-ii-errors.html#the-same-structure-in-familiar-settings",
+    "href": "foundations/07-type-i-and-ii-errors.html#the-same-structure-in-familiar-settings",
+    "title": "Type-I and Type-II errors: decisions under uncertainty",
+    "section": "3. The same structure in familiar settings",
+    "text": "3. The same structure in familiar settings\nThe terminology becomes clearer when we identify the null hypothesis, the action represented by rejecting it, and the four possible outcomes.\n\nJudicial setting\nTake the null hypothesis, \\(H_0\\), to be: the defendant is innocent. Rejecting \\(H_0\\) corresponds to conviction.\n\n\n\n\n\n\n\n\nActual state\nDo not convict (fail to reject \\(H_0\\))\nConvict (reject \\(H_0\\))\n\n\n\n\nDefendant is innocent\nCorrect: do not convict\nType-I error: convict an innocent person\n\n\nDefendant is guilty\nType-II error: fail to convict a guilty person\nCorrect conviction\n\n\n\nThe language of not guilty parallels fail to reject: it is not a claim that the defendant is known to be innocent.\n\n\nMedical screening\nFor a screening test, take \\(H_0\\) to be: the patient does not have the disease. Rejecting \\(H_0\\) corresponds to a positive screen.\n\n\n\n\n\n\n\n\nActual state\nNegative screen (fail to reject \\(H_0\\))\nPositive screen (reject \\(H_0\\))\n\n\n\n\nPatient does not have the disease\nCorrect negative\nType-I error: false positive\n\n\nPatient has the disease\nType-II error: false negative\nCorrect positive\n\n\n\nWhich error is more serious depends on the condition, the follow-up test, and the consequences of delayed treatment.\n\n\nShaft-diameter process\nReturn now to our machining process. Take \\(H_0\\) to be: the process mean shaft diameter is 20.00 mm. Rejecting \\(H_0\\) means investigating or adjusting the process.\n\n\n\n\n\n\n\n\nActual process state\nContinue operation (fail to reject \\(H_0\\))\nInvestigate or adjust (reject \\(H_0\\))\n\n\n\n\nProcess is centered at 20.00 mm\nCorrect: leave a stable process alone\nType-I error: unnecessarily interrupt a stable process\n\n\nProcess mean has shifted\nType-II error: miss a real shift\nCorrect detection: investigate or adjust the process"
+  },
+  {
+    "objectID": "foundations/07-type-i-and-ii-errors.html#from-error-types-to-error-rates",
+    "href": "foundations/07-type-i-and-ii-errors.html#from-error-types-to-error-rates",
+    "title": "Type-I and Type-II errors: decisions under uncertainty",
+    "section": "4. From error types to error rates",
+    "text": "4. From error types to error rates\nThe \\(2\\times2\\) table names the possible outcomes of one decision. To design a test, we also need to describe how often its errors occur over many comparable samples.\n\nType-I error rate: \\(\\alpha\\)\nThe significance level, \\(\\alpha\\), is the probability of rejecting a true null hypothesis:\n\\[\n\\alpha = P(\\text{reject } H_0 \\mid H_0 \\text{ is true}).\n\\]\nWe choose \\(\\alpha\\) before examining the data. With \\(\\alpha = 0.05\\), a decision procedure is designed to make a Type-I error about 5% of the time when \\(H_0\\) is true.\n\n\nType-II error rate: \\(\\beta\\)\nThe Type-II error rate is the probability of failing to reject \\(H_0\\) when a particular alternative is actually true:\n\\[\n\\beta(\\mu_A) = P(\\text{fail to reject } H_0 \\mid \\mu = \\mu_A).\n\\]\nUnlike \\(\\alpha\\), \\(\\beta\\) is not one universal number. It depends on which real shift we are trying to detect. For the shaft process, missing a shift to \\(20.05\\) mm is more likely than missing a shift to \\(20.30\\) mm.\nThe probability of correctly rejecting \\(H_0\\) when that particular alternative is true is the power of the test:\n\\[\n\\text{power}(\\mu_A) = 1 - \\beta(\\mu_A).\n\\]\nReturn to the Foundations page"
+  },
+  {
     "objectID": "foundations/04-central-limit-theorem.html",
     "href": "foundations/04-central-limit-theorem.html",
     "title": "Central Limit Theorem: an interactive simulation",
@@ -294,53 +427,39 @@
     "text": "The central limit theorem (CLT) concerns the sample mean, not the shape of the individual observations. Use the controls below to draw many independent samples from one population. Each trial contributes one sample mean to the plot on the right.\n\n\n\n\n\n\nTipWhat to compare\n\n\n\nKeep the distribution and number of trials fixed, then increase the sample size. The distribution of sample means should become narrower and more nearly bell-shaped. In contrast, increasing the number of trials only gives a clearer view of that same sampling distribution.\n\n\n\n  \n    \n      Underlying distribution\n      \n        Uniform (0, 1)\n        Binomial (10, 0.2)\n        Poisson (λ = 3)\n        Exponential (mean 1)\n        Normal (0, 1)\n      \n    \n    \n      Sample size, n (1–1,000)\n      \n    \n    \n      Total trials, B (1–2,000)\n      \n    \n    \n      Add trials\n      \n        1\n        5\n        10\n        25\n        50\n      \n    \n  \n\n  \n    Add trials\n    Run remaining trials\n    Reset\n  \n\n  No trials yet. Add a small batch to begin.\n\n  \n    \n      Most recent sample observations theoretical population\n      \n    \n    \n      Distribution of sample means\n      \n    \n  \n\n← Return to Foundations"
   },
   {
-    "objectID": "foundations/01-course-tools.html",
-    "href": "foundations/01-course-tools.html",
-    "title": "Course tools and Python foundations",
+    "objectID": "foundations/06-null-distribution-simulation.html",
+    "href": "foundations/06-null-distribution-simulation.html",
+    "title": "Null distributions: an interactive simulation",
     "section": "",
-    "text": "This notebook introduces the small set of Python tools used throughout the course. It is not a comprehensive Python tutorial: the goal is to be comfortable loading, inspecting, selecting, filtering, and plotting engineering data.\nLearning objectives"
+    "text": "The null-hypothesis-testing notebook gave us one observed quality-control sample:\n\\[\nn = 25,\n\\qquad\n\\bar{X}=20.20\\text{ mm},\n\\qquad\nS=0.40\\text{ mm}.\n\\]\nWe want to know where that one observed sample mean would stand if the null claim (\\(H_0: \\mu = 20.00\\ \\text{mm}\\)) were true. Choose a null population below, then generate many hypothetical samples of 25 shafts. The resulting distribution of sample means is the null distribution for this test.\nThe Normal and Uniform models have different shapes for individual shaft diameters, but their displayed parameters give both models the same null mean and population SD. The simulation does not estimate these parameters; it takes them as the specified null model.\n\n\n\n\n\n\nTipWhat to watch\n\n\n\nThe dashed line marks the null mean, 20.00 mm, and the solid red line marks the observed mean, 20.20 mm. First build the null distribution and assess how unusual the observation looks. Then use Show rejection region to reveal the two-sided decision rule for a chosen \\(\\alpha\\). The simulation estimates the two-sided p-value by counting sample means at least as extreme as the observation.\n\n\n\n  \n    \n      Null population model\n      \n        Normal\n        Uniform\n      \n    \n    \n      Total trials, B (1,000–10,000)\n      \n    \n    \n      Add trials\n      \n        1\n        5\n        25\n        100\n        250\n      \n    \n    \n      Significance level, α\n      \n        0.10\n        0.05\n        0.01\n      \n    \n  \n\n  Observed sample:\n    \\(n = 25\\);\n    \\(\\bar{X} = 20.20\\ \\text{mm}\\);\n    \\(S = 0.40\\ \\text{mm}\\).\n\n  \n\n  \n    Add trials\n    Run remaining trials\n    Show rejection region\n    Reset\n  \n\n  No trials yet. Add a small batch to begin.\n\n  \n    Null distribution of sample means two-sided critical region\n    \n  \n\n  \n\nWith a Normal population, the sample mean is exactly Normal. With a Uniform population, the sample mean is only approximately Normal—but with 25 observations, the central limit theorem makes the two null distributions look similar.\n← Return to Foundations"
   },
   {
-    "objectID": "foundations/01-course-tools.html#import-the-python-libraries",
-    "href": "foundations/01-course-tools.html#import-the-python-libraries",
-    "title": "Course tools and Python foundations",
-    "section": "1. Import the Python libraries",
-    "text": "1. Import the Python libraries\nThe next cell demonstrates how to import a Python library.\nimport numpy as np makes the NumPy library available in this notebook. The as keyword assigns the short alias np to NumPy’s namespace, so we can write np.array(...) instead of the longer numpy.array(...). Using np is a common convention in scientific Python.\n\n# Import NumPy first: it is the numerical-array tool used in this section.\nimport numpy as np"
+    "objectID": "foundations/03-variability-and-inference.html",
+    "href": "foundations/03-variability-and-inference.html",
+    "title": "Probability distributions and simulation",
+    "section": "",
+    "text": "Engineers use probability distributions to describe quantities that vary: a manufacturing dimension, a load, a sensor reading, or an emission measurement. In this notebook, you will use NumPy to simulate and visualize a few common distributions.\nThis is preparation for our in-class discussion of the central limit theorem (CLT). We will discuss sampling distributions, formal hypothesis tests, and p-values together in class.\nLearning objectives"
   },
   {
-    "objectID": "foundations/01-course-tools.html#numerical-arrays",
-    "href": "foundations/01-course-tools.html#numerical-arrays",
-    "title": "Course tools and Python foundations",
-    "section": "2. Numerical arrays",
-    "text": "2. Numerical arrays\nA NumPy array stores a collection of numerical values. Array operations act element-by-element, which makes calculations compact and readable.\n\n# Store repeated temperature measurements in a one-dimensional numerical array.\ntemperatures_c = np.array([15.2, 18.7, 21.4, 24.1])\n# NumPy applies this unit conversion to every element of the array at once.\ntemperatures_k = temperatures_c + 273.15\n\nprint(\"Temperatures in K:\", temperatures_k)\nprint(f\"Mean temperature: {temperatures_c.mean():.1f} °C\")\nprint(f\"Range: {temperatures_c.min():.1f}–{temperatures_c.max():.1f} °C\")\n\nTemperatures in K: [288.35 291.85 294.55 297.25]\nMean temperature: 19.9 °C\nRange: 15.2–24.1 °C\n\n\nThe array is useful for a single quantity observed repeatedly. A table with many named variables is better represented by a Pandas DataFrame.\nCompared with a native Python list, a NumPy array is designed for numerical work. It supports vectorized calculations—such as adding 273.15 to every temperature—in one clear operation, stores values efficiently, and is much faster for the large arrays used in data analysis and machine learning."
+    "objectID": "foundations/03-variability-and-inference.html#set-up-a-simulation",
+    "href": "foundations/03-variability-and-inference.html#set-up-a-simulation",
+    "title": "Probability distributions and simulation",
+    "section": "1. Set up a simulation",
+    "text": "1. Set up a simulation\nA simulation creates artificial observations according to rules we specify. This lets us isolate one statistical idea at a time before working with messier engineering measurements.\n\n# NumPy generates random samples; Matplotlib displays them.\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nplt.style.use(\"seaborn-v0_8-whitegrid\")\n# A fixed seed makes the examples reproducible: everyone sees the same draw.\nrng = np.random.default_rng(4520)"
   },
   {
-    "objectID": "foundations/01-course-tools.html#load-the-course-dataset",
-    "href": "foundations/01-course-tools.html#load-the-course-dataset",
-    "title": "Course tools and Python foundations",
-    "section": "3. Load the course dataset",
-    "text": "3. Load the course dataset\nThe Gas Turbine CO and NOx Emissions dataset records the operation of a gas turbine between 2011 and 2015. It combines ambient conditions, turbine sensor measurements, energy yield, and two emissions outcomes: carbon monoxide (CO) and nitrogen oxides (NOx).\nEach row represents one hourly observation of the system: the measured operating and environmental conditions during that hour, together with the emissions observed at that time. This course returns to the same dataset repeatedly so that the modeling choices remain connected to a physical system.\nThe original data and documentation are available from the UCI Machine Learning Repository.\n\n# Pandas represents a table with named columns as a DataFrame.\nimport pandas as pd\nfrom pathlib import Path\nfrom urllib.request import urlretrieve\n\n# Use the committed course version so everyone analyzes the same data.\nDATA_URL = (\n    \"https://raw.githubusercontent.com/changyaochen/MECE4520/master/\"\n    \"site/data/gas-turbine-course.csv\"\n)\n# Prefer a local copy; otherwise download it when this notebook runs independently.\ndata_path = next(\n    (path for path in [\n        Path(\"../data/gas-turbine-course.csv\"),\n        Path(\"site/data/gas-turbine-course.csv\"),\n        Path(\"gas-turbine-course.csv\")]\n        if path.exists()\n    ),\n    Path(\"gas-turbine-course.csv\"),\n)\nif not data_path.exists():\n    urlretrieve(DATA_URL, data_path)\ndata = pd.read_csv(data_path)\n\n# Inspect the dataset size before selecting variables or fitting a model.\nprint(f\"Rows: {len(data):,}\")\nprint(f\"Columns: {data.shape[1]}\")\ndata.head()\n\nRows: 36,733\nColumns: 12\n\n\n\n\n\n\n\n\n\ncampaign_year\nAT\nAP\nAH\nAFDP\nGTEP\nTIT\nTAT\nTEY\nCDP\nCO\nNOX\n\n\n\n\n0\n2011\n4.5878\n1018.7\n83.675\n3.5758\n23.979\n1086.2\n549.83\n134.67\n11.898\n0.32663\n81.952\n\n\n1\n2011\n4.2932\n1018.3\n84.235\n3.5709\n23.951\n1086.1\n550.05\n134.67\n11.892\n0.44784\n82.377\n\n\n2\n2011\n3.9045\n1018.4\n84.858\n3.5828\n23.990\n1086.5\n550.19\n135.10\n12.042\n0.45144\n83.776\n\n\n3\n2011\n3.7436\n1018.3\n85.434\n3.5808\n23.911\n1086.5\n550.17\n135.03\n11.990\n0.23107\n82.505\n\n\n4\n2011\n3.7516\n1017.8\n85.182\n3.5781\n23.917\n1085.9\n550.00\n134.67\n11.910\n0.26747\n82.028\n\n\n\n\n\n\n\nA good first habit is to inspect the column names and units before modeling. This data dictionary identifies every column in the course dataset.\n\n\n\nVariable\nMeaning\n\n\n\n\nAT\nAmbient temperature (°C)\n\n\nAP\nAmbient pressure (mbar)\n\n\nAH\nAmbient humidity (%)\n\n\nAFDP\nAir filter differential pressure (mbar)\n\n\nGTEP\nGas turbine exhaust pressure (mbar)\n\n\nTIT\nTurbine inlet temperature (°C)\n\n\nTAT\nTurbine after temperature (°C)\n\n\nTEY\nTurbine energy yield (MWh)\n\n\nCDP\nCompressor discharge pressure (mbar)\n\n\nCO\nCarbon monoxide emissions (mg/m³)\n\n\nNOX\nNitrogen oxides emissions (mg/m³)"
+    "objectID": "foundations/03-variability-and-inference.html#draw-samples-from-probability-distributions",
+    "href": "foundations/03-variability-and-inference.html#draw-samples-from-probability-distributions",
+    "title": "Probability distributions and simulation",
+    "section": "2. Draw samples from probability distributions",
+    "text": "2. Draw samples from probability distributions\nA distribution describes the values a variable can take and how frequently different values occur. We will begin with three useful distribution shapes. These are useful approximations, not automatic labels for every engineering variable: choosing a distribution should be guided by the physical mechanism and by observed data.\n\nNormal distribution\nA normal distribution is symmetric around a typical value and is often useful when many small, independent sources of variation add together. A familiar example is adult height within a relatively homogeneous population. An engineering example is repeated measurements of a machined part’s diameter when the process is stable.\nrng.normal(loc, scale, size) draws size observations with mean loc and standard deviation scale.\n\n# Simulate 1,000 measurements centered at 50 with a spread of 8.\nnormal_sample = rng.normal(loc=50, scale=8, size=1_000)\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.hist(normal_sample, bins=30, color=\"#4a90c2\", edgecolor=\"white\")\nax.set(\n    xlabel=\"Simulated measurement\",\n    ylabel=\"Number of observations\",\n    title=\"A simulated normal distribution\",\n)\nplt.show()\n\nprint(f\"Sample mean: {normal_sample.mean():.2f}\")\nprint(f\"Sample standard deviation: {normal_sample.std(ddof=1):.2f}\")\n\n\n\n\n\n\n\n\nSample mean: 49.76\nSample standard deviation: 7.84\n\n\n\n\nTry it\nDraw a normal sample centered at 100 with a standard deviation of 15. How do its histogram and sample summary differ from the one above?\n\n# my_sample = rng.normal(loc=..., scale=..., size=...)\n# print(my_sample.mean())\n# print(my_sample.std(ddof=1))\n\n\n\nUniform distribution\nIn a uniform distribution, every value in an interval is equally likely. A familiar example is an ideal random-number generator that returns any number from 0 to 1. An engineering simulation might choose an initial shaft angle at random between two limits, or sample evenly across an allowable tolerance range.\nrng.uniform(low, high, size) draws values evenly between two limits. Unlike the normal distribution, it has no single central value that is more likely than another within that interval.\n\n# Draw 5,000 values with equal probability anywhere from 0 to 10.\nuniform = rng.uniform(low=0, high=10, size=5_000)\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.hist(uniform, bins=35, density=True, color=\"#77a464\", edgecolor=\"white\")\nax.set(title=\"A simulated uniform distribution\", xlabel=\"Value\", ylabel=\"Density\")\nplt.show()\n\n\n\n\n\n\n\n\n\n\nExponential distribution\nAn exponential distribution is nonnegative and right-skewed, so it is often used to model waiting times. A familiar example is the waiting time until the next customer arrives when arrivals occur independently at a roughly constant average rate. In engineering, it can model the lifetime of one component when its instantaneous failure rate is assumed constant: a component that has already operated for 10 hours is, under this simplified model, no more or less likely to fail in the next hour than a new one.\nrng.exponential(scale, size) draws nonnegative, right-skewed values. Its average is approximately scale; most draws are relatively small, but occasionally a much larger value occurs.\n\n# Draw 5,000 waiting times with an average value of 2.\nexponential = rng.exponential(scale=2, size=5_000)\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.hist(exponential, bins=35, density=True, color=\"#d9903d\", edgecolor=\"white\")\nax.set(title=\"A simulated exponential distribution\", xlabel=\"Value\", ylabel=\"Density\")\nplt.show()"
   },
   {
-    "objectID": "foundations/01-course-tools.html#select-and-filter-data",
-    "href": "foundations/01-course-tools.html#select-and-filter-data",
-    "title": "Course tools and Python foundations",
-    "section": "4. Select and filter data",
-    "text": "4. Select and filter data\nData analysis often begins with two simple operations: selecting the columns (variables) relevant to a question and filtering the rows (observations) that meet a condition. The next cell demonstrates both operations on the gas-turbine data.\n\n# Select a small set of ambient, turbine, and emissions variables for inspection.\nselected = data[[\"AT\", \"TIT\", \"TEY\", \"CO\", \"NOX\"]]\n# Use the median to divide the observations into relatively warmer and cooler conditions.\nwarm_conditions = selected[selected[\"AT\"] &gt; selected[\"AT\"].median()]\n\nprint(\"Selected variables:\")\ndisplay(selected.head())\nprint(f\"Rows above the median ambient temperature: {len(warm_conditions):,}\")\nwarm_conditions.describe().loc[[\"mean\", \"std\", \"min\", \"max\"]]\n\nSelected variables:\n\n\n\n\n\n\n\n\n\nAT\nTIT\nTEY\nCO\nNOX\n\n\n\n\n0\n4.5878\n1086.2\n134.67\n0.32663\n81.952\n\n\n1\n4.2932\n1086.1\n134.67\n0.44784\n82.377\n\n\n2\n3.9045\n1086.5\n135.10\n0.45144\n83.776\n\n\n3\n3.7436\n1086.5\n135.03\n0.23107\n82.505\n\n\n4\n3.7516\n1085.9\n134.67\n0.26747\n82.028\n\n\n\n\n\n\n\nRows above the median ambient temperature: 18,365\n\n\n\n\n\n\n\n\n\nAT\nTIT\nTEY\nCO\nNOX\n\n\n\n\nmean\n24.005367\n1083.897964\n132.012501\n2.057256\n59.22925\n\n\nstd\n3.905948\n15.765051\n13.316517\n1.602460\n7.97456\n\n\nmin\n17.802000\n1024.800000\n100.040000\n0.001594\n25.90500\n\n\nmax\n37.103000\n1100.900000\n160.370000\n37.746000\n119.91000"
-  },
-  {
-    "objectID": "foundations/01-course-tools.html#make-a-first-plot",
-    "href": "foundations/01-course-tools.html#make-a-first-plot",
-    "title": "Course tools and Python foundations",
-    "section": "5. Make a first plot",
-    "text": "5. Make a first plot\nA scatter plot helps us inspect whether two variables move together. Each point below is one hourly observation. We draw only a random subset so the plot remains readable.\n\n# Import Matplotlib only when we are ready to make a figure.\nimport matplotlib.pyplot as plt\n\n# Use a readable plotting style for the exploratory figure below.\nplt.style.use(\"seaborn-v0_8-whitegrid\")\n\n# Plot a reproducible subset so overlapping points do not hide the overall pattern.\n# This is useful for large datasets.\nplot_data = data.sample(n=2_000, random_state=4520)\n\n# Each point represents one hourly turbine observation.\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.scatter(plot_data[\"TIT\"], plot_data[\"NOX\"], alpha=0.25, s=12)\nax.set(\n    xlabel=\"Turbine inlet temperature, TIT (°C)\",\n    ylabel=\"NOx emissions (mg/m³)\",\n    title=\"A first view of turbine inlet temperature and NOx emissions\",\n)\nplt.show()"
-  },
-  {
-    "objectID": "foundations/01-course-tools.html#check-in",
-    "href": "foundations/01-course-tools.html#check-in",
-    "title": "Course tools and Python foundations",
+    "objectID": "foundations/03-variability-and-inference.html#check-in",
+    "href": "foundations/03-variability-and-inference.html#check-in",
+    "title": "Probability distributions and simulation",
     "section": "Check-in",
-    "text": "Check-in\n\nChange the plotting code to use AT or TEY on the horizontal axis. What pattern do you see?\nWhat is one question you would ask before interpreting this plot as a causal relationship?\nIn one sentence, explain the difference between a NumPy array and a Pandas DataFrame.\n\nKeep your answers in your own notes. We will build on this dataset in the next notebook.\nReturn to the Foundations page"
+    "text": "Check-in\n\nWhich simulated distribution is symmetric? Which is right-skewed?\nIn rng.normal(loc, scale, size), what does each argument control?\nGive one setting in which a uniform distribution would be a reasonable model, and one in which it would not.\n\nKeep your answers in your own notes. Bring your questions about these distributions and the CLT to class.\nReturn to the Foundations page"
   },
   {
     "objectID": "regression/index.html",

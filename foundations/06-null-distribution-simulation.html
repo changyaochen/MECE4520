@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Foundations: Getting started with engineering data – MECE 4520</title>
+<title>Null distributions: an interactive simulation – MECE 4520</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -79,6 +79,35 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -276,7 +305,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../foundations/index.html" aria-current="page"> 
+    <a class="nav-link" href="../foundations/index.html"> 
 <span class="menu-text">Foundations</span></a>
   </li>  
   <li class="nav-item">
@@ -292,23 +321,22 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content column-page" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Foundations: Getting started with engineering data</h1>
+<h1 class="title">Null distributions: an interactive simulation</h1>
 </div>
 
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page">
 
     
   
@@ -319,69 +347,337 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<nav id="TOC" role="doc-toc">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#course-tools-and-python-foundations" id="toc-course-tools-and-python-foundations">1. Course tools and Python foundations</a></li>
-  <li><a href="#a-first-look-at-gas-turbine-emissions-data" id="toc-a-first-look-at-gas-turbine-emissions-data">2. A first look at gas-turbine emissions data</a></li>
-  <li><a href="#probability-distributions-and-simulation" id="toc-probability-distributions-and-simulation">3. Probability distributions and simulation</a></li>
-  <li><a href="#central-limit-theorem-interactive-simulation-and-notebook" id="toc-central-limit-theorem-interactive-simulation-and-notebook">4. Central Limit Theorem: interactive simulation and notebook</a></li>
-  <li><a href="#confidence-intervals-interactive-coverage-simulation" id="toc-confidence-intervals-interactive-coverage-simulation">5. Confidence intervals: interactive coverage simulation</a></li>
-  <li><a href="#null-hypothesis-testing-evidence-and-decisions" id="toc-null-hypothesis-testing-evidence-and-decisions">6. Null hypothesis testing: evidence and decisions</a></li>
-  <li><a href="#type-i-and-type-ii-errors" id="toc-type-i-and-type-ii-errors">7. Type-I and Type-II errors</a></li>
-  </ul>
-</nav>
-<p>These materials establish the shared computational and statistical vocabulary used throughout MECE 4520, using the course’s recurring gas-turbine emissions dataset. Complete the first three notebooks in order before beginning the course’s main modules; plan for approximately 2.5–3 hours in total. The CLT interactive is a companion to the first in-class discussion and can be revisited as needed.</p>
-<p>We highly recommend working with Google Colab. This allows you to run the notebooks in the cloud without tedious local setup. At the end of each notebook, there is a “Check-in” section that encourages you to try out what you’ve learned.</p>
-<p>The notebooks use the course version of the gas-turbine dataset. It retains the original measurements while adding a <code>campaign_year</code> field and documented missing values for later data-pipeline exercises. If opened independently in a fresh environment, they download that same course version from this repository.</p>
-<section id="course-tools-and-python-foundations" class="level2">
-<h2 class="anchored" data-anchor-id="course-tools-and-python-foundations">1. Course tools and Python foundations</h2>
-<p><strong>Estimated time:</strong> 30–45 minutes</p>
-<p>Learn the minimal NumPy and Pandas workflow used in the course: loading data, selecting variables, filtering observations, and making a first plot.</p>
-<p><a href="../foundations/01-course-tools.html">View the notebook</a></p>
-</section>
-<section id="a-first-look-at-gas-turbine-emissions-data" class="level2">
-<h2 class="anchored" data-anchor-id="a-first-look-at-gas-turbine-emissions-data">2. A first look at gas-turbine emissions data</h2>
-<p><strong>Estimated time:</strong> 45–60 minutes</p>
-<p>Explore the measurements, variables, distributions, and simple physical questions in the Gas Turbine CO and NOx Emissions dataset.</p>
-<p><a href="../foundations/02-gas-turbine-data.html">View the notebook</a></p>
-</section>
-<section id="probability-distributions-and-simulation" class="level2">
-<h2 class="anchored" data-anchor-id="probability-distributions-and-simulation">3. Probability distributions and simulation</h2>
-<p><strong>Estimated time:</strong> 45–60 minutes</p>
-<p>Practice drawing and visualizing simulated normal, uniform, and exponential data, and connect their shapes to familiar and engineering situations.</p>
-<p><a href="../foundations/03-variability-and-inference.html">View the notebook</a></p>
-</section>
-<section id="central-limit-theorem-interactive-simulation-and-notebook" class="level2">
-<h2 class="anchored" data-anchor-id="central-limit-theorem-interactive-simulation-and-notebook">4. Central Limit Theorem: interactive simulation and notebook</h2>
-<p><strong>Estimated time:</strong> 20–30 minutes</p>
-<p>Build a distribution of sample means one batch at a time, then see how the sample size changes its shape and spread. The interactive and companion notebook accompany the first in-class discussion of the central limit theorem.</p>
-<p><a href="../foundations/04-central-limit-theorem.html">Interactive simulation</a></p>
-<p><a href="../foundations/04-central-limit-theorem-notebook.html">View the notebook</a></p>
-</section>
-<section id="confidence-intervals-interactive-coverage-simulation" class="level2">
-<h2 class="anchored" data-anchor-id="confidence-intervals-interactive-coverage-simulation">5. Confidence intervals: interactive coverage simulation</h2>
-<p><strong>Estimated time:</strong> 10–15 minutes</p>
-<p>Repeatedly draw samples from a known normal population and construct a 95% confidence interval for each. See why 95% refers to the long-run coverage of the procedure, rather than a guarantee for one interval.</p>
-<p><a href="../foundations/05-confidence-interval-coverage.html">Interactive simulation</a></p>
-</section>
-<section id="null-hypothesis-testing-evidence-and-decisions" class="level2">
-<h2 class="anchored" data-anchor-id="null-hypothesis-testing-evidence-and-decisions">6. Null hypothesis testing: evidence and decisions</h2>
-<p><strong>Estimated time:</strong> 30–40 minutes</p>
-<p>Use a simulated machining-quality example to learn how a null hypothesis, null distribution, p-value, significance level, and Type-I error fit together.</p>
-<p><a href="../foundations/06-null-hypothesis-testing.html">View the notebook</a></p>
-<p><strong>Companion interactive (10–15 minutes):</strong> Specify either a Normal or Uniform null population, then simulate its sample means to see where the one observed mean falls in the null distribution and estimate a two-sided p-value.</p>
-<p><a href="../foundations/06-null-distribution-simulation.html">Interactive simulation</a></p>
-</section>
-<section id="type-i-and-type-ii-errors" class="level2">
-<h2 class="anchored" data-anchor-id="type-i-and-type-ii-errors">7. Type-I and Type-II errors</h2>
-<p><strong>Estimated time:</strong> 15–20 minutes</p>
-<p>Separate a test decision from the unknown population state, then use judicial and medical examples to identify false positives and false negatives.</p>
-<p><a href="../foundations/07-type-i-and-ii-errors.html">View the page</a></p>
+
+<p>The null-hypothesis-testing notebook gave us one observed quality-control sample:</p>
+<p><span class="math display">\[
+n = 25,
+\qquad
+\bar{X}=20.20\text{ mm},
+\qquad
+S=0.40\text{ mm}.
+\]</span></p>
+<p>We want to know where that one observed sample mean would stand if the null claim (<span class="math inline">\(H_0: \mu = 20.00\ \text{mm}\)</span>) were true. Choose a null population below, then generate many hypothetical samples of 25 shafts. The resulting distribution of sample means is the null distribution for this test.</p>
+<p>The Normal and Uniform models have different shapes for individual shaft diameters, but their displayed parameters give both models the same null mean and population SD. The simulation does not estimate these parameters; it takes them as the specified null model.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>What to watch
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The dashed line marks the null mean, 20.00 mm, and the solid red line marks the observed mean, 20.20 mm. First build the null distribution and assess how unusual the observation looks. Then use <strong>Show rejection region</strong> to reveal the two-sided decision rule for a chosen <span class="math inline">\(\alpha\)</span>. The simulation estimates the two-sided p-value by counting sample means at least as extreme as the observation.</p>
+</div>
+</div>
+<div id="null-test-explorer" class="clt-explorer" aria-label="Null distribution hypothesis-testing simulation">
+  <div class="clt-controls">
+    <label>
+      Null population model
+      <select id="null-test-distribution">
+        <option value="normal">Normal</option>
+        <option value="uniform">Uniform</option>
+      </select>
+    </label>
+    <label>
+      <span>Total trials, <i>B</i> (1,000–10,000)</span>
+      <input id="null-test-total-trials" type="number" min="1000" max="10000" step="1" value="5000" inputmode="numeric">
+    </label>
+    <label>
+      Add trials
+      <select id="null-test-batch-size">
+        <option value="1">1</option>
+        <option value="5">5</option>
+        <option value="25" selected="">25</option>
+        <option value="100">100</option>
+        <option value="250">250</option>
+      </select>
+    </label>
+    <label id="null-test-alpha-control" hidden="">
+      <span>Significance level, <i>α</i></span>
+      <select id="null-test-alpha">
+        <option value="0.10">0.10</option>
+        <option value="0.05" selected="">0.05</option>
+        <option value="0.01">0.01</option>
+      </select>
+    </label>
+  </div>
+
+  <p class="null-test-summary"><strong>Observed sample:</strong>
+    <span class="math inline">\(n = 25\)</span>;
+    <span class="math inline">\(\bar{X} = 20.20\ \text{mm}\)</span>;
+    <span class="math inline">\(S = 0.40\ \text{mm}\)</span>.</p>
+
+  <div id="null-test-summary" class="null-test-summary" aria-live="polite"></div>
+
+  <div class="clt-buttons" aria-label="Simulation controls">
+    <button id="null-test-add" type="button">Add trials</button>
+    <button id="null-test-run" type="button">Run remaining trials</button>
+    <button id="null-test-reveal" type="button" aria-pressed="false">Show rejection region</button>
+    <button id="null-test-reset" type="button">Reset</button>
+  </div>
+
+  <p id="null-test-status" class="clt-status" aria-live="polite">No trials yet. Add a small batch to begin.</p>
+
+  <figure class="clt-plot null-test-plot figure">
+    <figcaption>Null distribution of sample means <span id="null-test-critical-legend" class="clt-legend" hidden=""><span class="null-test-critical-swatch"></span><span id="null-test-critical-legend-text">two-sided critical region</span></span></figcaption>
+    <svg id="null-test-sample-means" role="img" aria-label="Accumulating null distribution of sample means"></svg>
+  </figure>
+
+  <p id="null-test-decision" class="null-test-decision" aria-live="polite" hidden=""></p>
+</div>
+<p>With a Normal population, the sample mean is exactly Normal. With a Uniform population, the sample mean is only approximately Normal—but with 25 observations, the central limit theorem makes the two null distributions look similar.</p>
+<p><a href="../foundations/index.html">← Return to Foundations</a></p>
+<script>
+(() => {
+  const root = document.getElementById("null-test-explorer");
+  if (!root) return;
+
+  const sampleSize = 25;
+  const observedMean = 20.20;
+  const observedSampleSd = 0.40;
+  const nullMean = 20.00;
+  const nullPopulationSd = 0.40;
+  const observedDistance = Math.abs(observedMean - nullMean);
+  const uniformLower = nullMean - Math.sqrt(3) * nullPopulationSd;
+  const uniformUpper = nullMean + Math.sqrt(3) * nullPopulationSd;
+
+  const distributionInput = document.getElementById("null-test-distribution");
+  const totalTrialsInput = document.getElementById("null-test-total-trials");
+  const batchSizeInput = document.getElementById("null-test-batch-size");
+  const alphaControl = document.getElementById("null-test-alpha-control");
+  const alphaInput = document.getElementById("null-test-alpha");
+  const addButton = document.getElementById("null-test-add");
+  const runButton = document.getElementById("null-test-run");
+  const revealButton = document.getElementById("null-test-reveal");
+  const resetButton = document.getElementById("null-test-reset");
+  const summary = document.getElementById("null-test-summary");
+  const status = document.getElementById("null-test-status");
+  const criticalLegend = document.getElementById("null-test-critical-legend");
+  const criticalLegendText = document.getElementById("null-test-critical-legend-text");
+  const decision = document.getElementById("null-test-decision");
+
+  let means = [];
+  let showRejectionRegion = false;
+
+  const clamp = (value, lower, upper) => Math.max(lower, Math.min(upper, value));
+  const getTotalTrials = () => clamp(Number.parseInt(totalTrialsInput.value, 10) || 5000, 1000, 10000);
+  const getAlpha = () => Number.parseFloat(alphaInput.value);
+
+  function criticalValues() {
+    const alpha = getAlpha();
+    const criticalZ = { 0.10: 1.6449, 0.05: 1.9600, 0.01: 2.5758 }[alpha];
+    const criticalDistance = criticalZ * nullPopulationSd / Math.sqrt(sampleSize);
+    return {
+      alpha,
+      lower: nullMean - criticalDistance,
+      upper: nullMean + criticalDistance
+    };
+  }
+
+  function normalRandom() {
+    const u = 1 - Math.random();
+    const v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function activeModel() {
+    if (distributionInput.value === "uniform") {
+      return {
+        name: "Uniform",
+        parameters: `Uniform population: lower bound = ${uniformLower.toFixed(3)} mm; upper bound = ${uniformUpper.toFixed(3)} mm`,
+        draw: () => uniformLower + Math.random() * (uniformUpper - uniformLower)
+      };
+    }
+    return {
+      name: "Normal",
+      parameters: "Normal population: mean = 20.00 mm; SD = 0.40 mm",
+      draw: () => nullMean + nullPopulationSd * normalRandom()
+    };
+  }
+
+  function svgElement(tag, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    svg.append(element);
+  }
+
+  function prepareSvg() {
+    const svg = document.getElementById("null-test-sample-means");
+    const width = Math.max(320, Math.round(svg.getBoundingClientRect().width || 920));
+    const height = 300;
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+    return { svg, width, height, margin: { top: 20, right: 22, bottom: 40, left: 48 } };
+  }
+
+  function addAxes(chart, domain, maximum) {
+    const { svg, width, height, margin } = chart;
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const x = value => margin.left + ((value - domain[0]) / (domain[1] - domain[0])) * plotWidth;
+    const y = value => margin.top + plotHeight - (value / maximum) * plotHeight;
+
+    svg.append(svgElement("line", { x1: margin.left, y1: y(0), x2: width - margin.right, y2: y(0), class: "clt-axis" }));
+    svg.append(svgElement("line", { x1: margin.left, y1: margin.top, x2: margin.left, y2: y(0), class: "clt-axis" }));
+    for (let i = 0; i <= 4; i += 1) {
+      const value = domain[0] + (i / 4) * (domain[1] - domain[0]);
+      const tickX = x(value);
+      svg.append(svgElement("line", { x1: tickX, y1: y(0), x2: tickX, y2: y(0) + 4, class: "clt-axis" }));
+      addText(svg, value.toFixed(2), tickX, height - 14, { class: "clt-tick", "text-anchor": "middle" });
+    }
+    const labelX = 14;
+    const labelY = margin.top + plotHeight / 2;
+    addText(svg, "simulated samples", labelX, labelY, {
+      class: "clt-tick",
+      "text-anchor": "middle",
+      transform: `rotate(-90 ${labelX} ${labelY})`
+    });
+    return { x, y };
+  }
+
+  function histogram(values, domain, binCount) {
+    const bins = Array.from({ length: binCount }, () => 0);
+    const width = (domain[1] - domain[0]) / binCount;
+    values.forEach(value => {
+      const index = clamp(Math.floor((value - domain[0]) / width), 0, binCount - 1);
+      bins[index] += 1;
+    });
+    return { bins, width };
+  }
+
+  function drawNullDistribution() {
+    const chart = prepareSvg();
+    const standardError = nullPopulationSd / Math.sqrt(sampleSize);
+    const { lower: lowerCritical, upper: upperCritical } = criticalValues();
+    const observedSpread = means.length ? Math.max(...means.map(mean => Math.abs(mean - nullMean))) : 0;
+    const spread = Math.max(4 * standardError, observedDistance * 1.35, observedSpread * 1.12);
+    const domain = [nullMean - spread, nullMean + spread];
+    const binCount = 64;
+    const { bins, width: binWidth } = histogram(means, domain, binCount);
+    const maximum = Math.max(...bins, 1) * 1.12;
+    const { svg, width, height, margin } = chart;
+    const { x, y } = addAxes(chart, domain, maximum);
+
+    if (showRejectionRegion) {
+      [
+        [domain[0], lowerCritical],
+        [upperCritical, domain[1]]
+      ].forEach(([start, end]) => {
+        svg.append(svgElement("rect", {
+          x: x(start),
+          y: margin.top,
+          width: Math.max(0, x(end) - x(start)),
+          height: y(0) - margin.top,
+          class: "null-test-critical-region"
+        }));
+      });
+    }
+
+    bins.forEach((count, index) => {
+      const start = domain[0] + index * binWidth;
+      const attributes = {
+        x: x(start) + 1,
+        y: y(count),
+        width: Math.max(1, x(start + binWidth) - x(start) - 2),
+        height: y(0) - y(count),
+        class: "clt-means-bar"
+      };
+      svg.append(svgElement("rect", attributes));
+    });
+
+    const nullX = x(nullMean);
+    svg.append(svgElement("line", { x1: nullX, y1: margin.top, x2: nullX, y2: y(0), class: "clt-mean-line" }));
+    addText(svg, "null mean: 20.00", Math.min(nullX + 4, width - 95), margin.top + 13, { class: "clt-annotation" });
+
+    if (showRejectionRegion) {
+      [lowerCritical, upperCritical].forEach(cutoff => {
+        const cutoffX = x(cutoff);
+        svg.append(svgElement("line", { x1: cutoffX, y1: margin.top, x2: cutoffX, y2: y(0), class: "null-test-critical-boundary" }));
+      });
+    }
+
+    const observedX = x(observedMean);
+    svg.append(svgElement("line", { x1: observedX, y1: margin.top, x2: observedX, y2: y(0), class: "null-test-observed-line" }));
+    addText(svg, "observed mean: 20.20", Math.min(observedX + 4, width - 125), margin.top + 13, { class: "clt-annotation" });
+
+    if (!means.length) {
+      addText(svg, "The simulated null distribution will appear here.", width / 2, height / 2, {
+        class: "clt-empty-message", "text-anchor": "middle"
+      });
+    }
+  }
+
+  function addTrials(requested) {
+    const total = getTotalTrials();
+    const numberToAdd = Math.min(requested, Math.max(0, total - means.length));
+    const model = activeModel();
+    for (let trial = 0; trial < numberToAdd; trial += 1) {
+      let sum = 0;
+      for (let observation = 0; observation < sampleSize; observation += 1) sum += model.draw();
+      means.push(sum / sampleSize);
+    }
+    render();
+  }
+
+  function render() {
+    const model = activeModel();
+    const total = getTotalTrials();
+    const completed = means.length;
+    const remaining = total - completed;
+    const extremeCount = means.filter(mean => Math.abs(mean - nullMean) >= observedDistance).length;
+    summary.innerHTML = `<p><strong>Selected null model:</strong> ${model.parameters}.</p>`;
+    const { alpha, lower, upper } = criticalValues();
+    const rejects = observedMean < lower || observedMean > upper;
+    alphaControl.hidden = !showRejectionRegion;
+    criticalLegend.hidden = !showRejectionRegion;
+    criticalLegendText.textContent = `two-sided critical region, α = ${alpha.toFixed(2)}`;
+    decision.hidden = !showRejectionRegion;
+    if (showRejectionRegion) {
+      const typeIError = `${(alpha * 100).toFixed(0)}%`;
+      decision.innerHTML = rejects
+        ? `<strong>Decision:</strong> With a Type-I error rate of ${typeIError}, we <strong>reject</strong> H<sub>0</sub>: the sample provides evidence that the process mean differs from 20.00 mm.`
+        : `<strong>Decision:</strong> With a Type-I error rate of ${typeIError}, we <strong>fail to reject</strong> H<sub>0</sub>: the sample does not provide sufficient evidence that the process mean differs from 20.00 mm.`;
+    }
+    drawNullDistribution();
+    status.textContent = completed
+      ? `${completed} of ${total} null samples completed. ${extremeCount} are at least as extreme as the observation (estimated two-sided p-value: ${(extremeCount / completed).toFixed(3)}).`
+      : "No trials yet. Add a small batch to begin.";
+    addButton.disabled = remaining <= 0;
+    runButton.disabled = remaining <= 0;
+  }
+
+  function reset() {
+    totalTrialsInput.value = getTotalTrials();
+    means = [];
+    render();
+  }
+
+  addButton.addEventListener("click", () => addTrials(Number.parseInt(batchSizeInput.value, 10)));
+  runButton.addEventListener("click", () => addTrials(getTotalTrials() - means.length));
+  revealButton.addEventListener("click", () => {
+    showRejectionRegion = !showRejectionRegion;
+    revealButton.textContent = showRejectionRegion ? "Hide rejection region" : "Show rejection region";
+    revealButton.setAttribute("aria-pressed", String(showRejectionRegion));
+    render();
+  });
+  resetButton.addEventListener("click", reset);
+  [distributionInput, totalTrialsInput].forEach(input => input.addEventListener("change", reset));
+  alphaInput.addEventListener("change", render);
+  window.addEventListener("resize", render);
+  reset();
+})();
+</script>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
