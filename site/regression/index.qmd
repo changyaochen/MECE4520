@@ -21,6 +21,16 @@ claim or a complete engineering model.
 
 [View the notebook](01-simple-linear-regression.ipynb)
 
+## 2. Uncertainty in a regression slope
+
+**Estimated time:** 35–45 minutes
+
+Use repeated samples to see why the temperature–NOx slope is an estimate, then
+quantify its uncertainty with a standard error, confidence interval, and
+hypothesis test.
+
+[View the notebook](02-testing-a-regression-slope.ipynb)
+
 ## Dataset source
 
 The underlying measurements come from the [Gas Turbine CO and NOx Emissions
