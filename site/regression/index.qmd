@@ -23,7 +23,22 @@ claim or a complete engineering model.
 
 ## 2. Uncertainty in a regression slope
 
-**Estimated time:** 35–45 minutes
+The interactive explorer and notebook work together: first make the variability
+of a fitted slope visible, then connect it to standard errors, confidence
+intervals, and hypothesis tests.
+
+### Interactive explorer
+
+**Estimated time:** 10–15 minutes
+
+Draw repeated samples of real turbine operating hours, watch fitted lines
+accumulate, and compare the spread of their slopes.
+
+[Open the interactive explorer](sampling-variability.qmd)
+
+### Notebook
+
+**Estimated time:** 50–65 minutes
 
 Use repeated samples to see why the temperature–NOx slope is an estimate, then
 quantify its uncertainty with a standard error, confidence interval, and
