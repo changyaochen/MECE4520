@@ -21,10 +21,27 @@ claim or a complete engineering model.
 
 [View the notebook](01-simple-linear-regression.ipynb)
 
-## Dataset source
+## 2. Uncertainty in a regression slope
 
-The underlying measurements come from the [Gas Turbine CO and NOx Emissions
-dataset](https://archive.ics.uci.edu/dataset/551/gas+turbine+co+and+nox+emission+data+set)
-at the UCI Machine Learning Repository. The course version adds a
-`campaign_year` field and documented missing values for later data-pipeline
-exercises.
+The interactive explorer and notebook work together: first make the variability
+of a fitted slope visible, then connect it to standard errors, confidence
+intervals, and hypothesis tests.
+
+### Interactive explorer
+
+**Estimated time:** 10–15 minutes
+
+Draw repeated samples of real turbine operating hours, watch fitted lines
+accumulate, and compare the spread of their slopes.
+
+[Open the interactive explorer](sampling-variability.qmd)
+
+### Notebook
+
+**Estimated time:** 50–65 minutes
+
+Use repeated samples to see why the temperature–NOx slope is an estimate, then
+quantify its uncertainty with a standard error, confidence interval, and
+hypothesis test.
+
+[View the notebook](02-testing-a-regression-slope.ipynb)

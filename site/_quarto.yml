@@ -1,6 +1,8 @@
 project:
   type: website
   output-dir: _site
+  resources:
+    - data/gas-turbine-course.csv
 
 website:
   title: "MECE 4520"

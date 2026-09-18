@@ -1,0 +1,349 @@
+---
+title: "Sampling variability in a regression slope"
+toc: false
+page-layout: full
+---
+
+The full gas-turbine dataset is one observed collection of operating hours,
+not the entire population of possible operating hours. This explorer makes
+that idea visible by repeatedly drawing paired AT–NOx observations from the
+course data and fitting a new simple-regression line each time.
+
+The draws are a visual thought experiment. They do not replace the
+model-based standard error developed in the [slope-inference
+notebook](02-testing-a-regression-slope.ipynb); instead, they show why the
+fitted slope $hat{\beta}_1$ changes from one plausible dataset to another.
+
+::: {.callout-tip}
+## What to compare
+
+Hold the sample size fixed and increase the number of samples: the histogram
+becomes smoother, but its underlying spread does not shrink. Then increase the
+sample size: the fitted-line fan and the slope histogram should become tighter.
+:::
+
+```{=html}
+<div id="regression-sampling-explorer" class="clt-explorer regression-sampling-explorer" aria-label="Interactive regression sampling-variability explorer">
+  <div class="clt-controls">
+    <label>
+      <span>Observations per fit, <i>n</i> (25–2,000)</span>
+      <input id="regression-sampling-size" type="number" min="25" max="2000" step="1" value="300" inputmode="numeric">
+    </label>
+    <label>
+      <span>Total samples, <i>B</i> (1–1,000)</span>
+      <input id="regression-sampling-total" type="number" min="1" max="1000" step="1" value="100" inputmode="numeric">
+    </label>
+    <label>
+      Add samples
+      <select id="regression-sampling-batch">
+        <option value="1">1</option>
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="clt-buttons" aria-label="Simulation controls">
+    <button id="regression-sampling-add" class="regression-sampling-primary" type="button" disabled>Add samples</button>
+    <button id="regression-sampling-run" type="button" disabled>Run remaining samples</button>
+    <button id="regression-sampling-reset" type="button" disabled>Reset</button>
+  </div>
+
+  <p id="regression-sampling-status" class="clt-status" aria-live="polite">Loading the gas-turbine data…</p>
+
+  <div class="clt-plots">
+    <figure class="clt-plot">
+      <figcaption><span id="regression-sampling-lines-title">Fitted sample lines</span> <span class="clt-legend"><span class="regression-sampling-line-swatch"></span>sample fits <span class="regression-sampling-full-swatch"></span>full-data fit</span></figcaption>
+      <svg id="regression-sampling-lines" role="img" aria-label="Temperature and NOx observations with fitted regression lines"></svg>
+    </figure>
+    <figure class="clt-plot">
+      <figcaption>Distribution of fitted slopes</figcaption>
+      <svg id="regression-sampling-slopes" role="img" aria-label="Histogram of fitted regression slopes"></svg>
+    </figure>
+  </div>
+</div>
+```
+
+<a href="index.qmd">← Return to Regression</a>
+
+<script>
+(() => {
+  const root = document.getElementById("regression-sampling-explorer");
+  if (!root) return;
+
+  const sampleSizeInput = document.getElementById("regression-sampling-size");
+  const totalSamplesInput = document.getElementById("regression-sampling-total");
+  const batchSizeInput = document.getElementById("regression-sampling-batch");
+  const addButton = document.getElementById("regression-sampling-add");
+  const runButton = document.getElementById("regression-sampling-run");
+  const resetButton = document.getElementById("regression-sampling-reset");
+  const status = document.getElementById("regression-sampling-status");
+  const linesTitle = document.getElementById("regression-sampling-lines-title");
+
+  const maxLinesToDraw = 100;
+  const plottedObservationCount = 2500;
+  let data = [];
+  let plottedData = [];
+  let fullFit = null;
+  let fits = [];
+  let dataReady = false;
+
+  const clamp = (value, lower, upper) => Math.max(lower, Math.min(upper, value));
+  const getSampleSize = () => clamp(Number.parseInt(sampleSizeInput.value, 10) || 300, 25, Math.min(2000, data.length || 2000));
+  const getTotalSamples = () => clamp(Number.parseInt(totalSamplesInput.value, 10) || 100, 1, 1000);
+
+  function svgElement(tag, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    svg.append(element);
+  }
+
+  function prepareSvg(id, height = 300) {
+    const svg = document.getElementById(id);
+    const width = Math.max(320, Math.round(svg.getBoundingClientRect().width || 600));
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+    return { svg, width, height, margin: { top: 22, right: 22, bottom: 42, left: 52 } };
+  }
+
+  function addAxes(chart, xDomain, yMaximum, xLabel, yLabel, decimals = 0) {
+    const { svg, width, height, margin } = chart;
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const x = value => margin.left + ((value - xDomain[0]) / (xDomain[1] - xDomain[0])) * plotWidth;
+    const y = value => margin.top + plotHeight - (value / yMaximum) * plotHeight;
+
+    svg.append(svgElement("line", { x1: margin.left, y1: y(0), x2: width - margin.right, y2: y(0), class: "clt-axis" }));
+    svg.append(svgElement("line", { x1: margin.left, y1: margin.top, x2: margin.left, y2: y(0), class: "clt-axis" }));
+
+    for (let i = 0; i <= 4; i += 1) {
+      const xValue = xDomain[0] + (i / 4) * (xDomain[1] - xDomain[0]);
+      const tickX = x(xValue);
+      svg.append(svgElement("line", { x1: tickX, y1: y(0), x2: tickX, y2: y(0) + 4, class: "clt-axis" }));
+      addText(svg, xValue.toFixed(decimals), tickX, height - 17, { class: "clt-tick", "text-anchor": "middle" });
+    }
+
+    for (let i = 1; i <= 3; i += 1) {
+      const yValue = (i / 3) * yMaximum;
+      const tickY = y(yValue);
+      svg.append(svgElement("line", { x1: margin.left - 4, y1: tickY, x2: margin.left, y2: tickY, class: "clt-axis" }));
+      addText(svg, yValue.toFixed(0), margin.left - 7, tickY + 4, { class: "clt-tick", "text-anchor": "end" });
+    }
+
+    addText(svg, xLabel, margin.left + plotWidth / 2, height - 3, { class: "clt-tick", "text-anchor": "middle" });
+    const labelX = 14;
+    const labelY = margin.top + plotHeight / 2;
+    addText(svg, yLabel, labelX, labelY, {
+      class: "clt-tick",
+      "text-anchor": "middle",
+      transform: `rotate(-90 ${labelX} ${labelY})`
+    });
+    return { x, y };
+  }
+
+  function fitLine(points) {
+    const n = points.length;
+    const meanX = points.reduce((sum, point) => sum + point.at, 0) / n;
+    const meanY = points.reduce((sum, point) => sum + point.nox, 0) / n;
+    let sxx = 0;
+    let sxy = 0;
+    points.forEach(point => {
+      const xDifference = point.at - meanX;
+      sxx += xDifference ** 2;
+      sxy += xDifference * (point.nox - meanY);
+    });
+    const slope = sxy / sxx;
+    return { slope, intercept: meanY - slope * meanX };
+  }
+
+  function sampleRows(count) {
+    const indices = new Set();
+    while (indices.size < count) indices.add(Math.floor(Math.random() * data.length));
+    return Array.from(indices, index => data[index]);
+  }
+
+  function histogram(values, domain, binCount) {
+    const bins = Array.from({ length: binCount }, () => 0);
+    const width = (domain[1] - domain[0]) / binCount;
+    values.forEach(value => {
+      const index = clamp(Math.floor((value - domain[0]) / width), 0, binCount - 1);
+      bins[index] += 1;
+    });
+    return { bins, width };
+  }
+
+  function dataExtent(key) {
+    const values = data.map(point => point[key]);
+    return [Math.min(...values), Math.max(...values)];
+  }
+
+  function paddedDomain([minimum, maximum], fraction = 0.06) {
+    const padding = Math.max(0.5, (maximum - minimum) * fraction);
+    return [minimum - padding, maximum + padding];
+  }
+
+  function drawFittedLines() {
+    const chart = prepareSvg("regression-sampling-lines");
+    const xDomain = paddedDomain(dataExtent("at"));
+    const yDomain = paddedDomain(dataExtent("nox"));
+    const { svg, width, height, margin } = chart;
+    const plotHeight = height - margin.top - margin.bottom;
+    const x = value => margin.left + ((value - xDomain[0]) / (xDomain[1] - xDomain[0])) * (width - margin.left - margin.right);
+    const y = value => margin.top + plotHeight - ((value - yDomain[0]) / (yDomain[1] - yDomain[0])) * plotHeight;
+
+    svg.append(svgElement("line", { x1: margin.left, y1: y(yDomain[0]), x2: width - margin.right, y2: y(yDomain[0]), class: "clt-axis" }));
+    svg.append(svgElement("line", { x1: margin.left, y1: margin.top, x2: margin.left, y2: y(yDomain[0]), class: "clt-axis" }));
+    for (let i = 0; i <= 4; i += 1) {
+      const xValue = xDomain[0] + (i / 4) * (xDomain[1] - xDomain[0]);
+      const tickX = x(xValue);
+      svg.append(svgElement("line", { x1: tickX, y1: y(yDomain[0]), x2: tickX, y2: y(yDomain[0]) + 4, class: "clt-axis" }));
+      addText(svg, xValue.toFixed(0), tickX, height - 17, { class: "clt-tick", "text-anchor": "middle" });
+    }
+    for (let i = 1; i <= 3; i += 1) {
+      const yValue = yDomain[0] + (i / 3) * (yDomain[1] - yDomain[0]);
+      const tickY = y(yValue);
+      svg.append(svgElement("line", { x1: margin.left - 4, y1: tickY, x2: margin.left, y2: tickY, class: "clt-axis" }));
+      addText(svg, yValue.toFixed(0), margin.left - 7, tickY + 4, { class: "clt-tick", "text-anchor": "end" });
+    }
+    addText(svg, "Ambient temperature, AT (°C)", width / 2, height - 3, { class: "clt-tick", "text-anchor": "middle" });
+    const labelX = 14;
+    const labelY = margin.top + plotHeight / 2;
+    addText(svg, "NOx concentration (mg/m³)", labelX, labelY, {
+      class: "clt-tick", "text-anchor": "middle", transform: `rotate(-90 ${labelX} ${labelY})`
+    });
+
+    plottedData.forEach(point => {
+      svg.append(svgElement("circle", { cx: x(point.at), cy: y(point.nox), r: 1.5, class: "regression-sampling-observation" }));
+    });
+
+    const visibleFits = fits.slice(-maxLinesToDraw);
+    visibleFits.forEach(fit => {
+      svg.append(svgElement("line", {
+        x1: x(xDomain[0]), y1: y(fit.intercept + fit.slope * xDomain[0]),
+        x2: x(xDomain[1]), y2: y(fit.intercept + fit.slope * xDomain[1]),
+        class: "regression-sampling-line"
+      }));
+    });
+    svg.append(svgElement("line", {
+      x1: x(xDomain[0]), y1: y(fullFit.intercept + fullFit.slope * xDomain[0]),
+      x2: x(xDomain[1]), y2: y(fullFit.intercept + fullFit.slope * xDomain[1]),
+      class: "regression-sampling-full-line"
+    }));
+
+    if (!fits.length) {
+      addText(svg, "Add samples to see fitted lines accumulate.", width / 2, height / 2, {
+        class: "clt-empty-message", "text-anchor": "middle"
+      });
+    }
+    linesTitle.textContent = fits.length <= maxLinesToDraw
+      ? `${fits.length} fitted sample line${fits.length === 1 ? "" : "s"}`
+      : `${maxLinesToDraw} most recent fitted lines (of ${fits.length})`;
+  }
+
+  function drawSlopeHistogram() {
+    const chart = prepareSvg("regression-sampling-slopes");
+    const slopes = fits.map(fit => fit.slope);
+    const referenceValues = slopes.length ? [...slopes, fullFit.slope] : [fullFit.slope - 0.15, fullFit.slope + 0.15];
+    const rawMinimum = Math.min(...referenceValues);
+    const rawMaximum = Math.max(...referenceValues);
+    const padding = Math.max(0.02, (rawMaximum - rawMinimum) * 0.14);
+    const domain = [rawMinimum - padding, rawMaximum + padding];
+    const { bins, width: binWidth } = histogram(slopes, domain, 28);
+    const maximum = Math.max(...bins, 1) * 1.12;
+    const { svg, width, height, margin } = chart;
+    const { x, y } = addAxes(chart, domain, maximum, "Fitted slope (mg/m³ per °C)", "number of samples", 2);
+
+    bins.forEach((count, index) => {
+      const start = domain[0] + index * binWidth;
+      svg.append(svgElement("rect", {
+        x: x(start) + 1,
+        y: y(count),
+        width: Math.max(1, x(start + binWidth) - x(start) - 2),
+        height: y(0) - y(count),
+        class: "regression-sampling-bar"
+      }));
+    });
+
+    const fullSlopeX = x(fullFit.slope);
+    svg.append(svgElement("line", { x1: fullSlopeX, y1: margin.top, x2: fullSlopeX, y2: y(0), class: "regression-sampling-full-line" }));
+    addText(svg, `full-data slope = ${fullFit.slope.toFixed(3)}`, Math.min(fullSlopeX + 5, width - 150), margin.top + 13, { class: "clt-annotation" });
+    if (!fits.length) {
+      addText(svg, "The distribution of fitted slopes will appear here.", width / 2, height / 2, {
+        class: "clt-empty-message", "text-anchor": "middle"
+      });
+    }
+  }
+
+  function render() {
+    if (!dataReady) return;
+    const total = getTotalSamples();
+    const completed = fits.length;
+    const remaining = total - completed;
+    drawFittedLines();
+    drawSlopeHistogram();
+    status.textContent = completed
+      ? `${completed} of ${total} sample fits completed. Each fit uses ${getSampleSize()} paired operating-hour observations.`
+      : `The full dataset contains ${data.length.toLocaleString()} operating hours. Add samples to begin.`;
+    addButton.disabled = remaining <= 0;
+    runButton.disabled = remaining <= 0;
+    resetButton.disabled = false;
+  }
+
+  function addSamples(requested) {
+    if (!dataReady) return;
+    const total = getTotalSamples();
+    const numberToAdd = Math.min(requested, Math.max(0, total - fits.length));
+    const sampleSize = getSampleSize();
+    for (let trial = 0; trial < numberToAdd; trial += 1) {
+      fits.push(fitLine(sampleRows(sampleSize)));
+    }
+    render();
+  }
+
+  function reset() {
+    if (!dataReady) return;
+    sampleSizeInput.value = getSampleSize();
+    totalSamplesInput.value = getTotalSamples();
+    fits = [];
+    render();
+  }
+
+  async function loadData() {
+    try {
+      const response = await fetch("../data/gas-turbine-course.csv");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const rows = (await response.text()).trim().split(/\r?\n/);
+      const header = rows.shift().split(",");
+      const atIndex = header.indexOf("AT");
+      const noxIndex = header.indexOf("NOX");
+      data = rows.map(row => {
+        const values = row.split(",");
+        return { at: Number(values[atIndex]), nox: Number(values[noxIndex]) };
+      }).filter(point => Number.isFinite(point.at) && Number.isFinite(point.nox));
+      if (data.length < 25) throw new Error("Too few usable AT–NOx rows");
+      plottedData = sampleRows(Math.min(plottedObservationCount, data.length));
+      fullFit = fitLine(data);
+      dataReady = true;
+      reset();
+    } catch (error) {
+      status.textContent = `Unable to load the gas-turbine data (${error.message}). Render the Quarto site and try again.`;
+    }
+  }
+
+  addButton.addEventListener("click", () => addSamples(Number.parseInt(batchSizeInput.value, 10)));
+  runButton.addEventListener("click", () => addSamples(getTotalSamples() - fits.length));
+  resetButton.addEventListener("click", reset);
+  [sampleSizeInput, totalSamplesInput].forEach(input => input.addEventListener("change", reset));
+  window.addEventListener("resize", render);
+  loadData();
+})();
+</script>
