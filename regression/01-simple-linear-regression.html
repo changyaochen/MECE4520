@@ -696,7 +696,11 @@ window.Quarto = {
 <p><span class="math display">\[
 Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i.
 \]</span></p>
-<p>Here, <span class="math inline">\(\varepsilon_i = y_i - \hat{y}_i\)</span> is the residual: the vertical difference between an observation and its prediction.</p>
+<p>A hat denotes a quantity estimated from the observed data. After fitting the model, its prediction for observation <span class="math inline">\(i\)</span> is:</p>
+<p><span class="math display">\[
+\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i.
+\]</span></p>
+<p>Thus, <span class="math inline">\(\hat{y}_i\)</span> is a predicted NOx value, while <span class="math inline">\(\hat{\beta}_0\)</span> and <span class="math inline">\(\hat{\beta}_1\)</span> are the fitted intercept and slope. The unobserved <span class="math inline">\(\varepsilon_i\)</span> in the population model is an error term; the <strong>residual</strong> is the observed vertical difference <span class="math inline">\(e_i = y_i - \hat{y}_i\)</span>.</p>
 </section>
 <section id="choose-a-loss-function" class="level2">
 <h2 class="anchored" data-anchor-id="choose-a-loss-function">6. Choose a loss function</h2>

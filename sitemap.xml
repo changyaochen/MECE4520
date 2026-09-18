@@ -1,55 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://changyaochen.github.io/MECE4520/regression/01-simple-linear-regression.html</loc>
-    <lastmod>2026-09-17T18:26:15.597Z</lastmod>
+    <loc>https://changyaochen.github.io/MECE4520/regression/sampling-variability.html</loc>
+    <lastmod>2026-09-18T12:53:00.740Z</lastmod>
+  </url>
+  <url>
+    <loc>https://changyaochen.github.io/MECE4520/regression/02-testing-a-regression-slope.html</loc>
+    <lastmod>2026-09-18T12:53:00.739Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/06-null-hypothesis-testing.html</loc>
-    <lastmod>2026-09-17T18:26:15.592Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.731Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/01-course-tools.html</loc>
-    <lastmod>2026-09-17T18:26:15.588Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.726Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/02-gas-turbine-data.html</loc>
-    <lastmod>2026-09-17T18:26:15.589Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.728Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/05-confidence-interval-coverage.html</loc>
-    <lastmod>2026-09-17T18:26:15.591Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.730Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/04-central-limit-theorem-notebook.html</loc>
-    <lastmod>2026-09-17T18:26:15.591Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.730Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/index.html</loc>
-    <lastmod>2026-09-17T18:26:15.592Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.731Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/index.html</loc>
-    <lastmod>2026-09-17T18:26:15.592Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.731Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/07-type-i-and-ii-errors.html</loc>
-    <lastmod>2026-09-17T18:26:15.592Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.731Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/04-central-limit-theorem.html</loc>
-    <lastmod>2026-09-17T18:26:15.591Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.730Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/06-null-distribution-simulation.html</loc>
-    <lastmod>2026-09-17T18:26:15.591Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.730Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/03-variability-and-inference.html</loc>
-    <lastmod>2026-09-17T18:26:15.590Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.728Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/regression/index.html</loc>
-    <lastmod>2026-09-17T18:26:15.597Z</lastmod>
+    <lastmod>2026-09-18T12:53:00.739Z</lastmod>
+  </url>
+  <url>
+    <loc>https://changyaochen.github.io/MECE4520/regression/01-simple-linear-regression.html</loc>
+    <lastmod>2026-09-18T12:53:00.737Z</lastmod>
   </url>
 </urlset>

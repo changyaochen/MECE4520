@@ -259,6 +259,52 @@
   fill: #457eaa;
 }
 
+/* Regression sampling-variability interactive. */
+.clt-buttons .regression-sampling-primary {
+  background: #457eaa;
+  color: #fff;
+}
+
+.clt-buttons .regression-sampling-primary:hover:not(:disabled) {
+  background: #355f80;
+  color: #fff;
+}
+
+.regression-sampling-line-swatch,
+.regression-sampling-full-swatch {
+  display: inline-block;
+  width: 1rem;
+  border-top: 2px solid;
+}
+
+.regression-sampling-line-swatch {
+  border-color: #457eaa;
+}
+
+.regression-sampling-full-swatch {
+  border-color: #c43c35;
+}
+
+.regression-sampling-observation {
+  fill: #457eaa;
+  opacity: 0.08;
+}
+
+.regression-sampling-line {
+  stroke: #457eaa;
+  stroke-width: 1;
+  stroke-opacity: 0.18;
+}
+
+.regression-sampling-full-line {
+  stroke: #c43c35;
+  stroke-width: 2.6;
+}
+
+.regression-sampling-bar {
+  fill: #457eaa;
+}
+
 @media (max-width: 700px) {
   .clt-plots {
     grid-template-columns: 1fr;
@@ -474,6 +520,12 @@
 .quarto-dark .clt-buttons button:hover:not(:disabled),
 .quarto-dark .ci-buttons button:hover:not(:disabled) {
   background: #3a4b56;
+  color: #fff;
+}
+
+.quarto-dark .clt-buttons .regression-sampling-primary,
+.quarto-dark .clt-buttons .regression-sampling-primary:hover:not(:disabled) {
+  background: #457eaa;
   color: #fff;
 }
 
