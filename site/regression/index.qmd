@@ -45,3 +45,13 @@ quantify its uncertainty with a standard error, confidence interval, and
 hypothesis test.
 
 [View the notebook](02-testing-a-regression-slope.ipynb)
+
+## 3. Confidence and prediction intervals
+
+**Estimated time:** 20–30 minutes
+
+Use the same temperature–NOx model to distinguish uncertainty in the mean
+response from uncertainty in one additional operating hour. Calculate both
+intervals and compare their widths across the observed temperature range.
+
+[View the notebook](03-confidence-and-prediction-intervals.ipynb)
