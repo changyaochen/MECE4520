@@ -593,11 +593,19 @@ dtype: float64</code></pre>
 <p>The repeated 300-hour fits give a visual demonstration, but they do not directly quantify the uncertainty of the slope fitted to the full dataset. For that, return to the population model from Section 1. Conditional on the observed temperature values <span class="math inline">\(x_i\)</span>, assume the errors <span class="math inline">\(\epsilon_i\)</span> are independent, have mean zero, and have a common variance <span class="math inline">\(\sigma^2\)</span>. Start with the ordinary-least-squares slope formula:</p>
 <p><span class="math display">\[
 \hat{\beta}_1 =
-\frac{\sum_{i=1}^{n}(x_i - \bar{x})y_i}{S_{xx}},
+\frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{S_{xx}},
 \qquad
 S_{xx} = \sum_{i=1}^{n}(x_i - \bar{x})^2.
 \]</span></p>
-<p>Substitute the population model <span class="math inline">\(y_i = \beta_0 + \beta_1 x_i +
+<p>First, simplify the numerator. Since <span class="math inline">\(\bar{y}\)</span> is constant across observations and <span class="math inline">\(\sum_i(x_i - \bar{x}) = 0\)</span>,</p>
+<p><span class="math display">\[
+\begin{aligned}
+\sum_i(x_i - \bar{x})(y_i - \bar{y})
+&amp;= \sum_i(x_i - \bar{x})y_i - \bar{y}\sum_i(x_i - \bar{x}) \\
+&amp;= \sum_i(x_i - \bar{x})y_i.
+\end{aligned}
+\]</span></p>
+<p>Removing <span class="math inline">\(\bar{y}\)</span> therefore gives exactly the same slope estimate. Now substitute the population model <span class="math inline">\(y_i = \beta_0 + \beta_1 x_i +
 \epsilon_i\)</span> into that formula:</p>
 <p><span class="math display">\[
 \hat{\beta}_1 =
@@ -609,11 +617,23 @@ S_{xx} = \sum_{i=1}^{n}(x_i - \bar{x})^2.
 \hat{\beta}_1 = \beta_1 +
 \frac{\sum_{i=1}^{n}(x_i - \bar{x})\epsilon_i}{S_{xx}}.
 \]</span></p>
-<p>The fitted slope is therefore the unknown population slope plus a weighted sum of random errors. Under those assumptions,</p>
+<p>The fitted slope is therefore the unknown population slope plus a weighted sum of random errors. Here <span class="math inline">\(X\)</span> denotes the observed predictor values, which we hold fixed. The population slope <span class="math inline">\(\beta_1\)</span> is fixed too; the uncertainty in <span class="math inline">\(\hat{\beta}_1\)</span> comes from the errors.</p>
+<p>To find its variance, use two rules: multiplying a random variable by a constant multiplies its variance by the <strong>square</strong> of that constant, and the variances of independent random variables add. Thus, for fixed weights <span class="math inline">\(a_i\)</span>,</p>
 <p><span class="math display">\[
-\operatorname{Var}(\hat{\beta}_1 \mid X)
-= \frac{\sigma^2}{S_{xx}}.
+\operatorname{Var}\left(\sum_i a_i\epsilon_i \mid X\right)
+= \sum_i a_i^2\operatorname{Var}(\epsilon_i \mid X).
 \]</span></p>
+<p>Applying this rule to the weighted errors in the fitted slope gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+\operatorname{Var}(\hat{\beta}_1 \mid X)
+&amp;= \frac{\sum_i(x_i - \bar{x})^2\operatorname{Var}(\epsilon_i \mid X)}{S_{xx}^2} \\
+&amp;= \frac{\sigma^2\sum_i(x_i - \bar{x})^2}{S_{xx}^2} \\
+&amp;= \frac{\sigma^2 S_{xx}}{S_{xx}^2} \\
+&amp;= \frac{\sigma^2}{S_{xx}}.
+\end{aligned}
+\]</span></p>
+<p>The squared deviations do appear in the numerator: their sum is <span class="math inline">\(S_{xx}\)</span>, which cancels one of the two factors of <span class="math inline">\(S_{xx}\)</span> in the denominator.</p>
 <p>The denominator captures how much information the temperatures provide: more observations and a wider spread of AT values both make <span class="math inline">\(S_{xx}\)</span> larger and the fitted slope more precise.</p>
 <p>We do not know the population error variance <span class="math inline">\(\sigma^2\)</span>. We estimate it from the residuals of the fitted line:</p>
 <p><span class="math display">\[
