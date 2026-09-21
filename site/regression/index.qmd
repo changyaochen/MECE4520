@@ -55,3 +55,13 @@ response from uncertainty in one additional operating hour. Calculate both
 intervals and compare their widths across the observed temperature range.
 
 [View the notebook](03-confidence-and-prediction-intervals.ipynb)
+
+## 4. Multiple regression and multicollinearity
+
+**Estimated time:** 35–45 minutes
+
+Add compressor discharge pressure to the temperature–NOx model, then add
+turbine energy yield. Compare fit and coefficient uncertainty, and examine why
+an existing coefficient changes sign when another feature enters the model.
+
+[View the notebook](04-multiple-linear-regression.ipynb)
