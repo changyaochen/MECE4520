@@ -325,6 +325,8 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#simple-linear-regression-weather-and-nox" id="toc-simple-linear-regression-weather-and-nox">1. Simple linear regression: weather and NOx</a></li>
   <li><a href="#uncertainty-in-a-regression-slope" id="toc-uncertainty-in-a-regression-slope">2. Uncertainty in a regression slope</a></li>
+  <li><a href="#confidence-and-prediction-intervals" id="toc-confidence-and-prediction-intervals">3. Confidence and prediction intervals</a></li>
+  <li><a href="#multiple-regression-and-multicollinearity" id="toc-multiple-regression-and-multicollinearity">4. Multiple regression and multicollinearity</a></li>
   </ul>
 </nav>
 <p>These materials introduce regression as a way to translate an observed engineering relationship into a quantitative prediction. We continue to use the course gas-turbine emissions dataset, beginning with a single, interpretable question before adding the complications of multiple predictors and model validation.</p>
@@ -349,9 +351,21 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Estimated time:</strong> 50–65 minutes</p>
 <p>Use repeated samples to see why the temperature–NOx slope is an estimate, then quantify its uncertainty with a standard error, confidence interval, and hypothesis test.</p>
 <p><a href="../regression/02-testing-a-regression-slope.html">View the notebook</a></p>
-
-
 </section>
+</section>
+<section id="confidence-and-prediction-intervals" class="level2">
+<h2 class="anchored" data-anchor-id="confidence-and-prediction-intervals">3. Confidence and prediction intervals</h2>
+<p><strong>Estimated time:</strong> 20–30 minutes</p>
+<p>Use the same temperature–NOx model to distinguish uncertainty in the mean response from uncertainty in one additional operating hour. Calculate both intervals and compare their widths across the observed temperature range.</p>
+<p><a href="../regression/03-confidence-and-prediction-intervals.html">View the notebook</a></p>
+</section>
+<section id="multiple-regression-and-multicollinearity" class="level2">
+<h2 class="anchored" data-anchor-id="multiple-regression-and-multicollinearity">4. Multiple regression and multicollinearity</h2>
+<p><strong>Estimated time:</strong> 35–45 minutes</p>
+<p>Add compressor discharge pressure to the temperature–NOx model, then add turbine energy yield. Compare fit and coefficient uncertainty, and examine why an existing coefficient changes sign when another feature enters the model.</p>
+<p><a href="../regression/04-multiple-linear-regression.html">View the notebook</a></p>
+
+
 </section>
 
 </main> <!-- /main -->
