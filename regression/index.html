@@ -327,6 +327,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#uncertainty-in-a-regression-slope" id="toc-uncertainty-in-a-regression-slope">2. Uncertainty in a regression slope</a></li>
   <li><a href="#confidence-and-prediction-intervals" id="toc-confidence-and-prediction-intervals">3. Confidence and prediction intervals</a></li>
   <li><a href="#multiple-regression-and-multicollinearity" id="toc-multiple-regression-and-multicollinearity">4. Multiple regression and multicollinearity</a></li>
+  <li><a href="#categorical-features-and-one-hot-encoding" id="toc-categorical-features-and-one-hot-encoding">5. Categorical features and one-hot encoding</a></li>
   </ul>
 </nav>
 <p>These materials introduce regression as a way to translate an observed engineering relationship into a quantitative prediction. We continue to use the course gas-turbine emissions dataset, beginning with a single, interpretable question before adding the complications of multiple predictors and model validation.</p>
@@ -364,6 +365,12 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Estimated time:</strong> 35–45 minutes</p>
 <p>Add compressor discharge pressure to the temperature–NOx model, then add turbine energy yield. Compare fit and coefficient uncertainty, and examine why an existing coefficient changes sign when another feature enters the model.</p>
 <p><a href="../regression/04-multiple-linear-regression.html">View the notebook</a></p>
+</section>
+<section id="categorical-features-and-one-hot-encoding" class="level2">
+<h2 class="anchored" data-anchor-id="categorical-features-and-one-hot-encoding">5. Categorical features and one-hot encoding</h2>
+<p><strong>Estimated time:</strong> 25–35 minutes</p>
+<p>Add the categorical measurement-campaign year to a temperature–NOx model. Fit the same one-hot-encoded model using <code>statsmodels</code> formula syntax and an explicit scikit-learn preprocessing pipeline.</p>
+<p><a href="../regression/05-one-hot-encoding.html">View the notebook</a></p>
 
 
 </section>
