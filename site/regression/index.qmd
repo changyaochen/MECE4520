@@ -65,3 +65,13 @@ turbine energy yield. Compare fit and coefficient uncertainty, and examine why
 an existing coefficient changes sign when another feature enters the model.
 
 [View the notebook](04-multiple-linear-regression.ipynb)
+
+## 5. Categorical features and one-hot encoding
+
+**Estimated time:** 25–35 minutes
+
+Add the categorical measurement-campaign year to a temperature–NOx model.
+Fit the same one-hot-encoded model using `statsmodels` formula syntax and an
+explicit scikit-learn preprocessing pipeline.
+
+[View the notebook](05-one-hot-encoding.ipynb)
