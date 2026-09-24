@@ -16,6 +16,8 @@ website:
         text: Foundations
       - href: regression/index.qmd
         text: Regression
+      - href: evaluation/index.qmd
+        text: Evaluation
   page-footer:
     left: "MECE 4520 · Data Science for Mechanical Systems"
     right: "Fall 2026"
