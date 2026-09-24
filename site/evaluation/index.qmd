@@ -1,0 +1,21 @@
+---
+title: "Evaluation"
+---
+
+A fitted model is useful only if it performs well on new observations. These
+materials develop the tools for evaluating, comparing, and selecting models
+without mistaking a good fit to training data for reliable future performance.
+
+We continue to use the gas-turbine emissions measurements, but shift the
+question from *how do we fit a model?* to *how do we assess one fairly?*
+
+## 1. Polynomial regression and overfitting
+
+**Estimated time:** 25–35 minutes
+
+Fit linear, moderately flexible, and high-degree polynomial models to a
+limited turbine calibration sample. Compare training and test RMSE and
+$R^2$ to see why a flexible model can fit training observations well while
+predicting new observations poorly.
+
+[View the notebook](01-polynomial-model-validation.ipynb)
