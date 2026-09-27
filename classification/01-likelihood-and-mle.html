@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Confidence intervals: an interactive coverage simulation – MECE 4520</title>
+<title>Likelihood and maximum likelihood estimation – MECE 4520</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,6 +25,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -329,22 +364,23 @@ window.Quarto = {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Confidence intervals: an interactive coverage simulation</h1>
+<h1 class="title">Likelihood and maximum likelihood estimation</h1>
 </div>
 
 
 
-<div class="quarto-title-meta column-page">
+<div class="quarto-title-meta">
 
     
   
@@ -355,196 +391,163 @@ window.Quarto = {
 
 </header>
 
-
-<p>This simulation uses a population we completely know: a normal distribution with population mean <span class="math inline">\(\mu = 0\)</span> and standard deviation <span class="math inline">\(\sigma = 1\)</span>. Each trial draws a new random sample, calculates its sample mean, and creates an approximate 95% confidence interval for <span class="math inline">\(\mu\)</span>.</p>
-<p>Throughout this page, <span class="math inline">\(\mu\)</span> denotes the fixed population mean (the quantity we want to learn), while <span class="math inline">\(\bar{X}\)</span> denotes the sample mean (our estimate of it).</p>
-<p>The dashed vertical line marks the true population mean. Blue intervals contain it; red intervals miss it. A 95% confidence level describes the <em>long-run behavior of this procedure</em>: across many independently constructed intervals, about 95% should contain <span class="math inline">\(\mu\)</span>. It does not guarantee that any particular interval will do so.</p>
-<p>For each sample, the simulation constructs the approximate 95% confidence interval</p>
+<nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#likelihood-for-one-ticket-draw" id="toc-likelihood-for-one-ticket-draw">1. Likelihood for one ticket draw</a></li>
+  <li><a href="#joint-likelihood-for-ten-draws" id="toc-joint-likelihood-for-ten-draws">2. Joint likelihood for ten draws</a></li>
+  <li><a href="#let-the-candidate-vary-continuously" id="toc-let-the-candidate-vary-continuously">3. Let the candidate vary continuously</a></li>
+  <li><a href="#more-observations-give-more-concentrated-evidence" id="toc-more-observations-give-more-concentrated-evidence">4. More observations give more concentrated evidence</a></li>
+  <li><a href="#bridge-to-logistic-regression" id="toc-bridge-to-logistic-regression">5. Bridge to logistic regression</a></li>
+  </ul>
+</nav>
+<p><a target="_blank" href="https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/classification/01-likelihood-and-mle.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a></p>
+<p>Before fitting a logistic-regression model, let’s make the central idea—<strong>likelihood</strong>—concrete. We will use simulated red/blue ticket draws rather than the gas-turbine dataset.</p>
+<p>A red ticket is coded as <span class="math inline">\(1\)</span>, a blue ticket as <span class="math inline">\(0\)</span>, and <span class="math inline">\(p\)</span> is the unknown probability of drawing red.</p>
+<div id="f4c38b6f" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-09-27T17:01:05.437640Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-09-27T17:01:05.436826Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-09-27T17:01:07.659528Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-09-27T17:01:07.659171Z&quot;}}" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> comb</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>sns.set_theme(style<span class="op">=</span><span class="st">"whitegrid"</span>, context<span class="op">=</span><span class="st">"notebook"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="likelihood-for-one-ticket-draw" class="level2">
+<h2 class="anchored" data-anchor-id="likelihood-for-one-ticket-draw">1. Likelihood for one ticket draw</h2>
+<p>Let <span class="math inline">\(Y\)</span> represent one ticket draw: a red ticket is <span class="math inline">\(Y=1\)</span> and a blue ticket is <span class="math inline">\(Y=0\)</span>. If <span class="math inline">\(p\)</span> is the probability of drawing red, then</p>
 <p><span class="math display">\[
-\bar{X} \pm 1.96 \frac{S}{\sqrt{n}},
+P(Y=y\mid p)=p^y(1-p)^{1-y}, \qquad y\in\{0,1\}.
 \]</span></p>
-<p>where <span class="math inline">\(\bar{X}\)</span> is the sample mean, <span class="math inline">\(S\)</span> is the sample standard deviation, and <span class="math inline">\(n\)</span> is the sample size. The sample standard deviation is calculated from the same <span class="math inline">\(n\)</span> observations:</p>
+<p>Thus, after observing one red ticket, its likelihood is <span class="math inline">\(L(p)=p\)</span>; after observing one blue ticket, it is <span class="math inline">\(L(p)=1-p\)</span>. The observed outcome is fixed, and we compare possible values of the unknown <span class="math inline">\(p\)</span>.</p>
+</section>
+<section id="joint-likelihood-for-ten-draws" class="level2">
+<h2 class="anchored" data-anchor-id="joint-likelihood-for-ten-draws">2. Joint likelihood for ten draws</h2>
+<p>Now suppose that ten independent tickets are drawn, and six are red. Because the draws are independent, one particular ordering of those results has likelihood <span class="math inline">\(p^6(1-p)^4\)</span>. If we observe only the count, there are <span class="math inline">\(\binom{10}{6}\)</span> possible orderings, so the likelihood is</p>
 <p><span class="math display">\[
-S = \sqrt{\frac{1}{n - 1}\sum_{i=1}^{n}\left(X_i - \bar{X}\right)^2}.
+L(p) = \binom{10}{6}p^6(1-p)^4.
 \]</span></p>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
+<p>The binomial coefficient counts the possible orderings of six red and four blue tickets. It is the same for every candidate <span class="math inline">\(p\)</span>, so it does not change which candidate maximizes the likelihood.</p>
+<p>We hold the observations fixed and vary <span class="math inline">\(p\)</span>. Thus, likelihood is <strong>not</strong> the probability that a candidate parameter is true; it is a score for how well that candidate explains the observed data.</p>
+<div id="846f4155" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-09-27T17:01:07.661675Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-09-27T17:01:07.661419Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-09-27T17:01:07.830393Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-09-27T17:01:07.824117Z&quot;}}" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>red_tickets <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> likelihood(p, red_count, total_count):</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Probability of this red-ticket count under candidate p."""</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    blue_count <span class="op">=</span> total_count <span class="op">-</span> red_count</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> comb(total_count, red_count) <span class="op">*</span> p<span class="op">**</span>red_count <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> p)<span class="op">**</span>blue_count</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>candidates <span class="op">=</span> np.array([<span class="fl">0.4</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">0.8</span>])</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>candidate_likelihoods <span class="op">=</span> np.array([</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    likelihood(p, red_tickets, n) <span class="cf">for</span> p <span class="kw">in</span> candidates</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> p, value <span class="kw">in</span> <span class="bu">zip</span>(candidates, candidate_likelihoods):</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"p = </span><span class="sc">{</span>p<span class="sc">:.1f}</span><span class="ss">: likelihood = </span><span class="sc">{</span>value<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.5</span>, <span class="fl">4.5</span>))</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>bars <span class="op">=</span> ax.bar(candidates.astype(<span class="bu">str</span>), candidate_likelihoods, color<span class="op">=</span><span class="st">"#457eaa"</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>ax.bar_label(bars, fmt<span class="op">=</span><span class="st">"</span><span class="sc">%.3f</span><span class="st">"</span>, padding<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"Candidate probability of a red ticket, p"</span>,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"Likelihood of 6 red tickets out of 10"</span>,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Among these candidates, p = 0.6 makes the observation most likely"</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>p = 0.4: likelihood = 0.1115
+p = 0.5: likelihood = 0.2051
+p = 0.6: likelihood = 0.2508
+p = 0.8: likelihood = 0.0881</code></pre>
 </div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Try this
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01-likelihood-and-mle_files/figure-html/cell-3-output-2.png" class="img-fluid figure-img"></p>
+</figure>
 </div>
 </div>
-<div class="callout-body-container callout-body">
-<p>Begin with a few intervals, then add more. The occasional red interval makes the meaning of “95% confidence” visible. Reset and repeat: the exact number of misses changes each time, while the long-run pattern remains near 95% coverage.</p>
+</div>
+</section>
+<section id="let-the-candidate-vary-continuously" class="level2">
+<h2 class="anchored" data-anchor-id="let-the-candidate-vary-continuously">3. Let the candidate vary continuously</h2>
+<p>Rather than considering only four candidates, let’s evaluate a fine grid of values between 0 and 1. The maximum of the likelihood curve is the <strong>maximum-likelihood estimate</strong> (MLE):</p>
+<p><span class="math display">\[
+\hat p_{\mathrm{MLE}}
+= \underset{p}{\operatorname{arg\,max}}\; L(p).
+\]</span></p>
+<p>For a Bernoulli/binomial model, the MLE is the observed red-ticket fraction, <span class="math inline">\(\hat p_{\mathrm{MLE}}=6/10=0.6\)</span>.</p>
+<div id="f3a29305" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-09-27T17:01:07.837893Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-09-27T17:01:07.837293Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-09-27T17:01:08.041252Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-09-27T17:01:08.040935Z&quot;}}" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>p_grid <span class="op">=</span> np.linspace(<span class="fl">0.001</span>, <span class="fl">0.999</span>, <span class="dv">500</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>likelihood_grid <span class="op">=</span> np.array([likelihood(p, red_tickets, n) <span class="cf">for</span> p <span class="kw">in</span> p_grid])</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>p_hat <span class="op">=</span> red_tickets <span class="op">/</span> n</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">4.8</span>))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>ax.plot(p_grid, likelihood_grid, color<span class="op">=</span><span class="st">"#457eaa"</span>, linewidth<span class="op">=</span><span class="fl">2.5</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>ax.axvline(p_hat, color<span class="op">=</span><span class="st">"#c43c35"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="vs">rf"MLE: </span><span class="dv">$</span><span class="er">\</span><span class="vs">hat p=</span><span class="sc">{</span>p_hat<span class="sc">:.1f}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"Candidate p"</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"Likelihood"</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Likelihood"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01-likelihood-and-mle_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+</figure>
 </div>
 </div>
-<div id="ci-explorer" class="ci-explorer" aria-label="Confidence interval coverage simulation">
-  <div class="ci-controls">
-    <label>
-      <span>Sample size, <i>n</i> (2–500)</span>
-      <input id="ci-sample-size" type="number" min="2" max="500" step="1" value="30" inputmode="numeric">
-    </label>
-    <label>
-      <span>Intervals to show, <i>B</i> (1–100)</span>
-      <input id="ci-total-intervals" type="number" min="1" max="100" step="1" value="100" inputmode="numeric">
-    </label>
-    <label>
-      Add intervals
-      <select id="ci-batch-size">
-        <option value="1">1</option>
-        <option value="5" selected="">5</option>
-        <option value="10">10</option>
-        <option value="20">20</option>
-      </select>
-    </label>
-  </div>
-
-  <div class="ci-buttons" aria-label="Simulation controls">
-    <button id="ci-add" type="button">Add intervals</button>
-    <button id="ci-run" type="button">Run remaining intervals</button>
-    <button id="ci-reset" type="button">Reset</button>
-  </div>
-
-  <p id="ci-status" class="ci-status" aria-live="polite">No intervals yet. Add a small batch to begin.</p>
-
-  <figure class="ci-plot figure">
-    <figcaption>Confidence intervals for the population mean <span class="ci-legend"><span class="ci-legend-covered"></span>contains μ <span class="ci-legend-missed"></span>misses μ</span></figcaption>
-    <svg id="ci-interval-plot" role="img" aria-label="Repeated 95 percent confidence intervals and the true population mean"></svg>
-  </figure>
 </div>
-<p><a href="../foundations/index.html">← Return to Foundations</a></p>
-<script>
-(() => {
-  const root = document.getElementById("ci-explorer");
-  if (!root) return;
-
-  const populationMean = 0;
-  const confidenceMultiplier = 1.96;
-  const sampleSizeInput = document.getElementById("ci-sample-size");
-  const totalIntervalsInput = document.getElementById("ci-total-intervals");
-  const batchSizeInput = document.getElementById("ci-batch-size");
-  const addButton = document.getElementById("ci-add");
-  const runButton = document.getElementById("ci-run");
-  const resetButton = document.getElementById("ci-reset");
-  const status = document.getElementById("ci-status");
-  const plot = document.getElementById("ci-interval-plot");
-
-  let intervals = [];
-
-  const clamp = (value, lower, upper) => Math.max(lower, Math.min(upper, value));
-  const getSampleSize = () => clamp(Number.parseInt(sampleSizeInput.value, 10) || 30, 2, 500);
-  const getTotalIntervals = () => clamp(Number.parseInt(totalIntervalsInput.value, 10) || 100, 1, 100);
-
-  function normalRandom() {
-    const u = 1 - Math.random();
-    const v = Math.random();
-    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-  }
-
-  function createInterval() {
-    const n = getSampleSize();
-    const sample = Array.from({ length: n }, normalRandom);
-    const mean = sample.reduce((sum, value) => sum + value, 0) / n;
-    const sumSquaredDeviations = sample.reduce((sum, value) => sum + (value - mean) ** 2, 0);
-    const standardError = Math.sqrt(sumSquaredDeviations / (n - 1)) / Math.sqrt(n);
-    const margin = confidenceMultiplier * standardError;
-    const lower = mean - margin;
-    const upper = mean + margin;
-    return { mean, lower, upper, containsMean: lower <= populationMean && populationMean <= upper };
-  }
-
-  function svgElement(tag, attributes = {}) {
-    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
-    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
-    return element;
-  }
-
-  function addText(text, x, y, attributes = {}) {
-    const element = svgElement("text", { x, y, ...attributes });
-    element.textContent = text;
-    plot.append(element);
-  }
-
-  function renderPlot() {
-    const width = Math.max(320, Math.round(plot.getBoundingClientRect().width || 900));
-    const rowHeight = 6;
-    const margin = { top: 30, right: 26, bottom: 34, left: 46 };
-    const height = Math.max(250, margin.top + margin.bottom + Math.max(intervals.length, 20) * rowHeight);
-    const visibleIntervals = intervals;
-    const extremes = visibleIntervals.flatMap(interval => [interval.lower, interval.upper]);
-    const extent = extremes.length ? Math.max(0.5, ...extremes.map(value => Math.abs(value))) : 0.5;
-    const domainExtent = Math.ceil((extent + 0.08) * 2) / 2;
-    const domain = [-domainExtent, domainExtent];
-    const plotWidth = width - margin.left - margin.right;
-    const plotHeight = height - margin.top - margin.bottom;
-    const x = value => margin.left + ((value - domain[0]) / (domain[1] - domain[0])) * plotWidth;
-    const y = index => margin.top + (index + 0.5) * (plotHeight / Math.max(visibleIntervals.length, 20));
-
-    plot.replaceChildren();
-    plot.setAttribute("viewBox", `0 0 ${width} ${height}`);
-    plot.setAttribute("preserveAspectRatio", "none");
-    plot.append(svgElement("line", { x1: margin.left, y1: height - margin.bottom, x2: width - margin.right, y2: height - margin.bottom, class: "ci-axis" }));
-    plot.append(svgElement("line", { x1: x(populationMean), y1: margin.top, x2: x(populationMean), y2: height - margin.bottom, class: "ci-population-line" }));
-
-    for (let i = 0; i <= 4; i += 1) {
-      const value = domain[0] + (i / 4) * (domain[1] - domain[0]);
-      const tickX = x(value);
-      plot.append(svgElement("line", { x1: tickX, y1: height - margin.bottom, x2: tickX, y2: height - margin.bottom + 4, class: "ci-axis" }));
-      addText(Number(value.toFixed(1)).toString(), tickX, height - 12, { class: "ci-tick", "text-anchor": "middle" });
-    }
-    addText("true population mean, μ = 0", Math.min(x(populationMean) + 5, width - 145), 16, { class: "ci-annotation" });
-
-    visibleIntervals.forEach((interval, index) => {
-      const rowY = y(index);
-      const className = interval.containsMean ? "ci-covered" : "ci-missed";
-      plot.append(svgElement("line", { x1: x(interval.lower), y1: rowY, x2: x(interval.upper), y2: rowY, class: className }));
-      plot.append(svgElement("circle", { cx: x(interval.mean), cy: rowY, r: 2.2, class: `${className}-point` }));
-    });
-
-    if (!visibleIntervals.length) {
-      addText("Each new trial will add one 95% confidence interval here.", width / 2, height / 2, { class: "ci-empty-message", "text-anchor": "middle" });
-    }
-  }
-
-  function render() {
-    const total = getTotalIntervals();
-    const completed = intervals.length;
-    const covered = intervals.filter(interval => interval.containsMean).length;
-    const remaining = total - completed;
-    renderPlot();
-    status.textContent = completed
-      ? `${covered} of ${completed} intervals contain μ = 0 (${(100 * covered / completed).toFixed(1)}% coverage).`
-      : "No intervals yet. Add a small batch to begin.";
-    addButton.disabled = remaining <= 0;
-    runButton.disabled = remaining <= 0;
-  }
-
-  function addIntervals(requested) {
-    const total = getTotalIntervals();
-    const numberToAdd = Math.min(requested, Math.max(0, total - intervals.length));
-    for (let index = 0; index < numberToAdd; index += 1) intervals.push(createInterval());
-    render();
-  }
-
-  function reset() {
-    sampleSizeInput.value = getSampleSize();
-    totalIntervalsInput.value = getTotalIntervals();
-    intervals = [];
-    render();
-  }
-
-  addButton.addEventListener("click", () => addIntervals(Number.parseInt(batchSizeInput.value, 10)));
-  runButton.addEventListener("click", () => addIntervals(getTotalIntervals() - intervals.length));
-  resetButton.addEventListener("click", reset);
-  [sampleSizeInput, totalIntervalsInput].forEach(input => input.addEventListener("change", reset));
-  window.addEventListener("resize", render);
-  reset();
-})();
-</script>
+</section>
+<section id="more-observations-give-more-concentrated-evidence" class="level2">
+<h2 class="anchored" data-anchor-id="more-observations-give-more-concentrated-evidence">4. More observations give more concentrated evidence</h2>
+<p>Imagine another set of 100 draws with the same observed red fraction: 60 red tickets. Both samples have <span class="math inline">\(\hat p_{\mathrm{MLE}}=0.6\)</span>, but the larger sample supplies more evidence about plausible values of <span class="math inline">\(p\)</span>. The two panels use their own vertical scales so that both likelihood curves remain readable.</p>
+<div id="ea0893a3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-09-27T17:01:08.042864Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-09-27T17:01:08.042751Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-09-27T17:01:08.291470Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-09-27T17:01:08.291136Z&quot;}}" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="fl">4.8</span>), sharex<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, (total_count, red_count, color) <span class="kw">in</span> <span class="bu">zip</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    axes,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    [(<span class="dv">10</span>, <span class="dv">6</span>, <span class="st">"#457eaa"</span>), (<span class="dv">100</span>, <span class="dv">60</span>, <span class="st">"#d77732"</span>)],</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    likelihood_values <span class="op">=</span> np.array([</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        likelihood(p, red_count, total_count) <span class="cf">for</span> p <span class="kw">in</span> p_grid</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    ax.plot(p_grid, likelihood_values, color<span class="op">=</span>color, linewidth<span class="op">=</span><span class="fl">2.5</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    ax.axvline(<span class="fl">0.6</span>, color<span class="op">=</span><span class="st">"#c43c35"</span>, linewidth<span class="op">=</span><span class="fl">1.8</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">hat p = 0</span><span class="dv">.</span><span class="vs">6</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    ax.<span class="bu">set</span>(</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        xlabel<span class="op">=</span><span class="st">"Candidate p"</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        ylabel<span class="op">=</span><span class="st">"Likelihood"</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>red_count<span class="sc">}</span><span class="ss"> red tickets out of </span><span class="sc">{</span>total_count<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    ax.legend()</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"More observations make the likelihood peak narrower"</span>, y<span class="op">=</span><span class="fl">1.02</span>)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01-likelihood-and-mle_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="bridge-to-logistic-regression" class="level2">
+<h2 class="anchored" data-anchor-id="bridge-to-logistic-regression">5. Bridge to logistic regression</h2>
+<p>The ticket model assumes that every draw has the same red-ticket probability <span class="math inline">\(p\)</span>. In logistic regression, each observation can have a different probability because its features differ:</p>
+<p><span class="math display">\[
+p_i = P(y_i=1\mid\mathbf{x}_i)
+= \sigma(\mathbf{x}_i^\mathsf{T}\boldsymbol{\beta}).
+\]</span></p>
+<p>The likelihood idea is unchanged: choose the model parameters that make the observed binary labels most likely. In the next lecture, we will learn how to perform that optimization.</p>
+<p><a href="../classification/index.html">← Return to Classification</a></p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

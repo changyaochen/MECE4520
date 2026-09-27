@@ -392,6 +392,20 @@
     "text": "1. Polynomial regression and overfitting\nEstimated time: 25–35 minutes\nFit linear, moderately flexible, and high-degree polynomial models to a limited turbine calibration sample. Compare training and test RMSE and \\(R^2\\) to see why a flexible model can fit training observations well while predicting new observations poorly.\nView the notebook"
   },
   {
+    "objectID": "classification/index.html",
+    "href": "classification/index.html",
+    "title": "Classification",
+    "section": "",
+    "text": "Classification estimates the chance that an observation belongs to a category. Before we fit a classifier, we need a way to connect a probability model to observed binary outcomes."
+  },
+  {
+    "objectID": "classification/index.html#likelihood-and-maximum-likelihood-estimation",
+    "href": "classification/index.html#likelihood-and-maximum-likelihood-estimation",
+    "title": "Classification",
+    "section": "1. Likelihood and maximum likelihood estimation",
+    "text": "1. Likelihood and maximum likelihood estimation\nEstimated time: 20–30 minutes\nUse simulated red/blue ticket draws to distinguish probability from likelihood, compare proposed probabilities, and identify the maximum- likelihood estimate. This is the same likelihood idea that logistic regression will use later, without yet fitting a turbine-data model.\nView the notebook\n\nInteractive playground\nEstimated time: 10–15 minutes\nGenerate ticket draws one at a time and watch the likelihood curve accumulate. Use the maximum of that curve to identify the maximum-likelihood estimate.\nOpen the interactive playground"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Data Science for Mechanical Systems",
@@ -418,6 +432,55 @@
     "title": "Data Science for Mechanical Systems",
     "section": "Syllabus",
     "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\n\n\nSep. 15Sep. 17 — asynchronous\nSimple and multiple linear regression\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\n\n\nDec. 8 & 10\nFinal project presentations"
+  },
+  {
+    "objectID": "classification/01-likelihood-and-mle.html",
+    "href": "classification/01-likelihood-and-mle.html",
+    "title": "Likelihood and maximum likelihood estimation",
+    "section": "",
+    "text": "Before fitting a logistic-regression model, let’s make the central idea—likelihood—concrete. We will use simulated red/blue ticket draws rather than the gas-turbine dataset.\nA red ticket is coded as \\(1\\), a blue ticket as \\(0\\), and \\(p\\) is the unknown probability of drawing red.\nfrom math import comb\n\nimport matplotlib.pyplot as plt\nimport numpy as np\nimport seaborn as sns\n\nsns.set_theme(style=\"whitegrid\", context=\"notebook\")"
+  },
+  {
+    "objectID": "classification/01-likelihood-and-mle.html#likelihood-for-one-ticket-draw",
+    "href": "classification/01-likelihood-and-mle.html#likelihood-for-one-ticket-draw",
+    "title": "Likelihood and maximum likelihood estimation",
+    "section": "1. Likelihood for one ticket draw",
+    "text": "1. Likelihood for one ticket draw\nLet \\(Y\\) represent one ticket draw: a red ticket is \\(Y=1\\) and a blue ticket is \\(Y=0\\). If \\(p\\) is the probability of drawing red, then\n\\[\nP(Y=y\\mid p)=p^y(1-p)^{1-y}, \\qquad y\\in\\{0,1\\}.\n\\]\nThus, after observing one red ticket, its likelihood is \\(L(p)=p\\); after observing one blue ticket, it is \\(L(p)=1-p\\). The observed outcome is fixed, and we compare possible values of the unknown \\(p\\)."
+  },
+  {
+    "objectID": "classification/01-likelihood-and-mle.html#joint-likelihood-for-ten-draws",
+    "href": "classification/01-likelihood-and-mle.html#joint-likelihood-for-ten-draws",
+    "title": "Likelihood and maximum likelihood estimation",
+    "section": "2. Joint likelihood for ten draws",
+    "text": "2. Joint likelihood for ten draws\nNow suppose that ten independent tickets are drawn, and six are red. Because the draws are independent, one particular ordering of those results has likelihood \\(p^6(1-p)^4\\). If we observe only the count, there are \\(\\binom{10}{6}\\) possible orderings, so the likelihood is\n\\[\nL(p) = \\binom{10}{6}p^6(1-p)^4.\n\\]\nThe binomial coefficient counts the possible orderings of six red and four blue tickets. It is the same for every candidate \\(p\\), so it does not change which candidate maximizes the likelihood.\nWe hold the observations fixed and vary \\(p\\). Thus, likelihood is not the probability that a candidate parameter is true; it is a score for how well that candidate explains the observed data.\n\nn = 10\nred_tickets = 6\n\ndef likelihood(p, red_count, total_count):\n    \"\"\"Probability of this red-ticket count under candidate p.\"\"\"\n    blue_count = total_count - red_count\n    return comb(total_count, red_count) * p**red_count * (1 - p)**blue_count\n\ncandidates = np.array([0.4, 0.5, 0.6, 0.8])\ncandidate_likelihoods = np.array([\n    likelihood(p, red_tickets, n) for p in candidates\n])\n\nfor p, value in zip(candidates, candidate_likelihoods):\n    print(f\"p = {p:.1f}: likelihood = {value:.4f}\")\n\nfig, ax = plt.subplots(figsize=(7.5, 4.5))\nbars = ax.bar(candidates.astype(str), candidate_likelihoods, color=\"#457eaa\")\nax.bar_label(bars, fmt=\"%.3f\", padding=3)\nax.set(\n    xlabel=\"Candidate probability of a red ticket, p\",\n    ylabel=\"Likelihood of 6 red tickets out of 10\",\n    title=\"Among these candidates, p = 0.6 makes the observation most likely\",\n)\nplt.show()\n\np = 0.4: likelihood = 0.1115\np = 0.5: likelihood = 0.2051\np = 0.6: likelihood = 0.2508\np = 0.8: likelihood = 0.0881"
+  },
+  {
+    "objectID": "classification/01-likelihood-and-mle.html#let-the-candidate-vary-continuously",
+    "href": "classification/01-likelihood-and-mle.html#let-the-candidate-vary-continuously",
+    "title": "Likelihood and maximum likelihood estimation",
+    "section": "3. Let the candidate vary continuously",
+    "text": "3. Let the candidate vary continuously\nRather than considering only four candidates, let’s evaluate a fine grid of values between 0 and 1. The maximum of the likelihood curve is the maximum-likelihood estimate (MLE):\n\\[\n\\hat p_{\\mathrm{MLE}}\n= \\underset{p}{\\operatorname{arg\\,max}}\\; L(p).\n\\]\nFor a Bernoulli/binomial model, the MLE is the observed red-ticket fraction, \\(\\hat p_{\\mathrm{MLE}}=6/10=0.6\\).\n\np_grid = np.linspace(0.001, 0.999, 500)\nlikelihood_grid = np.array([likelihood(p, red_tickets, n) for p in p_grid])\np_hat = red_tickets / n\n\nfig, ax = plt.subplots(figsize=(8, 4.8))\nax.plot(p_grid, likelihood_grid, color=\"#457eaa\", linewidth=2.5)\nax.axvline(p_hat, color=\"#c43c35\", linewidth=2, label=rf\"MLE: $\\hat p={p_hat:.1f}$\")\nax.set(\n    xlabel=\"Candidate p\",\n    ylabel=\"Likelihood\",\n    title=\"Likelihood\",\n)\nax.legend()\nplt.show()"
+  },
+  {
+    "objectID": "classification/01-likelihood-and-mle.html#more-observations-give-more-concentrated-evidence",
+    "href": "classification/01-likelihood-and-mle.html#more-observations-give-more-concentrated-evidence",
+    "title": "Likelihood and maximum likelihood estimation",
+    "section": "4. More observations give more concentrated evidence",
+    "text": "4. More observations give more concentrated evidence\nImagine another set of 100 draws with the same observed red fraction: 60 red tickets. Both samples have \\(\\hat p_{\\mathrm{MLE}}=0.6\\), but the larger sample supplies more evidence about plausible values of \\(p\\). The two panels use their own vertical scales so that both likelihood curves remain readable.\n\nfig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharex=True)\nfor ax, (total_count, red_count, color) in zip(\n    axes,\n    [(10, 6, \"#457eaa\"), (100, 60, \"#d77732\")],\n):\n    likelihood_values = np.array([\n        likelihood(p, red_count, total_count) for p in p_grid\n    ])\n    ax.plot(p_grid, likelihood_values, color=color, linewidth=2.5)\n    ax.axvline(0.6, color=\"#c43c35\", linewidth=1.8, linestyle=\"--\", label=r\"$\\hat p = 0.6$\")\n    ax.set(\n        xlabel=\"Candidate p\",\n        ylabel=\"Likelihood\",\n        title=f\"{red_count} red tickets out of {total_count}\",\n    )\n    ax.legend()\n\nfig.suptitle(\"More observations make the likelihood peak narrower\", y=1.02)\nplt.tight_layout()\nplt.show()"
+  },
+  {
+    "objectID": "classification/01-likelihood-and-mle.html#bridge-to-logistic-regression",
+    "href": "classification/01-likelihood-and-mle.html#bridge-to-logistic-regression",
+    "title": "Likelihood and maximum likelihood estimation",
+    "section": "5. Bridge to logistic regression",
+    "text": "5. Bridge to logistic regression\nThe ticket model assumes that every draw has the same red-ticket probability \\(p\\). In logistic regression, each observation can have a different probability because its features differ:\n\\[\np_i = P(y_i=1\\mid\\mathbf{x}_i)\n= \\sigma(\\mathbf{x}_i^\\mathsf{T}\\boldsymbol{\\beta}).\n\\]\nThe likelihood idea is unchanged: choose the model parameters that make the observed binary labels most likely. In the next lecture, we will learn how to perform that optimization.\n← Return to Classification"
+  },
+  {
+    "objectID": "classification/likelihood-playground.html",
+    "href": "classification/likelihood-playground.html",
+    "title": "Likelihood playground",
+    "section": "",
+    "text": "Use this simulation to distinguish a probability model from the likelihood of observed data. A simulated box produces red tickets (coded as \\(1\\)) and blue tickets (coded as \\(0\\)). You control the probability used to generate the tickets, but the likelihood chart asks a different question: for the tickets we have already observed, which candidate value of \\(p\\) explains them best?\n\n\n\n\n\n\nTipWhat to watch\n\n\n\nAt first, no candidate value is preferred. Generate a few tickets, inspect the likelihood curve, and try to identify its peak before revealing the MLE. As more tickets accumulate, the curve generally becomes more concentrated.\n\n\n\n  \n    \n      Red-ticket probability used to simulate, p*\n      \n      0.60\n    \n    \n      Total tickets (10–100)\n      \n    \n  \n\n  \n    Draw one ticket\n    Draw 10 tickets\n    Draw remaining tickets\n    Show MLE\n    Reset\n  \n\n  No tickets drawn yet.\n\n  \n    \n      Observed ticket draws\n      \n    \n    \n      Likelihood of candidate values of p\n      \n    \n  \n\n  \n\nFor a fixed number of draws \\(n\\) and \\(r\\) observed red tickets, the likelihood is\n\\[\nL(p) = \\binom{n}{r}p^r(1-p)^{n-r}.\n\\]\nThe plotted vertical scale is the likelihood itself. It is not a probability distribution over \\(p\\); it shows how well each candidate accounts for the observed tickets.\n← Return to Classification"
   },
   {
     "objectID": "evaluation/01-polynomial-model-validation.html",

@@ -305,8 +305,68 @@
   fill: #457eaa;
 }
 
+/* Likelihood and maximum-likelihood estimation interactive. */
+.likelihood-explorer {
+  margin: 1.5rem 0 2rem;
+}
+
+.likelihood-controls output {
+  color: #4c5961;
+  font-variant-numeric: tabular-nums;
+}
+
+.likelihood-plots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.likelihood-red-ticket {
+  fill: #c43c35;
+}
+
+.likelihood-blue-ticket {
+  fill: #457eaa;
+}
+
+.likelihood-ticket-label {
+  fill: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.likelihood-curve-line {
+  fill: none;
+  stroke: #d77732;
+  stroke-width: 2.5;
+}
+
+.likelihood-mle-line {
+  stroke: #c43c35;
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+
+.likelihood-best-line {
+  stroke: #457eaa;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.likelihood-answer {
+  margin: 0.9rem 0 0;
+  padding: 0.8rem 1rem;
+  border-left: 4px solid #c43c35;
+  background: #f8f1ed;
+}
+
 @media (max-width: 700px) {
   .clt-plots {
+    grid-template-columns: 1fr;
+  }
+
+  .likelihood-plots {
     grid-template-columns: 1fr;
   }
 }
