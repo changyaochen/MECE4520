@@ -22,6 +22,7 @@ and CO/NOX targets, with these deliberate additions and changes:
 | `campaign_year` | Categorical provenance field derived from the annual UCI file names (`2011` through `2015`). It is not a turbine identifier or a timestamp. | One-hot encoding, group-aware validation, and distribution shift. |
 | `AH` missing values | 3% of ambient-humidity values are blanked at reproducible, isolated record positions. | Basic imputation and missingness indicators. |
 | `AFDP` missing values | Two non-overlapping 24-record blocks are blanked in each annual campaign. | Diagnose structured missingness and compare strategies with simple imputation. |
+| `high_co` | Binary label: `1` when CO is at least 2.0 mg/m³; otherwise `0`. The original numerical CO value remains available. | Binary classification and logistic regression. |
 
 Only predictor values are blanked. The CO and NOX emission targets are never
 changed or made missing.
@@ -29,6 +30,17 @@ changed or made missing.
 The missingness is simulated for teaching; it is not claimed to have occurred
 in the original UCI measurements. The nonmissing entries remain original UCI
 measurements.
+
+## Binary labels for classification
+
+Classification notebooks use the same course CSV rather than a second,
+near-duplicate data file. Its `high_co` label is `1` when the measured
+`CO` is at least 2.0 mg/m³ and `0` otherwise. The 2.0 mg/m³ cutoff is a
+course-defined operating-alert threshold for teaching classification; it is
+not claimed to be a regulatory limit.
+
+The Classification notebook removes the numerical CO and NOX columns from its
+working data so they cannot be used as contemporaneous emissions shortcuts.
 
 ## Reproducing the file
 
