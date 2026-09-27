@@ -1,0 +1,27 @@
+---
+title: "Classification"
+---
+
+Classification estimates the chance that an observation belongs to a category.
+Before we fit a classifier, we need a way to connect a probability model to
+observed binary outcomes.
+
+## 1. Likelihood and maximum likelihood estimation
+
+**Estimated time:** 20–30 minutes
+
+Use simulated red/blue ticket draws to distinguish probability from
+likelihood, compare proposed probabilities, and identify the maximum-
+likelihood estimate. This is the same likelihood idea that logistic regression
+will use later, without yet fitting a turbine-data model.
+
+[View the notebook](01-likelihood-and-mle.ipynb)
+
+### Interactive playground
+
+**Estimated time:** 10–15 minutes
+
+Generate ticket draws one at a time and watch the likelihood curve accumulate.
+Use the maximum of that curve to identify the maximum-likelihood estimate.
+
+[Open the interactive playground](likelihood-playground.qmd)

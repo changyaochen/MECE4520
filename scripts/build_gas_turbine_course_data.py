@@ -38,6 +38,8 @@ RANDOM_SEED = 4520
 AH_MISSING_FRACTION = 0.03
 AFDP_BLOCK_LENGTH = 24
 AFDP_BLOCKS_PER_CAMPAIGN = 2
+HIGH_CO_THRESHOLD = 2.0
+COURSE_COLUMNS = ("campaign_year", *SOURCE_COLUMNS, "high_co")
 
 
 def read_csv(path: Path) -> list[dict[str, str]]:
@@ -102,6 +104,13 @@ def add_documented_missingness(rows: list[dict[str, str]]) -> None:
                 rows[index]["AFDP"] = ""
 
 
+def add_high_co_label(rows: list[dict[str, str]]) -> None:
+    """Append the course-defined binary CO alert without changing CO itself."""
+
+    for row in rows:
+        row["high_co"] = str(int(float(row["CO"]) >= HIGH_CO_THRESHOLD))
+
+
 def write_csv(rows: list[dict[str, str]], output: Path, force: bool) -> None:
     if output.exists() and not force:
         raise FileExistsError(f"{output} already exists; pass --force to replace it.")
@@ -109,7 +118,7 @@ def write_csv(rows: list[dict[str, str]], output: Path, force: bool) -> None:
     with output.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(
             handle,
-            fieldnames=("campaign_year", *SOURCE_COLUMNS),
+            fieldnames=COURSE_COLUMNS,
             lineterminator="\n",
         )
         writer.writeheader()
@@ -151,6 +160,7 @@ def main() -> None:
         else read_annual_sources(args.uci_directory)
     )
     add_documented_missingness(rows)
+    add_high_co_label(rows)
     write_csv(rows, args.output, args.force)
     print(f"Wrote {len(rows)} rows to {args.output}")
 

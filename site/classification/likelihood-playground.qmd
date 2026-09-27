@@ -1,0 +1,272 @@
+---
+title: "Likelihood playground"
+toc: false
+page-layout: full
+---
+
+Use this simulation to distinguish a probability model from the likelihood of
+observed data. A simulated box produces red tickets (coded as $1$) and blue
+tickets (coded as $0$). You control the probability used to generate the
+tickets, but the likelihood chart asks a different question: **for the tickets
+we have already observed, which candidate value of $p$ explains them best?**
+
+::: {.callout-tip}
+## What to watch
+
+At first, no candidate value is preferred. Generate a few tickets, inspect the
+likelihood curve, and try to identify its peak before revealing the MLE. As
+more tickets accumulate, the curve generally becomes more concentrated.
+:::
+
+```{=html}
+<div id="likelihood-explorer" class="likelihood-explorer" aria-label="Interactive likelihood and maximum-likelihood estimation simulation">
+  <div class="clt-controls likelihood-controls">
+    <label>
+      <span>Red-ticket probability used to simulate, <i>p</i><sup>*</sup></span>
+      <input id="likelihood-true-p" type="range" min="0.10" max="0.90" step="0.05" value="0.60">
+      <output id="likelihood-true-p-value" for="likelihood-true-p">0.60</output>
+    </label>
+    <label>
+      <span>Total tickets (10–100)</span>
+      <input id="likelihood-total" type="number" min="10" max="100" step="1" value="30" inputmode="numeric">
+    </label>
+  </div>
+
+  <div class="clt-buttons" aria-label="Simulation controls">
+    <button id="likelihood-add-one" type="button" class="regression-sampling-primary">Draw one ticket</button>
+    <button id="likelihood-add-ten" type="button">Draw 10 tickets</button>
+    <button id="likelihood-run" type="button">Draw remaining tickets</button>
+    <button id="likelihood-reveal" type="button" aria-pressed="false">Show MLE</button>
+    <button id="likelihood-reset" type="button">Reset</button>
+  </div>
+
+  <p id="likelihood-status" class="clt-status" aria-live="polite">No tickets drawn yet.</p>
+
+  <div class="likelihood-plots">
+    <figure class="clt-plot">
+      <figcaption>Observed ticket draws</figcaption>
+      <svg id="likelihood-tickets" role="img" aria-label="Observed red and blue ticket draws"></svg>
+    </figure>
+    <figure class="clt-plot">
+      <figcaption>Likelihood of candidate values of <i>p</i></figcaption>
+      <svg id="likelihood-curve" role="img" aria-label="Likelihood curve"></svg>
+    </figure>
+  </div>
+
+  <p id="likelihood-answer" class="likelihood-answer" aria-live="polite" hidden></p>
+</div>
+```
+
+For a fixed number of draws $n$ and $r$ observed red tickets, the likelihood
+is
+
+$$
+L(p) = \binom{n}{r}p^r(1-p)^{n-r}.
+$$
+
+The plotted vertical scale is the likelihood itself. It is not a probability
+distribution over $p$; it shows how well each candidate accounts for the
+observed tickets.
+
+<a href="index.qmd">← Return to Classification</a>
+
+<script>
+(() => {
+  const root = document.getElementById("likelihood-explorer");
+  if (!root) return;
+
+  const truePInput = document.getElementById("likelihood-true-p");
+  const truePValue = document.getElementById("likelihood-true-p-value");
+  const totalInput = document.getElementById("likelihood-total");
+  const oneButton = document.getElementById("likelihood-add-one");
+  const tenButton = document.getElementById("likelihood-add-ten");
+  const runButton = document.getElementById("likelihood-run");
+  const revealButton = document.getElementById("likelihood-reveal");
+  const resetButton = document.getElementById("likelihood-reset");
+  const status = document.getElementById("likelihood-status");
+  const answer = document.getElementById("likelihood-answer");
+
+  let draws = [];
+  let showMle = false;
+
+  const clamp = (value, lower, upper) => Math.max(lower, Math.min(upper, value));
+  const totalTickets = () => clamp(Number.parseInt(totalInput.value, 10) || 30, 10, 100);
+  const trueP = () => Number.parseFloat(truePInput.value);
+  const redCount = () => draws.reduce((sum, draw) => sum + draw, 0);
+
+  function svgElement(tag, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    svg.append(element);
+  }
+
+  function prepareSvg(id, height = 280) {
+    const svg = document.getElementById(id);
+    const width = Math.max(320, Math.round(svg.getBoundingClientRect().width || 520));
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+    return { svg, width, height, margin: { top: 24, right: 22, bottom: 42, left: 52 } };
+  }
+
+  function drawTickets() {
+    const chart = prepareSvg("likelihood-tickets");
+    const { svg, width, height, margin } = chart;
+    const plotWidth = width - margin.left - margin.right;
+    const cellWidth = Math.max(24, Math.min(48, plotWidth / 10));
+    const columns = Math.max(1, Math.floor(plotWidth / cellWidth));
+    const ticketWidth = Math.max(18, Math.min(34, cellWidth - 6));
+    const rows = Math.max(1, Math.ceil(Math.max(draws.length, 1) / columns));
+    // Shrink the grid as necessary so up to 100 draws remain inside the panel.
+    const gridTop = 28;
+    const gridBottom = height - 28;
+    const rowHeight = Math.max(18, Math.min(34, (gridBottom - gridTop) / rows));
+    const ticketHeight = Math.max(13, rowHeight - 5);
+
+    addText(svg, "Red tickets", margin.left, 14, { class: "clt-annotation" });
+    addText(svg, "Blue tickets", width - margin.right, 14, { class: "clt-annotation", "text-anchor": "end" });
+
+    if (!draws.length) {
+      addText(svg, "Draw tickets to create an observation.", width / 2, height / 2, {
+        class: "clt-empty-message", "text-anchor": "middle"
+      });
+      return;
+    }
+
+    draws.forEach((draw, index) => {
+      const column = index % columns;
+      const row = Math.floor(index / columns);
+      const x = margin.left + column * cellWidth + (cellWidth - ticketWidth) / 2;
+      const y = gridTop + row * rowHeight;
+      svg.append(svgElement("rect", {
+        x, y, width: ticketWidth, height: ticketHeight, rx: 4,
+        class: draw ? "likelihood-red-ticket" : "likelihood-blue-ticket"
+      }));
+      addText(svg, draw ? "1" : "0", x + ticketWidth / 2, y + ticketHeight / 2 + 4, {
+        class: "likelihood-ticket-label", "text-anchor": "middle"
+      });
+    });
+
+    const countY = height - 10;
+    addText(svg, `${redCount()} red`, margin.left, countY, { class: "clt-annotation" });
+    addText(svg, `${draws.length - redCount()} blue`, width - margin.right, countY, {
+      class: "clt-annotation", "text-anchor": "end"
+    });
+  }
+
+  function drawLikelihood() {
+    const chart = prepareSvg("likelihood-curve");
+    const { svg, width, height, margin } = chart;
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const x = value => margin.left + value * plotWidth;
+    const red = redCount();
+    const n = draws.length;
+    const mle = n ? red / n : 0;
+    let coefficient = 1;
+    for (let index = 1; index <= Math.min(red, n - red); index += 1) {
+      coefficient *= (n - Math.min(red, n - red) + index) / index;
+    }
+    const rawPoints = [];
+    if (n) {
+      for (let index = 0; index <= 240; index += 1) {
+        const candidate = 0.001 + (index / 240) * 0.998;
+        rawPoints.push([
+          candidate,
+          coefficient * candidate ** red * (1 - candidate) ** (n - red)
+        ]);
+      }
+    }
+    const maximum = rawPoints.length ? Math.max(...rawPoints.map(([, value]) => value)) * 1.05 : 1;
+    const y = value => margin.top + plotHeight - (value / maximum) * plotHeight;
+    const xAxisY = height - margin.bottom;
+
+    svg.append(svgElement("line", { x1: margin.left, y1: xAxisY, x2: width - margin.right, y2: xAxisY, class: "clt-axis" }));
+    svg.append(svgElement("line", { x1: margin.left, y1: margin.top, x2: margin.left, y2: xAxisY, class: "clt-axis" }));
+    [0, 0.25, 0.5, 0.75, 1].forEach(value => {
+      const tickX = x(value);
+      svg.append(svgElement("line", { x1: tickX, y1: xAxisY, x2: tickX, y2: xAxisY + 4, class: "clt-axis" }));
+      addText(svg, value.toFixed(2), tickX, height - 15, { class: "clt-tick", "text-anchor": "middle" });
+    });
+    [0, 0.5, 1].forEach(fraction => {
+      const value = maximum * fraction;
+      const tickY = y(value);
+      svg.append(svgElement("line", { x1: margin.left - 4, y1: tickY, x2: margin.left, y2: tickY, class: "clt-axis" }));
+      addText(svg, value < 0.001 ? value.toExponential(1) : value.toFixed(3), margin.left - 7, tickY + 4, {
+        class: "clt-tick", "text-anchor": "end"
+      });
+    });
+    const labelX = 14;
+    const labelY = margin.top + plotHeight / 2;
+    addText(svg, "likelihood", labelX, labelY, {
+      class: "clt-tick", "text-anchor": "middle", transform: `rotate(-90 ${labelX} ${labelY})`
+    });
+
+    if (!draws.length) {
+      addText(svg, "Every candidate is equally supported before any draw.", width / 2, height / 2, {
+        class: "clt-empty-message", "text-anchor": "middle"
+      });
+      return;
+    }
+
+    const points = rawPoints;
+    const path = points.map(([candidate, value], index) => `${index ? "L" : "M"}${x(candidate).toFixed(2)},${y(value).toFixed(2)}`).join(" ");
+    svg.append(svgElement("path", { d: path, class: "likelihood-curve-line" }));
+
+    const mleX = x(mle);
+    svg.append(svgElement("line", { x1: mleX, y1: margin.top, x2: mleX, y2: xAxisY, class: "likelihood-best-line" }));
+    addText(svg, "best p", Math.min(mleX + 4, width - margin.right - 38), xAxisY - 8, { class: "clt-annotation" });
+
+    if (showMle) {
+      svg.append(svgElement("line", { x1: mleX, y1: margin.top, x2: mleX, y2: y(0), class: "likelihood-mle-line" }));
+      addText(svg, `MLE: ${mle.toFixed(2)}`, Math.min(mleX + 4, width - margin.right - 56), margin.top + 14, { class: "clt-annotation" });
+    }
+  }
+
+  function render() {
+    const total = totalTickets();
+    if (draws.length > total) draws = draws.slice(0, total);
+    truePValue.value = trueP().toFixed(2);
+    truePValue.textContent = trueP().toFixed(2);
+    const red = redCount();
+    const remaining = total - draws.length;
+    status.textContent = draws.length
+      ? `${draws.length} of ${total} tickets drawn: ${red} red and ${draws.length - red} blue. ${remaining} remaining.`
+      : `No tickets drawn yet. The simulation will draw up to ${total} tickets.`;
+    oneButton.disabled = remaining === 0;
+    tenButton.disabled = remaining === 0;
+    runButton.disabled = remaining === 0;
+    revealButton.disabled = draws.length === 0;
+    revealButton.textContent = showMle ? "Hide MLE" : "Show MLE";
+    revealButton.setAttribute("aria-pressed", String(showMle));
+    answer.hidden = !showMle || !draws.length;
+    if (showMle && draws.length) {
+      answer.innerHTML = `<strong>Maximum-likelihood estimate:</strong> <i>p</i><sub>MLE</sub> = ${red}/${draws.length} = ${(red / draws.length).toFixed(3)}. This is the candidate probability that maximizes the likelihood of the observed draws.`;
+    }
+    drawTickets();
+    drawLikelihood();
+  }
+
+  function addDraws(requested) {
+    const numberToAdd = Math.min(requested, totalTickets() - draws.length);
+    for (let index = 0; index < numberToAdd; index += 1) draws.push(Math.random() < trueP() ? 1 : 0);
+    render();
+  }
+
+  oneButton.addEventListener("click", () => addDraws(1));
+  tenButton.addEventListener("click", () => addDraws(10));
+  runButton.addEventListener("click", () => addDraws(totalTickets()));
+  revealButton.addEventListener("click", () => { showMle = !showMle; render(); });
+  resetButton.addEventListener("click", () => { draws = []; showMle = false; render(); });
+  truePInput.addEventListener("input", render);
+  totalInput.addEventListener("change", render);
+  window.addEventListener("resize", render);
+  render();
+})();
+</script>
