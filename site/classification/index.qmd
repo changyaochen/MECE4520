@@ -25,3 +25,23 @@ Generate ticket draws one at a time and watch the likelihood curve accumulate.
 Use the maximum of that curve to identify the maximum-likelihood estimate.
 
 [Open the interactive playground](likelihood-playground.qmd)
+
+## 2. Logistic regression and gradient descent
+
+**Estimated time:** 45–60 minutes
+
+Fit a high-CO classification model using turbine inlet temperature (TIT).
+Starting from the likelihood idea, build the binary-cross-entropy loss,
+calculate its gradient, and use repeated gradient-descent updates to fit the
+model.
+
+[View the notebook](02-logistic-regression-gradient-descent.ipynb)
+
+### Interactive explorer
+
+**Estimated time:** 10–15 minutes
+
+Step through the same logistic-regression updates and watch the coefficients
+move downhill on the binary-cross-entropy surface.
+
+[Open the interactive explorer](logistic-gradient-descent.qmd)
