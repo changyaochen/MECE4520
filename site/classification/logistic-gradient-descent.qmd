@@ -1,0 +1,586 @@
+---
+title: "Gradient descent for logistic regression"
+toc: false
+page-layout: full
+---
+
+This explorer fits a logistic-regression model for the course-defined high-CO
+label using turbine inlet temperature (TIT). It uses standardized TIT, so the
+two fitted coefficients have a convenient common scale.
+
+::: {.callout-tip}
+## What to watch
+
+Choose the initial coefficients and learning rate, then take one step at a
+time. The red point traces the path downhill across the
+binary-cross-entropy surface; the panel on the right records the loss after
+each update. Adjust the surface-view-angle slider to inspect the same path
+from another direction; it does not change the optimization.
+:::
+
+$$
+\begin{aligned}
+\tilde{x}_i
+&= \frac{\mathrm{TIT}_i-\overline{\mathrm{TIT}}}{s_{\mathrm{TIT}}},\\
+p_i
+&=\sigma(\beta_0+\beta_1\tilde{x}_i),\\
+\boldsymbol{\beta}^{(t+1)}
+&=\boldsymbol{\beta}^{(t)}-\eta\nabla\mathcal{L}_{\mathrm{BCE}}.
+\end{aligned}
+$$
+
+```{=html}
+<div id="logistic-gd-explorer" class="clt-explorer logistic-gd-explorer" aria-label="Interactive logistic-regression gradient-descent explorer">
+  <div class="clt-controls logistic-gd-controls" aria-label="Gradient-descent settings">
+    <label>
+      <span>Initial β₀ (−1.5 to 0.7)</span>
+      <input id="logistic-gd-beta0" type="range" min="-1.5" max="0.7" step="0.05" value="0" disabled>
+      <output id="logistic-gd-beta0-value" for="logistic-gd-beta0">0.00</output>
+    </label>
+    <label>
+      <span>Initial β₁ (−4.0 to 0.6)</span>
+      <input id="logistic-gd-beta1" type="range" min="-4.0" max="0.6" step="0.05" value="0" disabled>
+      <output id="logistic-gd-beta1-value" for="logistic-gd-beta1">0.00</output>
+    </label>
+    <label>
+      <span>Learning rate, η (0.05 to 2.00)</span>
+      <input id="logistic-gd-learning-rate" type="range" min="0.05" max="2.00" step="0.05" value="0.75" disabled>
+      <output id="logistic-gd-learning-rate-value" for="logistic-gd-learning-rate">0.75</output>
+    </label>
+    <label>
+      <span>Surface view angle, φ (0° to 360°)</span>
+      <input id="logistic-gd-view-angle" type="range" min="0" max="360" step="5" value="45" disabled>
+      <output id="logistic-gd-view-angle-value" for="logistic-gd-view-angle">45°</output>
+    </label>
+  </div>
+
+  <div class="clt-buttons" aria-label="Gradient-descent controls">
+    <button id="logistic-gd-next" type="button" class="regression-sampling-primary" disabled>Take one step</button>
+    <button id="logistic-gd-ten" type="button" disabled>Run 10 steps</button>
+    <button id="logistic-gd-run" type="button" disabled>Run to 60 steps</button>
+    <button id="logistic-gd-reset" type="button" disabled>Reset to selected settings</button>
+    <button id="logistic-gd-defaults" type="button" disabled>Restore defaults</button>
+  </div>
+
+  <p id="logistic-gd-status" class="clt-status" aria-live="polite">Loading the gas-turbine data…</p>
+
+  <div class="clt-plots">
+    <figure class="clt-plot">
+      <figcaption>Binary-cross-entropy loss surface <span class="logistic-gd-caption-note">red = iteration path</span></figcaption>
+      <svg id="logistic-gd-surface" role="img" aria-label="Binary-cross-entropy surface with the gradient-descent path"></svg>
+    </figure>
+    <figure class="clt-plot">
+      <figcaption>Loss after each gradient-descent update</figcaption>
+      <svg id="logistic-gd-history" role="img" aria-label="Binary cross-entropy by gradient-descent iteration"></svg>
+    </figure>
+  </div>
+</div>
+```
+
+The displayed surface is computed from a fixed, evenly spaced subset of the
+course dataset so that the page stays responsive. Each displayed
+gradient-descent update uses all available TIT–high-CO observations.
+
+<a href="index.qmd">← Return to Classification</a>
+
+<script>
+(() => {
+  const root = document.getElementById("logistic-gd-explorer");
+  if (!root) return;
+
+  const nextButton = document.getElementById("logistic-gd-next");
+  const tenButton = document.getElementById("logistic-gd-ten");
+  const runButton = document.getElementById("logistic-gd-run");
+  const resetButton = document.getElementById("logistic-gd-reset");
+  const defaultsButton = document.getElementById("logistic-gd-defaults");
+  const status = document.getElementById("logistic-gd-status");
+  const beta0Input = document.getElementById("logistic-gd-beta0");
+  const beta1Input = document.getElementById("logistic-gd-beta1");
+  const learningRateInput = document.getElementById("logistic-gd-learning-rate");
+  const viewAngleInput = document.getElementById("logistic-gd-view-angle");
+  const beta0Value = document.getElementById("logistic-gd-beta0-value");
+  const beta1Value = document.getElementById("logistic-gd-beta1-value");
+  const learningRateValue = document.getElementById("logistic-gd-learning-rate-value");
+  const viewAngleValue = document.getElementById("logistic-gd-view-angle-value");
+
+  const maximumSteps = 60;
+  const beta0Domain = [-1.5, 0.7];
+  const beta1Domain = [-4.0, 0.6];
+  const learningRateDomain = [0.05, 2.0];
+  const viewAngleDomain = [0, 360];
+  const surfaceResolution = 41;
+  let data = [];
+  let surfaceData = [];
+  let surface = [];
+  let history = [];
+  let dataReady = false;
+  let settingsChanged = false;
+
+  const clamp = (value, lower, upper) => Math.max(lower, Math.min(upper, value));
+
+  function inputValue(input, domain) {
+    return clamp(Number.parseFloat(input.value), domain[0], domain[1]);
+  }
+
+  function initialBeta() {
+    return [
+      inputValue(beta0Input, beta0Domain),
+      inputValue(beta1Input, beta1Domain)
+    ];
+  }
+
+  function currentLearningRate() {
+    return inputValue(learningRateInput, learningRateDomain);
+  }
+
+  function currentViewAngle() {
+    return inputValue(viewAngleInput, viewAngleDomain);
+  }
+
+  function updateSettingDisplays() {
+    const beta = initialBeta();
+    const learningRate = currentLearningRate();
+    beta0Value.value = beta[0].toFixed(2);
+    beta0Value.textContent = beta[0].toFixed(2);
+    beta1Value.value = beta[1].toFixed(2);
+    beta1Value.textContent = beta[1].toFixed(2);
+    learningRateValue.value = learningRate.toFixed(2);
+    learningRateValue.textContent = learningRate.toFixed(2);
+    viewAngleValue.value = currentViewAngle().toFixed(0) + "°";
+    viewAngleValue.textContent = currentViewAngle().toFixed(0) + "°";
+  }
+
+  function setSettingsDisabled(disabled) {
+    [beta0Input, beta1Input, learningRateInput, viewAngleInput].forEach(input => {
+      input.disabled = disabled;
+    });
+  }
+
+  function svgElement(tag, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    svg.append(element);
+  }
+
+  function prepareSvg(id, height = 300, preserveAspectRatio = "none", minimumWidth = 320) {
+    const svg = document.getElementById(id);
+    const width = Math.max(minimumWidth, Math.round(svg.getBoundingClientRect().width || 600));
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+    svg.setAttribute("preserveAspectRatio", preserveAspectRatio);
+    return { svg, width, height, margin: { top: 22, right: 22, bottom: 46, left: 52 } };
+  }
+
+  function sigmoid(value) {
+    if (value >= 0) return 1 / (1 + Math.exp(-value));
+    const exponential = Math.exp(value);
+    return exponential / (1 + exponential);
+  }
+
+  function softplus(value) {
+    return Math.log1p(Math.exp(-Math.abs(value))) + Math.max(value, 0);
+  }
+
+  function loss(beta, rows = data) {
+    let total = 0;
+    rows.forEach(row => {
+      const linearScore = beta[0] + beta[1] * row.x;
+      total += softplus(linearScore) - row.y * linearScore;
+    });
+    return total / rows.length;
+  }
+
+  function gradient(beta) {
+    let beta0Gradient = 0;
+    let beta1Gradient = 0;
+    data.forEach(row => {
+      const probability = sigmoid(beta[0] + beta[1] * row.x);
+      const residual = probability - row.y;
+      beta0Gradient += residual;
+      beta1Gradient += residual * row.x;
+    });
+    return [beta0Gradient / data.length, beta1Gradient / data.length];
+  }
+
+  function makeStep() {
+    const current = history.at(-1);
+    const direction = gradient([current.beta0, current.beta1]);
+    const learningRate = currentLearningRate();
+    const next = [
+      current.beta0 - learningRate * direction[0],
+      current.beta1 - learningRate * direction[1]
+    ];
+    history.push({
+      beta0: next[0],
+      beta1: next[1],
+      loss: loss(next)
+    });
+  }
+
+  function mixColor(start, end, fraction) {
+    const red = Math.round(start[0] + (end[0] - start[0]) * fraction);
+    const green = Math.round(start[1] + (end[1] - start[1]) * fraction);
+    const blue = Math.round(start[2] + (end[2] - start[2]) * fraction);
+    return "rgb(" + red + ", " + green + ", " + blue + ")";
+  }
+
+  function scale(value, domain, range) {
+    return range[0] + ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]);
+  }
+
+  function drawAxes(chart, xDomain, yDomain, xLabel, yLabel) {
+    const { svg, width, height, margin } = chart;
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const x = value => scale(value, xDomain, [margin.left, margin.left + plotWidth]);
+    const y = value => scale(value, yDomain, [margin.top + plotHeight, margin.top]);
+    const axisY = margin.top + plotHeight;
+
+    svg.append(svgElement("line", {
+      x1: margin.left, y1: axisY, x2: width - margin.right, y2: axisY, class: "clt-axis"
+    }));
+    svg.append(svgElement("line", {
+      x1: margin.left, y1: margin.top, x2: margin.left, y2: axisY, class: "clt-axis"
+    }));
+
+    for (let tick = 0; tick <= 4; tick += 1) {
+      const xValue = xDomain[0] + (tick / 4) * (xDomain[1] - xDomain[0]);
+      const tickX = x(xValue);
+      svg.append(svgElement("line", {
+        x1: tickX, y1: axisY, x2: tickX, y2: axisY + 4, class: "clt-axis"
+      }));
+      addText(svg, xValue.toFixed(1), tickX, height - 17, {
+        class: "clt-tick", "text-anchor": "middle"
+      });
+    }
+
+    for (let tick = 0; tick <= 4; tick += 1) {
+      const yValue = yDomain[0] + (tick / 4) * (yDomain[1] - yDomain[0]);
+      const tickY = y(yValue);
+      svg.append(svgElement("line", {
+        x1: margin.left - 4, y1: tickY, x2: margin.left, y2: tickY, class: "clt-axis"
+      }));
+      addText(svg, yValue.toFixed(1), margin.left - 7, tickY + 4, {
+        class: "clt-tick", "text-anchor": "end"
+      });
+    }
+
+    addText(svg, xLabel, margin.left + plotWidth / 2, height - 3, {
+      class: "clt-tick", "text-anchor": "middle"
+    });
+    const labelX = 14;
+    const labelY = margin.top + plotHeight / 2;
+    addText(svg, yLabel, labelX, labelY, {
+      class: "clt-tick",
+      "text-anchor": "middle",
+      transform: "rotate(-90 " + labelX + " " + labelY + ")"
+    });
+    return { x, y, plotWidth, plotHeight };
+  }
+
+  function buildSurface() {
+    surface = [];
+    for (let row = 0; row < surfaceResolution; row += 1) {
+      const beta1 = beta1Domain[0] + (row / (surfaceResolution - 1)) * (beta1Domain[1] - beta1Domain[0]);
+      const values = [];
+      for (let column = 0; column < surfaceResolution; column += 1) {
+        const beta0 = beta0Domain[0] + (column / (surfaceResolution - 1)) * (beta0Domain[1] - beta0Domain[0]);
+        values.push(loss([beta0, beta1], surfaceData));
+      }
+      surface.push(values);
+    }
+  }
+
+  function drawSurface() {
+    const chart = prepareSvg("logistic-gd-surface", 380, "xMidYMid meet", 240);
+    chart.margin = { top: 14, right: 16, bottom: 24, left: 16 };
+    const { svg, width, height, margin } = chart;
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const surfaceValues = surface.flat();
+    const lossMinimum = Math.min(...surfaceValues);
+    const lossMaximum = Math.max(...surfaceValues);
+    const lossSpan = Math.max(lossMaximum - lossMinimum, 1e-9);
+    const elevation = Math.PI / 6;
+    const yaw = currentViewAngle() * Math.PI / 180;
+    const plane = 0.96 * Math.min(
+      plotWidth / (2 * Math.cos(elevation)),
+      plotHeight / (2 * Math.sin(elevation) + 0.70)
+    );
+    const heightScale = Math.min(plotHeight - plane - 20, 1.35 * plane);
+    const centerX = margin.left + plotWidth / 2;
+    const baseY = height - margin.bottom - plane;
+    const horizontalScale = plane * Math.SQRT2;
+    const groundCenterY = baseY + plane * Math.sin(elevation);
+
+    function project(beta0, beta1, lossValue) {
+      const u = clamp(
+        (beta0 - beta0Domain[0]) / (beta0Domain[1] - beta0Domain[0]),
+        0,
+        1
+      );
+      const v = clamp(
+        (beta1 - beta1Domain[0]) / (beta1Domain[1] - beta1Domain[0]),
+        0,
+        1
+      );
+      const h = clamp((lossValue - lossMinimum) / lossSpan, 0, 1);
+      const xWorld = u - 0.5;
+      const yWorld = v - 0.5;
+      const screenXWorld = xWorld * Math.cos(yaw) - yWorld * Math.sin(yaw);
+      const cameraDepth = xWorld * Math.sin(yaw) + yWorld * Math.cos(yaw);
+      return {
+        x: centerX + horizontalScale * screenXWorld * Math.cos(elevation),
+        y: groundCenterY + horizontalScale * cameraDepth * Math.sin(elevation) - heightScale * h,
+        depth: cameraDepth
+      };
+    }
+
+    const faces = [];
+    for (let row = 0; row < surfaceResolution - 1; row += 1) {
+      for (let column = 0; column < surfaceResolution - 1; column += 1) {
+        const beta0 = beta0Domain[0] + (column / (surfaceResolution - 1)) * (beta0Domain[1] - beta0Domain[0]);
+        const nextBeta0 = beta0Domain[0] + ((column + 1) / (surfaceResolution - 1)) * (beta0Domain[1] - beta0Domain[0]);
+        const beta1 = beta1Domain[0] + (row / (surfaceResolution - 1)) * (beta1Domain[1] - beta1Domain[0]);
+        const nextBeta1 = beta1Domain[0] + ((row + 1) / (surfaceResolution - 1)) * (beta1Domain[1] - beta1Domain[0]);
+        const values = [
+          surface[row][column],
+          surface[row][column + 1],
+          surface[row + 1][column + 1],
+          surface[row + 1][column]
+        ];
+        const points = [
+          project(beta0, beta1, values[0]),
+          project(nextBeta0, beta1, values[1]),
+          project(nextBeta0, nextBeta1, values[2]),
+          project(beta0, nextBeta1, values[3])
+        ];
+        faces.push({
+          depth: points.reduce((total, point) => total + point.depth, 0) / points.length,
+          value: values.reduce((total, value) => total + value, 0) / values.length,
+          points
+        });
+      }
+    }
+
+    faces.sort((left, right) => left.depth - right.depth);
+    faces.forEach(face => {
+      const fraction = clamp((face.value - lossMinimum) / lossSpan, 0, 1);
+      svg.append(svgElement("polygon", {
+        points: face.points.map(point => point.x.toFixed(2) + "," + point.y.toFixed(2)).join(" "),
+        fill: mixColor([231, 242, 246], [39, 84, 110], fraction),
+        class: "logistic-gd-surface-face"
+      }));
+    });
+
+    for (let row = 0; row < surfaceResolution; row += 4) {
+      const meshPath = [];
+      for (let column = 0; column < surfaceResolution; column += 1) {
+        const beta0 = beta0Domain[0] + (column / (surfaceResolution - 1)) * (beta0Domain[1] - beta0Domain[0]);
+        const beta1 = beta1Domain[0] + (row / (surfaceResolution - 1)) * (beta1Domain[1] - beta1Domain[0]);
+        const point = project(beta0, beta1, surface[row][column]);
+        meshPath.push((column ? "L" : "M") + point.x.toFixed(2) + "," + point.y.toFixed(2));
+      }
+      svg.append(svgElement("path", { d: meshPath.join(" "), class: "logistic-gd-mesh" }));
+    }
+    for (let column = 0; column < surfaceResolution; column += 4) {
+      const meshPath = [];
+      for (let row = 0; row < surfaceResolution; row += 1) {
+        const beta0 = beta0Domain[0] + (column / (surfaceResolution - 1)) * (beta0Domain[1] - beta0Domain[0]);
+        const beta1 = beta1Domain[0] + (row / (surfaceResolution - 1)) * (beta1Domain[1] - beta1Domain[0]);
+        const point = project(beta0, beta1, surface[row][column]);
+        meshPath.push((row ? "L" : "M") + point.x.toFixed(2) + "," + point.y.toFixed(2));
+      }
+      svg.append(svgElement("path", { d: meshPath.join(" "), class: "logistic-gd-mesh" }));
+    }
+
+    const origin = project(beta0Domain[0], beta1Domain[0], lossMinimum);
+    const beta0End = project(beta0Domain[1], beta1Domain[0], lossMinimum);
+    const beta1End = project(beta0Domain[0], beta1Domain[1], lossMinimum);
+    const lossEnd = project(beta0Domain[0], beta1Domain[0], lossMaximum);
+    [[origin, beta0End], [origin, beta1End], [origin, lossEnd]].forEach(([start, end]) => {
+      svg.append(svgElement("line", {
+        x1: start.x, y1: start.y, x2: end.x, y2: end.y, class: "logistic-gd-axis"
+      }));
+    });
+
+    [0, 0.5, 1].forEach(fraction => {
+      const beta0 = beta0Domain[0] + fraction * (beta0Domain[1] - beta0Domain[0]);
+      const beta0Point = project(beta0, beta1Domain[0], lossMinimum);
+      addText(svg, beta0.toFixed(1), beta0Point.x + 4, beta0Point.y + 15, {
+        class: "clt-tick", "text-anchor": "middle"
+      });
+
+      const beta1 = beta1Domain[0] + fraction * (beta1Domain[1] - beta1Domain[0]);
+      const beta1Point = project(beta0Domain[0], beta1, lossMinimum);
+      addText(svg, beta1.toFixed(1), beta1Point.x - 4, beta1Point.y + 15, {
+        class: "clt-tick", "text-anchor": "middle"
+      });
+
+      const lossValue = lossMinimum + fraction * lossSpan;
+      const lossPoint = project(beta0Domain[0], beta1Domain[0], lossValue);
+      addText(svg, lossValue.toFixed(2), lossPoint.x - 8, lossPoint.y + 4, {
+        class: "clt-tick", "text-anchor": "end"
+      });
+    });
+    addText(svg, "β₀", beta0End.x + 12, beta0End.y + 8, { class: "clt-tick" });
+    addText(svg, "β₁", beta1End.x - 12, beta1End.y + 8, {
+      class: "clt-tick", "text-anchor": "end"
+    });
+    addText(svg, "BCE", lossEnd.x - 8, lossEnd.y - 7, {
+      class: "clt-tick", "text-anchor": "end"
+    });
+
+    const pathPoints = history.map(point => {
+      const visualLoss = loss([point.beta0, point.beta1], surfaceData);
+      return project(point.beta0, point.beta1, visualLoss);
+    });
+    const trajectory = pathPoints.map((point, index) => {
+      return (index ? "L" : "M") + point.x.toFixed(2) + "," + point.y.toFixed(2);
+    }).join(" ");
+    svg.append(svgElement("path", { d: trajectory, class: "logistic-gd-path" }));
+
+    pathPoints.forEach((point, index) => {
+      const isCurrent = index === pathPoints.length - 1;
+      svg.append(svgElement("circle", {
+        cx: point.x,
+        cy: point.y,
+        r: isCurrent ? 5.6 : 3.2,
+        class: isCurrent ? "logistic-gd-current-point" : "logistic-gd-iteration-point"
+      }));
+    });
+  }
+
+  function drawHistory() {
+    const chart = prepareSvg("logistic-gd-history");
+    const { svg, width, margin } = chart;
+    const historyLosses = history.map(point => point.loss);
+    const observedMinimum = Math.min(0.40, ...historyLosses);
+    const observedMaximum = Math.max(0.70, ...historyLosses);
+    const padding = Math.max(0.02, 0.08 * (observedMaximum - observedMinimum));
+    const axes = drawAxes(
+      chart,
+      [0, maximumSteps],
+      [Math.max(0, observedMinimum - padding), observedMaximum + padding],
+      "iteration",
+      "binary cross-entropy"
+    );
+    const current = history.at(-1);
+    const path = history.map((point, index) => {
+      const command = index ? "L" : "M";
+      return command + axes.x(index).toFixed(2) + "," + axes.y(point.loss).toFixed(2);
+    }).join(" ");
+    svg.append(svgElement("path", { d: path, class: "logistic-gd-loss-line" }));
+    history.forEach((point, index) => {
+      svg.append(svgElement("circle", {
+        cx: axes.x(index),
+        cy: axes.y(point.loss),
+        r: index === history.length - 1 ? 4.5 : 2.3,
+        class: index === history.length - 1 ? "logistic-gd-current-point" : "logistic-gd-iteration-point"
+      }));
+    });
+    addText(svg, "current BCE = " + current.loss.toFixed(4), width - margin.right, margin.top + 14, {
+      class: "clt-annotation", "text-anchor": "end"
+    });
+  }
+
+  function render() {
+    if (!dataReady) return;
+    const current = history.at(-1);
+    const iteration = history.length - 1;
+    const prefix = settingsChanged ? "Settings changed. " : "";
+    status.textContent = prefix + "Iteration " + iteration + " of " + maximumSteps
+      + ": β₀ = " + current.beta0.toFixed(3)
+      + ", β₁ = " + current.beta1.toFixed(3)
+      + ", BCE = " + current.loss.toFixed(4)
+      + ", η = " + currentLearningRate().toFixed(2)
+      + ", view = " + currentViewAngle().toFixed(0) + "°.";
+    nextButton.disabled = iteration >= maximumSteps;
+    tenButton.disabled = iteration >= maximumSteps;
+    runButton.disabled = iteration >= maximumSteps;
+    resetButton.disabled = false;
+    defaultsButton.disabled = false;
+    drawSurface();
+    drawHistory();
+  }
+
+  function reset(settingsWereChanged = false) {
+    if (!dataReady) return;
+    updateSettingDisplays();
+    settingsChanged = settingsWereChanged;
+    const beta = initialBeta();
+    history = [{ beta0: beta[0], beta1: beta[1], loss: loss(beta) }];
+    render();
+  }
+
+  function takeSteps(count) {
+    if (!dataReady) return;
+    settingsChanged = false;
+    const remaining = maximumSteps - (history.length - 1);
+    for (let step = 0; step < Math.min(count, remaining); step += 1) makeStep();
+    render();
+  }
+
+  function restoreDefaults() {
+    beta0Input.value = "0";
+    beta1Input.value = "0";
+    learningRateInput.value = "0.75";
+    viewAngleInput.value = "45";
+    reset(true);
+  }
+
+  async function loadData() {
+    try {
+      const response = await fetch("../data/gas-turbine-course.csv");
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const rows = (await response.text()).trim().split(/\r?\n/);
+      const header = rows.shift().split(",");
+      const titIndex = header.indexOf("TIT");
+      const labelIndex = header.indexOf("high_co");
+      const rawRows = rows.map(row => {
+        const values = row.split(",");
+        return { tit: Number(values[titIndex]), y: Number(values[labelIndex]) };
+      }).filter(row => Number.isFinite(row.tit) && (row.y === 0 || row.y === 1));
+      if (rawRows.length < 100) throw new Error("Too few usable TIT–high-CO rows");
+
+      const mean = rawRows.reduce((total, row) => total + row.tit, 0) / rawRows.length;
+      const variance = rawRows.reduce((total, row) => total + (row.tit - mean) ** 2, 0) / rawRows.length;
+      const standardDeviation = Math.sqrt(variance);
+      data = rawRows.map(row => ({ x: (row.tit - mean) / standardDeviation, y: row.y }));
+      const stride = Math.max(1, Math.floor(data.length / 2200));
+      surfaceData = data.filter((row, index) => index % stride === 0);
+      status.textContent = "Preparing the binary-cross-entropy surface…";
+      buildSurface();
+      dataReady = true;
+      setSettingsDisabled(false);
+      updateSettingDisplays();
+      reset();
+    } catch (error) {
+      status.textContent = "Unable to load the gas-turbine data (" + error.message + "). Render the Quarto site and try again.";
+    }
+  }
+
+  nextButton.addEventListener("click", () => takeSteps(1));
+  tenButton.addEventListener("click", () => takeSteps(10));
+  runButton.addEventListener("click", () => takeSteps(maximumSteps));
+  resetButton.addEventListener("click", () => reset());
+  defaultsButton.addEventListener("click", restoreDefaults);
+  [beta0Input, beta1Input, learningRateInput].forEach(input => {
+    input.addEventListener("input", updateSettingDisplays);
+    input.addEventListener("change", () => reset(true));
+  });
+  viewAngleInput.addEventListener("input", () => {
+    updateSettingDisplays();
+    render();
+  });
+  window.addEventListener("resize", render);
+  updateSettingDisplays();
+  loadData();
+})();
+</script>
