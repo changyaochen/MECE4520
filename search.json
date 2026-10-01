@@ -392,46 +392,11 @@
     "text": "1. Polynomial regression and overfitting\nEstimated time: 25–35 minutes\nFit linear, moderately flexible, and high-degree polynomial models to a limited turbine calibration sample. Compare training and test RMSE and \\(R^2\\) to see why a flexible model can fit training observations well while predicting new observations poorly.\nView the notebook"
   },
   {
-    "objectID": "classification/index.html",
-    "href": "classification/index.html",
-    "title": "Classification",
+    "objectID": "classification/likelihood-playground.html",
+    "href": "classification/likelihood-playground.html",
+    "title": "Likelihood playground",
     "section": "",
-    "text": "Classification estimates the chance that an observation belongs to a category. Before we fit a classifier, we need a way to connect a probability model to observed binary outcomes."
-  },
-  {
-    "objectID": "classification/index.html#likelihood-and-maximum-likelihood-estimation",
-    "href": "classification/index.html#likelihood-and-maximum-likelihood-estimation",
-    "title": "Classification",
-    "section": "1. Likelihood and maximum likelihood estimation",
-    "text": "1. Likelihood and maximum likelihood estimation\nEstimated time: 20–30 minutes\nUse simulated red/blue ticket draws to distinguish probability from likelihood, compare proposed probabilities, and identify the maximum- likelihood estimate. This is the same likelihood idea that logistic regression will use later, without yet fitting a turbine-data model.\nView the notebook\n\nInteractive playground\nEstimated time: 10–15 minutes\nGenerate ticket draws one at a time and watch the likelihood curve accumulate. Use the maximum of that curve to identify the maximum-likelihood estimate.\nOpen the interactive playground"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Data Science for Mechanical Systems",
-    "section": "",
-    "text": "MECE 4520 introduces data science and machine learning through real engineering systems.\nCourse materials and source files are available on GitHub."
-  },
-  {
-    "objectID": "index.html#course-focus",
-    "href": "index.html#course-focus",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Course focus",
-    "text": "Course focus\nRather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:\n\nunderstand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems\n\nStudents will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data."
-  },
-  {
-    "objectID": "index.html#grading-policy",
-    "href": "index.html#grading-policy",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Grading policy",
-    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n30%\n\n\nIn-class quizzes\n30%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately five homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.\n\nIn-class quizzes\nExpect a short, time-limited quiz about once each week. At the end of the semester, your 3 lowest quiz scores will be dropped.\nWe will use Poll Everywhere for in-class quizzes. You need to sign in Poll Everywhere with your Columbia UNI before the first quiz."
-  },
-  {
-    "objectID": "index.html#syllabus",
-    "href": "index.html#syllabus",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Syllabus",
-    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\n\n\nSep. 15Sep. 17 — asynchronous\nSimple and multiple linear regression\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\n\n\nDec. 8 & 10\nFinal project presentations"
+    "text": "Use this simulation to distinguish a probability model from the likelihood of observed data. A simulated box produces red tickets (coded as \\(1\\)) and blue tickets (coded as \\(0\\)). You control the probability used to generate the tickets, but the likelihood chart asks a different question: for the tickets we have already observed, which candidate value of \\(p\\) explains them best?\n\n\n\n\n\n\nTipWhat to watch\n\n\n\nAt first, no candidate value is preferred. Generate a few tickets, inspect the likelihood curve, and try to identify its peak before revealing the MLE. As more tickets accumulate, the curve generally becomes more concentrated.\n\n\n\n  \n    \n      Red-ticket probability used to simulate, p*\n      \n      0.60\n    \n    \n      Total tickets (10–100)\n      \n    \n  \n\n  \n    Draw one ticket\n    Draw 10 tickets\n    Draw remaining tickets\n    Show MLE\n    Reset\n  \n\n  No tickets drawn yet.\n\n  \n    \n      Observed ticket draws\n      \n    \n    \n      Likelihood of candidate values of p\n      \n    \n  \n\n  \n\nFor a fixed number of draws \\(n\\) and \\(r\\) observed red tickets, the likelihood is\n\\[\nL(p) = \\binom{n}{r}p^r(1-p)^{n-r}.\n\\]\nThe plotted vertical scale is the likelihood itself. It is not a probability distribution over \\(p\\); it shows how well each candidate accounts for the observed tickets.\n← Return to Classification"
   },
   {
     "objectID": "classification/01-likelihood-and-mle.html",
@@ -476,11 +441,116 @@
     "text": "5. Bridge to logistic regression\nThe ticket model assumes that every draw has the same red-ticket probability \\(p\\). In logistic regression, each observation can have a different probability because its features differ:\n\\[\np_i = P(y_i=1\\mid\\mathbf{x}_i)\n= \\sigma(\\mathbf{x}_i^\\mathsf{T}\\boldsymbol{\\beta}).\n\\]\nThe likelihood idea is unchanged: choose the model parameters that make the observed binary labels most likely. In the next lecture, we will learn how to perform that optimization.\n← Return to Classification"
   },
   {
-    "objectID": "classification/likelihood-playground.html",
-    "href": "classification/likelihood-playground.html",
-    "title": "Likelihood playground",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Data Science for Mechanical Systems",
     "section": "",
-    "text": "Use this simulation to distinguish a probability model from the likelihood of observed data. A simulated box produces red tickets (coded as \\(1\\)) and blue tickets (coded as \\(0\\)). You control the probability used to generate the tickets, but the likelihood chart asks a different question: for the tickets we have already observed, which candidate value of \\(p\\) explains them best?\n\n\n\n\n\n\nTipWhat to watch\n\n\n\nAt first, no candidate value is preferred. Generate a few tickets, inspect the likelihood curve, and try to identify its peak before revealing the MLE. As more tickets accumulate, the curve generally becomes more concentrated.\n\n\n\n  \n    \n      Red-ticket probability used to simulate, p*\n      \n      0.60\n    \n    \n      Total tickets (10–100)\n      \n    \n  \n\n  \n    Draw one ticket\n    Draw 10 tickets\n    Draw remaining tickets\n    Show MLE\n    Reset\n  \n\n  No tickets drawn yet.\n\n  \n    \n      Observed ticket draws\n      \n    \n    \n      Likelihood of candidate values of p\n      \n    \n  \n\n  \n\nFor a fixed number of draws \\(n\\) and \\(r\\) observed red tickets, the likelihood is\n\\[\nL(p) = \\binom{n}{r}p^r(1-p)^{n-r}.\n\\]\nThe plotted vertical scale is the likelihood itself. It is not a probability distribution over \\(p\\); it shows how well each candidate accounts for the observed tickets.\n← Return to Classification"
+    "text": "MECE 4520 introduces data science and machine learning through real engineering systems.\nCourse materials and source files are available on GitHub."
+  },
+  {
+    "objectID": "index.html#course-focus",
+    "href": "index.html#course-focus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Course focus",
+    "text": "Course focus\nRather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:\n\nunderstand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems\n\nStudents will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data."
+  },
+  {
+    "objectID": "index.html#grading-policy",
+    "href": "index.html#grading-policy",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Grading policy",
+    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n30%\n\n\nIn-class quizzes\n30%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately five homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.\n\nIn-class quizzes\nExpect a short, time-limited quiz about once each week. At the end of the semester, your 3 lowest quiz scores will be dropped.\nWe will use Poll Everywhere for in-class quizzes. You need to sign in Poll Everywhere with your Columbia UNI before the first quiz."
+  },
+  {
+    "objectID": "index.html#syllabus",
+    "href": "index.html#syllabus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Syllabus",
+    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\n\n\nSep. 15Sep. 17 — asynchronous\nSimple and multiple linear regression\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\n\n\nDec. 8 & 10\nFinal project presentations"
+  },
+  {
+    "objectID": "classification/02-logistic-regression-gradient-descent.html",
+    "href": "classification/02-logistic-regression-gradient-descent.html",
+    "title": "Logistic regression and gradient descent",
+    "section": "",
+    "text": "In the likelihood notebook, we selected the probability that best explained a set of red/blue ticket draws. Here, we use the same maximum-likelihood idea to fit a logistic-regression model for gas-turbine operating observations.\nIn the data, each row records one operating observation. Our target is the course-defined high-CO label: it is 1 when CO is at least 2 mg/m³ and 0 otherwise. We will use turbine inlet temperature (TIT) as one feature and implement gradient descent ourselves.\nfrom pathlib import Path\nfrom urllib.request import urlretrieve\n\nimport matplotlib.pyplot as plt\nimport numpy as np\nimport pandas as pd\nimport seaborn as sns\n\nsns.set_theme(style=\"whitegrid\", context=\"notebook\")"
+  },
+  {
+    "objectID": "classification/02-logistic-regression-gradient-descent.html#set-up-the-turbine-classification-task",
+    "href": "classification/02-logistic-regression-gradient-descent.html#set-up-the-turbine-classification-task",
+    "title": "Logistic regression and gradient descent",
+    "section": "1. Set up the turbine classification task",
+    "text": "1. Set up the turbine classification task\nThe same course dataset supported our regression examples. This time, the measured CO value has already been converted into a binary label, so we can focus on the probability model rather than on constructing the label.\n\nDATA_URL = \"https://raw.githubusercontent.com/changyaochen/MECE4520/master/site/data/gas-turbine-course.csv\"\ncandidates = [\n    Path(\"../data/gas-turbine-course.csv\"),\n    Path(\"site/data/gas-turbine-course.csv\"),\n    Path(\"gas-turbine-course.csv\"),\n]\ndata_path = next((path for path in candidates if path.exists()), candidates[-1])\n\n# In Google Colab, download the small course dataset if it is not already present.\nif not data_path.exists():\n    urlretrieve(DATA_URL, data_path)\n\ndata = pd.read_csv(data_path)\nmodel_data = data[[\"TIT\", \"CO\", \"high_co\"]].dropna().copy()\n\nprint(f\"Usable operating observations: {len(model_data):,}\")\nprint(f\"High-CO observations: {model_data['high_co'].sum():,} ({model_data['high_co'].mean():.1%})\")\nmodel_data.head()\n\nUsable operating observations: 36,733\nHigh-CO observations: 14,270 (38.8%)\n\n\n\n\n\n\n\n\n\nTIT\nCO\nhigh_co\n\n\n\n\n0\n1086.2\n0.32663\n0\n\n\n1\n1086.1\n0.44784\n0\n\n\n2\n1086.5\n0.45144\n0\n\n\n3\n1086.5\n0.23107\n0\n\n\n4\n1085.9\n0.26747\n0\n\n\n\n\n\n\n\nA logistic model does not try to draw a straight line through 0/1 labels. Instead, it estimates the chance of a high-CO observation. The small vertical jitter below is only for visibility; the labels themselves remain 0 or 1.\n\nplot_data = model_data.sample(n=min(6_000, len(model_data)), random_state=4520)\nrng = np.random.default_rng(4520)\nlabel_jitter = plot_data[\"high_co\"] + rng.normal(0, 0.025, len(plot_data))\n\nfig, ax = plt.subplots(figsize=(9, 4.8))\nax.scatter(\n    plot_data[\"TIT\"],\n    label_jitter,\n    s=14,\n    alpha=0.16,\n    color=\"#c43c35\",\n    edgecolor=\"none\",\n)\nax.set(\n    xlabel=\"Turbine inlet temperature, TIT (°C)\",\n    ylabel=\"High-CO label\",\n    yticks=[0, 1],\n    ylim=(-0.12, 1.12),\n    title=\"High-CO observations are more common at lower TIT\",\n)\nplt.show()"
+  },
+  {
+    "objectID": "classification/02-logistic-regression-gradient-descent.html#a-logistic-probability-model",
+    "href": "classification/02-logistic-regression-gradient-descent.html#a-logistic-probability-model",
+    "title": "Logistic regression and gradient descent",
+    "section": "2. A logistic probability model",
+    "text": "2. A logistic probability model\nLet \\(y_i\\) be the high-CO label for observation \\(i\\). We first standardize TIT, then map a linear score to a probability with the sigmoid function:\n\\[\n\\tilde{x}_i = \\frac{\\mathrm{TIT}_i-\\overline{\\mathrm{TIT}}}{s_{\\mathrm{TIT}}},\n\\qquad\nz_i=\\beta_0+\\beta_1\\tilde{x}_i,\n\\qquad\np_i=P(y_i=1\\mid \\tilde{x}_i)=\\sigma(z_i)=\\frac{1}{1+e^{-z_i}}.\n\\]\nStandardizing TIT is not a different model. It is a convenient re-expression of the same feature: \\(\\beta_1\\) now describes a one-standard-deviation change in TIT, and a single learning rate can update both coefficients sensibly.\n\ntit_mean = model_data[\"TIT\"].mean()\ntit_std = model_data[\"TIT\"].std(ddof=0)\nmodel_data[\"tit_standardized\"] = (model_data[\"TIT\"] - tit_mean) / tit_std\n\n# The first column of X supplies the intercept; the second is standardized TIT.\nX = np.column_stack([\n    np.ones(len(model_data)),\n    model_data[\"tit_standardized\"].to_numpy(),\n])\ny = model_data[\"high_co\"].to_numpy(dtype=float)\n\ndef sigmoid(z: float | np.ndarray) -&gt; float | np.ndarray:\n    \"\"\"Map linear score(s) to probability values.\n\n    Args:\n        z: A scalar or NumPy array of linear scores.\n\n    Returns:\n        The corresponding probability or array of probabilities in [0, 1].\n    \"\"\"\n    return 1 / (1 + np.exp(-z))\n\nprint(f\"Mean TIT: {tit_mean:.2f} °C\")\nprint(f\"Standard deviation of TIT: {tit_std:.2f} °C\")\nprint(f\"Design-matrix shape: {X.shape}\")\n\nMean TIT: 1081.43 °C\nStandard deviation of TIT: 17.54 °C\nDesign-matrix shape: (36733, 2)"
+  },
+  {
+    "objectID": "classification/02-logistic-regression-gradient-descent.html#turn-likelihood-into-a-loss-function",
+    "href": "classification/02-logistic-regression-gradient-descent.html#turn-likelihood-into-a-loss-function",
+    "title": "Logistic regression and gradient descent",
+    "section": "3. Turn likelihood into a loss function",
+    "text": "3. Turn likelihood into a loss function\nFor independent binary observations, maximizing the likelihood is equivalent to minimizing the average negative log-likelihood, also called binary cross-entropy:\n\\[\n\\mathcal{L}_{\\mathrm{BCE}}(\\boldsymbol{\\beta})\n=-\\frac{1}{n}\\sum_{i=1}^{n}\n\\left[y_i\\log(p_i)+(1-y_i)\\log(1-p_i)\\right].\n\\]\nSmaller values mean that the model assigns higher probability to the labels we actually observed. To minimize this loss, we also need its gradient with respect to the coefficient vector:\n\\[\n\\mathbf{p}=\\sigma(\\mathbf{X}\\boldsymbol{\\beta}),\n\\qquad\n\\nabla\\mathcal{L}_{\\mathrm{BCE}}(\\boldsymbol{\\beta})\n=\\frac{1}{n}\\mathbf{X}^{\\mathsf{T}}(\\mathbf{p}-\\mathbf{y}).\n\\]\nHere, \\(\\mathbf{X}\\) is the design matrix, \\(\\mathbf{p}\\) contains the predicted probabilities, and \\(\\mathbf{y}\\) contains the observed 0/1 labels. The vector \\(\\mathbf{p}-\\mathbf{y}\\) measures each prediction’s error; multiplying by \\(\\mathbf{X}^{\\mathsf{T}}\\) combines those errors into one update direction for the two coefficients.\nThe loss_and_gradient function below follows that sequence:\n\nCompute one linear score for each observation.\nTransform the scores into predicted probabilities with the sigmoid.\nCompute and average the per-observation binary cross-entropy losses.\nCombine the probability errors into the gradient above.\n\nThe code below follows the displayed expression directly. It clips probabilities only to prevent taking the logarithm of 0 if floating-point roundoff produces an extreme value of exactly 0 or 1.\n\ndef loss_and_gradient(\n    beta: np.ndarray, X: np.ndarray, y: np.ndarray\n) -&gt; tuple[float, np.ndarray]:\n    \"\"\"Compute binary cross-entropy and its gradient.\n\n    Args:\n        beta: Current intercept and standardized-TIT slope, shape (2,).\n        X: Design matrix with intercept and standardized-TIT columns.\n        y: Observed high-CO labels, encoded as zeros and ones.\n\n    Returns:\n        A pair containing the average binary cross-entropy and its\n        gradient with respect to `beta`.\n    \"\"\"\n    # One linear score and one predicted probability per observation.\n    scores = X @ beta\n    probabilities = sigmoid(scores)\n\n    # Keep logarithms defined if floating-point roundoff produces 0 or 1.\n    safe_probabilities = np.clip(probabilities, 1e-12, 1 - 1e-12)\n    per_observation_loss = -(\n        y * np.log(safe_probabilities)\n        + (1 - y) * np.log(1 - safe_probabilities)\n    )\n    loss = np.mean(per_observation_loss)\n\n    # Weight probability errors by the feature values, then average them.\n    probability_errors = probabilities - y\n    gradient = X.T @ probability_errors / len(y)\n    return float(loss), gradient\n\ninitial_beta = np.array([0.0, 0.0])\ninitial_loss, initial_gradient = loss_and_gradient(initial_beta, X, y)\n\nprint(\"At β₀ = β₁ = 0, every predicted probability is 0.5.\")\nprint(f\"Initial BCE: {initial_loss:.4f}\")\nprint(f\"Gradient: {initial_gradient}\")\n\nAt β₀ = β₁ = 0, every predicted probability is 0.5.\nInitial BCE: 0.6931\nGradient: [0.11152098 0.31981404]"
+  },
+  {
+    "objectID": "classification/02-logistic-regression-gradient-descent.html#one-gradient-descent-update",
+    "href": "classification/02-logistic-regression-gradient-descent.html#one-gradient-descent-update",
+    "title": "Logistic regression and gradient descent",
+    "section": "4. One gradient-descent update",
+    "text": "4. One gradient-descent update\nThe gradient introduced above points in the direction of greatest local increase in the loss. To decrease the loss, we step in the opposite direction:\n\\[\n\\boldsymbol{\\beta}^{(t+1)}\n=\\boldsymbol{\\beta}^{(t)}-\\eta\\nabla\\mathcal{L}_{\\mathrm{BCE}}\n\\left(\\boldsymbol{\\beta}^{(t)}\\right).\n\\]\nHere, \\(\\eta\\) is the learning rate. It controls how far one update travels. We begin at \\((0,0)\\) and use \\(\\eta=0.75\\).\n\nlearning_rate = 0.75\none_step_beta = initial_beta - learning_rate * initial_gradient\none_step_loss, _ = loss_and_gradient(one_step_beta, X, y)\n\nprint(f\"Start: β = {initial_beta}, BCE = {initial_loss:.4f}\")\nprint(f\"After one step: β = {one_step_beta.round(3)}, BCE = {one_step_loss:.4f}\")\n\nStart: β = [0. 0.], BCE = 0.6931\nAfter one step: β = [-0.084 -0.24 ], BCE = 0.6151"
+  },
+  {
+    "objectID": "classification/02-logistic-regression-gradient-descent.html#repeat-the-updates",
+    "href": "classification/02-logistic-regression-gradient-descent.html#repeat-the-updates",
+    "title": "Logistic regression and gradient descent",
+    "section": "5. Repeat the updates",
+    "text": "5. Repeat the updates\nA complete gradient-descent fit repeats the same calculation many times. The history records the coefficient values and loss after every iteration, including the starting point.\nFor a fixed learning rate, the algorithm is:\n\nStart with an initial coefficient vector \\(\\boldsymbol{\\beta}^{(0)}\\).\nCompute the predicted probabilities and the loss gradient.\nMove one step opposite the gradient.\nRepeat until the loss and coefficients no longer change much.\n\n\ndef gradient_descent(\n    X: np.ndarray,\n    y: np.ndarray,\n    learning_rate: float = 0.75,\n    n_steps: int = 100,\n) -&gt; tuple[np.ndarray, pd.DataFrame]:\n    \"\"\"Fit logistic-regression coefficients with gradient descent.\n\n    Args:\n        X: Design matrix with intercept and standardized-TIT columns.\n        y: Observed high-CO labels, encoded as zeros and ones.\n        learning_rate: Size of each update opposite the gradient.\n        n_steps: Number of coefficient updates to perform.\n\n    Returns:\n        A pair containing the final coefficient vector and a table with\n        the coefficient values and BCE at every iteration.\n    \"\"\"\n    beta = np.zeros(X.shape[1])\n    history = []\n\n    for iteration in range(n_steps + 1):\n        loss, gradient = loss_and_gradient(beta, X, y)\n        history.append({\n            \"iteration\": iteration,\n            \"beta_0\": beta[0],\n            \"beta_1\": beta[1],\n            \"bce\": loss,\n        })\n\n        if iteration &lt; n_steps:\n            beta = beta - learning_rate * gradient\n\n    return beta, pd.DataFrame(history)\n\nbeta_hat, history = gradient_descent(X, y, learning_rate=learning_rate, n_steps=100)\nhistory.iloc[[0, 1, 2, 5, 10, 25, 50, 100]].round(4)\n\n\n\n\n\n\n\n\niteration\nbeta_0\nbeta_1\nbce\n\n\n\n\n0\n0\n0.0000\n0.0000\n0.6931\n\n\n1\n1\n-0.0836\n-0.2399\n0.6151\n\n\n2\n2\n-0.1516\n-0.4353\n0.5632\n\n\n5\n5\n-0.2904\n-0.8464\n0.4845\n\n\n10\n10\n-0.4055\n-1.2376\n0.4415\n\n\n25\n25\n-0.4978\n-1.7219\n0.4182\n\n\n50\n50\n-0.5102\n-1.9517\n0.4150\n\n\n100\n100\n-0.5082\n-2.0307\n0.4147\n\n\n\n\n\n\n\nWith two coefficients, we can view the loss as a surface. The contour plot below is a top-down view: lighter contours have lower binary cross-entropy. The red path shows the successive gradient-descent estimates.\n\nbeta_0_values = np.linspace(-1.5, 0.7, 41)\nbeta_1_values = np.linspace(-4.0, 0.6, 41)\nloss_surface = np.empty((len(beta_1_values), len(beta_0_values)))\n\nfor row, beta_1 in enumerate(beta_1_values):\n    for column, beta_0 in enumerate(beta_0_values):\n        loss_surface[row, column], _ = loss_and_gradient(\n            np.array([beta_0, beta_1]), X, y\n        )\n\nfig, axes = plt.subplots(1, 2, figsize=(13, 4.8))\n\ncontours = axes[0].contourf(\n    beta_0_values, beta_1_values, loss_surface, levels=22, cmap=\"Blues\"\n)\naxes[0].plot(history[\"beta_0\"], history[\"beta_1\"], color=\"#c43c35\", linewidth=2)\naxes[0].scatter(history[\"beta_0\"], history[\"beta_1\"], color=\"#c43c35\", s=16, zorder=3)\naxes[0].scatter(beta_hat[0], beta_hat[1], color=\"#c43c35\", edgecolor=\"white\", linewidth=1.3, s=80, zorder=4)\naxes[0].set(\n    xlabel=\"β₀\",\n    ylabel=\"β₁ (per standardized TIT)\",\n    title=\"Gradient descent moves toward lower BCE\",\n)\nfig.colorbar(contours, ax=axes[0], label=\"Binary cross-entropy\")\n\naxes[1].plot(history[\"iteration\"], history[\"bce\"], color=\"#457eaa\", marker=\"o\", markersize=3)\naxes[1].set(\n    xlabel=\"Gradient-descent iteration\",\n    ylabel=\"Binary cross-entropy\",\n    title=\"The loss falls rapidly, then levels off\",\n)\n\nplt.tight_layout()\nplt.show()\n\n/var/folders/ck/6xgx96j15vd6tcwzl68twbpc0000gn/T/ipykernel_43232/43750391.py:33: UserWarning: Glyph 8320 (\\N{SUBSCRIPT ZERO}) missing from font(s) Arial.\n  plt.tight_layout()\n/var/folders/ck/6xgx96j15vd6tcwzl68twbpc0000gn/T/ipykernel_43232/43750391.py:33: UserWarning: Glyph 8321 (\\N{SUBSCRIPT ONE}) missing from font(s) Arial.\n  plt.tight_layout()\n/Users/changyaochen/Projects/MECE4520/.venv/lib/python3.11/site-packages/IPython/core/pylabtools.py:170: UserWarning: Glyph 8320 (\\N{SUBSCRIPT ZERO}) missing from font(s) Arial.\n  fig.canvas.print_figure(bytes_io, **kw)\n/Users/changyaochen/Projects/MECE4520/.venv/lib/python3.11/site-packages/IPython/core/pylabtools.py:170: UserWarning: Glyph 8321 (\\N{SUBSCRIPT ONE}) missing from font(s) Arial.\n  fig.canvas.print_figure(bytes_io, **kw)"
+  },
+  {
+    "objectID": "classification/02-logistic-regression-gradient-descent.html#return-to-the-raw-tit-scale",
+    "href": "classification/02-logistic-regression-gradient-descent.html#return-to-the-raw-tit-scale",
+    "title": "Logistic regression and gradient descent",
+    "section": "6. Return to the raw TIT scale",
+    "text": "6. Return to the raw TIT scale\nThe optimization used standardized TIT, but we can draw the fitted probability curve against the original TIT values. If\n\\[\np_i=\\sigma(\\beta_0+\\beta_1\\tilde{x}_i),\n\\]\nthen the equivalent raw-TIT coefficients are\n\\[\nb_1=\\frac{\\beta_1}{s_{\\mathrm{TIT}}},\n\\qquad\nb_0=\\beta_0-\\frac{\\beta_1\\overline{\\mathrm{TIT}}}{s_{\\mathrm{TIT}}}.\n\\]\nThe fitted curve gives a probability, not a promise that each individual 0/1 observation will match the curve.\n\nraw_slope = beta_hat[1] / tit_std\nraw_intercept = beta_hat[0] - beta_hat[1] * tit_mean / tit_std\n\nprint(f\"Standardized-scale fit: β₀ = {beta_hat[0]:.3f}, β₁ = {beta_hat[1]:.3f}\")\nprint(f\"Raw-TIT fit: log-odds = {raw_intercept:.3f} + ({raw_slope:.5f}) × TIT\")\n\ntit_grid = np.linspace(model_data[\"TIT\"].min(), model_data[\"TIT\"].max(), 400)\nstandardized_grid = (tit_grid - tit_mean) / tit_std\nprobability_grid = sigmoid(beta_hat[0] + beta_hat[1] * standardized_grid)\n\nfig, ax = plt.subplots(figsize=(9, 4.8))\nax.scatter(\n    plot_data[\"TIT\"],\n    label_jitter,\n    s=14,\n    alpha=0.12,\n    color=\"#457eaa\",\n    edgecolor=\"none\",\n    label=\"Operating observations\",\n)\nax.plot(tit_grid, probability_grid, color=\"#c43c35\", linewidth=3, label=\"Fitted high-CO probability\")\nax.set(\n    xlabel=\"Turbine inlet temperature, TIT (°C)\",\n    ylabel=\"High-CO label or predicted probability\",\n    yticks=[0, 1],\n    ylim=(-0.12, 1.12),\n    title=\"The fitted probability declines as TIT increases\",\n)\nax.legend()\nplt.show()\n\nStandardized-scale fit: β₀ = -0.508, β₁ = -2.031\nRaw-TIT fit: log-odds = 124.725 + (-0.11580) × TIT"
+  },
+  {
+    "objectID": "classification/02-logistic-regression-gradient-descent.html#try-it",
+    "href": "classification/02-logistic-regression-gradient-descent.html#try-it",
+    "title": "Logistic regression and gradient descent",
+    "section": "Try it",
+    "text": "Try it\nChange the learning rate in the starter cell below. A smaller value makes slower progress; a much larger value can overshoot the low-loss region. Compare the final loss with the one above.\n\n# Try it: fit again with a smaller learning rate.\n# _, slower_history = gradient_descent(X, y, learning_rate=0.15, n_steps=100)\n# slower_history.tail()\n\n← Return to Classification"
+  },
+  {
+    "objectID": "classification/index.html",
+    "href": "classification/index.html",
+    "title": "Classification",
+    "section": "",
+    "text": "Classification estimates the chance that an observation belongs to a category. Before we fit a classifier, we need a way to connect a probability model to observed binary outcomes."
+  },
+  {
+    "objectID": "classification/index.html#likelihood-and-maximum-likelihood-estimation",
+    "href": "classification/index.html#likelihood-and-maximum-likelihood-estimation",
+    "title": "Classification",
+    "section": "1. Likelihood and maximum likelihood estimation",
+    "text": "1. Likelihood and maximum likelihood estimation\nEstimated time: 20–30 minutes\nUse simulated red/blue ticket draws to distinguish probability from likelihood, compare proposed probabilities, and identify the maximum- likelihood estimate. This is the same likelihood idea that logistic regression will use later, without yet fitting a turbine-data model.\nView the notebook\n\nInteractive playground\nEstimated time: 10–15 minutes\nGenerate ticket draws one at a time and watch the likelihood curve accumulate. Use the maximum of that curve to identify the maximum-likelihood estimate.\nOpen the interactive playground"
+  },
+  {
+    "objectID": "classification/index.html#logistic-regression-and-gradient-descent",
+    "href": "classification/index.html#logistic-regression-and-gradient-descent",
+    "title": "Classification",
+    "section": "2. Logistic regression and gradient descent",
+    "text": "2. Logistic regression and gradient descent\nEstimated time: 45–60 minutes\nFit a high-CO classification model using turbine inlet temperature (TIT). Starting from the likelihood idea, build the binary-cross-entropy loss, calculate its gradient, and use repeated gradient-descent updates to fit the model.\nView the notebook\n\nInteractive explorer\nEstimated time: 10–15 minutes\nStep through the same logistic-regression updates and watch the coefficients move downhill on the binary-cross-entropy surface.\nOpen the interactive explorer"
+  },
+  {
+    "objectID": "classification/logistic-gradient-descent.html",
+    "href": "classification/logistic-gradient-descent.html",
+    "title": "Gradient descent for logistic regression",
+    "section": "",
+    "text": "This explorer fits a logistic-regression model for the course-defined high-CO label using turbine inlet temperature (TIT). It uses standardized TIT, so the two fitted coefficients have a convenient common scale.\n\n\n\n\n\n\nTipWhat to watch\n\n\n\nChoose the initial coefficients and learning rate, then take one step at a time. The red point traces the path downhill across the binary-cross-entropy surface; the panel on the right records the loss after each update. Adjust the surface-view-angle slider to inspect the same path from another direction; it does not change the optimization.\n\n\n\\[\n\\begin{aligned}\n\\tilde{x}_i\n&= \\frac{\\mathrm{TIT}_i-\\overline{\\mathrm{TIT}}}{s_{\\mathrm{TIT}}},\\\\\np_i\n&=\\sigma(\\beta_0+\\beta_1\\tilde{x}_i),\\\\\n\\boldsymbol{\\beta}^{(t+1)}\n&=\\boldsymbol{\\beta}^{(t)}-\\eta\\nabla\\mathcal{L}_{\\mathrm{BCE}}.\n\\end{aligned}\n\\]\n\n  \n    \n      Initial β₀ (−1.5 to 0.7)\n      \n      0.00\n    \n    \n      Initial β₁ (−4.0 to 0.6)\n      \n      0.00\n    \n    \n      Learning rate, η (0.05 to 2.00)\n      \n      0.75\n    \n    \n      Surface view angle, φ (0° to 360°)\n      \n      45°\n    \n  \n\n  \n    Take one step\n    Run 10 steps\n    Run to 60 steps\n    Reset to selected settings\n    Restore defaults\n  \n\n  Loading the gas-turbine data…\n\n  \n    \n      Binary-cross-entropy loss surface red = iteration path\n      \n    \n    \n      Loss after each gradient-descent update\n      \n    \n  \n\nThe displayed surface is computed from a fixed, evenly spaced subset of the course dataset so that the page stays responsive. Each displayed gradient-descent update uses all available TIT–high-CO observations.\n← Return to Classification"
   },
   {
     "objectID": "evaluation/01-polynomial-model-validation.html",

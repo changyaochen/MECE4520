@@ -361,6 +361,76 @@
   background: #f8f1ed;
 }
 
+/* Logistic-regression gradient-descent interactive. */
+.logistic-gd-explorer {
+  margin: 1.5rem 0 2rem;
+}
+
+.logistic-gd-controls output {
+  color: #4c5961;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.92rem;
+  font-weight: 400;
+}
+
+.logistic-gd-controls input[type="range"] {
+  min-height: 1.8rem;
+  padding: 0;
+  accent-color: #457eaa;
+}
+
+.logistic-gd-caption-note {
+  color: #4c5961;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+#logistic-gd-surface {
+  height: 360px;
+}
+
+.logistic-gd-surface-face {
+  stroke: none;
+}
+
+.logistic-gd-mesh {
+  fill: none;
+  stroke: rgba(29, 66, 86, 0.48);
+  stroke-width: 0.85;
+}
+
+.logistic-gd-axis {
+  stroke: #4c5961;
+  stroke-width: 1.25;
+}
+
+.logistic-gd-path {
+  fill: none;
+  stroke: #c43c35;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.logistic-gd-iteration-point {
+  fill: #c43c35;
+  opacity: 0.72;
+}
+
+.logistic-gd-current-point {
+  fill: #c43c35;
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.logistic-gd-loss-line {
+  fill: none;
+  stroke: #457eaa;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 @media (max-width: 700px) {
   .clt-plots {
     grid-template-columns: 1fr;
@@ -368,6 +438,10 @@
 
   .likelihood-plots {
     grid-template-columns: 1fr;
+  }
+
+  #logistic-gd-surface {
+    height: 330px;
   }
 }
 
@@ -593,7 +667,9 @@
 .quarto-dark .clt-legend,
 .quarto-dark .ci-status,
 .quarto-dark .ci-legend,
-.quarto-dark .null-test-summary {
+.quarto-dark .null-test-summary,
+.quarto-dark .logistic-gd-controls output,
+.quarto-dark .logistic-gd-caption-note {
   color: #c8d1d6;
 }
 
@@ -622,4 +698,20 @@
 
 .quarto-dark .ci-population-line {
   stroke: #e6ebed;
+}
+
+.quarto-dark .logistic-gd-current-point {
+  stroke: #1f2529;
+}
+
+.quarto-dark .logistic-gd-surface-face {
+  stroke: none;
+}
+
+.quarto-dark .logistic-gd-mesh {
+  stroke: rgba(220, 235, 242, 0.42);
+}
+
+.quarto-dark .logistic-gd-axis {
+  stroke: #d5dde1;
 }
