@@ -45,3 +45,13 @@ Step through the same logistic-regression updates and watch the coefficients
 move downhill on the binary-cross-entropy surface.
 
 [Open the interactive explorer](logistic-gradient-descent.qmd)
+
+## 3. Classification metrics and the confusion matrix
+
+**Estimated time:** 30–40 minutes
+
+Evaluate the high-CO logistic model on held-out turbine observations. Turn
+probabilities into alerts, read a confusion matrix, and compare accuracy,
+precision, and recall at several decision thresholds.
+
+[View the notebook](03-classification-metrics.ipynb)
