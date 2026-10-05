@@ -441,34 +441,6 @@
     "text": "5. Bridge to logistic regression\nThe ticket model assumes that every draw has the same red-ticket probability \\(p\\). In logistic regression, each observation can have a different probability because its features differ:\n\\[\np_i = P(y_i=1\\mid\\mathbf{x}_i)\n= \\sigma(\\mathbf{x}_i^\\mathsf{T}\\boldsymbol{\\beta}).\n\\]\nThe likelihood idea is unchanged: choose the model parameters that make the observed binary labels most likely. In the next lecture, we will learn how to perform that optimization.\n← Return to Classification"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Data Science for Mechanical Systems",
-    "section": "",
-    "text": "MECE 4520 introduces data science and machine learning through real engineering systems.\nCourse materials and source files are available on GitHub."
-  },
-  {
-    "objectID": "index.html#course-focus",
-    "href": "index.html#course-focus",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Course focus",
-    "text": "Course focus\nRather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:\n\nunderstand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems\n\nStudents will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data."
-  },
-  {
-    "objectID": "index.html#grading-policy",
-    "href": "index.html#grading-policy",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Grading policy",
-    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n30%\n\n\nIn-class quizzes\n30%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately five homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.\n\nIn-class quizzes\nExpect a short, time-limited quiz about once each week. At the end of the semester, your 3 lowest quiz scores will be dropped.\nWe will use Poll Everywhere for in-class quizzes. You need to sign in Poll Everywhere with your Columbia UNI before the first quiz."
-  },
-  {
-    "objectID": "index.html#syllabus",
-    "href": "index.html#syllabus",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Syllabus",
-    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\n\n\nSep. 15Sep. 17 — asynchronous\nSimple and multiple linear regression\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\n\n\nDec. 8 & 10\nFinal project presentations"
-  },
-  {
     "objectID": "classification/02-logistic-regression-gradient-descent.html",
     "href": "classification/02-logistic-regression-gradient-descent.html",
     "title": "Logistic regression and gradient descent",
@@ -525,6 +497,146 @@
     "text": "Try it\nChange the learning rate in the starter cell below. A smaller value makes slower progress; a much larger value can overshoot the low-loss region. Compare the final loss with the one above.\n\n# Try it: fit again with a smaller learning rate.\n# _, slower_history = gradient_descent(X, y, learning_rate=0.15, n_steps=100)\n# slower_history.tail()\n\n← Return to Classification"
   },
   {
+    "objectID": "classification/03-classification-metrics.html",
+    "href": "classification/03-classification-metrics.html",
+    "title": "Evaluating a high-CO alert",
+    "section": "",
+    "text": "In the previous notebook, we fitted a logistic-regression model that estimates the probability of a high-CO operating observation from turbine inlet temperature (TIT). A probability alone does not say whether the system should issue an alert. Here, we make that decision, compare it with held-out observations, and use a confusion matrix to describe what the model gets right and wrong.\nWe will use a train/test split throughout. The model sees the training observations while it is fitted, and test observations remain untouched until the final evaluation."
+  },
+  {
+    "objectID": "classification/03-classification-metrics.html#set-aside-test-observations",
+    "href": "classification/03-classification-metrics.html#set-aside-test-observations",
+    "title": "Evaluating a high-CO alert",
+    "section": "1. Set aside test observations",
+    "text": "1. Set aside test observations\nEach row records one gas-turbine operating observation. The course-defined target high_co equals 1 when the measured carbon-monoxide concentration is at least 2 mg/m³, and 0 otherwise. We use TIT as one feature, as in the gradient-descent example.\nBefore fitting anything, we reserve 30% of the observations as a test set. stratify=y keeps the high-CO fraction approximately the same in both sets. The model will fit on training data, and the final confusion matrix will use the held-out test set.\n\nfrom pathlib import Path\nfrom urllib.request import urlretrieve\n\nimport matplotlib.pyplot as plt\nimport numpy as np\nimport pandas as pd\nimport seaborn as sns\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.model_selection import train_test_split\n\nsns.set_theme(style=\"whitegrid\", context=\"notebook\")\n\nDATA_URL = \"https://raw.githubusercontent.com/changyaochen/MECE4520/master/site/data/gas-turbine-course.csv\"\ncandidates = [\n    Path(\"../data/gas-turbine-course.csv\"),\n    Path(\"site/data/gas-turbine-course.csv\"),\n    Path(\"gas-turbine-course.csv\"),\n]\ndata_path = next((path for path in candidates if path.exists()), candidates[-1])\n\n# In Google Colab, download the small course dataset if it is not already present.\nif not data_path.exists():\n    urlretrieve(DATA_URL, data_path)\n\ndata = pd.read_csv(data_path)\nmodel_data = data[[\"TIT\", \"high_co\"]].dropna().copy()\n\nX = model_data[[\"TIT\"]]\ny = model_data[\"high_co\"]\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X,\n    y,\n    test_size=0.30,\n    random_state=4520,\n    stratify=y,\n)\n\nsplit_summary = pd.DataFrame(\n    {\n        \"observations\": [len(X_train), len(X_test)],\n        \"high-CO fraction\": [y_train.mean(), y_test.mean()],\n    },\n    index=[\"Training set\", \"Test set\"],\n)\nsplit_summary.style.format({\"high-CO fraction\": \"{:.1%}\"})\n\n\n\n\n\n\n \nobservations\nhigh-CO fraction\n\n\n\n\nTraining set\n25713\n38.8%\n\n\nTest set\n11020\n38.8%"
+  },
+  {
+    "objectID": "classification/03-classification-metrics.html#fit-a-probability-model-on-the-training-set",
+    "href": "classification/03-classification-metrics.html#fit-a-probability-model-on-the-training-set",
+    "title": "Evaluating a high-CO alert",
+    "section": "2. Fit a probability model on the training set",
+    "text": "2. Fit a probability model on the training set\nWe fit logistic regression only on the training observations. The fitted model returns an estimated probability of high CO for every test row.\nFor this notebook, we use scikit-learn’s implementation rather than repeat the gradient-descent code from the previous notebook. Its default decision rule issues an alert at a predicted probability of 0.50. That is a useful reference choice—not a universally optimal threshold.\n\nmodel = LogisticRegression(max_iter=1_000)\nmodel.fit(X_train, y_train)\n\ntest_probabilities = model.predict_proba(X_test)[:, 1]\ntest_predictions = model.predict(X_test)\n\nprint(f\"Training observations used to fit the model: {len(X_train):,}\")\nprint(f\"Held-out test observations: {len(X_test):,}\")\nprint(f\"Fitted log-odds = {model.intercept_[0]:.3f} + ({model.coef_[0, 0]:.5f}) × TIT\")\n\nTraining observations used to fit the model: 25,713\nHeld-out test observations: 11,020\nFitted log-odds = 124.614 + (-0.11570) × TIT\n\n\n\nVisualize the fitted model and make a prediction\nThe curve below is the model’s estimated probability of high CO at each TIT value. Drawing that curve requires predict_proba; the points are a sample of the training observations, whose measured labels are either 0 (not high CO) or 1 (high CO).\nTo make an alert decision for a new operating condition, put its TIT value in a one-row table and pass it to predict. For example, we will predict the high-CO label at a TIT of 1080 °C.\n\n# Plot a reproducible subset so the observed labels remain readable.\nplot_sample = pd.DataFrame({\"TIT\": X_train[\"TIT\"], \"high_co\": y_train}).sample(\n    n=min(3_000, len(X_train)), random_state=4520\n)\n\n# Evaluate the fitted logistic curve across the observed TIT range.\ntit_grid = np.linspace(X_train[\"TIT\"].min(), X_train[\"TIT\"].max(), 400)\nprobability_grid = model.predict_proba(pd.DataFrame({\"TIT\": tit_grid}))[:, 1]\n\n# Classify one new operating condition with scikit-learn's default decision rule.\nexample_tit = 1080.0\nexample_features = pd.DataFrame({\"TIT\": [example_tit]})\nexample_prediction = model.predict(example_features)[0]\n\nfig, ax = plt.subplots(figsize=(8.2, 5.2))\nax.scatter(\n    plot_sample[\"TIT\"],\n    plot_sample[\"high_co\"],\n    color=\"#4C78A8\",\n    alpha=0.10,\n    s=16,\n    label=\"Training observations\",\n)\nax.plot(tit_grid, probability_grid, color=\"#E45756\", linewidth=3, label=\"Fitted probability\")\nax.set(\n    xlabel=\"Turbine inlet temperature, TIT (°C)\",\n    ylabel=\"High-CO label or predicted probability\",\n    ylim=(-0.05, 1.05),\n    yticks=[0, 0.5, 1],\n    title=\"Logistic regression converts TIT into a high-CO probability\",\n)\nax.legend(loc=\"center left\", bbox_to_anchor=(1.02, 0.5))\nplt.show()\n\nprediction_example = pd.DataFrame(\n    {\n        \"TIT (°C)\": [example_tit],\n        \"Predicted high-CO label\": [example_prediction],\n    }\n)\nprediction_example.style.format({\"TIT (°C)\": \"{:.0f}\"})\n\n\n\n\n\n\n\n\n\n\n\n\n\n \nTIT (°C)\nPredicted high-CO label\n\n\n\n\n0\n1080\n0"
+  },
+  {
+    "objectID": "classification/03-classification-metrics.html#read-the-confusion-matrix",
+    "href": "classification/03-classification-metrics.html#read-the-confusion-matrix",
+    "title": "Evaluating a high-CO alert",
+    "section": "3. Read the confusion matrix",
+    "text": "3. Read the confusion matrix\nA confusion matrix compares the model’s alert decision with the measured high-CO label on the test set. Each test observation belongs to exactly one cell:\n\n\n\n\nPredicted no alert\nPredicted alert\n\n\n\n\nObserved not high CO\nTrue negative (TN)\nFalse positive (FP)\n\n\nObserved high CO\nFalse negative (FN)\nTrue positive (TP)\n\n\n\nA false negative misses a high-CO condition. A false positive issues an alert when the measured CO value was not high. Which mistake matters more depends on the operating context.\n\nfrom sklearn.metrics import confusion_matrix\n\ntn, fp, fn, tp = confusion_matrix(y_test, test_predictions, labels=[0, 1]).ravel()\n\nmatrix = np.array([[tn, fp], [fn, tp]])\ncell_labels = np.array([\n    [f\"True negative\\n{tn:,}\", f\"False positive\\n{fp:,}\"],\n    [f\"False negative\\n{fn:,}\", f\"True positive\\n{tp:,}\"],\n])\n\nfig, ax = plt.subplots(figsize=(7.2, 5.4))\nsns.heatmap(\n    matrix,\n    annot=cell_labels,\n    fmt=\"\",\n    cmap=\"Blues\",\n    cbar=False,\n    square=True,\n    linewidths=1.5,\n    linecolor=\"white\",\n    xticklabels=[\"No alert\", \"Alert\"],\n    yticklabels=[\"Observed not high CO\", \"Observed high CO\"],\n    ax=ax,\n)\nax.set(\n    xlabel=\"Model decision\",\n    ylabel=\"Measured test-set outcome\",\n    title=\"Test-set confusion matrix using the default model decision\",\n)\nplt.show()"
+  },
+  {
+    "objectID": "classification/03-classification-metrics.html#summarize-default-threshold-performance",
+    "href": "classification/03-classification-metrics.html#summarize-default-threshold-performance",
+    "title": "Evaluating a high-CO alert",
+    "section": "4. Summarize default-threshold performance",
+    "text": "4. Summarize default-threshold performance\nThe four confusion-matrix counts measure different kinds of success and error. Four common summaries are:\n\\[\n\\text{Accuracy} = \\frac{TP + TN}{TP + TN + FP + FN}\n\\]\n\\[\n\\text{Precision} = \\frac{TP}{TP + FP}\n\\]\n\\[\n\\text{Recall} = \\frac{TP}{TP + FN}\n\\]\n\\[\nF_1 = \\frac{2\\,(\\text{Precision})\\,(\\text{Recall})}\n{\\text{Precision} + \\text{Recall}}\n\\]\nAccuracy asks how often the alert decision is correct overall. Precision asks, “When the model issues an alert, how often is high CO actually present?” Recall asks, “Of all high-CO observations, how many did the model alert on?” The \\(F_1\\) score balances precision and recall through their harmonic mean.\nAll four metrics depend on the chosen decision threshold.\n\naccuracy = (tp + tn) / (tp + tn + fp + fn)\nprecision = tp / (tp + fp)\nrecall = tp / (tp + fn)\nf1 = 2 * precision * recall / (precision + recall)\n\nmetrics = pd.DataFrame(\n    {\n        \"value\": [accuracy, precision, recall, f1],\n        \"plain-language question\": [\n            \"How often is the alert decision correct overall?\",\n            \"When there is an alert, how often is CO actually high?\",\n            \"Of the high-CO observations, how many receive an alert?\",\n            \"How well do precision and recall balance each other?\",\n        ],\n    },\n    index=[\"Accuracy\", \"Precision\", \"Recall\", \"F1 score\"],\n)\nmetrics.style.format({\"value\": \"{:.1%}\"})\n\n\n\n\n\n\n \nvalue\nplain-language question\n\n\n\n\nAccuracy\n84.7%\nHow often is the alert decision correct overall?\n\n\nPrecision\n87.9%\nWhen there is an alert, how often is CO actually high?\n\n\nRecall\n70.3%\nOf the high-CO observations, how many receive an alert?\n\n\nF1 score\n78.1%\nHow well do precision and recall balance each other?"
+  },
+  {
+    "objectID": "classification/03-classification-metrics.html#change-the-threshold-change-the-decision",
+    "href": "classification/03-classification-metrics.html#change-the-threshold-change-the-decision",
+    "title": "Evaluating a high-CO alert",
+    "section": "5. Change the threshold, change the decision",
+    "text": "5. Change the threshold, change the decision\nThe fitted logistic model has not changed, but the alert policy can. At a general threshold \\(\\tau\\),\n\\[\n\\hat{y}_i(\\tau) =\n\\begin{cases}\n1, & \\hat{p}_i \\geq \\tau, \\\\\n0, & \\hat{p}_i &lt; \\tau.\n\\end{cases}\n\\]\nLowering \\(\\tau\\) makes alerts more common. That can increase recall by catching more high-CO conditions, but it can also increase false positives. Below, we compare the reference threshold \\(0.50\\) with \\(0.20\\) on the test observations.\n\ndef threshold_summary(labels, probabilities, threshold):\n    \"\"\"Return confusion-matrix counts and metrics at one threshold.\"\"\"\n    predictions = (probabilities &gt;= threshold).astype(int)\n    tn, fp, fn, tp = confusion_matrix(labels, predictions, labels=[0, 1]).ravel()\n    precision = tp / (tp + fp)\n    recall = tp / (tp + fn)\n    return {\n        \"threshold\": threshold,\n        \"alerts\": int(predictions.sum()),\n        \"TN\": int(tn),\n        \"FP\": int(fp),\n        \"FN\": int(fn),\n        \"TP\": int(tp),\n        \"accuracy\": (tp + tn) / len(labels),\n        \"precision\": precision,\n        \"recall\": recall,\n        \"F1\": 2 * precision * recall / (precision + recall),\n    }\n\n\nthreshold_comparison = pd.DataFrame(\n    [threshold_summary(y_test, test_probabilities, threshold)\n     for threshold in [0.50, 0.20]]\n).set_index(\"threshold\")\nthreshold_comparison.style.format(\n    {\"accuracy\": \"{:.1%}\", \"precision\": \"{:.1%}\",\n     \"recall\": \"{:.1%}\", \"F1\": \"{:.1%}\"}\n)\n\n\n\n\n\n\n \nalerts\nTN\nFP\nFN\nTP\naccuracy\nprecision\nrecall\nF1\n\n\nthreshold\n \n \n \n \n \n \n \n \n \n\n\n\n\n0.500000\n3423\n6324\n415\n1273\n3008\n84.7%\n87.9%\n70.3%\n78.1%\n\n\n0.200000\n6501\n3978\n2761\n541\n3740\n70.0%\n57.5%\n87.4%\n69.4%"
+  },
+  {
+    "objectID": "classification/03-classification-metrics.html#include-the-cost-of-mistakes",
+    "href": "classification/03-classification-metrics.html#include-the-cost-of-mistakes",
+    "title": "Evaluating a high-CO alert",
+    "section": "6. Include the cost of mistakes",
+    "text": "6. Include the cost of mistakes\nThe appropriate threshold depends on what a false positive and false negative mean operationally. For one illustrative policy, suppose that missing a high-CO condition costs three units, while issuing an unnecessary alert costs one unit. The total decision cost is\n\\[\nC(\\tau) = 3\\,FN(\\tau) + FP(\\tau).\n\\]\nThis cost ratio is an engineering assumption, not a universal rule. A different operating context can lead to a different threshold.\n\nfalse_negative_cost = 3\nfalse_positive_cost = 1\ncandidate_thresholds = np.linspace(0.01, 0.99, 199)\n\ncost_by_threshold = pd.DataFrame(\n    [threshold_summary(y_test, test_probabilities, threshold)\n     for threshold in candidate_thresholds]\n)\ncost_by_threshold[\"cost\"] = (\n    false_negative_cost * cost_by_threshold[\"FN\"]\n    + false_positive_cost * cost_by_threshold[\"FP\"]\n)\nbest_cost_row = cost_by_threshold.loc[cost_by_threshold[\"cost\"].idxmin()]\n\nfig, ax = plt.subplots(figsize=(8.2, 5.2))\nax.plot(cost_by_threshold[\"threshold\"], cost_by_threshold[\"cost\"] / 1_000,\n        color=\"#3F78A8\", linewidth=2.5)\nax.scatter(best_cost_row[\"threshold\"], best_cost_row[\"cost\"] / 1_000,\n           color=\"#E45756\", s=90, zorder=3,\n           label=(f\"Lowest shown cost: τ = {best_cost_row['threshold']:.2f}, \"\n                  f\"{best_cost_row['cost'] / 1_000:.2f} thousand units\"))\nax.set(xlabel=\"Decision threshold, τ\", ylabel=\"Cost (thousand units)\",\n       title=\"An operating cost can favor a threshold below 0.50\", xlim=(0, 1))\nax.legend(frameon=True)\nplt.show()"
+  },
+  {
+    "objectID": "classification/03-classification-metrics.html#try-it",
+    "href": "classification/03-classification-metrics.html#try-it",
+    "title": "Evaluating a high-CO alert",
+    "section": "Try it",
+    "text": "Try it\nChange the threshold below and inspect the resulting counts. Then compare them with the threshold values above.\n← Return to Classification\n\n# Choose a probability threshold, then inspect the resulting counts.\n# my_threshold = 0.35\n# my_summary = threshold_summary(y_test, test_probabilities, my_threshold)\n# my_summary"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Data Science for Mechanical Systems",
+    "section": "",
+    "text": "MECE 4520 introduces data science and machine learning through real engineering systems.\nCourse materials and source files are available on GitHub."
+  },
+  {
+    "objectID": "index.html#course-focus",
+    "href": "index.html#course-focus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Course focus",
+    "text": "Course focus\nRather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:\n\nunderstand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems\n\nStudents will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data."
+  },
+  {
+    "objectID": "index.html#grading-policy",
+    "href": "index.html#grading-policy",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Grading policy",
+    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n30%\n\n\nIn-class quizzes\n30%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately five homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.\n\nIn-class quizzes\nExpect a short, time-limited quiz about once each week. At the end of the semester, your 3 lowest quiz scores will be dropped.\nWe will use Poll Everywhere for in-class quizzes. You need to sign in Poll Everywhere with your Columbia UNI before the first quiz."
+  },
+  {
+    "objectID": "index.html#syllabus",
+    "href": "index.html#syllabus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Syllabus",
+    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\n\n\nSep. 15Sep. 17 — asynchronous\nSimple and multiple linear regression\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\n\n\nDec. 8 & 10\nFinal project presentations"
+  },
+  {
+    "objectID": "classification/roc-threshold-builder.html",
+    "href": "classification/roc-threshold-builder.html",
+    "title": "Building an ROC curve",
+    "section": "",
+    "text": "This explorer uses the TIT-based high-CO logistic model on the training set. Every observed score threshold produces one point on the ROC curve.\n\n\n\n\n\n\nTipWhat to watch\n\n\n\nStart with a very high threshold: no observations receive a high-CO label, so the curve begins at (0, 0). As the threshold decreases, the model labels more observations positive. True positives move the point upward; false positives move it rightward.\n\n\n\n  \n    \n      Threshold position\n      \n      τ = ∞\n    \n  \n\n  \n    Play\n    Next point\n    Reset\n  \n\n  \n\n  \n    Training ROC curve · final AUC = 0.866\n    \n  \n\nThe animation steps through all distinct model-score thresholds in descending order. The slider lets you stop at any individual ROC point. Its values are not evenly spaced: each one is a predicted probability at which at least one assigned label changes.\nOpen the slide-ready animation\n← Return to Classification"
+  },
+  {
+    "objectID": "classification/04-ranking-and-calibration.html",
+    "href": "classification/04-ranking-and-calibration.html",
+    "title": "Ranking and probability quality",
+    "section": "",
+    "text": "The previous notebook evaluated an alert decision after choosing a probability threshold. A classifier also produces probability scores that we can evaluate without fixing one threshold. Here, we separate three questions:"
+  },
+  {
+    "objectID": "classification/04-ranking-and-calibration.html#fit-the-tit-based-probability-model",
+    "href": "classification/04-ranking-and-calibration.html#fit-the-tit-based-probability-model",
+    "title": "Ranking and probability quality",
+    "section": "1. Fit the TIT-based probability model",
+    "text": "1. Fit the TIT-based probability model\nAs before, each row is one gas-turbine operating observation. The target high_co equals 1 when measured CO is at least 2 mg/m³. We train logistic regression with turbine inlet temperature (TIT) as its one feature, then keep a test set for comparison.\n\nfrom pathlib import Path\nfrom urllib.request import urlretrieve\n\nimport matplotlib.pyplot as plt\nimport numpy as np\nimport pandas as pd\nimport seaborn as sns\nfrom sklearn.calibration import calibration_curve\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.metrics import log_loss, roc_auc_score, roc_curve\nfrom sklearn.model_selection import train_test_split\n\nsns.set_theme(style=\"whitegrid\", context=\"notebook\")\n\nDATA_URL = \"https://raw.githubusercontent.com/changyaochen/MECE4520/master/site/data/gas-turbine-course.csv\"\ncandidates = [\n    Path(\"../data/gas-turbine-course.csv\"),\n    Path(\"site/data/gas-turbine-course.csv\"),\n    Path(\"gas-turbine-course.csv\"),\n]\ndata_path = next((path for path in candidates if path.exists()), candidates[-1])\n\n# In Google Colab, download the small course dataset if it is not already present.\nif not data_path.exists():\n    urlretrieve(DATA_URL, data_path)\n\ndata = pd.read_csv(data_path)\nmodel_data = data[[\"TIT\", \"high_co\"]].dropna().copy()\nX = model_data[[\"TIT\"]]\ny = model_data[\"high_co\"]\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.30, random_state=4520, stratify=y\n)\n\nmodel = LogisticRegression(max_iter=1_000).fit(X_train, y_train)\ntrain_probabilities = model.predict_proba(X_train)[:, 1]\ntest_probabilities = model.predict_proba(X_test)[:, 1]"
+  },
+  {
+    "objectID": "classification/04-ranking-and-calibration.html#measure-ranking-with-roc-and-auc",
+    "href": "classification/04-ranking-and-calibration.html#measure-ranking-with-roc-and-auc",
+    "title": "Ranking and probability quality",
+    "section": "2. Measure ranking with ROC and AUC",
+    "text": "2. Measure ranking with ROC and AUC\nAt a threshold \\(\\tau\\), the true-positive rate and false-positive rate are\n\\[\n\\operatorname{TPR}(\\tau) = \\frac{TP(\\tau)}{TP(\\tau)+FN(\\tau)},\n\\qquad\n\\operatorname{FPR}(\\tau) = \\frac{FP(\\tau)}{FP(\\tau)+TN(\\tau)}.\n\\]\nAn ROC curve traces TPR against FPR as \\(\\tau\\) moves from a strict threshold to a permissive one. Its area, AUC, summarizes ranking quality: it is the chance that the model assigns a randomly chosen high-CO observation a higher score than a randomly chosen not-high-CO observation. An AUC of 0.5 corresponds to random ranking.\n\ntrain_fpr, train_tpr, _ = roc_curve(y_train, train_probabilities)\ntest_fpr, test_tpr, _ = roc_curve(y_test, test_probabilities)\ntrain_auc = roc_auc_score(y_train, train_probabilities)\ntest_auc = roc_auc_score(y_test, test_probabilities)\n\nfig, ax = plt.subplots(figsize=(7.2, 7.2))\nax.plot([0, 1], [0, 1], \"--\", color=\"#5F6368\",\n        label=\"Random ranking (AUC = 0.500)\")\nax.plot(train_fpr, train_tpr, color=\"#3F78A8\", linewidth=2.5,\n        label=f\"Training ROC (AUC = {train_auc:.3f})\")\nax.plot(test_fpr, test_tpr, color=\"#E1812C\", linewidth=2.5,\n        label=f\"Test ROC (AUC = {test_auc:.3f})\")\nax.set(\n    xlabel=\"False-positive rate (FPR)\",\n    ylabel=\"True-positive rate (TPR)\",\n    title=\"TIT provides useful ranking of high-CO observations\",\n    xlim=(0, 1),\n    ylim=(0, 1),\n    aspect=\"equal\",\n)\nax.legend(loc=\"lower right\", frameon=True)\nplt.show()\n\n\n\n\n\n\n\n\nExplore how the ROC curve is built, threshold by threshold."
+  },
+  {
+    "objectID": "classification/04-ranking-and-calibration.html#measure-probability-quality-with-log-loss",
+    "href": "classification/04-ranking-and-calibration.html#measure-probability-quality-with-log-loss",
+    "title": "Ranking and probability quality",
+    "section": "3. Measure probability quality with log loss",
+    "text": "3. Measure probability quality with log loss\nAUC only cares about the ordering of scores. It does not check whether a predicted probability such as 0.90 is numerically credible. For that, we use the binary cross-entropy introduced with logistic regression, often called log loss:\n\\[\n\\operatorname{LogLoss} = -\\frac{1}{n}\\sum_{i=1}^{n}\n\\left[y_i\\log(\\hat p_i) + (1-y_i)\\log(1-\\hat p_i)\\right].\n\\]\nTo make this scale interpretable, compare it with the loss from predicting the test-set high-CO fraction \\(\\bar y\\) for every observation:\n\\[\nH(\\bar y) = -\\bar y\\log(\\bar y) - (1-\\bar y)\\log(1-\\bar y),\n\\qquad\n\\text{normalized log loss} = \\frac{\\operatorname{LogLoss}}{H(\\bar y)}.\n\\]\nA normalized log loss of 1 means the model is no better than this constant-probability baseline; lower values are better.\n\n# Make deliberately overconfident predictions without changing their rank.\ntest_scores = model.decision_function(X_test)\nsharpened_probabilities = 1 / (1 + np.exp(-5 * test_scores))\n\ntest_prevalence = y_test.mean()\nbaseline_log_loss = -(\n    test_prevalence * np.log(test_prevalence)\n    + (1 - test_prevalence) * np.log(1 - test_prevalence)\n)\n\nprobability_quality = pd.DataFrame(\n    {\n        \"AUC\": [\n            roc_auc_score(y_test, test_probabilities),\n            roc_auc_score(y_test, sharpened_probabilities),\n        ],\n        \"log loss\": [\n            log_loss(y_test, test_probabilities),\n            log_loss(y_test, sharpened_probabilities),\n        ],\n    },\n    index=[\"Original TIT model\", \"Overconfident $5z$ scores\"],\n)\nprobability_quality[\"normalized log loss\"] = (\n    probability_quality[\"log loss\"] / baseline_log_loss\n)\nprobability_quality.style.format(\n    {\"AUC\": \"{:.3f}\", \"log loss\": \"{:.3f}\",\n     \"normalized log loss\": \"{:.3f}\"}\n)\n\n\n\n\n\n\n \nAUC\nlog loss\nnormalized log loss\n\n\n\n\nOriginal TIT model\n0.871\n0.412\n0.617\n\n\nOverconfident $5z$ scores\n0.871\n1.011\n1.514\n\n\n\n\n\nMultiplying every log-odds score \\(z_i\\) by 5 is strictly increasing, so it preserves the ranking and therefore AUC. But it moves probabilities closer to 0 and 1. When the model is wrong, it is now much more confidently wrong, which log loss penalizes heavily."
+  },
+  {
+    "objectID": "classification/04-ranking-and-calibration.html#check-calibration-with-a-reliability-diagram",
+    "href": "classification/04-ranking-and-calibration.html#check-calibration-with-a-reliability-diagram",
+    "title": "Ranking and probability quality",
+    "section": "4. Check calibration with a reliability diagram",
+    "text": "4. Check calibration with a reliability diagram\nCalibration asks whether the probability values mean what they say. For example, among test observations assigned probabilities near 0.70, we would hope that approximately 70% actually have high CO. A reliability diagram bins the predicted probabilities and compares their mean with the observed high-CO fraction in each bin.\n\ndef reliability_points(labels, probabilities, n_bins=10):\n    \"\"\"Return observed fractions and mean predictions in probability bins.\"\"\"\n    observed_fraction, mean_prediction = calibration_curve(\n        labels, probabilities, n_bins=n_bins, strategy=\"uniform\"\n    )\n    return observed_fraction, mean_prediction\n\n\nfig, ax = plt.subplots(figsize=(7.2, 7.2))\nax.plot([0, 1], [0, 1], \"--\", color=\"#5F6368\",\n        label=\"Perfect calibration\")\nfor labels, probabilities, label, color, marker in [\n    (y_train, train_probabilities, \"Training set\", \"#3F78A8\", \"o\"),\n    (y_test, test_probabilities, \"Test set\", \"#E1812C\", \"s\"),\n]:\n    observed_fraction, mean_prediction = reliability_points(labels, probabilities)\n    ax.plot(mean_prediction, observed_fraction, color=color, marker=marker,\n            markersize=7, linewidth=2.5, label=label)\n\nax.set(\n    xlabel=\"Mean predicted probability\",\n    ylabel=\"Observed high-CO fraction\",\n    title=\"Reliability of TIT-based high-CO probabilities\",\n    xlim=(0, 1),\n    ylim=(0, 1),\n    aspect=\"equal\",\n)\nax.legend(loc=\"upper left\", frameon=True)\nplt.show()"
+  },
+  {
+    "objectID": "classification/04-ranking-and-calibration.html#choose-the-metric-that-answers-the-question",
+    "href": "classification/04-ranking-and-calibration.html#choose-the-metric-that-answers-the-question",
+    "title": "Ranking and probability quality",
+    "section": "5. Choose the metric that answers the question",
+    "text": "5. Choose the metric that answers the question\n\n\n\n\n\n\n\nQuestion\nUseful evaluation\n\n\n\n\nWhich observations should be investigated first?\nROC and AUC: ranking quality\n\n\nHow good is a particular alert policy?\nConfusion matrix, precision, recall, F1, and operating cost\n\n\nCan a probability support a cost-based decision?\nLog loss and calibration\n\n\n\nNo one metric is universally sufficient. The choice follows the engineering decision that the model is meant to support."
+  },
+  {
+    "objectID": "classification/04-ranking-and-calibration.html#try-it",
+    "href": "classification/04-ranking-and-calibration.html#try-it",
+    "title": "Ranking and probability quality",
+    "section": "Try it",
+    "text": "Try it\nChange the multiplier from 5 to 2 in the \\(5z\\) example, rerun the cell, and compare AUC with log loss again.\n← Return to Classification\n\n# Try a less extreme score multiplier.\n# alternative_probabilities = 1 / (1 + np.exp(-2 * test_scores))\n# roc_auc_score(y_test, alternative_probabilities), log_loss(y_test, alternative_probabilities)"
+  },
+  {
     "objectID": "classification/index.html",
     "href": "classification/index.html",
     "title": "Classification",
@@ -544,6 +656,20 @@
     "title": "Classification",
     "section": "2. Logistic regression and gradient descent",
     "text": "2. Logistic regression and gradient descent\nEstimated time: 45–60 minutes\nFit a high-CO classification model using turbine inlet temperature (TIT). Starting from the likelihood idea, build the binary-cross-entropy loss, calculate its gradient, and use repeated gradient-descent updates to fit the model.\nView the notebook\n\nInteractive explorer\nEstimated time: 10–15 minutes\nStep through the same logistic-regression updates and watch the coefficients move downhill on the binary-cross-entropy surface.\nOpen the interactive explorer"
+  },
+  {
+    "objectID": "classification/index.html#classification-metrics-thresholds-and-costs",
+    "href": "classification/index.html#classification-metrics-thresholds-and-costs",
+    "title": "Classification",
+    "section": "3. Classification metrics, thresholds, and costs",
+    "text": "3. Classification metrics, thresholds, and costs\nEstimated time: 40–50 minutes\nEvaluate the high-CO logistic model on held-out turbine observations. Turn probabilities into alerts, read a confusion matrix, and calculate accuracy, precision, recall, and F1. Compare alert thresholds and see how operating costs can change the appropriate decision rule.\nView the notebook"
+  },
+  {
+    "objectID": "classification/index.html#ranking-probability-quality-and-calibration",
+    "href": "classification/index.html#ranking-probability-quality-and-calibration",
+    "title": "Classification",
+    "section": "4. Ranking, probability quality, and calibration",
+    "text": "4. Ranking, probability quality, and calibration\nEstimated time: 30–40 minutes\nEvaluate the same high-CO probability model without fixing one alert threshold. Use ROC/AUC to assess ranking, log loss to assess probability quality, and a reliability diagram to check whether predicted probabilities agree with observed frequencies.\nView the notebook\n\nInteractive ROC builder\nEstimated time: 5–10 minutes\nLower the classification threshold point by point to see how a training-set ROC curve grows from (0, 0) to (1, 1). Inspect the threshold, false-positive rate, true-positive rate, and the associated counts at any point.\nOpen the interactive ROC builder\nOpen the slide-ready animation"
   },
   {
     "objectID": "classification/logistic-gradient-descent.html",

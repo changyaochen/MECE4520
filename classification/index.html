@@ -333,6 +333,8 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#likelihood-and-maximum-likelihood-estimation" id="toc-likelihood-and-maximum-likelihood-estimation">1. Likelihood and maximum likelihood estimation</a></li>
   <li><a href="#logistic-regression-and-gradient-descent" id="toc-logistic-regression-and-gradient-descent">2. Logistic regression and gradient descent</a></li>
+  <li><a href="#classification-metrics-thresholds-and-costs" id="toc-classification-metrics-thresholds-and-costs">3. Classification metrics, thresholds, and costs</a></li>
+  <li><a href="#ranking-probability-quality-and-calibration" id="toc-ranking-probability-quality-and-calibration">4. Ranking, probability quality, and calibration</a></li>
   </ul>
 </nav>
 <p>Classification estimates the chance that an observation belongs to a category. Before we fit a classifier, we need a way to connect a probability model to observed binary outcomes.</p>
@@ -358,6 +360,25 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Estimated time:</strong> 10–15 minutes</p>
 <p>Step through the same logistic-regression updates and watch the coefficients move downhill on the binary-cross-entropy surface.</p>
 <p><a href="../classification/logistic-gradient-descent.html">Open the interactive explorer</a></p>
+</section>
+</section>
+<section id="classification-metrics-thresholds-and-costs" class="level2">
+<h2 class="anchored" data-anchor-id="classification-metrics-thresholds-and-costs">3. Classification metrics, thresholds, and costs</h2>
+<p><strong>Estimated time:</strong> 40–50 minutes</p>
+<p>Evaluate the high-CO logistic model on held-out turbine observations. Turn probabilities into alerts, read a confusion matrix, and calculate accuracy, precision, recall, and F1. Compare alert thresholds and see how operating costs can change the appropriate decision rule.</p>
+<p><a href="../classification/03-classification-metrics.html">View the notebook</a></p>
+</section>
+<section id="ranking-probability-quality-and-calibration" class="level2">
+<h2 class="anchored" data-anchor-id="ranking-probability-quality-and-calibration">4. Ranking, probability quality, and calibration</h2>
+<p><strong>Estimated time:</strong> 30–40 minutes</p>
+<p>Evaluate the same high-CO probability model without fixing one alert threshold. Use ROC/AUC to assess ranking, log loss to assess probability quality, and a reliability diagram to check whether predicted probabilities agree with observed frequencies.</p>
+<p><a href="../classification/04-ranking-and-calibration.html">View the notebook</a></p>
+<section id="interactive-roc-builder" class="level3">
+<h3 class="anchored" data-anchor-id="interactive-roc-builder">Interactive ROC builder</h3>
+<p><strong>Estimated time:</strong> 5–10 minutes</p>
+<p>Lower the classification threshold point by point to see how a training-set ROC curve grows from <code>(0, 0)</code> to <code>(1, 1)</code>. Inspect the threshold, false-positive rate, true-positive rate, and the associated counts at any point.</p>
+<p><a href="../classification/roc-threshold-builder.html">Open the interactive ROC builder</a></p>
+<p><a href="../assets/roc-threshold-training.gif">Open the slide-ready animation</a></p>
 
 
 </section>

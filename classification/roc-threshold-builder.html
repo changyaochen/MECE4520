@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Building an ROC curve – MECE 4520</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d0e9dd6581773c2d153725aefe2da3c3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-90b0ccabdf50233fb893b00cd6e33405.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d0e9dd6581773c2d153725aefe2da3c3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">⚙️</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../foundations/index.html"> 
+<span class="menu-text">Foundations</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../regression/index.html"> 
+<span class="menu-text">Regression</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../evaluation/index.html"> 
+<span class="menu-text">Evaluation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../classification/index.html"> 
+<span class="menu-text">Classification</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content column-page" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Building an ROC curve</h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-page">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This explorer uses the TIT-based high-CO logistic model on the training set. Every observed score threshold produces one point on the ROC curve.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>What to watch
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Start with a very high threshold: no observations receive a high-CO label, so the curve begins at <code>(0, 0)</code>. As the threshold decreases, the model labels more observations positive. True positives move the point upward; false positives move it rightward.</p>
+</div>
+</div>
+<div id="roc-threshold-builder" class="clt-explorer roc-threshold-builder" aria-label="Interactive ROC curve builder">
+  <div class="clt-controls roc-threshold-controls" aria-label="ROC threshold control">
+    <label>
+      <span>Threshold position</span>
+      <input id="roc-threshold-slider" type="range" min="0" value="0">
+      <output id="roc-threshold-value" for="roc-threshold-slider">τ = ∞</output>
+    </label>
+  </div>
+
+  <div class="clt-buttons" aria-label="ROC animation controls">
+    <button id="roc-play" type="button" class="regression-sampling-primary">Play</button>
+    <button id="roc-step" type="button">Next point</button>
+    <button id="roc-reset" type="button">Reset</button>
+  </div>
+
+  <p id="roc-status" class="clt-status tabular-nums" aria-live="polite"></p>
+
+  <figure class="clt-plot roc-threshold-plot figure">
+    <figcaption>Training ROC curve · final AUC = 0.866</figcaption>
+    <svg id="roc-threshold-chart" role="img" aria-label="Training receiver operating characteristic curve being drawn as the threshold decreases"></svg>
+  </figure>
+</div>
+<p>The animation steps through all distinct model-score thresholds in descending order. The slider lets you stop at any individual ROC point. Its values are not evenly spaced: each one is a predicted probability at which at least one assigned label changes.</p>
+<p><a href="../assets/roc-threshold-training.gif">Open the slide-ready animation</a></p>
+<p><a href="../classification/index.html">← Return to Classification</a></p>
+<script>
+(() => {
+  const root = document.getElementById("roc-threshold-builder");
+  if (!root) return;
+
+  const roc = {"auc":0.86577337,"positives":9989,"negatives":15724,"points":[{"threshold":null,"fpr":0.0,"tpr":0.0,"fp":0,"tp":0},{"threshold":0.999841796751,"fpr":6.36e-05,"tpr":0.0,"fp":1,"tp":0},{"threshold":0.999714617975,"fpr":6.36e-05,"tpr":0.00010011,"fp":1,"tp":1},{"threshold":0.999664453681,"fpr":6.36e-05,"tpr":0.00020022,"fp":1,"tp":2},{"threshold":0.999618929035,"fpr":6.36e-05,"tpr":0.00030033,"fp":1,"tp":3},{"threshold":0.999596242905,"fpr":6.36e-05,"tpr":0.00040044,"fp":1,"tp":4},{"threshold":0.999479266331,"fpr":6.36e-05,"tpr":0.00050055,"fp":1,"tp":5},{"threshold":0.999143873971,"fpr":6.36e-05,"tpr":0.00060066,"fp":1,"tp":6},{"threshold":0.999103357294,"fpr":6.36e-05,"tpr":0.00070077,"fp":1,"tp":7},{"threshold":0.999071717497,"fpr":6.36e-05,"tpr":0.00090099,"fp":1,"tp":9},{"threshold":0.999016486517,"fpr":6.36e-05,"tpr":0.0010011,"fp":1,"tp":10},{"threshold":0.998921208397,"fpr":6.36e-05,"tpr":0.00110121,"fp":1,"tp":11},{"threshold":0.998843746995,"fpr":6.36e-05,"tpr":0.00120132,"fp":1,"tp":12},{"threshold":0.998802957316,"fpr":6.36e-05,"tpr":0.00140154,"fp":1,"tp":14},{"threshold":0.998789043844,"fpr":6.36e-05,"tpr":0.00150165,"fp":1,"tp":15},{"threshold":0.998671761451,"fpr":6.36e-05,"tpr":0.00160176,"fp":1,"tp":16},{"threshold":0.99862491291,"fpr":6.36e-05,"tpr":0.00180198,"fp":1,"tp":18},{"threshold":0.998608932873,"fpr":6.36e-05,"tpr":0.00190209,"fp":1,"tp":19},{"threshold":0.998543136702,"fpr":6.36e-05,"tpr":0.0020022,"fp":1,"tp":20},{"threshold":0.998509082349,"fpr":6.36e-05,"tpr":0.00210231,"fp":1,"tp":21},{"threshold":0.998491758266,"fpr":6.36e-05,"tpr":0.00220242,"fp":1,"tp":22},{"threshold":0.998420428612,"fpr":6.36e-05,"tpr":0.00230253,"fp":1,"tp":23},{"threshold":0.998164515377,"fpr":6.36e-05,"tpr":0.00240264,"fp":1,"tp":24},{"threshold":0.99809980971,"fpr":0.00012719,"tpr":0.00240264,"fp":2,"tp":24},{"threshold":0.998032827494,"fpr":0.00012719,"tpr":0.00250275,"fp":2,"tp":25},{"threshold":0.998009980479,"fpr":0.00012719,"tpr":0.00260286,"fp":2,"tp":26},{"threshold":0.997986868652,"fpr":0.00012719,"tpr":0.00270297,"fp":2,"tp":27},{"threshold":0.997963488954,"fpr":0.00012719,"tpr":0.00290319,"fp":2,"tp":29},{"threshold":0.997891711545,"fpr":0.00012719,"tpr":0.00310341,"fp":2,"tp":31},{"threshold":0.997867229093,"fpr":0.00012719,"tpr":0.00320352,"fp":2,"tp":32},{"threshold":0.997842462953,"fpr":0.00019079,"tpr":0.00320352,"fp":3,"tp":32},{"threshold":0.997817409854,"fpr":0.00019079,"tpr":0.00330363,"fp":3,"tp":33},{"threshold":0.997792066484,"fpr":0.00019079,"tpr":0.00340374,"fp":3,"tp":34},{"threshold":0.997766429495,"fpr":0.00019079,"tpr":0.00350385,"fp":3,"tp":35},{"threshold":0.997740495502,"fpr":0.00019079,"tpr":0.00370407,"fp":3,"tp":37},{"threshold":0.997714261079,"fpr":0.00019079,"tpr":0.00380418,"fp":3,"tp":38},{"threshold":0.997687722762,"fpr":0.00019079,"tpr":0.0040044,"fp":3,"tp":40},{"threshold":0.997633720391,"fpr":0.00019079,"tpr":0.00420463,"fp":3,"tp":42},{"threshold":0.997606249209,"fpr":0.00019079,"tpr":0.00430474,"fp":3,"tp":43},{"threshold":0.997578459876,"fpr":0.00019079,"tpr":0.00450496,"fp":3,"tp":45},{"threshold":0.997521912049,"fpr":0.00019079,"tpr":0.00470518,"fp":3,"tp":47},{"threshold":0.997434611144,"fpr":0.00019079,"tpr":0.0049054,"fp":3,"tp":49},{"threshold":0.997404834428,"fpr":0.00019079,"tpr":0.00530584,"fp":3,"tp":53},{"threshold":0.997374713001,"fpr":0.00019079,"tpr":0.00540595,"fp":3,"tp":54},{"threshold":0.997344242892,"fpr":0.00019079,"tpr":0.00550606,"fp":3,"tp":55},{"threshold":0.997313420088,"fpr":0.00019079,"tpr":0.00580639,"fp":3,"tp":58},{"threshold":0.997250700107,"fpr":0.00019079,"tpr":0.00600661,"fp":3,"tp":60},{"threshold":0.997186520018,"fpr":0.00019079,"tpr":0.00610672,"fp":3,"tp":61},{"threshold":0.997153871901,"fpr":0.00019079,"tpr":0.00650716,"fp":3,"tp":65},{"threshold":0.99708743804,"fpr":0.00019079,"tpr":0.00680749,"fp":3,"tp":68},{"threshold":0.997053643555,"fpr":0.00019079,"tpr":0.00700771,"fp":3,"tp":70},{"threshold":0.997019458125,"fpr":0.00019079,"tpr":0.00720793,"fp":3,"tp":72},{"threshold":0.996984877255,"fpr":0.00019079,"tpr":0.00730804,"fp":3,"tp":73},{"threshold":0.996949896397,"fpr":0.00019079,"tpr":0.00750826,"fp":3,"tp":75},{"threshold":0.996878716276,"fpr":0.00019079,"tpr":0.00770848,"fp":3,"tp":77},{"threshold":0.99684250766,"fpr":0.00019079,"tpr":0.00780859,"fp":3,"tp":78},{"threshold":0.99680588035,"fpr":0.00019079,"tpr":0.0079087,"fp":3,"tp":79},{"threshold":0.996768829536,"fpr":0.00019079,"tpr":0.00800881,"fp":3,"tp":80},{"threshold":0.996693437881,"fpr":0.00019079,"tpr":0.00820903,"fp":3,"tp":82},{"threshold":0.996655087146,"fpr":0.00019079,"tpr":0.00850936,"fp":3,"tp":85},{"threshold":0.996616293114,"fpr":0.00019079,"tpr":0.00860947,"fp":3,"tp":86},{"threshold":0.996577050697,"fpr":0.00019079,"tpr":0.00870958,"fp":3,"tp":87},{"threshold":0.996497200066,"fpr":0.00019079,"tpr":0.0089098,"fp":3,"tp":89},{"threshold":0.996415493377,"fpr":0.00019079,"tpr":0.00931024,"fp":3,"tp":93},{"threshold":0.996331887805,"fpr":0.00019079,"tpr":0.00961057,"fp":3,"tp":96},{"threshold":0.996289359289,"fpr":0.00019079,"tpr":0.01001101,"fp":3,"tp":100},{"threshold":0.99624633955,"fpr":0.00019079,"tpr":0.01021123,"fp":3,"tp":102},{"threshold":0.996202822958,"fpr":0.00019079,"tpr":0.01051156,"fp":3,"tp":105},{"threshold":0.996158803818,"fpr":0.00019079,"tpr":0.01081189,"fp":3,"tp":108},{"threshold":0.996114276373,"fpr":0.00019079,"tpr":0.010912,"fp":3,"tp":109},{"threshold":0.996069234798,"fpr":0.00025439,"tpr":0.010912,"fp":4,"tp":109},{"threshold":0.996023673207,"fpr":0.00025439,"tpr":0.01111222,"fp":4,"tp":111},{"threshold":0.995977585642,"fpr":0.00025439,"tpr":0.01121233,"fp":4,"tp":112},{"threshold":0.995930966082,"fpr":0.00025439,"tpr":0.01171288,"fp":4,"tp":117},{"threshold":0.995883808437,"fpr":0.00025439,"tpr":0.01181299,"fp":4,"tp":118},{"threshold":0.995836106548,"fpr":0.00025439,"tpr":0.0119131,"fp":4,"tp":119},{"threshold":0.995787854188,"fpr":0.00025439,"tpr":0.01221343,"fp":4,"tp":122},{"threshold":0.995689672792,"fpr":0.00025439,"tpr":0.01261388,"fp":4,"tp":126},{"threshold":0.995639730947,"fpr":0.00025439,"tpr":0.0128141,"fp":4,"tp":128},{"threshold":0.995589213011,"fpr":0.00025439,"tpr":0.01321454,"fp":4,"tp":132},{"threshold":0.995538112399,"fpr":0.00025439,"tpr":0.01331465,"fp":4,"tp":133},{"threshold":0.995486422451,"fpr":0.00025439,"tpr":0.01351487,"fp":4,"tp":135},{"threshold":0.995434136433,"fpr":0.00025439,"tpr":0.0138152,"fp":4,"tp":138},{"threshold":0.995381247536,"fpr":0.00025439,"tpr":0.01411553,"fp":4,"tp":141},{"threshold":0.995327748873,"fpr":0.00025439,"tpr":0.01431575,"fp":4,"tp":143},{"threshold":0.995273633482,"fpr":0.00025439,"tpr":0.01471619,"fp":4,"tp":147},{"threshold":0.995218894321,"fpr":0.00025439,"tpr":0.01501652,"fp":4,"tp":150},{"threshold":0.995163524271,"fpr":0.00025439,"tpr":0.01521674,"fp":4,"tp":152},{"threshold":0.995107516131,"fpr":0.00025439,"tpr":0.01551707,"fp":4,"tp":155},{"threshold":0.995050862623,"fpr":0.00025439,"tpr":0.0158174,"fp":4,"tp":158},{"threshold":0.994993556384,"fpr":0.00025439,"tpr":0.01601762,"fp":4,"tp":160},{"threshold":0.994935589972,"fpr":0.00025439,"tpr":0.01621784,"fp":4,"tp":162},{"threshold":0.994876955859,"fpr":0.00025439,"tpr":0.0168185,"fp":4,"tp":168},{"threshold":0.994817646435,"fpr":0.00025439,"tpr":0.01691861,"fp":4,"tp":169},{"threshold":0.994757654005,"fpr":0.00025439,"tpr":0.01721894,"fp":4,"tp":172},{"threshold":0.994573500429,"fpr":0.00025439,"tpr":0.01741916,"fp":4,"tp":174},{"threshold":0.994510697289,"fpr":0.00025439,"tpr":0.01751927,"fp":4,"tp":175},{"threshold":0.99444717136,"fpr":0.00025439,"tpr":0.01801982,"fp":4,"tp":180},{"threshold":0.994382914418,"fpr":0.00025439,"tpr":0.01842026,"fp":4,"tp":184},{"threshold":0.994317918148,"fpr":0.00025439,"tpr":0.01852037,"fp":4,"tp":185},{"threshold":0.994252174143,"fpr":0.00025439,"tpr":0.01872059,"fp":4,"tp":187},{"threshold":0.9941856739,"fpr":0.00025439,"tpr":0.01902092,"fp":4,"tp":190},{"threshold":0.994118408825,"fpr":0.00025439,"tpr":0.01912103,"fp":4,"tp":191},{"threshold":0.994050370228,"fpr":0.00025439,"tpr":0.01922114,"fp":4,"tp":192},{"threshold":0.993981549321,"fpr":0.00025439,"tpr":0.01932125,"fp":4,"tp":193},{"threshold":0.993911937221,"fpr":0.00025439,"tpr":0.01942136,"fp":4,"tp":194},{"threshold":0.993841524944,"fpr":0.00025439,"tpr":0.01962158,"fp":4,"tp":196},{"threshold":0.993770303409,"fpr":0.00025439,"tpr":0.0198218,"fp":4,"tp":198},{"threshold":0.993698263434,"fpr":0.00025439,"tpr":0.02012213,"fp":4,"tp":201},{"threshold":0.993625395736,"fpr":0.00025439,"tpr":0.02022224,"fp":4,"tp":202},{"threshold":0.993477139519,"fpr":0.00025439,"tpr":0.02042246,"fp":4,"tp":204},{"threshold":0.993401731917,"fpr":0.00025439,"tpr":0.0207228,"fp":4,"tp":207},{"threshold":0.993325458422,"fpr":0.00025439,"tpr":0.02122335,"fp":4,"tp":212},{"threshold":0.993248309226,"fpr":0.00025439,"tpr":0.02132346,"fp":4,"tp":213},{"threshold":0.993170274415,"fpr":0.00025439,"tpr":0.02142357,"fp":4,"tp":214},{"threshold":0.993091343965,"fpr":0.00025439,"tpr":0.02162379,"fp":4,"tp":216},{"threshold":0.993011507743,"fpr":0.00031799,"tpr":0.02162379,"fp":5,"tp":216},{"threshold":0.992930755503,"fpr":0.00031799,"tpr":0.02192412,"fp":5,"tp":219},{"threshold":0.992849076888,"fpr":0.00031799,"tpr":0.02262489,"fp":5,"tp":226},{"threshold":0.992766461427,"fpr":0.00031799,"tpr":0.02292522,"fp":5,"tp":229},{"threshold":0.992598377507,"fpr":0.00031799,"tpr":0.0237261,"fp":5,"tp":237},{"threshold":0.992512887527,"fpr":0.00031799,"tpr":0.02382621,"fp":5,"tp":238},{"threshold":0.992426417659,"fpr":0.00031799,"tpr":0.02422665,"fp":5,"tp":242},{"threshold":0.992338956844,"fpr":0.00031799,"tpr":0.02492742,"fp":5,"tp":249},{"threshold":0.992250493906,"fpr":0.00031799,"tpr":0.02542797,"fp":5,"tp":254},{"threshold":0.992161017545,"fpr":0.00031799,"tpr":0.02562819,"fp":5,"tp":256},{"threshold":0.99207051634,"fpr":0.00031799,"tpr":0.0257283,"fp":5,"tp":257},{"threshold":0.991978978744,"fpr":0.00031799,"tpr":0.02632896,"fp":5,"tp":263},{"threshold":0.991886393084,"fpr":0.00031799,"tpr":0.02692962,"fp":5,"tp":269},{"threshold":0.991792747561,"fpr":0.00031799,"tpr":0.02743017,"fp":5,"tp":274},{"threshold":0.991698030249,"fpr":0.00031799,"tpr":0.0277305,"fp":5,"tp":277},{"threshold":0.991602229089,"fpr":0.00031799,"tpr":0.02813094,"fp":5,"tp":281},{"threshold":0.991505331894,"fpr":0.00031799,"tpr":0.02833116,"fp":5,"tp":283},{"threshold":0.991407326345,"fpr":0.00031799,"tpr":0.02863149,"fp":5,"tp":286},{"threshold":0.991308199989,"fpr":0.00031799,"tpr":0.02913205,"fp":5,"tp":291},{"threshold":0.991207940237,"fpr":0.00031799,"tpr":0.02993293,"fp":5,"tp":299},{"threshold":0.991106534367,"fpr":0.00031799,"tpr":0.03003304,"fp":5,"tp":300},{"threshold":0.991003969516,"fpr":0.00031799,"tpr":0.03043348,"fp":5,"tp":304},{"threshold":0.990900232685,"fpr":0.00031799,"tpr":0.03083392,"fp":5,"tp":308},{"threshold":0.990795310735,"fpr":0.00031799,"tpr":0.03103414,"fp":5,"tp":310},{"threshold":0.990689190382,"fpr":0.00031799,"tpr":0.03123436,"fp":5,"tp":312},{"threshold":0.990581858204,"fpr":0.00031799,"tpr":0.03153469,"fp":5,"tp":315},{"threshold":0.990473300631,"fpr":0.00031799,"tpr":0.03173491,"fp":5,"tp":317},{"threshold":0.99036350395,"fpr":0.00031799,"tpr":0.03243568,"fp":5,"tp":324},{"threshold":0.990252454298,"fpr":0.00031799,"tpr":0.0326359,"fp":5,"tp":326},{"threshold":0.990140137666,"fpr":0.00031799,"tpr":0.03323656,"fp":5,"tp":332},{"threshold":0.990026539893,"fpr":0.00031799,"tpr":0.03393733,"fp":5,"tp":339},{"threshold":0.98991164667,"fpr":0.00031799,"tpr":0.0346381,"fp":5,"tp":346},{"threshold":0.98979544353,"fpr":0.00031799,"tpr":0.03513865,"fp":5,"tp":351},{"threshold":0.989677915857,"fpr":0.00031799,"tpr":0.03543898,"fp":5,"tp":354},{"threshold":0.989559048875,"fpr":0.00031799,"tpr":0.03613975,"fp":5,"tp":361},{"threshold":0.989438827653,"fpr":0.00031799,"tpr":0.03644008,"fp":5,"tp":364},{"threshold":0.9893172371,"fpr":0.00031799,"tpr":0.03714085,"fp":5,"tp":371},{"threshold":0.989194261966,"fpr":0.00031799,"tpr":0.03744119,"fp":5,"tp":374},{"threshold":0.989069886838,"fpr":0.00031799,"tpr":0.03784163,"fp":5,"tp":378},{"threshold":0.98894409614,"fpr":0.00031799,"tpr":0.0385424,"fp":5,"tp":385},{"threshold":0.988816874131,"fpr":0.00031799,"tpr":0.0395435,"fp":5,"tp":395},{"threshold":0.988688204904,"fpr":0.00031799,"tpr":0.04024427,"fp":5,"tp":402},{"threshold":0.988558072383,"fpr":0.00031799,"tpr":0.04074482,"fp":5,"tp":407},{"threshold":0.988426460324,"fpr":0.00031799,"tpr":0.04134548,"fp":5,"tp":413},{"threshold":0.988293352309,"fpr":0.00031799,"tpr":0.04184603,"fp":5,"tp":418},{"threshold":0.988158731751,"fpr":0.00031799,"tpr":0.04214636,"fp":5,"tp":421},{"threshold":0.988022581885,"fpr":0.00031799,"tpr":0.04274702,"fp":5,"tp":427},{"threshold":0.987884885773,"fpr":0.00031799,"tpr":0.04334768,"fp":5,"tp":433},{"threshold":0.987745626297,"fpr":0.00031799,"tpr":0.04374812,"fp":5,"tp":437},{"threshold":0.987604786162,"fpr":0.00031799,"tpr":0.04424867,"fp":5,"tp":442},{"threshold":0.987462347891,"fpr":0.00031799,"tpr":0.04474922,"fp":5,"tp":447},{"threshold":0.987318293823,"fpr":0.00031799,"tpr":0.04504955,"fp":5,"tp":450},{"threshold":0.987172606116,"fpr":0.00031799,"tpr":0.04544999,"fp":5,"tp":454},{"threshold":0.98702526674,"fpr":0.00038158,"tpr":0.0464511,"fp":6,"tp":464},{"threshold":0.986876257477,"fpr":0.00038158,"tpr":0.04725198,"fp":6,"tp":472},{"threshold":0.986725559922,"fpr":0.00038158,"tpr":0.04795275,"fp":6,"tp":479},{"threshold":0.986573155478,"fpr":0.00038158,"tpr":0.04865352,"fp":6,"tp":486},{"threshold":0.986419025354,"fpr":0.00038158,"tpr":0.04935429,"fp":6,"tp":493},{"threshold":0.986263150568,"fpr":0.00038158,"tpr":0.04995495,"fp":6,"tp":499},{"threshold":0.986105511938,"fpr":0.00038158,"tpr":0.05035539,"fp":6,"tp":503},{"threshold":0.985946090088,"fpr":0.00038158,"tpr":0.05055561,"fp":6,"tp":505},{"threshold":0.98578486544,"fpr":0.00038158,"tpr":0.05095605,"fp":6,"tp":509},{"threshold":0.985621818215,"fpr":0.00038158,"tpr":0.05135649,"fp":6,"tp":513},{"threshold":0.985456928433,"fpr":0.00038158,"tpr":0.05205726,"fp":6,"tp":520},{"threshold":0.985290175907,"fpr":0.00038158,"tpr":0.05225748,"fp":6,"tp":522},{"threshold":0.985121540246,"fpr":0.00038158,"tpr":0.05255781,"fp":6,"tp":525},{"threshold":0.984951000847,"fpr":0.00038158,"tpr":0.05325858,"fp":6,"tp":532},{"threshold":0.984778536901,"fpr":0.00038158,"tpr":0.05486035,"fp":6,"tp":548},{"threshold":0.984604127385,"fpr":0.00038158,"tpr":0.05526079,"fp":6,"tp":552},{"threshold":0.984427751062,"fpr":0.00038158,"tpr":0.05576134,"fp":6,"tp":557},{"threshold":0.984249386482,"fpr":0.00038158,"tpr":0.05606167,"fp":6,"tp":560},{"threshold":0.984069011974,"fpr":0.00038158,"tpr":0.05686255,"fp":6,"tp":568},{"threshold":0.983886605652,"fpr":0.00038158,"tpr":0.05776354,"fp":6,"tp":577},{"threshold":0.983702145407,"fpr":0.00038158,"tpr":0.05806387,"fp":6,"tp":580},{"threshold":0.983515608908,"fpr":0.00038158,"tpr":0.05886475,"fp":6,"tp":588},{"threshold":0.983326973599,"fpr":0.00038158,"tpr":0.05946541,"fp":6,"tp":594},{"threshold":0.983136216698,"fpr":0.00038158,"tpr":0.06026629,"fp":6,"tp":602},{"threshold":0.982943315194,"fpr":0.00038158,"tpr":0.06146761,"fp":6,"tp":614},{"threshold":0.982748245848,"fpr":0.00038158,"tpr":0.06216839,"fp":6,"tp":621},{"threshold":0.982550985188,"fpr":0.00038158,"tpr":0.06256883,"fp":6,"tp":625},{"threshold":0.982351509507,"fpr":0.00038158,"tpr":0.0632696,"fp":6,"tp":632},{"threshold":0.982149794866,"fpr":0.00038158,"tpr":0.06387026,"fp":6,"tp":638},{"threshold":0.981945817085,"fpr":0.00038158,"tpr":0.06477125,"fp":6,"tp":647},{"threshold":0.981739551748,"fpr":0.00038158,"tpr":0.06577235,"fp":6,"tp":657},{"threshold":0.981530974194,"fpr":0.00038158,"tpr":0.06647312,"fp":6,"tp":664},{"threshold":0.981320059522,"fpr":0.00038158,"tpr":0.067274,"fp":6,"tp":672},{"threshold":0.981106782586,"fpr":0.00038158,"tpr":0.06777455,"fp":6,"tp":677},{"threshold":0.980891117993,"fpr":0.00038158,"tpr":0.06867554,"fp":6,"tp":686},{"threshold":0.9806730401,"fpr":0.00038158,"tpr":0.0692762,"fp":6,"tp":692},{"threshold":0.980452523017,"fpr":0.00038158,"tpr":0.07077786,"fp":6,"tp":707},{"threshold":0.980229540597,"fpr":0.00038158,"tpr":0.07137852,"fp":6,"tp":713},{"threshold":0.980004066444,"fpr":0.00038158,"tpr":0.07237962,"fp":6,"tp":723},{"threshold":0.979776073901,"fpr":0.00044518,"tpr":0.07368105,"fp":7,"tp":736},{"threshold":0.979545536058,"fpr":0.00044518,"tpr":0.07468215,"fp":7,"tp":746},{"threshold":0.979312425742,"fpr":0.00050878,"tpr":0.07538292,"fp":8,"tp":753},{"threshold":0.979076715519,"fpr":0.00063597,"tpr":0.07598358,"fp":10,"tp":759},{"threshold":0.978838377692,"fpr":0.00063597,"tpr":0.07708479,"fp":10,"tp":770},{"threshold":0.978597384299,"fpr":0.00069957,"tpr":0.07828611,"fp":11,"tp":782},{"threshold":0.978353707111,"fpr":0.00069957,"tpr":0.07878667,"fp":11,"tp":787},{"threshold":0.978107317628,"fpr":0.00076316,"tpr":0.07928722,"fp":12,"tp":792},{"threshold":0.977858187083,"fpr":0.00082676,"tpr":0.08048854,"fp":13,"tp":804},{"threshold":0.977606286432,"fpr":0.00089036,"tpr":0.08168986,"fp":14,"tp":816},{"threshold":0.97735158636,"fpr":0.00089036,"tpr":0.08299129,"fp":14,"tp":829},{"threshold":0.977094057274,"fpr":0.00089036,"tpr":0.08419261,"fp":14,"tp":841},{"threshold":0.976833669303,"fpr":0.00089036,"tpr":0.08489338,"fp":14,"tp":848},{"threshold":0.976570392297,"fpr":0.00089036,"tpr":0.08559415,"fp":14,"tp":855},{"threshold":0.976304195822,"fpr":0.00089036,"tpr":0.08639503,"fp":14,"tp":863},{"threshold":0.976035049164,"fpr":0.00095396,"tpr":0.08749625,"fp":15,"tp":874},{"threshold":0.975762921321,"fpr":0.00095396,"tpr":0.08849735,"fp":15,"tp":884},{"threshold":0.975487781004,"fpr":0.00095396,"tpr":0.09019922,"fp":15,"tp":901},{"threshold":0.975209596637,"fpr":0.00095396,"tpr":0.09110021,"fp":15,"tp":910},{"threshold":0.974928336351,"fpr":0.00095396,"tpr":0.09240164,"fp":15,"tp":923},{"threshold":0.974643967988,"fpr":0.00095396,"tpr":0.09350285,"fp":15,"tp":934},{"threshold":0.974356459092,"fpr":0.00095396,"tpr":0.09450395,"fp":15,"tp":944},{"threshold":0.974065776915,"fpr":0.00095396,"tpr":0.09650616,"fp":15,"tp":964},{"threshold":0.973771888408,"fpr":0.00095396,"tpr":0.09740715,"fp":15,"tp":973},{"threshold":0.973474760227,"fpr":0.00095396,"tpr":0.09920913,"fp":15,"tp":991},{"threshold":0.973174358723,"fpr":0.00095396,"tpr":0.10051056,"fp":15,"tp":1004},{"threshold":0.972870649948,"fpr":0.00095396,"tpr":0.10141155,"fp":15,"tp":1013},{"threshold":0.972563599647,"fpr":0.00095396,"tpr":0.10251276,"fp":15,"tp":1024},{"threshold":0.972253173262,"fpr":0.00095396,"tpr":0.10431475,"fp":15,"tp":1042},{"threshold":0.971939335927,"fpr":0.00095396,"tpr":0.10551607,"fp":15,"tp":1054},{"threshold":0.971622052465,"fpr":0.00095396,"tpr":0.1068175,"fp":15,"tp":1067},{"threshold":0.971301287393,"fpr":0.00095396,"tpr":0.10811893,"fp":15,"tp":1080},{"threshold":0.970977004913,"fpr":0.00095396,"tpr":0.1088197,"fp":15,"tp":1087},{"threshold":0.970649168913,"fpr":0.00095396,"tpr":0.11042146,"fp":15,"tp":1103},{"threshold":0.970317742968,"fpr":0.00095396,"tpr":0.11242367,"fp":15,"tp":1123},{"threshold":0.969982690338,"fpr":0.00095396,"tpr":0.11452598,"fp":15,"tp":1144},{"threshold":0.969643973961,"fpr":0.00095396,"tpr":0.11662829,"fp":15,"tp":1165},{"threshold":0.96930155646,"fpr":0.00095396,"tpr":0.11833016,"fp":15,"tp":1182},{"threshold":0.968955400136,"fpr":0.00101755,"tpr":0.11893082,"fp":16,"tp":1188},{"threshold":0.968605466968,"fpr":0.00101755,"tpr":0.12053259,"fp":16,"tp":1204},{"threshold":0.968251718611,"fpr":0.00101755,"tpr":0.12303534,"fp":16,"tp":1229},{"threshold":0.967894116399,"fpr":0.00101755,"tpr":0.12473721,"fp":16,"tp":1246},{"threshold":0.967532621336,"fpr":0.00101755,"tpr":0.12653919,"fp":16,"tp":1264},{"threshold":0.967167194103,"fpr":0.00101755,"tpr":0.1285414,"fp":16,"tp":1284},{"threshold":0.96679779505,"fpr":0.00101755,"tpr":0.12934228,"fp":16,"tp":1292},{"threshold":0.966424384201,"fpr":0.00101755,"tpr":0.1315447,"fp":16,"tp":1314},{"threshold":0.966046921248,"fpr":0.00101755,"tpr":0.13224547,"fp":16,"tp":1321},{"threshold":0.96566536555,"fpr":0.00101755,"tpr":0.1335469,"fp":16,"tp":1334},{"threshold":0.965279676138,"fpr":0.00101755,"tpr":0.13524877,"fp":16,"tp":1351},{"threshold":0.964889811707,"fpr":0.00101755,"tpr":0.13705076,"fp":16,"tp":1369},{"threshold":0.964495730618,"fpr":0.00108115,"tpr":0.13865252,"fp":17,"tp":1385},{"threshold":0.964097390898,"fpr":0.00108115,"tpr":0.14005406,"fp":17,"tp":1399},{"threshold":0.963694750237,"fpr":0.00108115,"tpr":0.14185604,"fp":17,"tp":1417},{"threshold":0.963287765989,"fpr":0.00108115,"tpr":0.1434578,"fp":17,"tp":1433},{"threshold":0.962876395172,"fpr":0.00108115,"tpr":0.14475924,"fp":17,"tp":1446},{"threshold":0.962460594464,"fpr":0.00108115,"tpr":0.14646111,"fp":17,"tp":1463},{"threshold":0.962040320204,"fpr":0.00108115,"tpr":0.14806287,"fp":17,"tp":1479},{"threshold":0.961615528394,"fpr":0.00108115,"tpr":0.14986485,"fp":17,"tp":1497},{"threshold":0.961186174696,"fpr":0.00108115,"tpr":0.15156672,"fp":17,"tp":1514},{"threshold":0.960752214429,"fpr":0.00108115,"tpr":0.15306838,"fp":17,"tp":1529},{"threshold":0.960313602574,"fpr":0.00108115,"tpr":0.15396937,"fp":17,"tp":1538},{"threshold":0.959870293772,"fpr":0.00108115,"tpr":0.15477025,"fp":17,"tp":1546},{"threshold":0.95942224232,"fpr":0.00108115,"tpr":0.15617179,"fp":17,"tp":1560},{"threshold":0.958969402174,"fpr":0.00108115,"tpr":0.15807388,"fp":17,"tp":1579},{"threshold":0.958511726951,"fpr":0.00108115,"tpr":0.15967564,"fp":17,"tp":1595},{"threshold":0.958049169924,"fpr":0.00108115,"tpr":0.16147763,"fp":17,"tp":1613},{"threshold":0.957581684025,"fpr":0.00108115,"tpr":0.16237862,"fp":17,"tp":1622},{"threshold":0.957109221844,"fpr":0.00108115,"tpr":0.16378016,"fp":17,"tp":1636},{"threshold":0.956631735631,"fpr":0.00108115,"tpr":0.16578236,"fp":17,"tp":1656},{"threshold":0.956149177293,"fpr":0.00108115,"tpr":0.16798478,"fp":17,"tp":1678},{"threshold":0.955661498398,"fpr":0.00120834,"tpr":0.16928621,"fp":19,"tp":1691},{"threshold":0.95516865017,"fpr":0.00127194,"tpr":0.17188908,"fp":20,"tp":1717},{"threshold":0.954670583498,"fpr":0.00127194,"tpr":0.17379117,"fp":20,"tp":1736},{"threshold":0.954167248926,"fpr":0.00127194,"tpr":0.17569326,"fp":20,"tp":1755},{"threshold":0.953658596664,"fpr":0.00127194,"tpr":0.17749524,"fp":20,"tp":1773},{"threshold":0.953144576579,"fpr":0.00127194,"tpr":0.17939734,"fp":20,"tp":1792},{"threshold":0.952625138204,"fpr":0.00127194,"tpr":0.18129943,"fp":20,"tp":1811},{"threshold":0.952100230735,"fpr":0.00127194,"tpr":0.18270097,"fp":20,"tp":1825},{"threshold":0.95156980303,"fpr":0.00127194,"tpr":0.18430273,"fp":20,"tp":1841},{"threshold":0.951033803615,"fpr":0.00127194,"tpr":0.18620483,"fp":20,"tp":1860},{"threshold":0.950492180681,"fpr":0.00127194,"tpr":0.18830714,"fp":20,"tp":1881},{"threshold":0.949944882089,"fpr":0.00133554,"tpr":0.18980879,"fp":21,"tp":1896},{"threshold":0.949391855367,"fpr":0.00133554,"tpr":0.19161077,"fp":21,"tp":1914},{"threshold":0.948833047714,"fpr":0.00139914,"tpr":0.19351286,"fp":22,"tp":1933},{"threshold":0.948268406003,"fpr":0.00139914,"tpr":0.1958154,"fp":22,"tp":1956},{"threshold":0.94769787678,"fpr":0.00146273,"tpr":0.19801782,"fp":23,"tp":1978},{"threshold":0.947121406266,"fpr":0.00146273,"tpr":0.19961958,"fp":23,"tp":1994},{"threshold":0.946538940361,"fpr":0.00146273,"tpr":0.20152167,"fp":23,"tp":2013},{"threshold":0.945950424644,"fpr":0.00146273,"tpr":0.20342377,"fp":23,"tp":2032},{"threshold":0.945355804376,"fpr":0.00146273,"tpr":0.20582641,"fp":23,"tp":2056},{"threshold":0.944755024504,"fpr":0.00146273,"tpr":0.20782861,"fp":23,"tp":2076},{"threshold":0.944148029659,"fpr":0.00146273,"tpr":0.20943037,"fp":23,"tp":2092},{"threshold":0.943534764162,"fpr":0.00146273,"tpr":0.21183302,"fp":23,"tp":2116},{"threshold":0.942915172026,"fpr":0.00146273,"tpr":0.21383522,"fp":23,"tp":2136},{"threshold":0.942289196959,"fpr":0.00146273,"tpr":0.21583742,"fp":23,"tp":2156},{"threshold":0.941656782366,"fpr":0.00146273,"tpr":0.21743918,"fp":23,"tp":2172},{"threshold":0.941017871352,"fpr":0.00146273,"tpr":0.21964161,"fp":23,"tp":2194},{"threshold":0.940372406727,"fpr":0.00146273,"tpr":0.22264491,"fp":23,"tp":2224},{"threshold":0.939720331007,"fpr":0.00152633,"tpr":0.22524777,"fp":24,"tp":2250},{"threshold":0.939061586418,"fpr":0.00152633,"tpr":0.22724997,"fp":24,"tp":2270},{"threshold":0.938396114901,"fpr":0.00152633,"tpr":0.23015317,"fp":24,"tp":2299},{"threshold":0.937723858116,"fpr":0.00158993,"tpr":0.23365702,"fp":25,"tp":2334},{"threshold":0.937044757442,"fpr":0.00158993,"tpr":0.23565923,"fp":25,"tp":2354},{"threshold":0.936358753987,"fpr":0.00165352,"tpr":0.23796176,"fp":26,"tp":2377},{"threshold":0.935665788587,"fpr":0.00171712,"tpr":0.24096506,"fp":27,"tp":2407},{"threshold":0.934965801813,"fpr":0.00178072,"tpr":0.24396837,"fp":28,"tp":2437},{"threshold":0.934258733975,"fpr":0.00178072,"tpr":0.24687156,"fp":28,"tp":2466},{"threshold":0.933544525127,"fpr":0.00178072,"tpr":0.24977475,"fp":28,"tp":2495},{"threshold":0.932823115071,"fpr":0.00184431,"tpr":0.25197717,"fp":29,"tp":2517},{"threshold":0.932094443365,"fpr":0.00184431,"tpr":0.25568125,"fp":29,"tp":2554},{"threshold":0.931358449322,"fpr":0.00184431,"tpr":0.25758334,"fp":29,"tp":2573},{"threshold":0.930615072023,"fpr":0.00190791,"tpr":0.26068676,"fp":30,"tp":2604},{"threshold":0.929864250317,"fpr":0.00190791,"tpr":0.26419061,"fp":30,"tp":2639},{"threshold":0.929105922829,"fpr":0.00190791,"tpr":0.26749424,"fp":30,"tp":2672},{"threshold":0.928340027966,"fpr":0.00190791,"tpr":0.26989689,"fp":30,"tp":2696},{"threshold":0.927566503922,"fpr":0.00190791,"tpr":0.27360096,"fp":30,"tp":2733},{"threshold":0.926785288684,"fpr":0.00197151,"tpr":0.27730504,"fp":31,"tp":2770},{"threshold":0.925996320044,"fpr":0.00197151,"tpr":0.27930724,"fp":31,"tp":2790},{"threshold":0.925199535595,"fpr":0.00197151,"tpr":0.28371208,"fp":31,"tp":2834},{"threshold":0.92439487275,"fpr":0.00197151,"tpr":0.28661528,"fp":31,"tp":2863},{"threshold":0.923582268739,"fpr":0.00197151,"tpr":0.29001902,"fp":31,"tp":2897},{"threshold":0.922761660622,"fpr":0.0020987,"tpr":0.29342277,"fp":33,"tp":2931},{"threshold":0.921932985295,"fpr":0.0020987,"tpr":0.29742717,"fp":33,"tp":2971},{"threshold":0.921096179499,"fpr":0.0020987,"tpr":0.30103113,"fp":33,"tp":3007},{"threshold":0.920251179825,"fpr":0.0020987,"tpr":0.30423466,"fp":33,"tp":3039},{"threshold":0.919397922724,"fpr":0.0021623,"tpr":0.30803884,"fp":34,"tp":3077},{"threshold":0.918536344515,"fpr":0.0021623,"tpr":0.31024127,"fp":34,"tp":3099},{"threshold":0.917666381395,"fpr":0.0021623,"tpr":0.31424567,"fp":34,"tp":3139},{"threshold":0.916787969444,"fpr":0.0021623,"tpr":0.31724897,"fp":34,"tp":3169},{"threshold":0.91590104464,"fpr":0.0022259,"tpr":0.32005206,"fp":35,"tp":3197},{"threshold":0.915005542862,"fpr":0.00228949,"tpr":0.32355591,"fp":36,"tp":3232},{"threshold":0.914101399902,"fpr":0.00228949,"tpr":0.32645911,"fp":36,"tp":3261},{"threshold":0.913188551477,"fpr":0.00228949,"tpr":0.32916208,"fp":36,"tp":3288},{"threshold":0.912266933234,"fpr":0.00235309,"tpr":0.33226549,"fp":37,"tp":3319},{"threshold":0.911336480765,"fpr":0.00241669,"tpr":0.3343678,"fp":38,"tp":3340},{"threshold":0.910397129615,"fpr":0.00254388,"tpr":0.33717089,"fp":40,"tp":3368},{"threshold":0.909448815291,"fpr":0.00254388,"tpr":0.33987386,"fp":40,"tp":3395},{"threshold":0.908491473277,"fpr":0.00260748,"tpr":0.34307739,"fp":41,"tp":3427},{"threshold":0.907525039042,"fpr":0.00260748,"tpr":0.34628091,"fp":41,"tp":3459},{"threshold":0.906549448051,"fpr":0.00260748,"tpr":0.34888377,"fp":41,"tp":3485},{"threshold":0.90556463578,"fpr":0.00260748,"tpr":0.3530884,"fp":41,"tp":3527},{"threshold":0.904570537724,"fpr":0.00267108,"tpr":0.35639203,"fp":42,"tp":3560},{"threshold":0.90356708941,"fpr":0.00286187,"tpr":0.35969567,"fp":45,"tp":3593},{"threshold":0.902554226412,"fpr":0.00305266,"tpr":0.36279908,"fp":48,"tp":3624},{"threshold":0.90153188436,"fpr":0.00305266,"tpr":0.3650015,"fp":48,"tp":3646},{"threshold":0.900499998954,"fpr":0.00305266,"tpr":0.36810492,"fp":48,"tp":3677},{"threshold":0.899458505979,"fpr":0.00317985,"tpr":0.37200921,"fp":50,"tp":3716},{"threshold":0.898407341315,"fpr":0.00337064,"tpr":0.37521273,"fp":53,"tp":3748},{"threshold":0.897346440954,"fpr":0.00343424,"tpr":0.37891681,"fp":54,"tp":3785},{"threshold":0.896275741012,"fpr":0.00356143,"tpr":0.38302132,"fp":56,"tp":3826},{"threshold":0.895195177741,"fpr":0.00368863,"tpr":0.3857243,"fp":58,"tp":3853},{"threshold":0.894104687548,"fpr":0.00400661,"tpr":0.38952848,"fp":63,"tp":3891},{"threshold":0.893004207008,"fpr":0.00400661,"tpr":0.39303234,"fp":63,"tp":3926},{"threshold":0.891893672875,"fpr":0.00451539,"tpr":0.3966363,"fp":71,"tp":3962},{"threshold":0.890773022103,"fpr":0.00496057,"tpr":0.3996396,"fp":78,"tp":3992},{"threshold":0.889642191857,"fpr":0.00502417,"tpr":0.40304335,"fp":79,"tp":4026},{"threshold":0.888501119533,"fpr":0.00534215,"tpr":0.40494544,"fp":84,"tp":4045},{"threshold":0.887349742768,"fpr":0.00566014,"tpr":0.40724797,"fp":89,"tp":4068},{"threshold":0.886187999462,"fpr":0.00597812,"tpr":0.41015117,"fp":94,"tp":4097},{"threshold":0.88501582779,"fpr":0.00610532,"tpr":0.41405546,"fp":96,"tp":4136},{"threshold":0.883833166222,"fpr":0.0063597,"tpr":0.41705876,"fp":100,"tp":4166},{"threshold":0.882639953538,"fpr":0.0064869,"tpr":0.41926119,"fp":102,"tp":4188},{"threshold":0.881436128846,"fpr":0.00674129,"tpr":0.42226449,"fp":106,"tp":4218},{"threshold":0.8802216316,"fpr":0.00699568,"tpr":0.42576835,"fp":110,"tp":4253},{"threshold":0.878996401615,"fpr":0.00731366,"tpr":0.42787066,"fp":115,"tp":4274},{"threshold":0.877760379089,"fpr":0.00756805,"tpr":0.43037341,"fp":119,"tp":4299},{"threshold":0.87651350462,"fpr":0.00788603,"tpr":0.43267594,"fp":124,"tp":4322},{"threshold":0.87525571922,"fpr":0.00833121,"tpr":0.43487837,"fp":131,"tp":4344},{"threshold":0.873986964342,"fpr":0.0086492,"tpr":0.43668035,"fp":136,"tp":4362},{"threshold":0.872707181892,"fpr":0.00903078,"tpr":0.43898288,"fp":142,"tp":4385},{"threshold":0.871416314251,"fpr":0.00922157,"tpr":0.44098508,"fp":145,"tp":4405},{"threshold":0.870114304295,"fpr":0.00960315,"tpr":0.44368806,"fp":151,"tp":4432},{"threshold":0.868801095414,"fpr":0.01017553,"tpr":0.44629092,"fp":160,"tp":4458},{"threshold":0.867476631531,"fpr":0.01042992,"tpr":0.44739213,"fp":164,"tp":4469},{"threshold":0.866140857124,"fpr":0.01062071,"tpr":0.44939433,"fp":167,"tp":4489},{"threshold":0.864793717247,"fpr":0.01106589,"tpr":0.45149665,"fp":174,"tp":4510},{"threshold":0.863435157546,"fpr":0.01157466,"tpr":0.45329863,"fp":182,"tp":4528},{"threshold":0.862065124288,"fpr":0.01195625,"tpr":0.45560116,"fp":188,"tp":4551},{"threshold":0.860683564372,"fpr":0.01240142,"tpr":0.45750325,"fp":195,"tp":4570},{"threshold":0.85929042536,"fpr":0.01278301,"tpr":0.45840424,"fp":201,"tp":4579},{"threshold":0.857885655493,"fpr":0.01310099,"tpr":0.45960557,"fp":206,"tp":4591},{"threshold":0.856469203714,"fpr":0.01354617,"tpr":0.46120733,"fp":213,"tp":4607},{"threshold":0.85504101969,"fpr":0.01380056,"tpr":0.46270898,"fp":217,"tp":4622},{"threshold":0.853601053833,"fpr":0.01443653,"tpr":0.46461107,"fp":227,"tp":4641},{"threshold":0.852149257327,"fpr":0.01469092,"tpr":0.46611272,"fp":231,"tp":4656},{"threshold":0.850685582145,"fpr":0.01494531,"tpr":0.46721394,"fp":235,"tp":4667},{"threshold":0.849209981074,"fpr":0.0151361,"tpr":0.46841526,"fp":238,"tp":4679},{"threshold":0.847722407738,"fpr":0.01532689,"tpr":0.47051757,"fp":241,"tp":4700},{"threshold":0.846222816622,"fpr":0.01570847,"tpr":0.47151867,"fp":247,"tp":4710},{"threshold":0.844711163094,"fpr":0.01596286,"tpr":0.47342076,"fp":251,"tp":4729},{"threshold":0.843187403428,"fpr":0.01628084,"tpr":0.47522275,"fp":256,"tp":4747},{"threshold":0.841651494829,"fpr":0.01647164,"tpr":0.4767244,"fp":259,"tp":4762},{"threshold":0.840103395457,"fpr":0.01659883,"tpr":0.47822605,"fp":261,"tp":4777},{"threshold":0.838543064449,"fpr":0.01704401,"tpr":0.48002803,"fp":268,"tp":4795},{"threshold":0.836970461944,"fpr":0.0172984,"tpr":0.48132946,"fp":272,"tp":4808},{"threshold":0.835385549108,"fpr":0.01780717,"tpr":0.482731,"fp":280,"tp":4822},{"threshold":0.833788288156,"fpr":0.01857034,"tpr":0.483632,"fp":292,"tp":4831},{"threshold":0.832178642379,"fpr":0.01869753,"tpr":0.48533387,"fp":294,"tp":4848},{"threshold":0.830556576167,"fpr":0.01888832,"tpr":0.48713585,"fp":297,"tp":4866},{"threshold":0.828922055035,"fpr":0.01907911,"tpr":0.48883772,"fp":300,"tp":4883},{"threshold":0.827275045644,"fpr":0.01952429,"tpr":0.49083992,"fp":307,"tp":4903},{"threshold":0.825615515829,"fpr":0.01996947,"tpr":0.49274202,"fp":314,"tp":4922},{"threshold":0.823943434625,"fpr":0.02028746,"tpr":0.49464411,"fp":319,"tp":4941},{"threshold":0.822258772286,"fpr":0.02047825,"tpr":0.49634598,"fp":322,"tp":4958},{"threshold":0.820561500317,"fpr":0.02105062,"tpr":0.49804785,"fp":331,"tp":4975},{"threshold":0.818851591494,"fpr":0.02111422,"tpr":0.50015017,"fp":332,"tp":4996},{"threshold":0.817129019889,"fpr":0.02111422,"tpr":0.50165182,"fp":332,"tp":5011},{"threshold":0.815393760899,"fpr":0.02136861,"tpr":0.50285314,"fp":336,"tp":5023},{"threshold":0.813645791266,"fpr":0.021623,"tpr":0.50395435,"fp":340,"tp":5034},{"threshold":0.811885089105,"fpr":0.02181379,"tpr":0.50555611,"fp":343,"tp":5050},{"threshold":0.810111633926,"fpr":0.02200458,"tpr":0.50705776,"fp":346,"tp":5065},{"threshold":0.808325406664,"fpr":0.02225897,"tpr":0.50855942,"fp":350,"tp":5080},{"threshold":0.806526389697,"fpr":0.02251336,"tpr":0.50986085,"fp":354,"tp":5093},{"threshold":0.804714566877,"fpr":0.02289494,"tpr":0.51126239,"fp":360,"tp":5107},{"threshold":0.80288992355,"fpr":0.02314933,"tpr":0.51256382,"fp":364,"tp":5120},{"threshold":0.801052446582,"fpr":0.02346731,"tpr":0.51366503,"fp":369,"tp":5131},{"threshold":0.799202124385,"fpr":0.0237217,"tpr":0.51526679,"fp":373,"tp":5147},{"threshold":0.797338946938,"fpr":0.02397609,"tpr":0.51706878,"fp":377,"tp":5165},{"threshold":0.795462905815,"fpr":0.02416688,"tpr":0.51806988,"fp":380,"tp":5175},{"threshold":0.793573994207,"fpr":0.02435767,"tpr":0.51947142,"fp":383,"tp":5189},{"threshold":0.791672206944,"fpr":0.02461206,"tpr":0.51997197,"fp":387,"tp":5194},{"threshold":0.789757540523,"fpr":0.02480285,"tpr":0.52137351,"fp":390,"tp":5208},{"threshold":0.787829993127,"fpr":0.02480285,"tpr":0.52317549,"fp":390,"tp":5226},{"threshold":0.785889564653,"fpr":0.02493004,"tpr":0.52387626,"fp":392,"tp":5233},{"threshold":0.783936256729,"fpr":0.02493004,"tpr":0.52507759,"fp":392,"tp":5245},{"threshold":0.781970072742,"fpr":0.02512083,"tpr":0.52647913,"fp":395,"tp":5259},{"threshold":0.779991017861,"fpr":0.02531163,"tpr":0.52768045,"fp":398,"tp":5271},{"threshold":0.777999099052,"fpr":0.02543882,"tpr":0.52848133,"fp":400,"tp":5279},{"threshold":0.77599432511,"fpr":0.02556601,"tpr":0.52978276,"fp":402,"tp":5292},{"threshold":0.773976706674,"fpr":0.0257568,"tpr":0.53128441,"fp":405,"tp":5307},{"threshold":0.771946256248,"fpr":0.0259476,"tpr":0.53288617,"fp":408,"tp":5323},{"threshold":0.769902988228,"fpr":0.02601119,"tpr":0.53378717,"fp":409,"tp":5332},{"threshold":0.767846918915,"fpr":0.02645637,"tpr":0.53528882,"fp":416,"tp":5347},{"threshold":0.765778066544,"fpr":0.02664716,"tpr":0.53588948,"fp":419,"tp":5353},{"threshold":0.763696451295,"fpr":0.02677436,"tpr":0.53749124,"fp":421,"tp":5369},{"threshold":0.761602095318,"fpr":0.02683795,"tpr":0.53839223,"fp":422,"tp":5378},{"threshold":0.759495022752,"fpr":0.02683795,"tpr":0.53999399,"fp":422,"tp":5394},{"threshold":0.757375259742,"fpr":0.02696515,"tpr":0.54149565,"fp":424,"tp":5409},{"threshold":0.755242834457,"fpr":0.02715594,"tpr":0.54249675,"fp":427,"tp":5419},{"threshold":0.75309777711,"fpr":0.02741033,"tpr":0.54339774,"fp":431,"tp":5428},{"threshold":0.750940119973,"fpr":0.02772831,"tpr":0.54489939,"fp":436,"tp":5443},{"threshold":0.748769897395,"fpr":0.0279191,"tpr":0.54580038,"fp":439,"tp":5452},{"threshold":0.746587145819,"fpr":0.0279191,"tpr":0.54670137,"fp":439,"tp":5461},{"threshold":0.744391903795,"fpr":0.02817349,"tpr":0.54750225,"fp":443,"tp":5469},{"threshold":0.742184211998,"fpr":0.02817349,"tpr":0.54880368,"fp":443,"tp":5482},{"threshold":0.739964113243,"fpr":0.02830069,"tpr":0.54970468,"fp":445,"tp":5491},{"threshold":0.737731652496,"fpr":0.02836428,"tpr":0.550906,"fp":446,"tp":5503},{"threshold":0.735486876888,"fpr":0.02849148,"tpr":0.55200721,"fp":448,"tp":5514},{"threshold":0.733229835733,"fpr":0.02855508,"tpr":0.55320853,"fp":449,"tp":5526},{"threshold":0.730960580531,"fpr":0.02861867,"tpr":0.55410952,"fp":450,"tp":5535},{"threshold":0.72867916499,"fpr":0.02868227,"tpr":0.55501051,"fp":451,"tp":5544},{"threshold":0.726385645028,"fpr":0.02887306,"tpr":0.55651216,"fp":454,"tp":5559},{"threshold":0.724080078788,"fpr":0.02887306,"tpr":0.55731304,"fp":454,"tp":5567},{"threshold":0.721762526646,"fpr":0.02912745,"tpr":0.55861448,"fp":458,"tp":5580},{"threshold":0.719433051221,"fpr":0.02925464,"tpr":0.56011613,"fp":460,"tp":5595},{"threshold":0.717091717383,"fpr":0.02944543,"tpr":0.5608169,"fp":463,"tp":5602},{"threshold":0.714738592256,"fpr":0.02944543,"tpr":0.561818,"fp":463,"tp":5612},{"threshold":0.712373745231,"fpr":0.02957263,"tpr":0.56311943,"fp":465,"tp":5625},{"threshold":0.70999724797,"fpr":0.02969982,"tpr":0.56392031,"fp":467,"tp":5633},{"threshold":0.707609174407,"fpr":0.02989061,"tpr":0.56542196,"fp":470,"tp":5648},{"threshold":0.705209600757,"fpr":0.0300814,"tpr":0.56642307,"fp":473,"tp":5658},{"threshold":0.702798605518,"fpr":0.0302086,"tpr":0.5677245,"fp":475,"tp":5671},{"threshold":0.700376269471,"fpr":0.03046299,"tpr":0.5687256,"fp":479,"tp":5681},{"threshold":0.697942675686,"fpr":0.03084457,"tpr":0.56982681,"fp":485,"tp":5692},{"threshold":0.69549790952,"fpr":0.03103536,"tpr":0.57062769,"fp":488,"tp":5700},{"threshold":0.69304205862,"fpr":0.03109896,"tpr":0.57092802,"fp":489,"tp":5703},{"threshold":0.690575212916,"fpr":0.03128975,"tpr":0.5717289,"fp":492,"tp":5711},{"threshold":0.688097464627,"fpr":0.03135335,"tpr":0.57323055,"fp":493,"tp":5726},{"threshold":0.685608908253,"fpr":0.03135335,"tpr":0.57403143,"fp":493,"tp":5734},{"threshold":0.683109640574,"fpr":0.03141694,"tpr":0.57533287,"fp":494,"tp":5747},{"threshold":0.680599760645,"fpr":0.03160773,"tpr":0.57673441,"fp":497,"tp":5761},{"threshold":0.67807936979,"fpr":0.03179852,"tpr":0.57773551,"fp":500,"tp":5771},{"threshold":0.675548571596,"fpr":0.03179852,"tpr":0.57803584,"fp":500,"tp":5774},{"threshold":0.673007471908,"fpr":0.03192572,"tpr":0.57903694,"fp":502,"tp":5784},{"threshold":0.670456178817,"fpr":0.03218011,"tpr":0.58053859,"fp":506,"tp":5799},{"threshold":0.667894802653,"fpr":0.0323709,"tpr":0.5816398,"fp":509,"tp":5810},{"threshold":0.665323455976,"fpr":0.03268888,"tpr":0.58224046,"fp":514,"tp":5816},{"threshold":0.662742253563,"fpr":0.03281608,"tpr":0.58334168,"fp":516,"tp":5827},{"threshold":0.660151312398,"fpr":0.03307047,"tpr":0.58464311,"fp":520,"tp":5840},{"threshold":0.657550751656,"fpr":0.03338845,"tpr":0.58614476,"fp":525,"tp":5855},{"threshold":0.654940692692,"fpr":0.03357924,"tpr":0.58744619,"fp":528,"tp":5868},{"threshold":0.652321259025,"fpr":0.03370644,"tpr":0.58904795,"fp":530,"tp":5884},{"threshold":0.649692576324,"fpr":0.03383363,"tpr":0.58974872,"fp":532,"tp":5891},{"threshold":0.647054772387,"fpr":0.03421521,"tpr":0.59115027,"fp":538,"tp":5905},{"threshold":0.644407977126,"fpr":0.0345332,"tpr":0.59235159,"fp":543,"tp":5917},{"threshold":0.641752322549,"fpr":0.03497838,"tpr":0.59415357,"fp":550,"tp":5935},{"threshold":0.639087942739,"fpr":0.03504197,"tpr":0.59515467,"fp":551,"tp":5945},{"threshold":0.636414973832,"fpr":0.03516917,"tpr":0.5964561,"fp":553,"tp":5958},{"threshold":0.633733553996,"fpr":0.03542356,"tpr":0.59825808,"fp":557,"tp":5976},{"threshold":0.631043823413,"fpr":0.03574154,"tpr":0.60096106,"fp":562,"tp":6003},{"threshold":0.628345924246,"fpr":0.03586874,"tpr":0.60286315,"fp":564,"tp":6022},{"threshold":0.625640000622,"fpr":0.03625032,"tpr":0.60416458,"fp":570,"tp":6035},{"threshold":0.622926198605,"fpr":0.03650471,"tpr":0.60566623,"fp":574,"tp":6050},{"threshold":0.620204666167,"fpr":0.03650471,"tpr":0.60696766,"fp":574,"tp":6063},{"threshold":0.617475553161,"fpr":0.0366955,"tpr":0.60906998,"fp":577,"tp":6084},{"threshold":0.614739011296,"fpr":0.03707708,"tpr":0.61117229,"fp":583,"tp":6105},{"threshold":0.611995194104,"fpr":0.03739506,"tpr":0.61317449,"fp":588,"tp":6125},{"threshold":0.609244256909,"fpr":0.03790384,"tpr":0.61547702,"fp":596,"tp":6148},{"threshold":0.6064863568,"fpr":0.03841262,"tpr":0.61697868,"fp":604,"tp":6163},{"threshold":0.603721652598,"fpr":0.0387942,"tpr":0.61898088,"fp":610,"tp":6183},{"threshold":0.600950304817,"fpr":0.03898499,"tpr":0.62108319,"fp":613,"tp":6204},{"threshold":0.598172475639,"fpr":0.03949377,"tpr":0.62288517,"fp":621,"tp":6222},{"threshold":0.595388328873,"fpr":0.04006614,"tpr":0.62518771,"fp":630,"tp":6245},{"threshold":0.592598029922,"fpr":0.04032053,"tpr":0.62759035,"fp":634,"tp":6269},{"threshold":0.589801745746,"fpr":0.04063851,"tpr":0.63019321,"fp":639,"tp":6295},{"threshold":0.586999644826,"fpr":0.04121089,"tpr":0.63249575,"fp":648,"tp":6318},{"threshold":0.584191897123,"fpr":0.04133808,"tpr":0.63429773,"fp":650,"tp":6336},{"threshold":0.581378674043,"fpr":0.04152887,"tpr":0.63609971,"fp":653,"tp":6354},{"threshold":0.578560148394,"fpr":0.04203765,"tpr":0.6380018,"fp":661,"tp":6373},{"threshold":0.575736494348,"fpr":0.04229204,"tpr":0.63980378,"fp":665,"tp":6391},{"threshold":0.572907887398,"fpr":0.04280081,"tpr":0.64230654,"fp":673,"tp":6416},{"threshold":0.57007450432,"fpr":0.0431824,"tpr":0.64480929,"fp":679,"tp":6441},{"threshold":0.567236523124,"fpr":0.04362758,"tpr":0.64721193,"fp":686,"tp":6465},{"threshold":0.564394123018,"fpr":0.04413635,"tpr":0.64941436,"fp":694,"tp":6487},{"threshold":0.56154748436,"fpr":0.04439074,"tpr":0.65141656,"fp":698,"tp":6507},{"threshold":0.558696788613,"fpr":0.04496311,"tpr":0.65462008,"fp":707,"tp":6539},{"threshold":0.555842218304,"fpr":0.04553549,"tpr":0.65722295,"fp":716,"tp":6565},{"threshold":0.552983956973,"fpr":0.04623505,"tpr":0.65892482,"fp":727,"tp":6582},{"threshold":0.550122189133,"fpr":0.04661664,"tpr":0.66062669,"fp":733,"tp":6599},{"threshold":0.547257100216,"fpr":0.0473162,"tpr":0.66262889,"fp":744,"tp":6619},{"threshold":0.544388876534,"fpr":0.04827016,"tpr":0.66483131,"fp":759,"tp":6641},{"threshold":0.541517705223,"fpr":0.04903332,"tpr":0.66733407,"fp":771,"tp":6666},{"threshold":0.538643774202,"fpr":0.04941491,"tpr":0.6696366,"fp":777,"tp":6689},{"threshold":0.535767272119,"fpr":0.04998728,"tpr":0.67173891,"fp":786,"tp":6710},{"threshold":0.532888388305,"fpr":0.05087764,"tpr":0.67394134,"fp":800,"tp":6732},{"threshold":0.530007312723,"fpr":0.05234037,"tpr":0.67684453,"fp":823,"tp":6761},{"threshold":0.527124235921,"fpr":0.05284915,"tpr":0.6785464,"fp":831,"tp":6778},{"threshold":0.524239348977,"fpr":0.05399389,"tpr":0.68114926,"fp":849,"tp":6804},{"threshold":0.521352843454,"fpr":0.05488425,"tpr":0.68295125,"fp":863,"tp":6822},{"threshold":0.518464911346,"fpr":0.05558382,"tpr":0.68495345,"fp":874,"tp":6842},{"threshold":0.515575745026,"fpr":0.05698296,"tpr":0.68675543,"fp":896,"tp":6860},{"threshold":0.5126855372,"fpr":0.05831849,"tpr":0.68915807,"fp":917,"tp":6884},{"threshold":0.509794480849,"fpr":0.05952684,"tpr":0.69196116,"fp":936,"tp":6912},{"threshold":0.506902769184,"fpr":0.0603536,"tpr":0.69446391,"fp":949,"tp":6937},{"threshold":0.504010595591,"fpr":0.06168914,"tpr":0.69656622,"fp":970,"tp":6958},{"threshold":0.501118153576,"fpr":0.06385144,"tpr":0.69896887,"fp":1004,"tp":6982},{"threshold":0.498225636721,"fpr":0.06537777,"tpr":0.70117129,"fp":1028,"tp":7004},{"threshold":0.495333238627,"fpr":0.06728568,"tpr":0.70297327,"fp":1058,"tp":7022},{"threshold":0.492441152862,"fpr":0.06932078,"tpr":0.70517569,"fp":1090,"tp":7044},{"threshold":0.489549572912,"fpr":0.07154668,"tpr":0.70747823,"fp":1125,"tp":7067},{"threshold":0.486658692126,"fpr":0.07396337,"tpr":0.70907999,"fp":1163,"tp":7083},{"threshold":0.483768703666,"fpr":0.07561689,"tpr":0.71108219,"fp":1189,"tp":7103},{"threshold":0.480879800458,"fpr":0.07777919,"tpr":0.71268395,"fp":1223,"tp":7119},{"threshold":0.477992175134,"fpr":0.08013228,"tpr":0.71438582,"fp":1260,"tp":7136},{"threshold":0.475106019989,"fpr":0.08248537,"tpr":0.7160877,"fp":1297,"tp":7153},{"threshold":0.472221526921,"fpr":0.08477487,"tpr":0.71738913,"fp":1333,"tp":7166},{"threshold":0.469338887388,"fpr":0.08680997,"tpr":0.71889078,"fp":1365,"tp":7181},{"threshold":0.466458292353,"fpr":0.08878148,"tpr":0.72029232,"fp":1396,"tp":7195},{"threshold":0.463579932235,"fpr":0.09011702,"tpr":0.72189408,"fp":1417,"tp":7211},{"threshold":0.460703996857,"fpr":0.09240651,"tpr":0.72299529,"fp":1453,"tp":7222},{"threshold":0.457830675401,"fpr":0.09444162,"tpr":0.72489739,"fp":1485,"tp":7241},{"threshold":0.454960156354,"fpr":0.09679471,"tpr":0.72609871,"fp":1522,"tp":7253},{"threshold":0.45209262746,"fpr":0.09940219,"tpr":0.72830113,"fp":1563,"tp":7275},{"threshold":0.449228275673,"fpr":0.10188247,"tpr":0.72970267,"fp":1602,"tp":7289},{"threshold":0.44636728711,"fpr":0.10436276,"tpr":0.73130443,"fp":1641,"tp":7305},{"threshold":0.443509846999,"fpr":0.10671585,"tpr":0.73310642,"fp":1678,"tp":7323},{"threshold":0.440656139634,"fpr":0.11015009,"tpr":0.73440785,"fp":1732,"tp":7336},{"threshold":0.437806348332,"fpr":0.11250318,"tpr":0.73550906,"fp":1769,"tp":7347},{"threshold":0.434960655381,"fpr":0.11568303,"tpr":0.73701071,"fp":1819,"tp":7362},{"threshold":0.432119241999,"fpr":0.11797253,"tpr":0.73871258,"fp":1855,"tp":7379},{"threshold":0.429282288284,"fpr":0.12032562,"tpr":0.74011413,"fp":1892,"tp":7393},{"threshold":0.426449973178,"fpr":0.12204274,"tpr":0.74161578,"fp":1919,"tp":7408},{"threshold":0.423622474416,"fpr":0.12369626,"tpr":0.74321754,"fp":1945,"tp":7424},{"threshold":0.420799968483,"fpr":0.12630374,"tpr":0.74541996,"fp":1986,"tp":7446},{"threshold":0.41798263058,"fpr":0.12846604,"tpr":0.74652117,"fp":2020,"tp":7457},{"threshold":0.41517063457,"fpr":0.13081913,"tpr":0.7478226,"fp":2057,"tp":7470},{"threshold":0.412364152948,"fpr":0.13253625,"tpr":0.74902393,"fp":2084,"tp":7482},{"threshold":0.409563356796,"fpr":0.13450776,"tpr":0.7507258,"fp":2115,"tp":7499},{"threshold":0.406768415741,"fpr":0.13622488,"tpr":0.75182701,"fp":2142,"tp":7510},{"threshold":0.403979497924,"fpr":0.137942,"tpr":0.75292822,"fp":2169,"tp":7521},{"threshold":0.401196769953,"fpr":0.14029509,"tpr":0.75452998,"fp":2206,"tp":7537},{"threshold":0.398420396875,"fpr":0.1421394,"tpr":0.75543097,"fp":2235,"tp":7546},{"threshold":0.395650542131,"fpr":0.14379293,"tpr":0.7566323,"fp":2261,"tp":7558},{"threshold":0.392887367527,"fpr":0.14570084,"tpr":0.75813395,"fp":2291,"tp":7573},{"threshold":0.390131033199,"fpr":0.14684559,"tpr":0.75933527,"fp":2309,"tp":7585},{"threshold":0.387381697576,"fpr":0.14843551,"tpr":0.76023626,"fp":2334,"tp":7594},{"threshold":0.384639517348,"fpr":0.14964386,"tpr":0.76133747,"fp":2353,"tp":7605},{"threshold":0.381904647438,"fpr":0.15110659,"tpr":0.76283912,"fp":2376,"tp":7620},{"threshold":0.379177240965,"fpr":0.15333249,"tpr":0.76364,"fp":2411,"tp":7628},{"threshold":0.37645744922,"fpr":0.15485881,"tpr":0.76504155,"fp":2435,"tp":7642},{"threshold":0.373745421632,"fpr":0.15651234,"tpr":0.76604265,"fp":2461,"tp":7652},{"threshold":0.371041305743,"fpr":0.15842025,"tpr":0.76704375,"fp":2491,"tp":7662},{"threshold":0.368345247178,"fpr":0.16045535,"tpr":0.76864551,"fp":2523,"tp":7678},{"threshold":0.365657389623,"fpr":0.16217248,"tpr":0.76984683,"fp":2550,"tp":7690},{"threshold":0.362977874792,"fpr":0.16414398,"tpr":0.77104815,"fp":2581,"tp":7702},{"threshold":0.360306842412,"fpr":0.16573391,"tpr":0.77194914,"fp":2606,"tp":7711},{"threshold":0.357644430194,"fpr":0.16719664,"tpr":0.77275003,"fp":2629,"tp":7719},{"threshold":0.354990773808,"fpr":0.16859578,"tpr":0.7734508,"fp":2651,"tp":7726},{"threshold":0.352346006869,"fpr":0.16999491,"tpr":0.77455201,"fp":2673,"tp":7737},{"threshold":0.349710260911,"fpr":0.17164844,"tpr":0.77595355,"fp":2699,"tp":7751},{"threshold":0.347083665367,"fpr":0.17368354,"tpr":0.77705476,"fp":2731,"tp":7762},{"threshold":0.344466347556,"fpr":0.17571865,"tpr":0.77795575,"fp":2763,"tp":7771},{"threshold":0.341858432659,"fpr":0.17730857,"tpr":0.7794574,"fp":2788,"tp":7786},{"threshold":0.339260043705,"fpr":0.17928008,"tpr":0.78115928,"fp":2819,"tp":7803},{"threshold":0.336671301557,"fpr":0.18176037,"tpr":0.78246071,"fp":2858,"tp":7816},{"threshold":0.334092324893,"fpr":0.18417705,"tpr":0.78406247,"fp":2896,"tp":7832},{"threshold":0.331523230198,"fpr":0.18646655,"tpr":0.78556412,"fp":2932,"tp":7847},{"threshold":0.328964131747,"fpr":0.18894683,"tpr":0.78756632,"fp":2971,"tp":7867},{"threshold":0.326415141595,"fpr":0.19091834,"tpr":0.78956853,"fp":3002,"tp":7887},{"threshold":0.323876369565,"fpr":0.1939074,"tpr":0.79066974,"fp":3049,"tp":7898},{"threshold":0.321347923239,"fpr":0.19676927,"tpr":0.79167084,"fp":3094,"tp":7908},{"threshold":0.31882990795,"fpr":0.19950394,"tpr":0.79307238,"fp":3137,"tp":7922},{"threshold":0.316322426773,"fpr":0.202493,"tpr":0.79467414,"fp":3184,"tp":7938},{"threshold":0.313825580517,"fpr":0.20535487,"tpr":0.79667634,"fp":3229,"tp":7958},{"threshold":0.311339467722,"fpr":0.20802595,"tpr":0.79787767,"fp":3271,"tp":7970},{"threshold":0.308864184651,"fpr":0.21031544,"tpr":0.7991791,"fp":3307,"tp":7983},{"threshold":0.306399825287,"fpr":0.21406767,"tpr":0.80028031,"fp":3366,"tp":7994},{"threshold":0.303946481329,"fpr":0.21813788,"tpr":0.80198218,"fp":3430,"tp":8011},{"threshold":0.30150424219,"fpr":0.22169931,"tpr":0.80478526,"fp":3486,"tp":8039},{"threshold":0.299073194997,"fpr":0.22602391,"tpr":0.80658725,"fp":3554,"tp":8057},{"threshold":0.296653424589,"fpr":0.23009412,"tpr":0.8080889,"fp":3618,"tp":8072},{"threshold":0.294245013515,"fpr":0.23352836,"tpr":0.80969066,"fp":3672,"tp":8088},{"threshold":0.291848042039,"fpr":0.23613584,"tpr":0.81119231,"fp":3713,"tp":8103},{"threshold":0.289462588141,"fpr":0.24071483,"tpr":0.81239363,"fp":3785,"tp":8115},{"threshold":0.287088727518,"fpr":0.24554821,"tpr":0.81379517,"fp":3861,"tp":8129},{"threshold":0.284726533588,"fpr":0.25025439,"tpr":0.81549705,"fp":3935,"tp":8146},{"threshold":0.282376077497,"fpr":0.2543882,"tpr":0.81689859,"fp":4000,"tp":8160},{"threshold":0.280037428121,"fpr":0.25845841,"tpr":0.81850035,"fp":4064,"tp":8176},{"threshold":0.277710652074,"fpr":0.26348257,"tpr":0.82090299,"fp":4143,"tp":8200},{"threshold":0.275395813713,"fpr":0.26863394,"tpr":0.82310542,"fp":4224,"tp":8222},{"threshold":0.273092975146,"fpr":0.27321292,"tpr":0.82480729,"fp":4296,"tp":8239},{"threshold":0.270802196244,"fpr":0.2779191,"tpr":0.8269096,"fp":4370,"tp":8260},{"threshold":0.268523534644,"fpr":0.28205291,"tpr":0.82831114,"fp":4435,"tp":8274},{"threshold":0.266257045761,"fpr":0.28631392,"tpr":0.83021323,"fp":4502,"tp":8293},{"threshold":0.264002782801,"fpr":0.29152887,"tpr":0.83201522,"fp":4584,"tp":8311},{"threshold":0.261760796768,"fpr":0.29578988,"tpr":0.83331665,"fp":4651,"tp":8324},{"threshold":0.259531136478,"fpr":0.30011447,"tpr":0.83371709,"fp":4719,"tp":8328},{"threshold":0.257313848572,"fpr":0.30456627,"tpr":0.83531885,"fp":4789,"tp":8344},{"threshold":0.255108977525,"fpr":0.30870008,"tpr":0.83722094,"fp":4854,"tp":8363},{"threshold":0.252916565666,"fpr":0.31327906,"tpr":0.83852237,"fp":4926,"tp":8376},{"threshold":0.250736653186,"fpr":0.31811244,"tpr":0.84022425,"fp":5002,"tp":8393},{"threshold":0.248569278157,"fpr":0.32269143,"tpr":0.84142557,"fp":5074,"tp":8405},{"threshold":0.246414476544,"fpr":0.32739761,"tpr":0.84262689,"fp":5148,"tp":8417},{"threshold":0.244272282223,"fpr":0.33172221,"tpr":0.84392832,"fp":5216,"tp":8430},{"threshold":0.242142727,"fpr":0.33591961,"tpr":0.84482931,"fp":5282,"tp":8439},{"threshold":0.24002584062,"fpr":0.34075299,"tpr":0.84593052,"fp":5358,"tp":8450},{"threshold":0.237921650792,"fpr":0.34533198,"tpr":0.84743218,"fp":5430,"tp":8465},{"threshold":0.235830183206,"fpr":0.35022895,"tpr":0.84813295,"fp":5507,"tp":8472},{"threshold":0.233751461546,"fpr":0.35410837,"tpr":0.84923416,"fp":5568,"tp":8483},{"threshold":0.231685507514,"fpr":0.35875095,"tpr":0.85033537,"fp":5641,"tp":8494},{"threshold":0.229632340847,"fpr":0.36263037,"tpr":0.85113625,"fp":5702,"tp":8502},{"threshold":0.22759197934,"fpr":0.36606461,"tpr":0.85203724,"fp":5756,"tp":8511},{"threshold":0.22556443886,"fpr":0.36949886,"tpr":0.85313845,"fp":5810,"tp":8522},{"threshold":0.22354973337,"fpr":0.37356907,"tpr":0.8546401,"fp":5874,"tp":8537},{"threshold":0.221547874952,"fpr":0.37687611,"tpr":0.85584143,"fp":5926,"tp":8549},{"threshold":0.219558873823,"fpr":0.38094632,"tpr":0.85624187,"fp":5990,"tp":8553},{"threshold":0.217582738362,"fpr":0.38412618,"tpr":0.85674242,"fp":6040,"tp":8558},{"threshold":0.215619475125,"fpr":0.38743322,"tpr":0.85824407,"fp":6092,"tp":8573},{"threshold":0.213669088874,"fpr":0.39080387,"tpr":0.85934528,"fp":6145,"tp":8584},{"threshold":0.211731582595,"fpr":0.39353854,"tpr":0.86024627,"fp":6188,"tp":8593},{"threshold":0.209806957523,"fpr":0.39703638,"tpr":0.86074682,"fp":6243,"tp":8598},{"threshold":0.207895213162,"fpr":0.40097939,"tpr":0.86174792,"fp":6305,"tp":8608},{"threshold":0.205996347313,"fpr":0.40409565,"tpr":0.86284913,"fp":6354,"tp":8619},{"threshold":0.20411035609,"fpr":0.4074027,"tpr":0.86365002,"fp":6406,"tp":8627},{"threshold":0.202237233951,"fpr":0.41083694,"tpr":0.86505156,"fp":6460,"tp":8641},{"threshold":0.200376973718,"fpr":0.41458916,"tpr":0.86565222,"fp":6519,"tp":8647},{"threshold":0.198529566599,"fpr":0.41732384,"tpr":0.86675343,"fp":6562,"tp":8658},{"threshold":0.196695002217,"fpr":0.42139405,"tpr":0.86815497,"fp":6626,"tp":8672},{"threshold":0.194873268632,"fpr":0.42489189,"tpr":0.86955651,"fp":6681,"tp":8686},{"threshold":0.193064352361,"fpr":0.42826253,"tpr":0.87095805,"fp":6734,"tp":8700},{"threshold":0.191268238411,"fpr":0.43182396,"tpr":0.87205927,"fp":6790,"tp":8711},{"threshold":0.189484910295,"fpr":0.43494022,"tpr":0.8743618,"fp":6839,"tp":8734},{"threshold":0.187714350064,"fpr":0.43799288,"tpr":0.8753629,"fp":6887,"tp":8744},{"threshold":0.185956538325,"fpr":0.44149071,"tpr":0.87626389,"fp":6942,"tp":8753},{"threshold":0.184211454271,"fpr":0.44581531,"tpr":0.87746521,"fp":7010,"tp":8765},{"threshold":0.182479075703,"fpr":0.45013991,"tpr":0.87906697,"fp":7078,"tp":8781},{"threshold":0.180759379056,"fpr":0.45408293,"tpr":0.88096907,"fp":7140,"tp":8800},{"threshold":0.179052339424,"fpr":0.45815314,"tpr":0.88317149,"fp":7204,"tp":8822},{"threshold":0.177357930582,"fpr":0.46209616,"tpr":0.88467314,"fp":7266,"tp":8837},{"threshold":0.175676125017,"fpr":0.4654668,"tpr":0.88597457,"fp":7319,"tp":8850},{"threshold":0.174006893947,"fpr":0.46953701,"tpr":0.88657523,"fp":7383,"tp":8856},{"threshold":0.172350207347,"fpr":0.47239888,"tpr":0.88877766,"fp":7428,"tp":8878},{"threshold":0.170706033978,"fpr":0.47608751,"tpr":0.88947843,"fp":7486,"tp":8885},{"threshold":0.169074341407,"fpr":0.47952175,"tpr":0.89148063,"fp":7540,"tp":8905},{"threshold":0.167455096032,"fpr":0.48212923,"tpr":0.8921814,"fp":7581,"tp":8912},{"threshold":0.165848263112,"fpr":0.48619944,"tpr":0.89288217,"fp":7645,"tp":8919},{"threshold":0.164253806783,"fpr":0.48976088,"tpr":0.89408349,"fp":7701,"tp":8931},{"threshold":0.162671690092,"fpr":0.4934495,"tpr":0.8951847,"fp":7759,"tp":8942},{"threshold":0.161101875013,"fpr":0.49675655,"tpr":0.89658624,"fp":7811,"tp":8956},{"threshold":0.159544322476,"fpr":0.50101755,"tpr":0.89768746,"fp":7878,"tp":8967},{"threshold":0.157998992393,"fpr":0.50553294,"tpr":0.89868856,"fp":7949,"tp":8977},{"threshold":0.156465843676,"fpr":0.50992114,"tpr":0.89938933,"fp":8018,"tp":8984},{"threshold":0.154944834266,"fpr":0.51443653,"tpr":0.9000901,"fp":8089,"tp":8991},{"threshold":0.153435921154,"fpr":0.51837955,"tpr":0.90079087,"fp":8151,"tp":8998},{"threshold":0.151939060408,"fpr":0.52187738,"tpr":0.90189208,"fp":8206,"tp":9009},{"threshold":0.150454207192,"fpr":0.5257568,"tpr":0.90279307,"fp":8267,"tp":9018},{"threshold":0.148981315795,"fpr":0.52982702,"tpr":0.90359395,"fp":8331,"tp":9026},{"threshold":0.147520339648,"fpr":0.534406,"tpr":0.90389428,"fp":8403,"tp":9029},{"threshold":0.146071231353,"fpr":0.53847621,"tpr":0.90459505,"fp":8467,"tp":9036},{"threshold":0.1446339427,"fpr":0.54171966,"tpr":0.90539594,"fp":8518,"tp":9044},{"threshold":0.143208424697,"fpr":0.54636225,"tpr":0.90619682,"fp":8591,"tp":9052},{"threshold":0.141794627585,"fpr":0.55030527,"tpr":0.90689759,"fp":8653,"tp":9059},{"threshold":0.140392500864,"fpr":0.55418469,"tpr":0.90719792,"fp":8714,"tp":9062},{"threshold":0.139001993317,"fpr":0.55768252,"tpr":0.90779858,"fp":8769,"tp":9068},{"threshold":0.137623053029,"fpr":0.56181633,"tpr":0.90839924,"fp":8834,"tp":9074},{"threshold":0.136255627408,"fpr":0.56569575,"tpr":0.90920012,"fp":8895,"tp":9082},{"threshold":0.13489966321,"fpr":0.56919359,"tpr":0.90940034,"fp":8950,"tp":9084},{"threshold":0.133555106558,"fpr":0.57230984,"tpr":0.91010111,"fp":8999,"tp":9091},{"threshold":0.132221902962,"fpr":0.57555329,"tpr":0.91060166,"fp":9050,"tp":9096},{"threshold":0.130899997344,"fpr":0.57809718,"tpr":0.91110221,"fp":9090,"tp":9101},{"threshold":0.129589334053,"fpr":0.58108624,"tpr":0.91150265,"fp":9137,"tp":9105},{"threshold":0.128289856891,"fpr":0.58420249,"tpr":0.91240364,"fp":9186,"tp":9114},{"threshold":0.127001509128,"fpr":0.58687357,"tpr":0.91310441,"fp":9228,"tp":9121},{"threshold":0.125724233527,"fpr":0.58948105,"tpr":0.91330464,"fp":9269,"tp":9123},{"threshold":0.12445797236,"fpr":0.5925973,"tpr":0.91400541,"fp":9318,"tp":9130},{"threshold":0.123202667428,"fpr":0.59571356,"tpr":0.91440585,"fp":9367,"tp":9134},{"threshold":0.121958260082,"fpr":0.59825744,"tpr":0.91480629,"fp":9407,"tp":9138},{"threshold":0.120724691239,"fpr":0.60041974,"tpr":0.91500651,"fp":9441,"tp":9140},{"threshold":0.119501901405,"fpr":0.60270923,"tpr":0.91530684,"fp":9477,"tp":9143},{"threshold":0.118289830687,"fpr":0.60582549,"tpr":0.9159075,"fp":9526,"tp":9149},{"threshold":0.11708841882,"fpr":0.60792419,"tpr":0.91630794,"fp":9559,"tp":9153},{"threshold":0.115897605175,"fpr":0.61104045,"tpr":0.91670838,"fp":9608,"tp":9157},{"threshold":0.114717328786,"fpr":0.61307555,"tpr":0.91710882,"fp":9640,"tp":9161},{"threshold":0.113547528361,"fpr":0.61447469,"tpr":0.91750926,"fp":9662,"tp":9165},{"threshold":0.1123881423,"fpr":0.61663699,"tpr":0.91780959,"fp":9696,"tp":9168},{"threshold":0.111239108717,"fpr":0.61867209,"tpr":0.91821003,"fp":9728,"tp":9172},{"threshold":0.110100365448,"fpr":0.62051641,"tpr":0.91841025,"fp":9757,"tp":9174},{"threshold":0.108971850076,"fpr":0.62210633,"tpr":0.91911102,"fp":9782,"tp":9181},{"threshold":0.107853499942,"fpr":0.62356907,"tpr":0.91941135,"fp":9805,"tp":9184},{"threshold":0.106745252162,"fpr":0.6249682,"tpr":0.91951146,"fp":9827,"tp":9185},{"threshold":0.105647043643,"fpr":0.62624014,"tpr":0.92001201,"fp":9847,"tp":9190},{"threshold":0.104558811098,"fpr":0.62751208,"tpr":0.92021223,"fp":9867,"tp":9192},{"threshold":0.103480491062,"fpr":0.62884762,"tpr":0.92071278,"fp":9888,"tp":9197},{"threshold":0.102412019905,"fpr":0.63005597,"tpr":0.92101311,"fp":9907,"tp":9200},{"threshold":0.101353333848,"fpr":0.63126431,"tpr":0.92121333,"fp":9926,"tp":9202},{"threshold":0.100304368977,"fpr":0.63247265,"tpr":0.92131344,"fp":9945,"tp":9203},{"threshold":0.099265061258,"fpr":0.63310862,"tpr":0.92151367,"fp":9955,"tp":9205},{"threshold":0.098235346548,"fpr":0.63418977,"tpr":0.921814,"fp":9972,"tp":9208},{"threshold":0.09721516061,"fpr":0.63495294,"tpr":0.92201422,"fp":9984,"tp":9210},{"threshold":0.096204439129,"fpr":0.63667006,"tpr":0.92211433,"fp":10011,"tp":9211},{"threshold":0.095203117722,"fpr":0.63736963,"tpr":0.92211433,"fp":10022,"tp":9211},{"threshold":0.094211131948,"fpr":0.63845078,"tpr":0.92251477,"fp":10039,"tp":9215},{"threshold":0.093228417328,"fpr":0.63915034,"tpr":0.9228151,"fp":10050,"tp":9218},{"threshold":0.092254909352,"fpr":0.64023149,"tpr":0.92291521,"fp":10067,"tp":9219},{"threshold":0.09129054349,"fpr":0.64105825,"tpr":0.92291521,"fp":10080,"tp":9219},{"threshold":0.09033525521,"fpr":0.64175782,"tpr":0.92291521,"fp":10091,"tp":9219},{"threshold":0.089388979981,"fpr":0.64245739,"tpr":0.92311543,"fp":10102,"tp":9221},{"threshold":0.088451653292,"fpr":0.64296617,"tpr":0.92311543,"fp":10110,"tp":9221},{"threshold":0.087523210658,"fpr":0.64411091,"tpr":0.92311543,"fp":10128,"tp":9221},{"threshold":0.086603587633,"fpr":0.64493767,"tpr":0.92311543,"fp":10141,"tp":9221},{"threshold":0.085692719822,"fpr":0.64589163,"tpr":0.92311543,"fp":10156,"tp":9221},{"threshold":0.084790542886,"fpr":0.6465912,"tpr":0.92351587,"fp":10167,"tp":9225},{"threshold":0.083896992557,"fpr":0.64703638,"tpr":0.92361598,"fp":10174,"tp":9226},{"threshold":0.083012004649,"fpr":0.64779954,"tpr":0.92371609,"fp":10186,"tp":9227},{"threshold":0.08213551506,"fpr":0.64830832,"tpr":0.9238162,"fp":10194,"tp":9228},{"threshold":0.081267459791,"fpr":0.64900789,"tpr":0.9238162,"fp":10205,"tp":9228},{"threshold":0.080407774948,"fpr":0.64945307,"tpr":0.9238162,"fp":10212,"tp":9228},{"threshold":0.079556396755,"fpr":0.65059781,"tpr":0.92401642,"fp":10230,"tp":9230},{"threshold":0.07871326156,"fpr":0.65104299,"tpr":0.92421664,"fp":10237,"tp":9232},{"threshold":0.077878305845,"fpr":0.65186975,"tpr":0.92471719,"fp":10250,"tp":9237},{"threshold":0.077051466235,"fpr":0.65276011,"tpr":0.92501752,"fp":10264,"tp":9240},{"threshold":0.076232679504,"fpr":0.65384126,"tpr":0.92511763,"fp":10281,"tp":9241},{"threshold":0.075421882586,"fpr":0.6552404,"tpr":0.92541796,"fp":10303,"tp":9244},{"threshold":0.074619012578,"fpr":0.65619435,"tpr":0.92541796,"fp":10318,"tp":9244},{"threshold":0.073824006752,"fpr":0.6573391,"tpr":0.92551807,"fp":10336,"tp":9245},{"threshold":0.073036802559,"fpr":0.65861104,"tpr":0.92561818,"fp":10356,"tp":9246},{"threshold":0.072257337639,"fpr":0.66045535,"tpr":0.92591851,"fp":10385,"tp":9249},{"threshold":0.071485549826,"fpr":0.66198168,"tpr":0.92611873,"fp":10409,"tp":9251},{"threshold":0.070721377154,"fpr":0.66446197,"tpr":0.92651917,"fp":10448,"tp":9255},{"threshold":0.069964757866,"fpr":0.66713305,"tpr":0.92691961,"fp":10490,"tp":9259},{"threshold":0.069215630416,"fpr":0.67044009,"tpr":0.92762038,"fp":10542,"tp":9266},{"threshold":0.06847393348,"fpr":0.67781735,"tpr":0.92892181,"fp":10658,"tp":9279},{"threshold":0.067739605959,"fpr":0.69079115,"tpr":0.93082391,"fp":10862,"tp":9298},{"threshold":0.067012586987,"fpr":0.72449758,"tpr":0.93803184,"fp":11392,"tp":9370},{"threshold":0.066292815931,"fpr":0.80443907,"tpr":0.95895485,"fp":12649,"tp":9579},{"threshold":0.065580232404,"fpr":0.9095014,"tpr":0.98678546,"fp":14301,"tp":9857},{"threshold":0.064874776266,"fpr":0.96139659,"tpr":0.99689659,"fp":15117,"tp":9958},{"threshold":0.064176387627,"fpr":0.98467311,"tpr":0.99929923,"fp":15483,"tp":9982},{"threshold":0.063485006856,"fpr":0.99548461,"tpr":0.99959956,"fp":15653,"tp":9985},{"threshold":0.062800574585,"fpr":0.99904604,"tpr":0.99989989,"fp":15709,"tp":9988},{"threshold":0.062123031711,"fpr":0.99968201,"tpr":1.0,"fp":15719,"tp":9989},{"threshold":0.061452319402,"fpr":0.99980921,"tpr":1.0,"fp":15721,"tp":9989},{"threshold":0.060788379102,"fpr":0.99987281,"tpr":1.0,"fp":15722,"tp":9989},{"threshold":0.060131152532,"fpr":0.9999364,"tpr":1.0,"fp":15723,"tp":9989},{"threshold":0.0594805817,"fpr":1.0,"tpr":1.0,"fp":15724,"tp":9989}]};
+  const points = roc.points;
+  const slider = root.querySelector("#roc-threshold-slider");
+  const thresholdValue = root.querySelector("#roc-threshold-value");
+  const status = root.querySelector("#roc-status");
+  const chart = root.querySelector("#roc-threshold-chart");
+  const playButton = root.querySelector("#roc-play");
+  const stepButton = root.querySelector("#roc-step");
+  const resetButton = root.querySelector("#roc-reset");
+
+  slider.max = String(points.length - 1);
+
+  let pointIndex = 0;
+  let playing = false;
+  let animationFrame = null;
+  let lastFrameTime = 0;
+
+  function svgElement(tagName, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tagName);
+    Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    svg.append(element);
+  }
+
+  function scale(value, domain, range) {
+    return range[0] + ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]);
+  }
+
+  function formatThreshold(threshold) {
+    return threshold === null ? "∞" : threshold.toFixed(4);
+  }
+
+  function formatRate(rate) {
+    if (rate === 0 || rate === 1) return rate.toFixed(3);
+    return rate < 0.01 ? rate.toFixed(4) : rate.toFixed(3);
+  }
+
+  function draw() {
+    const width = Math.round(chart.getBoundingClientRect().width) || 640;
+    const compact = width < 480;
+    const margin = compact
+      ? { top: 16, right: 18, bottom: 50, left: 58 }
+      : { top: 20, right: 26, bottom: 58, left: 68 };
+    const plotSize = Math.max(1, width - margin.left - margin.right);
+    const height = plotSize + margin.top + margin.bottom;
+    const plotRight = margin.left + plotSize;
+    const plotBottom = margin.top + plotSize;
+    const x = value => scale(value, [0, 1], [margin.left, plotRight]);
+    const y = value => scale(value, [0, 1], [plotBottom, margin.top]);
+    const current = points[pointIndex];
+
+    chart.replaceChildren();
+    chart.setAttribute("viewBox", "0 0 " + width + " " + height);
+    chart.setAttribute("width", String(width));
+    chart.setAttribute("height", String(height));
+    chart.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+    const title = svgElement("title", {
+      id: "roc-threshold-chart-title"
+    });
+    title.textContent = "Training receiver operating characteristic curve";
+    const description = svgElement("desc", {
+      id: "roc-threshold-chart-description"
+    });
+    description.textContent = "The chart shows false positive rate on the horizontal axis and true positive rate on the vertical axis. The curve grows as the classification threshold decreases.";
+    chart.append(title, description);
+    chart.setAttribute("aria-labelledby", "roc-threshold-chart-title roc-threshold-chart-description");
+
+    chart.append(svgElement("rect", {
+      x: margin.left,
+      y: margin.top,
+      width: plotRight - margin.left,
+      height: plotBottom - margin.top,
+      class: "roc-threshold-frame"
+    }));
+
+    [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(tick => {
+      const xPosition = x(tick);
+      const yPosition = y(tick);
+      chart.append(svgElement("line", {
+        x1: xPosition,
+        y1: margin.top,
+        x2: xPosition,
+        y2: plotBottom,
+        class: "roc-threshold-grid"
+      }));
+      chart.append(svgElement("line", {
+        x1: margin.left,
+        y1: yPosition,
+        x2: plotRight,
+        y2: yPosition,
+        class: "roc-threshold-grid"
+      }));
+      addText(chart, tick.toFixed(1), xPosition, plotBottom + 20, {
+        class: "roc-threshold-tick",
+        "text-anchor": "middle"
+      });
+      addText(chart, tick.toFixed(1), margin.left - 9, yPosition + 4, {
+        class: "roc-threshold-tick",
+        "text-anchor": "end"
+      });
+    });
+
+    chart.append(svgElement("line", {
+      x1: x(0), y1: y(0), x2: x(1), y2: y(1), class: "roc-threshold-random"
+    }));
+
+    const pathData = points
+      .slice(0, pointIndex + 1)
+      .map((point, index) => (index === 0 ? "M" : "L") + x(point.fpr).toFixed(2) + " " + y(point.tpr).toFixed(2))
+      .join(" ");
+    chart.append(svgElement("path", {
+      d: pathData,
+      class: "roc-threshold-curve"
+    }));
+
+    chart.append(svgElement("circle", {
+      cx: x(current.fpr),
+      cy: y(current.tpr),
+      r: 5.5,
+      class: "roc-threshold-current"
+    }));
+
+    addText(chart, "Random classifier", x(0.79), y(0.74), {
+      class: "roc-threshold-reference-label",
+      "text-anchor": "middle"
+    });
+    addText(chart, "False positive rate (FPR)", (margin.left + plotRight) / 2, height - 11, {
+      class: "roc-threshold-axis-title",
+      "text-anchor": "middle"
+    });
+    const yTitleX = 18;
+    const yTitleY = (margin.top + plotBottom) / 2;
+    addText(chart, "True positive rate (TPR)", yTitleX, yTitleY, {
+      class: "roc-threshold-axis-title",
+      "text-anchor": "middle",
+      transform: "rotate(-90 " + yTitleX + " " + yTitleY + ")"
+    });
+
+    thresholdValue.value = "τ = " + formatThreshold(current.threshold);
+    thresholdValue.textContent = "τ = " + formatThreshold(current.threshold);
+    status.textContent = "τ = " + formatThreshold(current.threshold)
+      + " · FPR = " + formatRate(current.fpr)
+      + " · TPR = " + formatRate(current.tpr)
+      + " · TP = " + current.tp.toLocaleString()
+      + " · FP = " + current.fp.toLocaleString();
+  }
+
+  function update(index) {
+    pointIndex = Math.max(0, Math.min(points.length - 1, index));
+    slider.value = String(pointIndex);
+    draw();
+  }
+
+  function stop() {
+    playing = false;
+    if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+    playButton.textContent = pointIndex >= points.length - 1 ? "Replay" : "Play";
+  }
+
+  function animate(timestamp) {
+    if (!playing) return;
+    if (timestamp - lastFrameTime >= 14) {
+      update(pointIndex + 1);
+      lastFrameTime = timestamp;
+    }
+    if (pointIndex >= points.length - 1) {
+      stop();
+      return;
+    }
+    animationFrame = requestAnimationFrame(animate);
+  }
+
+  playButton.addEventListener("click", () => {
+    if (playing) {
+      stop();
+      return;
+    }
+    if (pointIndex >= points.length - 1) update(0);
+    playing = true;
+    playButton.textContent = "Pause";
+    lastFrameTime = 0;
+    animationFrame = requestAnimationFrame(animate);
+  });
+
+  stepButton.addEventListener("click", () => {
+    stop();
+    update(pointIndex + 1);
+  });
+
+  resetButton.addEventListener("click", () => {
+    stop();
+    update(0);
+  });
+
+  slider.addEventListener("input", () => {
+    stop();
+    update(Number.parseInt(slider.value, 10));
+  });
+
+  new ResizeObserver(draw).observe(chart);
+  update(0);
+})();
+</script>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/changyaochen\.github\.io\/MECE4520\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>MECE 4520 · Data Science for Mechanical Systems</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Fall 2026</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

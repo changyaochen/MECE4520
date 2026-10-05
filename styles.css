@@ -166,6 +166,73 @@
   overflow: visible;
 }
 
+/* ROC threshold explorer. */
+.roc-threshold-controls {
+  grid-template-columns: minmax(220px, 1fr);
+}
+
+.roc-threshold-controls output {
+  color: #4c5961;
+  font-weight: 400;
+}
+
+.roc-threshold-plot {
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.roc-threshold-plot svg {
+  height: auto;
+}
+
+.roc-threshold-frame {
+  fill: none;
+  stroke: #9daeb8;
+  stroke-width: 1;
+}
+
+.roc-threshold-grid {
+  stroke: #d9e1e5;
+  stroke-width: 1;
+}
+
+.roc-threshold-curve {
+  fill: none;
+  stroke: #457eaa;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.6;
+}
+
+.roc-threshold-current {
+  fill: #c43c35;
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.roc-threshold-random {
+  stroke: #747d83;
+  stroke-dasharray: 6 5;
+  stroke-width: 1.5;
+}
+
+.roc-threshold-tick,
+.roc-threshold-axis-title,
+.roc-threshold-reference-label {
+  fill: #4c5961;
+  font-family: inherit;
+}
+
+.roc-threshold-tick,
+.roc-threshold-reference-label {
+  font-size: 12px;
+}
+
+.roc-threshold-axis-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .clt-axis {
   stroke: #6d7980;
   stroke-width: 1;
@@ -639,6 +706,10 @@
   color: #f2f4f5;
 }
 
+.quarto-dark .roc-threshold-controls output {
+  color: #c8d1d6;
+}
+
 .quarto-dark .clt-controls select,
 .quarto-dark .ci-controls select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 6 5 5 5-5' fill='none' stroke='%23d5dde1' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75'/%3E%3C/svg%3E");
@@ -680,6 +751,28 @@
 .quarto-dark .clt-plot,
 .quarto-dark .ci-plot {
   border-color: #56616a;
+}
+
+.quarto-dark .roc-threshold-frame {
+  stroke: #aebbc2;
+}
+
+.quarto-dark .roc-threshold-grid {
+  stroke: #445058;
+}
+
+.quarto-dark .roc-threshold-current {
+  stroke: #1f2529;
+}
+
+.quarto-dark .roc-threshold-random {
+  stroke: #aebbc2;
+}
+
+.quarto-dark .roc-threshold-tick,
+.quarto-dark .roc-threshold-axis-title,
+.quarto-dark .roc-threshold-reference-label {
+  fill: #d5dde1;
 }
 
 .quarto-dark .clt-axis,
