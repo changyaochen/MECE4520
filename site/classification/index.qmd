@@ -46,12 +46,36 @@ move downhill on the binary-cross-entropy surface.
 
 [Open the interactive explorer](logistic-gradient-descent.qmd)
 
-## 3. Classification metrics and the confusion matrix
+## 3. Classification metrics, thresholds, and costs
+
+**Estimated time:** 40–50 minutes
+
+Evaluate the high-CO logistic model on held-out turbine observations. Turn
+probabilities into alerts, read a confusion matrix, and calculate accuracy,
+precision, recall, and F1. Compare alert thresholds and see how operating costs
+can change the appropriate decision rule.
+
+[View the notebook](03-classification-metrics.ipynb)
+
+## 4. Ranking, probability quality, and calibration
 
 **Estimated time:** 30–40 minutes
 
-Evaluate the high-CO logistic model on held-out turbine observations. Turn
-probabilities into alerts, read a confusion matrix, and compare accuracy,
-precision, and recall at several decision thresholds.
+Evaluate the same high-CO probability model without fixing one alert threshold.
+Use ROC/AUC to assess ranking, log loss to assess probability quality, and a
+reliability diagram to check whether predicted probabilities agree with observed
+frequencies.
 
-[View the notebook](03-classification-metrics.ipynb)
+[View the notebook](04-ranking-and-calibration.ipynb)
+
+### Interactive ROC builder
+
+**Estimated time:** 5–10 minutes
+
+Lower the classification threshold point by point to see how a training-set
+ROC curve grows from `(0, 0)` to `(1, 1)`. Inspect the threshold,
+false-positive rate, true-positive rate, and the associated counts at any point.
+
+[Open the interactive ROC builder](roc-threshold-builder.qmd)
+
+[Open the slide-ready animation](../assets/roc-threshold-training.gif)
