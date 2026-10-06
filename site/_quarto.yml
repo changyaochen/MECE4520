@@ -3,7 +3,7 @@ project:
   output-dir: _site
   resources:
     - data/gas-turbine-course.csv
-    - assets/roc-threshold-training.gif
+    - assets/precision-recall-thresholds.js
 
 website:
   title: "MECE 4520"

@@ -1,0 +1,311 @@
+---
+title: "Exploring classification thresholds"
+toc: false
+page-layout: full
+---
+
+This explorer uses the TIT-based high-CO logistic model on the training set.
+It follows one decision threshold as it changes the ROC curve, the
+precision–recall curve, and F1 score at the same time.
+
+::: {.callout-tip}
+## What to watch
+
+Start with a very high threshold: no observations receive a high-CO label. As
+the threshold decreases, the model produces more alerts. The ROC curve traces
+true-positive against false-positive rate; the precision–recall curve shows
+the same alerts from a different perspective. F1 summarizes the balance
+between precision and recall.
+:::
+
+```{=html}
+<div id="threshold-metrics-builder" class="clt-explorer threshold-metrics-builder" aria-label="Interactive classification-threshold explorer">
+  <div class="clt-controls threshold-metrics-controls" aria-label="Classification threshold control">
+    <label>
+      <span>Decision threshold</span>
+      <input id="threshold-metrics-slider" type="range" min="0" value="0">
+      <output id="threshold-metrics-value" for="threshold-metrics-slider">τ = 1.00</output>
+    </label>
+  </div>
+  <div class="clt-buttons" aria-label="Threshold-sweep controls">
+    <button id="threshold-metrics-run" type="button" class="regression-sampling-primary">Run all thresholds</button>
+    <button id="threshold-metrics-step" type="button">Next threshold</button>
+    <button id="threshold-metrics-reset" type="button">Reset</button>
+  </div>
+  <p id="threshold-metrics-status" class="clt-status tabular-nums" aria-live="polite"></p>
+  <div class="clt-plots threshold-metrics-plots">
+    <figure class="clt-plot threshold-metrics-plot">
+      <figcaption>Training ROC curve</figcaption>
+      <svg id="roc-threshold-chart" role="img" aria-label="Training ROC curve being drawn as the threshold decreases"></svg>
+    </figure>
+    <figure class="clt-plot threshold-metrics-plot">
+      <figcaption>Training precision–recall curve</figcaption>
+      <svg id="precision-recall-chart" role="img" aria-label="Training precision-recall curve being drawn as the threshold decreases"></svg>
+    </figure>
+    <figure class="clt-plot threshold-metrics-plot">
+      <figcaption>F1 score by decision threshold</figcaption>
+      <svg id="f1-threshold-chart" role="img" aria-label="Training F1 score as the threshold decreases"></svg>
+    </figure>
+  </div>
+</div>
+```
+
+The slider lowers $\tau$ in evenly spaced increments from 1 to 0. Each point
+uses all observations whose predicted probability is at least $\tau$; the
+same set of alerts drives all three views.
+
+<a href="index.qmd">← Return to Classification</a>
+
+<script src="../assets/precision-recall-thresholds.js"></script>
+<script>
+(() => {
+  const root = document.getElementById("threshold-metrics-builder");
+  if (!root || !window.MECE4520PrecisionRecallPoints) return;
+
+  const points = window.MECE4520PrecisionRecallPoints;
+  const negativeCount = points.at(-1).fp;
+  const slider = root.querySelector("#threshold-metrics-slider");
+  const thresholdValue = root.querySelector("#threshold-metrics-value");
+  const status = root.querySelector("#threshold-metrics-status");
+  const rocChart = root.querySelector("#roc-threshold-chart");
+  const prChart = root.querySelector("#precision-recall-chart");
+  const f1Chart = root.querySelector("#f1-threshold-chart");
+  const runButton = root.querySelector("#threshold-metrics-run");
+  const stepButton = root.querySelector("#threshold-metrics-step");
+  const resetButton = root.querySelector("#threshold-metrics-reset");
+
+  slider.max = String(points.length - 1);
+
+  let pointIndex = 0;
+  let running = false;
+  let animationFrame = null;
+  let lastFrameTime = 0;
+
+  function svgElement(tagName, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tagName);
+    Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    svg.append(element);
+  }
+
+  function scale(value, domain, range) {
+    return range[0] + ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]);
+  }
+
+  function chartSetup(chart, titleText, descriptionText) {
+    const width = Math.max(280, Math.round(chart.getBoundingClientRect().width) || 360);
+    const compact = width < 480;
+    const margin = compact
+      ? { top: 16, right: 18, bottom: 50, left: 56 }
+      : { top: 20, right: 24, bottom: 58, left: 66 };
+    const plotSize = Math.max(1, width - margin.left - margin.right);
+    const height = plotSize + margin.top + margin.bottom;
+    const plotRight = margin.left + plotSize;
+    const plotBottom = margin.top + plotSize;
+    const x = value => scale(value, [0, 1], [margin.left, plotRight]);
+    const y = value => scale(value, [0, 1], [plotBottom, margin.top]);
+
+    chart.replaceChildren();
+    chart.setAttribute("viewBox", "0 0 " + width + " " + height);
+    chart.setAttribute("width", String(width));
+    chart.setAttribute("height", String(height));
+    chart.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+    const title = svgElement("title", { id: chart.id + "-title" });
+    title.textContent = titleText;
+    const description = svgElement("desc", { id: chart.id + "-description" });
+    description.textContent = descriptionText;
+    chart.append(title, description);
+    chart.setAttribute("aria-labelledby", title.id + " " + description.id);
+
+    chart.append(svgElement("rect", {
+      x: margin.left, y: margin.top,
+      width: plotRight - margin.left, height: plotBottom - margin.top,
+      class: "threshold-metrics-frame"
+    }));
+
+    [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(tick => {
+      const xPosition = x(tick);
+      const yPosition = y(tick);
+      chart.append(svgElement("line", {
+        x1: xPosition, y1: margin.top, x2: xPosition, y2: plotBottom,
+        class: "threshold-metrics-grid"
+      }));
+      chart.append(svgElement("line", {
+        x1: margin.left, y1: yPosition, x2: plotRight, y2: yPosition,
+        class: "threshold-metrics-grid"
+      }));
+      addText(chart, tick.toFixed(1), xPosition, plotBottom + 20, {
+        class: "threshold-metrics-tick", "text-anchor": "middle"
+      });
+      addText(chart, tick.toFixed(1), margin.left - 9, yPosition + 4, {
+        class: "threshold-metrics-tick", "text-anchor": "end"
+      });
+    });
+
+    return { height, margin, plotRight, plotBottom, x, y };
+  }
+
+  function drawPath(chart, setup, values, xValue, yValue, curveClass, currentX, currentY) {
+    const pathData = values.map((point, index) =>
+      (index === 0 ? "M" : "L")
+      + setup.x(xValue(point)).toFixed(2) + " " + setup.y(yValue(point)).toFixed(2)
+    ).join(" ");
+    chart.append(svgElement("path", { d: pathData, class: curveClass }));
+    chart.append(svgElement("circle", {
+      cx: setup.x(currentX), cy: setup.y(currentY), r: 5.5,
+      class: "threshold-metrics-current"
+    }));
+  }
+
+  function addAxes(chart, setup, xTitle, yTitle) {
+    addText(chart, xTitle, (setup.margin.left + setup.plotRight) / 2, setup.height - 11, {
+      class: "threshold-metrics-axis-title", "text-anchor": "middle"
+    });
+    const yTitleX = 18;
+    const yTitleY = (setup.margin.top + setup.plotBottom) / 2;
+    addText(chart, yTitle, yTitleX, yTitleY, {
+      class: "threshold-metrics-axis-title", "text-anchor": "middle",
+      transform: "rotate(-90 " + yTitleX + " " + yTitleY + ")"
+    });
+  }
+
+  function drawRoc(currentPoints, current) {
+    const setup = chartSetup(
+      rocChart,
+      "Training ROC curve",
+      "The chart shows true-positive rate on the vertical axis and false-positive rate on the horizontal axis as the decision threshold decreases."
+    );
+    rocChart.append(svgElement("line", {
+      x1: setup.x(0), y1: setup.y(0), x2: setup.x(1), y2: setup.y(1),
+      class: "threshold-metrics-reference"
+    }));
+    drawPath(
+      rocChart, setup, currentPoints,
+      point => point.fp / negativeCount,
+      point => point.recall,
+      "threshold-metrics-roc-curve",
+      current.fp / negativeCount,
+      current.recall
+    );
+    addAxes(rocChart, setup, "False-positive rate", "True-positive rate");
+  }
+
+  function drawPrecisionRecall(currentPoints, current) {
+    const setup = chartSetup(
+      prChart,
+      "Training precision-recall curve",
+      "The chart shows precision on the vertical axis and recall on the horizontal axis as the decision threshold decreases."
+    );
+    drawPath(
+      prChart, setup, currentPoints,
+      point => point.recall,
+      point => point.precision,
+      "threshold-metrics-pr-curve",
+      current.recall,
+      current.precision
+    );
+    addAxes(prChart, setup, "Recall", "Precision");
+  }
+
+  function drawF1(currentPoints, current) {
+    const setup = chartSetup(
+      f1Chart,
+      "Training F1 score by decision threshold",
+      "The chart shows F1 score on the vertical axis as the decision threshold decreases from 1 to 0."
+    );
+    drawPath(
+      f1Chart, setup, currentPoints,
+      point => point.threshold,
+      point => point.f1,
+      "threshold-metrics-f1-curve",
+      current.threshold,
+      current.f1
+    );
+    addAxes(f1Chart, setup, "Decision threshold τ", "F1 score");
+  }
+
+  function draw() {
+    const current = points[pointIndex];
+    const currentPoints = points.slice(0, pointIndex + 1);
+    const falsePositiveRate = current.fp / negativeCount;
+
+    drawRoc(currentPoints, current);
+    drawPrecisionRecall(currentPoints, current);
+    drawF1(currentPoints, current);
+    thresholdValue.value = "τ = " + current.threshold.toFixed(2);
+    thresholdValue.textContent = "τ = " + current.threshold.toFixed(2);
+    status.textContent = "τ = " + current.threshold.toFixed(2)
+      + " · precision = " + current.precision.toFixed(3)
+      + " · recall / TPR = " + current.recall.toFixed(3)
+      + " · FPR = " + falsePositiveRate.toFixed(3)
+      + " · F1 = " + current.f1.toFixed(3)
+      + " · TP = " + current.tp.toLocaleString()
+      + " · FP = " + current.fp.toLocaleString()
+      + " · FN = " + current.fn.toLocaleString();
+  }
+
+  function update(index) {
+    pointIndex = Math.max(0, Math.min(points.length - 1, index));
+    slider.value = String(pointIndex);
+    draw();
+  }
+
+  function stop() {
+    running = false;
+    if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+    runButton.textContent = pointIndex >= points.length - 1
+      ? "Replay all thresholds"
+      : "Run all thresholds";
+  }
+
+  function animate(timestamp) {
+    if (!running) return;
+    if (timestamp - lastFrameTime >= 55) {
+      update(pointIndex + 1);
+      lastFrameTime = timestamp;
+    }
+    if (pointIndex >= points.length - 1) {
+      stop();
+      return;
+    }
+    animationFrame = requestAnimationFrame(animate);
+  }
+
+  runButton.addEventListener("click", () => {
+    if (running) {
+      stop();
+      return;
+    }
+    if (pointIndex >= points.length - 1) update(0);
+    running = true;
+    runButton.textContent = "Pause";
+    lastFrameTime = 0;
+    animationFrame = requestAnimationFrame(animate);
+  });
+
+  stepButton.addEventListener("click", () => {
+    stop();
+    update(pointIndex + 1);
+  });
+
+  resetButton.addEventListener("click", () => {
+    stop();
+    update(0);
+  });
+
+  slider.addEventListener("input", () => {
+    stop();
+    update(Number.parseInt(slider.value, 10));
+  });
+
+  [rocChart, prChart, f1Chart].forEach(chart => new ResizeObserver(draw).observe(chart));
+  update(0);
+})();
+</script>

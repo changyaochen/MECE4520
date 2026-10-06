@@ -68,14 +68,12 @@ frequencies.
 
 [View the notebook](04-ranking-and-calibration.ipynb)
 
-### Interactive ROC builder
+### Interactive threshold explorer
 
 **Estimated time:** 5–10 minutes
 
-Lower the classification threshold point by point to see how a training-set
-ROC curve grows from `(0, 0)` to `(1, 1)`. Inspect the threshold,
-false-positive rate, true-positive rate, and the associated counts at any point.
+Lower the classification threshold point by point to see how the training ROC
+curve, precision–recall curve, and F1 score change together. Inspect the
+threshold, rates, F1, and the associated counts at any point.
 
-[Open the interactive ROC builder](roc-threshold-builder.qmd)
-
-[Open the slide-ready animation](../assets/roc-threshold-training.gif)
+[Open the interactive threshold explorer](threshold-explorer.qmd)
