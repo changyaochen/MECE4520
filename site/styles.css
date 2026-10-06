@@ -166,71 +166,93 @@
   overflow: visible;
 }
 
-/* ROC threshold explorer. */
-.roc-threshold-controls {
+/* Classification-threshold explorer. */
+.threshold-metrics-controls {
   grid-template-columns: minmax(220px, 1fr);
 }
 
-.roc-threshold-controls output {
+.threshold-metrics-controls output {
   color: #4c5961;
   font-weight: 400;
 }
 
-.roc-threshold-plot {
-  max-width: 40rem;
-  margin-inline: auto;
+.threshold-metrics-plots {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.roc-threshold-plot svg {
+.threshold-metrics-plot svg {
   height: auto;
 }
 
-.roc-threshold-frame {
+.threshold-metrics-frame {
   fill: none;
   stroke: #9daeb8;
   stroke-width: 1;
 }
 
-.roc-threshold-grid {
+.threshold-metrics-grid {
   stroke: #d9e1e5;
   stroke-width: 1;
 }
 
-.roc-threshold-curve {
+.threshold-metrics-roc-curve,
+.threshold-metrics-pr-curve,
+.threshold-metrics-f1-curve {
   fill: none;
-  stroke: #457eaa;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2.6;
 }
 
-.roc-threshold-current {
+.threshold-metrics-roc-curve {
+  stroke: #457eaa;
+}
+
+.threshold-metrics-pr-curve {
+  stroke: #d77732;
+}
+
+.threshold-metrics-f1-curve {
+  stroke: #588157;
+}
+
+.threshold-metrics-reference {
+  stroke: #6d7980;
+  stroke-dasharray: 5 4;
+  stroke-width: 1.5;
+}
+
+.threshold-metrics-current {
   fill: #c43c35;
   stroke: #fff;
   stroke-width: 1.5;
 }
 
-.roc-threshold-random {
-  stroke: #747d83;
-  stroke-dasharray: 6 5;
-  stroke-width: 1.5;
-}
-
-.roc-threshold-tick,
-.roc-threshold-axis-title,
-.roc-threshold-reference-label {
+.threshold-metrics-tick,
+.threshold-metrics-axis-title {
   fill: #4c5961;
   font-family: inherit;
 }
 
-.roc-threshold-tick,
-.roc-threshold-reference-label {
+.threshold-metrics-tick {
   font-size: 12px;
 }
 
-.roc-threshold-axis-title {
+.threshold-metrics-axis-title {
   font-size: 13px;
   font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+  .threshold-metrics-plots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .threshold-metrics-plots {
+    grid-template-columns: 1fr;
+  }
 }
 
 .clt-axis {
@@ -706,7 +728,7 @@
   color: #f2f4f5;
 }
 
-.quarto-dark .roc-threshold-controls output {
+.quarto-dark .threshold-metrics-controls output {
   color: #c8d1d6;
 }
 
@@ -753,25 +775,20 @@
   border-color: #56616a;
 }
 
-.quarto-dark .roc-threshold-frame {
+.quarto-dark .threshold-metrics-frame {
   stroke: #aebbc2;
 }
 
-.quarto-dark .roc-threshold-grid {
+.quarto-dark .threshold-metrics-grid {
   stroke: #445058;
 }
 
-.quarto-dark .roc-threshold-current {
+.quarto-dark .threshold-metrics-current {
   stroke: #1f2529;
 }
 
-.quarto-dark .roc-threshold-random {
-  stroke: #aebbc2;
-}
-
-.quarto-dark .roc-threshold-tick,
-.quarto-dark .roc-threshold-axis-title,
-.quarto-dark .roc-threshold-reference-label {
+.quarto-dark .threshold-metrics-tick,
+.quarto-dark .threshold-metrics-axis-title {
   fill: #d5dde1;
 }
 
