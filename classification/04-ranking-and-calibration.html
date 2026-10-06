@@ -399,10 +399,11 @@ window.Quarto = {
    
   <ul>
   <li><a href="#fit-the-tit-based-probability-model" id="toc-fit-the-tit-based-probability-model">1. Fit the TIT-based probability model</a></li>
-  <li><a href="#measure-ranking-with-roc-and-auc" id="toc-measure-ranking-with-roc-and-auc">2. Measure ranking with ROC and AUC</a></li>
-  <li><a href="#measure-probability-quality-with-log-loss" id="toc-measure-probability-quality-with-log-loss">3. Measure probability quality with log loss</a></li>
-  <li><a href="#check-calibration-with-a-reliability-diagram" id="toc-check-calibration-with-a-reliability-diagram">4. Check calibration with a reliability diagram</a></li>
-  <li><a href="#choose-the-metric-that-answers-the-question" id="toc-choose-the-metric-that-answers-the-question">5. Choose the metric that answers the question</a></li>
+  <li><a href="#trace-precision-recall-and-f1-across-thresholds" id="toc-trace-precision-recall-and-f1-across-thresholds">2. Trace precision, recall, and F1 across thresholds</a></li>
+  <li><a href="#measure-ranking-with-roc-and-area-under-the-curve-auc" id="toc-measure-ranking-with-roc-and-area-under-the-curve-auc">3. Measure ranking with ROC and area under the curve (AUC)</a></li>
+  <li><a href="#measure-probability-quality-with-log-loss" id="toc-measure-probability-quality-with-log-loss">4. Measure probability quality with log loss</a></li>
+  <li><a href="#check-calibration-with-a-reliability-diagram" id="toc-check-calibration-with-a-reliability-diagram">5. Check calibration with a reliability diagram</a></li>
+  <li><a href="#choose-the-metric-that-answers-the-question" id="toc-choose-the-metric-that-answers-the-question">6. Choose the metric that answers the question</a></li>
   <li><a href="#try-it" id="toc-try-it">Try it</a></li>
   </ul>
 </nav>
@@ -416,7 +417,7 @@ window.Quarto = {
 <section id="fit-the-tit-based-probability-model" class="level2">
 <h2 class="anchored" data-anchor-id="fit-the-tit-based-probability-model">1. Fit the TIT-based probability model</h2>
 <p>As before, each row is one gas-turbine operating observation. The target <code>high_co</code> equals 1 when measured CO is at least 2 mg/m³. We train logistic regression with turbine inlet temperature (TIT) as its one feature, then keep a test set for comparison.</p>
-<div id="287e278e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-05T02:12:05.996224Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-05T02:12:05.995768Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-05T02:12:07.792409Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-05T02:12:07.792072Z&quot;}}" data-execution_count="1">
+<div id="287e278e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-06T01:28:25.586731Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-06T01:28:25.586577Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-06T01:28:28.124510Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-06T01:28:28.124099Z&quot;}}" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> urllib.request <span class="im">import</span> urlretrieve</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -426,69 +427,141 @@ window.Quarto = {
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.calibration <span class="im">import</span> calibration_curve</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> log_loss, roc_auc_score, roc_curve</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>sns.set_theme(style<span class="op">=</span><span class="st">"whitegrid"</span>, context<span class="op">=</span><span class="st">"notebook"</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>DATA_URL <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/changyaochen/MECE4520/master/site/data/gas-turbine-course.csv"</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>candidates <span class="op">=</span> [</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"../data/gas-turbine-course.csv"</span>),</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"site/data/gas-turbine-course.csv"</span>),</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"gas-turbine-course.csv"</span>),</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> <span class="bu">next</span>((path <span class="cf">for</span> path <span class="kw">in</span> candidates <span class="cf">if</span> path.exists()), candidates[<span class="op">-</span><span class="dv">1</span>])</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co"># In Google Colab, download the small course dataset if it is not already present.</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_path.exists():</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    urlretrieve(DATA_URL, data_path)</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(data_path)</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>model_data <span class="op">=</span> data[[<span class="st">"TIT"</span>, <span class="st">"high_co"</span>]].dropna().copy()</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> model_data[[<span class="st">"TIT"</span>]]</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> model_data[<span class="st">"high_co"</span>]</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> (</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    log_loss,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    precision_recall_curve,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    roc_auc_score,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    roc_curve,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>sns.set_theme(style<span class="op">=</span><span class="st">"whitegrid"</span>, context<span class="op">=</span><span class="st">"notebook"</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>DATA_URL <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/changyaochen/MECE4520/master/site/data/gas-turbine-course.csv"</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>candidates <span class="op">=</span> [</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"../data/gas-turbine-course.csv"</span>),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"site/data/gas-turbine-course.csv"</span>),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"gas-turbine-course.csv"</span>),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> <span class="bu">next</span>((path <span class="cf">for</span> path <span class="kw">in</span> candidates <span class="cf">if</span> path.exists()), candidates[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co"># In Google Colab, download the small course dataset if it is not already present.</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_path.exists():</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    urlretrieve(DATA_URL, data_path)</span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.30</span>, random_state<span class="op">=</span><span class="dv">4520</span>, stratify<span class="op">=</span>y</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LogisticRegression(max_iter<span class="op">=</span><span class="dv">1_000</span>).fit(X_train, y_train)</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>train_probabilities <span class="op">=</span> model.predict_proba(X_train)[:, <span class="dv">1</span>]</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>test_probabilities <span class="op">=</span> model.predict_proba(X_test)[:, <span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(data_path)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>model_data <span class="op">=</span> data[[<span class="st">"TIT"</span>, <span class="st">"high_co"</span>]].dropna().copy()</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> model_data[[<span class="st">"TIT"</span>]]</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> model_data[<span class="st">"high_co"</span>]</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.30</span>, random_state<span class="op">=</span><span class="dv">4520</span>, stratify<span class="op">=</span>y</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LogisticRegression(max_iter<span class="op">=</span><span class="dv">1_000</span>).fit(X_train, y_train)</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>train_probabilities <span class="op">=</span> model.predict_proba(X_train)[:, <span class="dv">1</span>]</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>test_probabilities <span class="op">=</span> model.predict_proba(X_test)[:, <span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="measure-ranking-with-roc-and-auc" class="level2">
-<h2 class="anchored" data-anchor-id="measure-ranking-with-roc-and-auc">2. Measure ranking with ROC and AUC</h2>
-<p>At a threshold <span class="math inline">\(\tau\)</span>, the <strong>true-positive rate</strong> and <strong>false-positive rate</strong> are</p>
+<section id="trace-precision-recall-and-f1-across-thresholds" class="level2">
+<h2 class="anchored" data-anchor-id="trace-precision-recall-and-f1-across-thresholds">2. Trace precision, recall, and F1 across thresholds</h2>
+<p>The previous notebook calculated precision, recall, and F1 after choosing one alert threshold. Here, we sweep the same threshold <span class="math inline">\(\tau\)</span> from strict to permissive and watch those quantities change.</p>
 <p><span class="math display">\[
-\operatorname{TPR}(\tau) = \frac{TP(\tau)}{TP(\tau)+FN(\tau)},
+\operatorname{Precision}(\tau) =
+\frac{TP(\tau)}{TP(\tau)+FP(\tau)},
 \qquad
-\operatorname{FPR}(\tau) = \frac{FP(\tau)}{FP(\tau)+TN(\tau)}.
+\operatorname{Recall}(\tau) =
+\frac{TP(\tau)}{TP(\tau)+FN(\tau)}.
 \]</span></p>
-<p>An ROC curve traces TPR against FPR as <span class="math inline">\(\tau\)</span> moves from a strict threshold to a permissive one. Its area, AUC, summarizes ranking quality: it is the chance that the model assigns a randomly chosen high-CO observation a higher score than a randomly chosen not-high-CO observation. An AUC of 0.5 corresponds to random ranking.</p>
-<div id="158ea0a9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-05T02:12:07.795030Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-05T02:12:07.794927Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-05T02:12:07.877234Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-05T02:12:07.876978Z&quot;}}" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>train_fpr, train_tpr, _ <span class="op">=</span> roc_curve(y_train, train_probabilities)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>test_fpr, test_tpr, _ <span class="op">=</span> roc_curve(y_test, test_probabilities)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>train_auc <span class="op">=</span> roc_auc_score(y_train, train_probabilities)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>test_auc <span class="op">=</span> roc_auc_score(y_test, test_probabilities)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">7.2</span>))</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"#5F6368"</span>,</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="st">"Random ranking (AUC = 0.500)"</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>ax.plot(train_fpr, train_tpr, color<span class="op">=</span><span class="st">"#3F78A8"</span>, linewidth<span class="op">=</span><span class="fl">2.5</span>,</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f"Training ROC (AUC = </span><span class="sc">{</span>train_auc<span class="sc">:.3f}</span><span class="ss">)"</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>ax.plot(test_fpr, test_tpr, color<span class="op">=</span><span class="st">"#E1812C"</span>, linewidth<span class="op">=</span><span class="fl">2.5</span>,</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f"Test ROC (AUC = </span><span class="sc">{</span>test_auc<span class="sc">:.3f}</span><span class="ss">)"</span>)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"False-positive rate (FPR)"</span>,</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"True-positive rate (TPR)"</span>,</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"TIT provides useful ranking of high-CO observations"</span>,</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    xlim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    ylim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    aspect<span class="op">=</span><span class="st">"equal"</span>,</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"lower right"</span>, frameon<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Precision asks: <em>among the observations labeled high CO, how many actually have high CO?</em> Recall asks: <em>among all actual high-CO observations, how many did we find?</em> Lowering <span class="math inline">\(\tau\)</span> usually increases recall, but it can decrease precision as more false alerts are included.</p>
+<p>The F1 score summarizes their balance:</p>
+<p><span class="math display">\[
+F_1(\tau) =
+\frac{2\,\operatorname{Precision}(\tau)\,
+\operatorname{Recall}(\tau)}
+{\operatorname{Precision}(\tau)+\operatorname{Recall}(\tau)}.
+\]</span></p>
+<p>The two plots below use the training predictions so they match the interactive explorer. The horizontal reference line is the fraction of high-CO observations in the training data; it is the precision from labeling every observation positive.</p>
+<div id="e1c231af" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-06T01:28:28.128587Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-06T01:28:28.128462Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-06T01:28:28.327931Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-06T01:28:28.327658Z&quot;}}" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>train_precision, train_recall, train_thresholds <span class="op">=</span> precision_recall_curve(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    y_train, train_probabilities</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Precision and recall include one endpoint with no matching threshold.</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>train_f1 <span class="op">=</span> np.divide(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span> <span class="op">*</span> train_precision[:<span class="op">-</span><span class="dv">1</span>] <span class="op">*</span> train_recall[:<span class="op">-</span><span class="dv">1</span>],</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    train_precision[:<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> train_recall[:<span class="op">-</span><span class="dv">1</span>],</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    out<span class="op">=</span>np.zeros_like(train_thresholds),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    where<span class="op">=</span>(train_precision[:<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> train_recall[:<span class="op">-</span><span class="dv">1</span>]) <span class="op">!=</span> <span class="dv">0</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>fig, (ax_pr, ax_f1) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="fl">5.5</span>))</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>ax_pr.plot(</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    train_recall,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    train_precision,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#3F78A8"</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">2.5</span>,</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"Training precision–recall curve"</span>,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>ax_pr.axhline(</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    y_train.mean(),</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#5F6368"</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    linestyle<span class="op">=</span><span class="st">"--"</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="ss">f"High-CO fraction = </span><span class="sc">{</span>y_train<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> threshold, color <span class="kw">in</span> [(<span class="fl">0.20</span>, <span class="st">"#E1812C"</span>), (<span class="fl">0.50</span>, <span class="st">"#1B4F72"</span>)]:</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    predicted_labels <span class="op">=</span> (train_probabilities <span class="op">&gt;=</span> threshold).astype(<span class="bu">int</span>)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    precision_value <span class="op">=</span> (predicted_labels[y_train.to_numpy() <span class="op">==</span> <span class="dv">1</span>].<span class="bu">sum</span>()</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>                       <span class="op">/</span> predicted_labels.<span class="bu">sum</span>())</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    recall_value <span class="op">=</span> predicted_labels[y_train.to_numpy() <span class="op">==</span> <span class="dv">1</span>].mean()</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    f1_value <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> precision_value <span class="op">*</span> recall_value <span class="op">/</span> (precision_value <span class="op">+</span> recall_value)</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    ax_pr.scatter(</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        recall_value,</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        precision_value,</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>color,</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        edgecolor<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        linewidth<span class="op">=</span><span class="fl">1.3</span>,</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>        s<span class="op">=</span><span class="dv">90</span>,</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>        zorder<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    ax_f1.scatter(</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        threshold,</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>        f1_value,</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>color,</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>        edgecolor<span class="op">=</span><span class="st">"white"</span>,</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>        linewidth<span class="op">=</span><span class="fl">1.3</span>,</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>        s<span class="op">=</span><span class="dv">90</span>,</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>        zorder<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="vs">rf"</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">au=</span><span class="sc">{</span>threshold<span class="sc">:.1f}</span><span class="dv">$</span><span class="vs">: F1 = </span><span class="sc">{</span>f1_value<span class="sc">:.3f}</span><span class="vs">"</span>,</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>ax_pr.<span class="bu">set</span>(</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"Recall"</span>,</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"Precision"</span>,</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Precision–recall trade-off"</span>,</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>    xlim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    ylim<span class="op">=</span>(<span class="dv">0</span>, <span class="fl">1.03</span>),</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>ax_pr.legend(loc<span class="op">=</span><span class="st">"lower left"</span>, frameon<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>ax_f1.plot(</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>    train_thresholds,</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>    train_f1,</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#3F78A8"</span>,</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">2.5</span>,</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>ax_f1.<span class="bu">set</span>(</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="vs">r"Decision threshold </span><span class="dv">$</span><span class="ch">\t</span><span class="vs">au</span><span class="dv">$</span><span class="vs">"</span>,</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"F1 score"</span>,</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"F1 depends on the threshold"</span>,</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    xlim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    ylim<span class="op">=</span>(<span class="dv">0</span>, <span class="fl">1.03</span>),</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>ax_f1.legend(loc<span class="op">=</span><span class="st">"lower center"</span>, frameon<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -497,10 +570,51 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p><a href="../classification/roc-threshold-builder.html">Explore how the ROC curve is built, threshold by threshold</a>.</p>
+</section>
+<section id="measure-ranking-with-roc-and-area-under-the-curve-auc" class="level2">
+<h2 class="anchored" data-anchor-id="measure-ranking-with-roc-and-area-under-the-curve-auc">3. Measure ranking with ROC and area under the curve (AUC)</h2>
+<p>At a threshold <span class="math inline">\(\tau\)</span>, the <strong>true-positive rate</strong> and <strong>false-positive rate</strong> are</p>
+<p><span class="math display">\[
+\operatorname{TPR}(\tau) = \frac{TP(\tau)}{TP(\tau)+FN(\tau)},
+\qquad
+\operatorname{FPR}(\tau) = \frac{FP(\tau)}{FP(\tau)+TN(\tau)}.
+\]</span></p>
+<p>An ROC curve traces TPR against FPR as <span class="math inline">\(\tau\)</span> moves from a strict threshold to a permissive one. The <strong>area under the ROC curve (AUC)</strong> summarizes ranking quality: it is the chance that the model assigns a randomly chosen high-CO observation a higher score than a randomly chosen not-high-CO observation. An AUC of 0.5 corresponds to random ranking.</p>
+<div id="158ea0a9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-06T01:28:28.329894Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-06T01:28:28.329809Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-06T01:28:28.391255Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-06T01:28:28.390971Z&quot;}}" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>train_fpr, train_tpr, _ <span class="op">=</span> roc_curve(y_train, train_probabilities)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>test_fpr, test_tpr, _ <span class="op">=</span> roc_curve(y_test, test_probabilities)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>train_auc <span class="op">=</span> roc_auc_score(y_train, train_probabilities)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>test_auc <span class="op">=</span> roc_auc_score(y_test, test_probabilities)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">7.2</span>))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"#5F6368"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="st">"Random ranking (AUC = 0.500)"</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>ax.plot(train_fpr, train_tpr, color<span class="op">=</span><span class="st">"#3F78A8"</span>, linewidth<span class="op">=</span><span class="fl">2.5</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f"Training ROC (AUC = </span><span class="sc">{</span>train_auc<span class="sc">:.3f}</span><span class="ss">)"</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>ax.plot(test_fpr, test_tpr, color<span class="op">=</span><span class="st">"#E1812C"</span>, linewidth<span class="op">=</span><span class="fl">2.5</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="ss">f"Test ROC (AUC = </span><span class="sc">{</span>test_auc<span class="sc">:.3f}</span><span class="ss">)"</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"False-positive rate (FPR)"</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"True-positive rate (TPR)"</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"TIT provides useful ranking of high-CO observations"</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    xlim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    ylim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    aspect<span class="op">=</span><span class="st">"equal"</span>,</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"lower right"</span>, frameon<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-ranking-and-calibration_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="../classification/threshold-explorer.html">Explore how the ROC curve, precision–recall curve, and F1 score change together as the threshold moves</a>.</p>
 </section>
 <section id="measure-probability-quality-with-log-loss" class="level2">
-<h2 class="anchored" data-anchor-id="measure-probability-quality-with-log-loss">3. Measure probability quality with log loss</h2>
+<h2 class="anchored" data-anchor-id="measure-probability-quality-with-log-loss">4. Measure probability quality with log loss</h2>
 <p>AUC only cares about the ordering of scores. It does not check whether a predicted probability such as 0.90 is numerically credible. For that, we use the binary cross-entropy introduced with logistic regression, often called <strong>log loss</strong>:</p>
 <p><span class="math display">\[
 \operatorname{LogLoss} = -\frac{1}{n}\sum_{i=1}^{n}
@@ -513,62 +627,62 @@ H(\bar y) = -\bar y\log(\bar y) - (1-\bar y)\log(1-\bar y),
 \text{normalized log loss} = \frac{\operatorname{LogLoss}}{H(\bar y)}.
 \]</span></p>
 <p>A normalized log loss of 1 means the model is no better than this constant-probability baseline; lower values are better.</p>
-<div id="e204c8cc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-05T02:12:07.878513Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-05T02:12:07.878423Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-05T02:12:07.919263Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-05T02:12:07.919001Z&quot;}}" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make deliberately overconfident predictions without changing their rank.</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>test_scores <span class="op">=</span> model.decision_function(X_test)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>sharpened_probabilities <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span><span class="dv">5</span> <span class="op">*</span> test_scores))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>test_prevalence <span class="op">=</span> y_test.mean()</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>baseline_log_loss <span class="op">=</span> <span class="op">-</span>(</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    test_prevalence <span class="op">*</span> np.log(test_prevalence)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> test_prevalence) <span class="op">*</span> np.log(<span class="dv">1</span> <span class="op">-</span> test_prevalence)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>probability_quality <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"AUC"</span>: [</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            roc_auc_score(y_test, test_probabilities),</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            roc_auc_score(y_test, sharpened_probabilities),</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        ],</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"log loss"</span>: [</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            log_loss(y_test, test_probabilities),</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            log_loss(y_test, sharpened_probabilities),</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        ],</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    index<span class="op">=</span>[<span class="st">"Original TIT model"</span>, <span class="st">"Overconfident $5z$ scores"</span>],</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>probability_quality[<span class="st">"normalized log loss"</span>] <span class="op">=</span> (</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    probability_quality[<span class="st">"log loss"</span>] <span class="op">/</span> baseline_log_loss</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>probability_quality.style.<span class="bu">format</span>(</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"AUC"</span>: <span class="st">"</span><span class="sc">{:.3f}</span><span class="st">"</span>, <span class="st">"log loss"</span>: <span class="st">"</span><span class="sc">{:.3f}</span><span class="st">"</span>,</span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>     <span class="st">"normalized log loss"</span>: <span class="st">"</span><span class="sc">{:.3f}</span><span class="st">"</span>}</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div id="e204c8cc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-06T01:28:28.392684Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-06T01:28:28.392579Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-06T01:28:28.438380Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-06T01:28:28.438102Z&quot;}}" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make deliberately overconfident predictions without changing their rank.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>test_scores <span class="op">=</span> model.decision_function(X_test)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>sharpened_probabilities <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> np.exp(<span class="op">-</span><span class="dv">5</span> <span class="op">*</span> test_scores))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>test_prevalence <span class="op">=</span> y_test.mean()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>baseline_log_loss <span class="op">=</span> <span class="op">-</span>(</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    test_prevalence <span class="op">*</span> np.log(test_prevalence)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> test_prevalence) <span class="op">*</span> np.log(<span class="dv">1</span> <span class="op">-</span> test_prevalence)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>probability_quality <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"AUC"</span>: [</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            roc_auc_score(y_test, test_probabilities),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>            roc_auc_score(y_test, sharpened_probabilities),</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"log loss"</span>: [</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            log_loss(y_test, test_probabilities),</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            log_loss(y_test, sharpened_probabilities),</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    index<span class="op">=</span>[<span class="st">"Original TIT model"</span>, <span class="st">"Overconfident $5z$ scores"</span>],</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>probability_quality[<span class="st">"normalized log loss"</span>] <span class="op">=</span> (</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    probability_quality[<span class="st">"log loss"</span>] <span class="op">/</span> baseline_log_loss</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>probability_quality.style.<span class="bu">format</span>(</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"AUC"</span>: <span class="st">"</span><span class="sc">{:.3f}</span><span class="st">"</span>, <span class="st">"log loss"</span>: <span class="st">"</span><span class="sc">{:.3f}</span><span class="st">"</span>,</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>     <span class="st">"normalized log loss"</span>: <span class="st">"</span><span class="sc">{:.3f}</span><span class="st">"</span>}</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
 <style type="text/css">
 </style>
 
-<table id="T_373e1" class="caption-top table table-sm table-striped small">
+<table id="T_15e91" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_373e1_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">AUC</th>
-<th id="T_373e1_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">log loss</th>
-<th id="T_373e1_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">normalized log loss</th>
+<th id="T_15e91_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">AUC</th>
+<th id="T_15e91_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">log loss</th>
+<th id="T_15e91_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">normalized log loss</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_373e1_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Original TIT model</th>
-<td id="T_373e1_row0_col0" class="data row0 col0">0.871</td>
-<td id="T_373e1_row0_col1" class="data row0 col1">0.412</td>
-<td id="T_373e1_row0_col2" class="data row0 col2">0.617</td>
+<th id="T_15e91_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Original TIT model</th>
+<td id="T_15e91_row0_col0" class="data row0 col0">0.871</td>
+<td id="T_15e91_row0_col1" class="data row0 col1">0.412</td>
+<td id="T_15e91_row0_col2" class="data row0 col2">0.617</td>
 </tr>
 <tr class="even">
-<th id="T_373e1_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Overconfident $5z$ scores</th>
-<td id="T_373e1_row1_col0" class="data row1 col0">0.871</td>
-<td id="T_373e1_row1_col1" class="data row1 col1">1.011</td>
-<td id="T_373e1_row1_col2" class="data row1 col2">1.514</td>
+<th id="T_15e91_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Overconfident $5z$ scores</th>
+<td id="T_15e91_row1_col0" class="data row1 col0">0.871</td>
+<td id="T_15e91_row1_col1" class="data row1 col1">1.011</td>
+<td id="T_15e91_row1_col2" class="data row1 col2">1.514</td>
 </tr>
 </tbody>
 </table>
@@ -577,49 +691,49 @@ H(\bar y) = -\bar y\log(\bar y) - (1-\bar y)\log(1-\bar y),
 <p>Multiplying every log-odds score <span class="math inline">\(z_i\)</span> by 5 is strictly increasing, so it preserves the ranking and therefore AUC. But it moves probabilities closer to 0 and 1. When the model is wrong, it is now much more confidently wrong, which log loss penalizes heavily.</p>
 </section>
 <section id="check-calibration-with-a-reliability-diagram" class="level2">
-<h2 class="anchored" data-anchor-id="check-calibration-with-a-reliability-diagram">4. Check calibration with a reliability diagram</h2>
+<h2 class="anchored" data-anchor-id="check-calibration-with-a-reliability-diagram">5. Check calibration with a reliability diagram</h2>
 <p>Calibration asks whether the probability values mean what they say. For example, among test observations assigned probabilities near 0.70, we would hope that approximately 70% actually have high CO. A reliability diagram bins the predicted probabilities and compares their mean with the observed high-CO fraction in each bin.</p>
-<div id="8121db89" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-05T02:12:07.920493Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-05T02:12:07.920392Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-05T02:12:07.970437Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-05T02:12:07.970173Z&quot;}}" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reliability_points(labels, probabilities, n_bins<span class="op">=</span><span class="dv">10</span>):</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Return observed fractions and mean predictions in probability bins."""</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    observed_fraction, mean_prediction <span class="op">=</span> calibration_curve(</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        labels, probabilities, n_bins<span class="op">=</span>n_bins, strategy<span class="op">=</span><span class="st">"uniform"</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> observed_fraction, mean_prediction</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">7.2</span>))</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"#5F6368"</span>,</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="st">"Perfect calibration"</span>)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> labels, probabilities, label, color, marker <span class="kw">in</span> [</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    (y_train, train_probabilities, <span class="st">"Training set"</span>, <span class="st">"#3F78A8"</span>, <span class="st">"o"</span>),</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    (y_test, test_probabilities, <span class="st">"Test set"</span>, <span class="st">"#E1812C"</span>, <span class="st">"s"</span>),</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>]:</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    observed_fraction, mean_prediction <span class="op">=</span> reliability_points(labels, probabilities)</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    ax.plot(mean_prediction, observed_fraction, color<span class="op">=</span>color, marker<span class="op">=</span>marker,</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            markersize<span class="op">=</span><span class="dv">7</span>, linewidth<span class="op">=</span><span class="fl">2.5</span>, label<span class="op">=</span>label)</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"Mean predicted probability"</span>,</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"Observed high-CO fraction"</span>,</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Reliability of TIT-based high-CO probabilities"</span>,</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    xlim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    ylim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    aspect<span class="op">=</span><span class="st">"equal"</span>,</span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"upper left"</span>, frameon<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="8121db89" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-06T01:28:28.439755Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-06T01:28:28.439641Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-06T01:28:28.495377Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-06T01:28:28.495110Z&quot;}}" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reliability_points(labels, probabilities, n_bins<span class="op">=</span><span class="dv">10</span>):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Return observed fractions and mean predictions in probability bins."""</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    observed_fraction, mean_prediction <span class="op">=</span> calibration_curve(</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        labels, probabilities, n_bins<span class="op">=</span>n_bins, strategy<span class="op">=</span><span class="st">"uniform"</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> observed_fraction, mean_prediction</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">7.2</span>))</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>], <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"#5F6368"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="st">"Perfect calibration"</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> labels, probabilities, label, color, marker <span class="kw">in</span> [</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    (y_train, train_probabilities, <span class="st">"Training set"</span>, <span class="st">"#3F78A8"</span>, <span class="st">"o"</span>),</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    (y_test, test_probabilities, <span class="st">"Test set"</span>, <span class="st">"#E1812C"</span>, <span class="st">"s"</span>),</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>]:</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    observed_fraction, mean_prediction <span class="op">=</span> reliability_points(labels, probabilities)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    ax.plot(mean_prediction, observed_fraction, color<span class="op">=</span>color, marker<span class="op">=</span>marker,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>            markersize<span class="op">=</span><span class="dv">7</span>, linewidth<span class="op">=</span><span class="fl">2.5</span>, label<span class="op">=</span>label)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"Mean predicted probability"</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"Observed high-CO fraction"</span>,</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Reliability of TIT-based high-CO probabilities"</span>,</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    xlim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    ylim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    aspect<span class="op">=</span><span class="st">"equal"</span>,</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"upper left"</span>, frameon<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04-ranking-and-calibration_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="04-ranking-and-calibration_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
 <section id="choose-the-metric-that-answers-the-question" class="level2">
-<h2 class="anchored" data-anchor-id="choose-the-metric-that-answers-the-question">5. Choose the metric that answers the question</h2>
+<h2 class="anchored" data-anchor-id="choose-the-metric-that-answers-the-question">6. Choose the metric that answers the question</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -652,10 +766,10 @@ H(\bar y) = -\bar y\log(\bar y) - (1-\bar y)\log(1-\bar y),
 <h2 class="anchored" data-anchor-id="try-it">Try it</h2>
 <p>Change the multiplier from 5 to 2 in the <span class="math inline">\(5z\)</span> example, rerun the cell, and compare AUC with log loss again.</p>
 <p><a href="../classification/index.html">← Return to Classification</a></p>
-<div id="f07b3ae3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-05T02:12:07.971860Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-05T02:12:07.971769Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-05T02:12:07.973341Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-05T02:12:07.973117Z&quot;}}" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Try a less extreme score multiplier.</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># alternative_probabilities = 1 / (1 + np.exp(-2 * test_scores))</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># roc_auc_score(y_test, alternative_probabilities), log_loss(y_test, alternative_probabilities)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="f07b3ae3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-06T01:28:28.496834Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-06T01:28:28.496725Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-06T01:28:28.498330Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-06T01:28:28.498065Z&quot;}}" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Try a less extreme score multiplier.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># alternative_probabilities = 1 / (1 + np.exp(-2 * test_scores))</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># roc_auc_score(y_test, alternative_probabilities), log_loss(y_test, alternative_probabilities)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 

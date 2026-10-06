@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Classification – MECE 4520</title>
+<title>Exploring classification thresholds – MECE 4520</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -79,6 +79,35 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -288,7 +317,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Evaluation</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../classification/index.html" aria-current="page"> 
+    <a class="nav-link" href="../classification/index.html"> 
 <span class="menu-text">Classification</span></a>
   </li>  
 </ul>
@@ -300,23 +329,22 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-    </div>
+    
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content column-page" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Classification</h1>
+<h1 class="title">Exploring classification thresholds</h1>
 </div>
 
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-page">
 
     
   
@@ -327,61 +355,307 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<nav id="TOC" role="doc-toc">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#likelihood-and-maximum-likelihood-estimation" id="toc-likelihood-and-maximum-likelihood-estimation">1. Likelihood and maximum likelihood estimation</a></li>
-  <li><a href="#logistic-regression-and-gradient-descent" id="toc-logistic-regression-and-gradient-descent">2. Logistic regression and gradient descent</a></li>
-  <li><a href="#classification-metrics-thresholds-and-costs" id="toc-classification-metrics-thresholds-and-costs">3. Classification metrics, thresholds, and costs</a></li>
-  <li><a href="#ranking-probability-quality-and-calibration" id="toc-ranking-probability-quality-and-calibration">4. Ranking, probability quality, and calibration</a></li>
-  </ul>
-</nav>
-<p>Classification estimates the chance that an observation belongs to a category. Before we fit a classifier, we need a way to connect a probability model to observed binary outcomes.</p>
-<section id="likelihood-and-maximum-likelihood-estimation" class="level2">
-<h2 class="anchored" data-anchor-id="likelihood-and-maximum-likelihood-estimation">1. Likelihood and maximum likelihood estimation</h2>
-<p><strong>Estimated time:</strong> 20–30 minutes</p>
-<p>Use simulated red/blue ticket draws to distinguish probability from likelihood, compare proposed probabilities, and identify the maximum- likelihood estimate. This is the same likelihood idea that logistic regression will use later, without yet fitting a turbine-data model.</p>
-<p><a href="../classification/01-likelihood-and-mle.html">View the notebook</a></p>
-<section id="interactive-playground" class="level3">
-<h3 class="anchored" data-anchor-id="interactive-playground">Interactive playground</h3>
-<p><strong>Estimated time:</strong> 10–15 minutes</p>
-<p>Generate ticket draws one at a time and watch the likelihood curve accumulate. Use the maximum of that curve to identify the maximum-likelihood estimate.</p>
-<p><a href="../classification/likelihood-playground.html">Open the interactive playground</a></p>
-</section>
-</section>
-<section id="logistic-regression-and-gradient-descent" class="level2">
-<h2 class="anchored" data-anchor-id="logistic-regression-and-gradient-descent">2. Logistic regression and gradient descent</h2>
-<p><strong>Estimated time:</strong> 45–60 minutes</p>
-<p>Fit a high-CO classification model using turbine inlet temperature (TIT). Starting from the likelihood idea, build the binary-cross-entropy loss, calculate its gradient, and use repeated gradient-descent updates to fit the model.</p>
-<p><a href="../classification/02-logistic-regression-gradient-descent.html">View the notebook</a></p>
-<section id="interactive-explorer" class="level3">
-<h3 class="anchored" data-anchor-id="interactive-explorer">Interactive explorer</h3>
-<p><strong>Estimated time:</strong> 10–15 minutes</p>
-<p>Step through the same logistic-regression updates and watch the coefficients move downhill on the binary-cross-entropy surface.</p>
-<p><a href="../classification/logistic-gradient-descent.html">Open the interactive explorer</a></p>
-</section>
-</section>
-<section id="classification-metrics-thresholds-and-costs" class="level2">
-<h2 class="anchored" data-anchor-id="classification-metrics-thresholds-and-costs">3. Classification metrics, thresholds, and costs</h2>
-<p><strong>Estimated time:</strong> 40–50 minutes</p>
-<p>Evaluate the high-CO logistic model on held-out turbine observations. Turn probabilities into alerts, read a confusion matrix, and calculate accuracy, precision, recall, and F1. Compare alert thresholds and see how operating costs can change the appropriate decision rule.</p>
-<p><a href="../classification/03-classification-metrics.html">View the notebook</a></p>
-</section>
-<section id="ranking-probability-quality-and-calibration" class="level2">
-<h2 class="anchored" data-anchor-id="ranking-probability-quality-and-calibration">4. Ranking, probability quality, and calibration</h2>
-<p><strong>Estimated time:</strong> 30–40 minutes</p>
-<p>Evaluate the same high-CO probability model without fixing one alert threshold. Use ROC/AUC to assess ranking, log loss to assess probability quality, and a reliability diagram to check whether predicted probabilities agree with observed frequencies.</p>
-<p><a href="../classification/04-ranking-and-calibration.html">View the notebook</a></p>
-<section id="interactive-threshold-explorer" class="level3">
-<h3 class="anchored" data-anchor-id="interactive-threshold-explorer">Interactive threshold explorer</h3>
-<p><strong>Estimated time:</strong> 5–10 minutes</p>
-<p>Lower the classification threshold point by point to see how the training ROC curve, precision–recall curve, and F1 score change together. Inspect the threshold, rates, F1, and the associated counts at any point.</p>
-<p><a href="../classification/threshold-explorer.html">Open the interactive threshold explorer</a></p>
+
+<p>This explorer uses the TIT-based high-CO logistic model on the training set. It follows one decision threshold as it changes the ROC curve, the precision–recall curve, and F1 score at the same time.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>What to watch
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Start with a very high threshold: no observations receive a high-CO label. As the threshold decreases, the model produces more alerts. The ROC curve traces true-positive against false-positive rate; the precision–recall curve shows the same alerts from a different perspective. F1 summarizes the balance between precision and recall.</p>
+</div>
+</div>
+<div id="threshold-metrics-builder" class="clt-explorer threshold-metrics-builder" aria-label="Interactive classification-threshold explorer">
+  <div class="clt-controls threshold-metrics-controls" aria-label="Classification threshold control">
+    <label>
+      <span>Decision threshold</span>
+      <input id="threshold-metrics-slider" type="range" min="0" value="0">
+      <output id="threshold-metrics-value" for="threshold-metrics-slider">τ = 1.00</output>
+    </label>
+  </div>
+  <div class="clt-buttons" aria-label="Threshold-sweep controls">
+    <button id="threshold-metrics-run" type="button" class="regression-sampling-primary">Run all thresholds</button>
+    <button id="threshold-metrics-step" type="button">Next threshold</button>
+    <button id="threshold-metrics-reset" type="button">Reset</button>
+  </div>
+  <p id="threshold-metrics-status" class="clt-status tabular-nums" aria-live="polite"></p>
+  <div class="clt-plots threshold-metrics-plots">
+    <figure class="clt-plot threshold-metrics-plot figure">
+      <figcaption>Training ROC curve</figcaption>
+      <svg id="roc-threshold-chart" role="img" aria-label="Training ROC curve being drawn as the threshold decreases"></svg>
+    </figure>
+    <figure class="clt-plot threshold-metrics-plot figure">
+      <figcaption>Training precision–recall curve</figcaption>
+      <svg id="precision-recall-chart" role="img" aria-label="Training precision-recall curve being drawn as the threshold decreases"></svg>
+    </figure>
+    <figure class="clt-plot threshold-metrics-plot figure">
+      <figcaption>F1 score by decision threshold</figcaption>
+      <svg id="f1-threshold-chart" role="img" aria-label="Training F1 score as the threshold decreases"></svg>
+    </figure>
+  </div>
+</div>
+<p>The slider lowers <span class="math inline">\(\tau\)</span> in evenly spaced increments from 1 to 0. Each point uses all observations whose predicted probability is at least <span class="math inline">\(\tau\)</span>; the same set of alerts drives all three views.</p>
+<p><a href="../classification/index.html">← Return to Classification</a></p>
+<script src="../assets/precision-recall-thresholds.js"></script>
+<script>
+(() => {
+  const root = document.getElementById("threshold-metrics-builder");
+  if (!root || !window.MECE4520PrecisionRecallPoints) return;
+
+  const points = window.MECE4520PrecisionRecallPoints;
+  const negativeCount = points.at(-1).fp;
+  const slider = root.querySelector("#threshold-metrics-slider");
+  const thresholdValue = root.querySelector("#threshold-metrics-value");
+  const status = root.querySelector("#threshold-metrics-status");
+  const rocChart = root.querySelector("#roc-threshold-chart");
+  const prChart = root.querySelector("#precision-recall-chart");
+  const f1Chart = root.querySelector("#f1-threshold-chart");
+  const runButton = root.querySelector("#threshold-metrics-run");
+  const stepButton = root.querySelector("#threshold-metrics-step");
+  const resetButton = root.querySelector("#threshold-metrics-reset");
+
+  slider.max = String(points.length - 1);
+
+  let pointIndex = 0;
+  let running = false;
+  let animationFrame = null;
+  let lastFrameTime = 0;
+
+  function svgElement(tagName, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tagName);
+    Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    svg.append(element);
+  }
+
+  function scale(value, domain, range) {
+    return range[0] + ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]);
+  }
+
+  function chartSetup(chart, titleText, descriptionText) {
+    const width = Math.max(280, Math.round(chart.getBoundingClientRect().width) || 360);
+    const compact = width < 480;
+    const margin = compact
+      ? { top: 16, right: 18, bottom: 50, left: 56 }
+      : { top: 20, right: 24, bottom: 58, left: 66 };
+    const plotSize = Math.max(1, width - margin.left - margin.right);
+    const height = plotSize + margin.top + margin.bottom;
+    const plotRight = margin.left + plotSize;
+    const plotBottom = margin.top + plotSize;
+    const x = value => scale(value, [0, 1], [margin.left, plotRight]);
+    const y = value => scale(value, [0, 1], [plotBottom, margin.top]);
+
+    chart.replaceChildren();
+    chart.setAttribute("viewBox", "0 0 " + width + " " + height);
+    chart.setAttribute("width", String(width));
+    chart.setAttribute("height", String(height));
+    chart.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+    const title = svgElement("title", { id: chart.id + "-title" });
+    title.textContent = titleText;
+    const description = svgElement("desc", { id: chart.id + "-description" });
+    description.textContent = descriptionText;
+    chart.append(title, description);
+    chart.setAttribute("aria-labelledby", title.id + " " + description.id);
+
+    chart.append(svgElement("rect", {
+      x: margin.left, y: margin.top,
+      width: plotRight - margin.left, height: plotBottom - margin.top,
+      class: "threshold-metrics-frame"
+    }));
+
+    [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(tick => {
+      const xPosition = x(tick);
+      const yPosition = y(tick);
+      chart.append(svgElement("line", {
+        x1: xPosition, y1: margin.top, x2: xPosition, y2: plotBottom,
+        class: "threshold-metrics-grid"
+      }));
+      chart.append(svgElement("line", {
+        x1: margin.left, y1: yPosition, x2: plotRight, y2: yPosition,
+        class: "threshold-metrics-grid"
+      }));
+      addText(chart, tick.toFixed(1), xPosition, plotBottom + 20, {
+        class: "threshold-metrics-tick", "text-anchor": "middle"
+      });
+      addText(chart, tick.toFixed(1), margin.left - 9, yPosition + 4, {
+        class: "threshold-metrics-tick", "text-anchor": "end"
+      });
+    });
+
+    return { height, margin, plotRight, plotBottom, x, y };
+  }
+
+  function drawPath(chart, setup, values, xValue, yValue, curveClass, currentX, currentY) {
+    const pathData = values.map((point, index) =>
+      (index === 0 ? "M" : "L")
+      + setup.x(xValue(point)).toFixed(2) + " " + setup.y(yValue(point)).toFixed(2)
+    ).join(" ");
+    chart.append(svgElement("path", { d: pathData, class: curveClass }));
+    chart.append(svgElement("circle", {
+      cx: setup.x(currentX), cy: setup.y(currentY), r: 5.5,
+      class: "threshold-metrics-current"
+    }));
+  }
+
+  function addAxes(chart, setup, xTitle, yTitle) {
+    addText(chart, xTitle, (setup.margin.left + setup.plotRight) / 2, setup.height - 11, {
+      class: "threshold-metrics-axis-title", "text-anchor": "middle"
+    });
+    const yTitleX = 18;
+    const yTitleY = (setup.margin.top + setup.plotBottom) / 2;
+    addText(chart, yTitle, yTitleX, yTitleY, {
+      class: "threshold-metrics-axis-title", "text-anchor": "middle",
+      transform: "rotate(-90 " + yTitleX + " " + yTitleY + ")"
+    });
+  }
+
+  function drawRoc(currentPoints, current) {
+    const setup = chartSetup(
+      rocChart,
+      "Training ROC curve",
+      "The chart shows true-positive rate on the vertical axis and false-positive rate on the horizontal axis as the decision threshold decreases."
+    );
+    rocChart.append(svgElement("line", {
+      x1: setup.x(0), y1: setup.y(0), x2: setup.x(1), y2: setup.y(1),
+      class: "threshold-metrics-reference"
+    }));
+    drawPath(
+      rocChart, setup, currentPoints,
+      point => point.fp / negativeCount,
+      point => point.recall,
+      "threshold-metrics-roc-curve",
+      current.fp / negativeCount,
+      current.recall
+    );
+    addAxes(rocChart, setup, "False-positive rate", "True-positive rate");
+  }
+
+  function drawPrecisionRecall(currentPoints, current) {
+    const setup = chartSetup(
+      prChart,
+      "Training precision-recall curve",
+      "The chart shows precision on the vertical axis and recall on the horizontal axis as the decision threshold decreases."
+    );
+    drawPath(
+      prChart, setup, currentPoints,
+      point => point.recall,
+      point => point.precision,
+      "threshold-metrics-pr-curve",
+      current.recall,
+      current.precision
+    );
+    addAxes(prChart, setup, "Recall", "Precision");
+  }
+
+  function drawF1(currentPoints, current) {
+    const setup = chartSetup(
+      f1Chart,
+      "Training F1 score by decision threshold",
+      "The chart shows F1 score on the vertical axis as the decision threshold decreases from 1 to 0."
+    );
+    drawPath(
+      f1Chart, setup, currentPoints,
+      point => point.threshold,
+      point => point.f1,
+      "threshold-metrics-f1-curve",
+      current.threshold,
+      current.f1
+    );
+    addAxes(f1Chart, setup, "Decision threshold τ", "F1 score");
+  }
+
+  function draw() {
+    const current = points[pointIndex];
+    const currentPoints = points.slice(0, pointIndex + 1);
+    const falsePositiveRate = current.fp / negativeCount;
+
+    drawRoc(currentPoints, current);
+    drawPrecisionRecall(currentPoints, current);
+    drawF1(currentPoints, current);
+    thresholdValue.value = "τ = " + current.threshold.toFixed(2);
+    thresholdValue.textContent = "τ = " + current.threshold.toFixed(2);
+    status.textContent = "τ = " + current.threshold.toFixed(2)
+      + " · precision = " + current.precision.toFixed(3)
+      + " · recall / TPR = " + current.recall.toFixed(3)
+      + " · FPR = " + falsePositiveRate.toFixed(3)
+      + " · F1 = " + current.f1.toFixed(3)
+      + " · TP = " + current.tp.toLocaleString()
+      + " · FP = " + current.fp.toLocaleString()
+      + " · FN = " + current.fn.toLocaleString();
+  }
+
+  function update(index) {
+    pointIndex = Math.max(0, Math.min(points.length - 1, index));
+    slider.value = String(pointIndex);
+    draw();
+  }
+
+  function stop() {
+    running = false;
+    if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+    runButton.textContent = pointIndex >= points.length - 1
+      ? "Replay all thresholds"
+      : "Run all thresholds";
+  }
+
+  function animate(timestamp) {
+    if (!running) return;
+    if (timestamp - lastFrameTime >= 55) {
+      update(pointIndex + 1);
+      lastFrameTime = timestamp;
+    }
+    if (pointIndex >= points.length - 1) {
+      stop();
+      return;
+    }
+    animationFrame = requestAnimationFrame(animate);
+  }
+
+  runButton.addEventListener("click", () => {
+    if (running) {
+      stop();
+      return;
+    }
+    if (pointIndex >= points.length - 1) update(0);
+    running = true;
+    runButton.textContent = "Pause";
+    lastFrameTime = 0;
+    animationFrame = requestAnimationFrame(animate);
+  });
+
+  stepButton.addEventListener("click", () => {
+    stop();
+    update(pointIndex + 1);
+  });
+
+  resetButton.addEventListener("click", () => {
+    stop();
+    update(0);
+  });
+
+  slider.addEventListener("input", () => {
+    stop();
+    update(Number.parseInt(slider.value, 10));
+  });
+
+  [rocChart, prChart, f1Chart].forEach(chart => new ResizeObserver(draw).observe(chart));
+  update(0);
+})();
+</script>
 
 
-</section>
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

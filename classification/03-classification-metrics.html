@@ -401,15 +401,15 @@ window.Quarto = {
   <li><a href="#set-aside-test-observations" id="toc-set-aside-test-observations">1. Set aside test observations</a></li>
   <li><a href="#fit-a-probability-model-on-the-training-set" id="toc-fit-a-probability-model-on-the-training-set">2. Fit a probability model on the training set</a></li>
   <li><a href="#read-the-confusion-matrix" id="toc-read-the-confusion-matrix">3. Read the confusion matrix</a></li>
-  <li><a href="#summarize-default-threshold-performance" id="toc-summarize-default-threshold-performance">4. Summarize default-threshold performance</a></li>
+  <li><a href="#common-metrics" id="toc-common-metrics">4. Common metrics</a></li>
   <li><a href="#change-the-threshold-change-the-decision" id="toc-change-the-threshold-change-the-decision">5. Change the threshold, change the decision</a></li>
   <li><a href="#include-the-cost-of-mistakes" id="toc-include-the-cost-of-mistakes">6. Include the cost of mistakes</a></li>
   <li><a href="#try-it" id="toc-try-it">Try it</a></li>
   </ul>
 </nav>
 <p><a target="_blank" href="https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/classification/03-classification-metrics.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a></p>
-<p>In the previous notebook, we fitted a logistic-regression model that estimates the probability of a high-CO operating observation from turbine inlet temperature (TIT). A probability alone does not say whether the system should issue an alert. Here, we make that decision, compare it with held-out observations, and use a <strong>confusion matrix</strong> to describe what the model gets right and wrong.</p>
-<p>We will use a train/test split throughout. The model sees the training observations while it is fitted, and test observations remain untouched until the final evaluation.</p>
+<p>In the previous notebook, we fitted a logistic-regression model that estimates the probability of a high-CO operating observation from turbine inlet temperature (TIT). A probability alone does not say whether the system should issue an alert. Here, we make that decision, compare it with the ground truth, and use a <strong>confusion matrix</strong> to describe what the model gets right and wrong.</p>
+<p>We will use a train/test split throughout. In this notebook, <strong>test set</strong> and <strong>validation set</strong> mean the same thing: the model sees the training observations while it is fitted, and the held-out test (validation) observations remain untouched until the final evaluation.</p>
 <section id="set-aside-test-observations" class="level2">
 <h2 class="anchored" data-anchor-id="set-aside-test-observations">1. Set aside test observations</h2>
 <p>Each row records one gas-turbine operating observation. The course-defined target <code>high_co</code> equals 1 when the measured carbon-monoxide concentration is at least 2 mg/m³, and 0 otherwise. We use TIT as one feature, as in the gradient-descent example.</p>
@@ -465,24 +465,24 @@ window.Quarto = {
 <style type="text/css">
 </style>
 
-<table id="T_3c50d" class="caption-top table table-sm table-striped small">
+<table id="T_8ba8e" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_3c50d_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">observations</th>
-<th id="T_3c50d_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">high-CO fraction</th>
+<th id="T_8ba8e_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">observations</th>
+<th id="T_8ba8e_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">high-CO fraction</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_3c50d_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Training set</th>
-<td id="T_3c50d_row0_col0" class="data row0 col0">25713</td>
-<td id="T_3c50d_row0_col1" class="data row0 col1">38.8%</td>
+<th id="T_8ba8e_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Training set</th>
+<td id="T_8ba8e_row0_col0" class="data row0 col0">25713</td>
+<td id="T_8ba8e_row0_col1" class="data row0 col1">38.8%</td>
 </tr>
 <tr class="even">
-<th id="T_3c50d_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Test set</th>
-<td id="T_3c50d_row1_col0" class="data row1 col0">11020</td>
-<td id="T_3c50d_row1_col1" class="data row1 col1">38.8%</td>
+<th id="T_8ba8e_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Test set</th>
+<td id="T_8ba8e_row1_col0" class="data row1 col0">11020</td>
+<td id="T_8ba8e_row1_col1" class="data row1 col1">38.8%</td>
 </tr>
 </tbody>
 </table>
@@ -492,7 +492,7 @@ window.Quarto = {
 <section id="fit-a-probability-model-on-the-training-set" class="level2">
 <h2 class="anchored" data-anchor-id="fit-a-probability-model-on-the-training-set">2. Fit a probability model on the training set</h2>
 <p>We fit logistic regression only on the training observations. The fitted model returns an estimated probability of high CO for every test row.</p>
-<p>For this notebook, we use scikit-learn’s implementation rather than repeat the gradient-descent code from the previous notebook. Its default decision rule issues an alert at a predicted probability of 0.50. That is a useful reference choice—not a universally optimal threshold.</p>
+<p>For this notebook, we use scikit-learn’s implementation rather than repeat the gradient-descent code from the previous notebook. Its default decision rule issues an alert at a predicted probability of 0.50. That is a useful reference choice—not a universally optimal threshold. Later in this notebook, we will examine how changing the threshold changes the resulting decisions and metrics.</p>
 <div id="327f378a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-05T02:09:48.943272Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-05T02:09:48.943170Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-05T02:09:48.990265Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-05T02:09:48.990049Z&quot;}}" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LogisticRegression(max_iter<span class="op">=</span><span class="dv">1_000</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train)</span>
@@ -558,7 +558,7 @@ Fitted log-odds = 124.614 + (-0.11570) × TIT</code></pre>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="03-classification-metrics_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="03-classification-metrics_files/figure-html/cell-4-output-1.png" width="895" height="470" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -566,19 +566,19 @@ Fitted log-odds = 124.614 + (-0.11570) × TIT</code></pre>
 <style type="text/css">
 </style>
 
-<table id="T_554df" class="caption-top table table-sm table-striped small">
+<table id="T_f7000" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_554df_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">TIT (°C)</th>
-<th id="T_554df_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Predicted high-CO label</th>
+<th id="T_f7000_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">TIT (°C)</th>
+<th id="T_f7000_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Predicted high-CO label</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_554df_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">0</th>
-<td id="T_554df_row0_col0" class="data row0 col0">1080</td>
-<td id="T_554df_row0_col1" class="data row0 col1">0</td>
+<th id="T_f7000_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">0</th>
+<td id="T_f7000_row0_col0" class="data row0 col0">1080</td>
+<td id="T_f7000_row0_col1" class="data row0 col1">0</td>
 </tr>
 </tbody>
 </table>
@@ -593,20 +593,20 @@ Fitted log-odds = 124.614 + (-0.11570) × TIT</code></pre>
 <thead>
 <tr class="header">
 <th></th>
-<th style="text-align: right;">Predicted no alert</th>
 <th style="text-align: right;">Predicted alert</th>
+<th style="text-align: right;">Predicted no alert</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>Observed not high CO</strong></td>
-<td style="text-align: right;">True negative (TN)</td>
-<td style="text-align: right;">False positive (FP)</td>
+<td><strong>Observed high CO</strong></td>
+<td style="text-align: right;">True positive (TP)</td>
+<td style="text-align: right;">False negative (FN)</td>
 </tr>
 <tr class="even">
-<td><strong>Observed high CO</strong></td>
-<td style="text-align: right;">False negative (FN)</td>
-<td style="text-align: right;">True positive (TP)</td>
+<td><strong>Observed not high CO</strong></td>
+<td style="text-align: right;">False positive (FP)</td>
+<td style="text-align: right;">True negative (TN)</td>
 </tr>
 </tbody>
 </table>
@@ -616,10 +616,10 @@ Fitted log-odds = 124.614 + (-0.11570) × TIT</code></pre>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>tn, fp, fn, tp <span class="op">=</span> confusion_matrix(y_test, test_predictions, labels<span class="op">=</span>[<span class="dv">0</span>, <span class="dv">1</span>]).ravel()</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>matrix <span class="op">=</span> np.array([[tn, fp], [fn, tp]])</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>matrix <span class="op">=</span> np.array([[tp, fn], [fp, tn]])</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>cell_labels <span class="op">=</span> np.array([</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    [<span class="ss">f"True negative</span><span class="ch">\n</span><span class="sc">{</span>tn<span class="sc">:,}</span><span class="ss">"</span>, <span class="ss">f"False positive</span><span class="ch">\n</span><span class="sc">{</span>fp<span class="sc">:,}</span><span class="ss">"</span>],</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    [<span class="ss">f"False negative</span><span class="ch">\n</span><span class="sc">{</span>fn<span class="sc">:,}</span><span class="ss">"</span>, <span class="ss">f"True positive</span><span class="ch">\n</span><span class="sc">{</span>tp<span class="sc">:,}</span><span class="ss">"</span>],</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    [<span class="ss">f"True positive</span><span class="ch">\n</span><span class="sc">{</span>tp<span class="sc">:,}</span><span class="ss">"</span>, <span class="ss">f"False negative</span><span class="ch">\n</span><span class="sc">{</span>fn<span class="sc">:,}</span><span class="ss">"</span>],</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    [<span class="ss">f"False positive</span><span class="ch">\n</span><span class="sc">{</span>fp<span class="sc">:,}</span><span class="ss">"</span>, <span class="ss">f"True negative</span><span class="ch">\n</span><span class="sc">{</span>tn<span class="sc">:,}</span><span class="ss">"</span>],</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>])</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">7.2</span>, <span class="fl">5.4</span>))</span>
@@ -632,8 +632,8 @@ Fitted log-odds = 124.614 + (-0.11570) × TIT</code></pre>
 <span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    square<span class="op">=</span><span class="va">True</span>,</span>
 <span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    linewidths<span class="op">=</span><span class="fl">1.5</span>,</span>
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    linecolor<span class="op">=</span><span class="st">"white"</span>,</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    xticklabels<span class="op">=</span>[<span class="st">"No alert"</span>, <span class="st">"Alert"</span>],</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    yticklabels<span class="op">=</span>[<span class="st">"Observed not high CO"</span>, <span class="st">"Observed high CO"</span>],</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    xticklabels<span class="op">=</span>[<span class="st">"Alert"</span>, <span class="st">"No alert"</span>],</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    yticklabels<span class="op">=</span>[<span class="st">"Observed high CO"</span>, <span class="st">"Observed not high CO"</span>],</span>
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>ax,</span>
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
@@ -645,15 +645,15 @@ Fitted log-odds = 124.614 + (-0.11570) × TIT</code></pre>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="03-classification-metrics_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="03-classification-metrics_files/figure-html/cell-5-output-1.png" width="470" height="484" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="summarize-default-threshold-performance" class="level2">
-<h2 class="anchored" data-anchor-id="summarize-default-threshold-performance">4. Summarize default-threshold performance</h2>
-<p>The four confusion-matrix counts measure different kinds of success and error. Four common summaries are:</p>
+<section id="common-metrics" class="level2">
+<h2 class="anchored" data-anchor-id="common-metrics">4. Common metrics</h2>
+<p>From the confusion matrix, we can derive the following commonly used metrics:</p>
 <p><span class="math display">\[
 \text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
 \]</span></p>
@@ -692,34 +692,34 @@ F_1 = \frac{2\,(\text{Precision})\,(\text{Recall})}
 <style type="text/css">
 </style>
 
-<table id="T_1cf7e" class="caption-top table table-sm table-striped small">
+<table id="T_61856" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_1cf7e_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">value</th>
-<th id="T_1cf7e_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">plain-language question</th>
+<th id="T_61856_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">value</th>
+<th id="T_61856_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">plain-language question</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_1cf7e_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Accuracy</th>
-<td id="T_1cf7e_row0_col0" class="data row0 col0">84.7%</td>
-<td id="T_1cf7e_row0_col1" class="data row0 col1">How often is the alert decision correct overall?</td>
+<th id="T_61856_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Accuracy</th>
+<td id="T_61856_row0_col0" class="data row0 col0">84.7%</td>
+<td id="T_61856_row0_col1" class="data row0 col1">How often is the alert decision correct overall?</td>
 </tr>
 <tr class="even">
-<th id="T_1cf7e_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Precision</th>
-<td id="T_1cf7e_row1_col0" class="data row1 col0">87.9%</td>
-<td id="T_1cf7e_row1_col1" class="data row1 col1">When there is an alert, how often is CO actually high?</td>
+<th id="T_61856_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Precision</th>
+<td id="T_61856_row1_col0" class="data row1 col0">87.9%</td>
+<td id="T_61856_row1_col1" class="data row1 col1">When there is an alert, how often is CO actually high?</td>
 </tr>
 <tr class="odd">
-<th id="T_1cf7e_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">Recall</th>
-<td id="T_1cf7e_row2_col0" class="data row2 col0">70.3%</td>
-<td id="T_1cf7e_row2_col1" class="data row2 col1">Of the high-CO observations, how many receive an alert?</td>
+<th id="T_61856_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">Recall</th>
+<td id="T_61856_row2_col0" class="data row2 col0">70.3%</td>
+<td id="T_61856_row2_col1" class="data row2 col1">Of the high-CO observations, how many receive an alert?</td>
 </tr>
 <tr class="even">
-<th id="T_1cf7e_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">F1 score</th>
-<td id="T_1cf7e_row3_col0" class="data row3 col0">78.1%</td>
-<td id="T_1cf7e_row3_col1" class="data row3 col1">How well do precision and recall balance each other?</td>
+<th id="T_61856_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">F1 score</th>
+<td id="T_61856_row3_col0" class="data row3 col0">78.1%</td>
+<td id="T_61856_row3_col1" class="data row3 col1">How well do precision and recall balance each other?</td>
 </tr>
 </tbody>
 </table>
@@ -770,19 +770,19 @@ F_1 = \frac{2\,(\text{Precision})\,(\text{Recall})}
 <style type="text/css">
 </style>
 
-<table id="T_4a548" class="caption-top table table-sm table-striped small">
+<table id="T_f7bd9" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_4a548_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">alerts</th>
-<th id="T_4a548_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">TN</th>
-<th id="T_4a548_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">FP</th>
-<th id="T_4a548_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">FN</th>
-<th id="T_4a548_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">TP</th>
-<th id="T_4a548_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">accuracy</th>
-<th id="T_4a548_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">precision</th>
-<th id="T_4a548_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">recall</th>
-<th id="T_4a548_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">F1</th>
+<th id="T_f7bd9_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">alerts</th>
+<th id="T_f7bd9_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">TN</th>
+<th id="T_f7bd9_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">FP</th>
+<th id="T_f7bd9_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">FN</th>
+<th id="T_f7bd9_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">TP</th>
+<th id="T_f7bd9_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">accuracy</th>
+<th id="T_f7bd9_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">precision</th>
+<th id="T_f7bd9_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">recall</th>
+<th id="T_f7bd9_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">F1</th>
 </tr>
 <tr class="even">
 <th class="index_name level0" data-quarto-table-cell-role="th">threshold</th>
@@ -799,28 +799,28 @@ F_1 = \frac{2\,(\text{Precision})\,(\text{Recall})}
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_4a548_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">0.500000</th>
-<td id="T_4a548_row0_col0" class="data row0 col0">3423</td>
-<td id="T_4a548_row0_col1" class="data row0 col1">6324</td>
-<td id="T_4a548_row0_col2" class="data row0 col2">415</td>
-<td id="T_4a548_row0_col3" class="data row0 col3">1273</td>
-<td id="T_4a548_row0_col4" class="data row0 col4">3008</td>
-<td id="T_4a548_row0_col5" class="data row0 col5">84.7%</td>
-<td id="T_4a548_row0_col6" class="data row0 col6">87.9%</td>
-<td id="T_4a548_row0_col7" class="data row0 col7">70.3%</td>
-<td id="T_4a548_row0_col8" class="data row0 col8">78.1%</td>
+<th id="T_f7bd9_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">0.500000</th>
+<td id="T_f7bd9_row0_col0" class="data row0 col0">3423</td>
+<td id="T_f7bd9_row0_col1" class="data row0 col1">6324</td>
+<td id="T_f7bd9_row0_col2" class="data row0 col2">415</td>
+<td id="T_f7bd9_row0_col3" class="data row0 col3">1273</td>
+<td id="T_f7bd9_row0_col4" class="data row0 col4">3008</td>
+<td id="T_f7bd9_row0_col5" class="data row0 col5">84.7%</td>
+<td id="T_f7bd9_row0_col6" class="data row0 col6">87.9%</td>
+<td id="T_f7bd9_row0_col7" class="data row0 col7">70.3%</td>
+<td id="T_f7bd9_row0_col8" class="data row0 col8">78.1%</td>
 </tr>
 <tr class="even">
-<th id="T_4a548_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">0.200000</th>
-<td id="T_4a548_row1_col0" class="data row1 col0">6501</td>
-<td id="T_4a548_row1_col1" class="data row1 col1">3978</td>
-<td id="T_4a548_row1_col2" class="data row1 col2">2761</td>
-<td id="T_4a548_row1_col3" class="data row1 col3">541</td>
-<td id="T_4a548_row1_col4" class="data row1 col4">3740</td>
-<td id="T_4a548_row1_col5" class="data row1 col5">70.0%</td>
-<td id="T_4a548_row1_col6" class="data row1 col6">57.5%</td>
-<td id="T_4a548_row1_col7" class="data row1 col7">87.4%</td>
-<td id="T_4a548_row1_col8" class="data row1 col8">69.4%</td>
+<th id="T_f7bd9_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">0.200000</th>
+<td id="T_f7bd9_row1_col0" class="data row1 col0">6501</td>
+<td id="T_f7bd9_row1_col1" class="data row1 col1">3978</td>
+<td id="T_f7bd9_row1_col2" class="data row1 col2">2761</td>
+<td id="T_f7bd9_row1_col3" class="data row1 col3">541</td>
+<td id="T_f7bd9_row1_col4" class="data row1 col4">3740</td>
+<td id="T_f7bd9_row1_col5" class="data row1 col5">70.0%</td>
+<td id="T_f7bd9_row1_col6" class="data row1 col6">57.5%</td>
+<td id="T_f7bd9_row1_col7" class="data row1 col7">87.4%</td>
+<td id="T_f7bd9_row1_col8" class="data row1 col8">69.4%</td>
 </tr>
 </tbody>
 </table>
@@ -863,7 +863,7 @@ C(\tau) = 3\,FN(\tau) + FP(\tau).
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="03-classification-metrics_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="03-classification-metrics_files/figure-html/cell-8-output-1.png" width="688" height="470" class="figure-img"></p>
 </figure>
 </div>
 </div>
