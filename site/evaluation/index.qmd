@@ -22,9 +22,9 @@ predicting new observations poorly.
 
 ## 2. Ridge and Lasso regularization
 
-**Estimated time:** 25–35 minutes
+**Estimated time:** 30–45 minutes
 
-Use a limited turbine calibration campaign to see how Ridge and Lasso
+Use 75 gas-turbine operating observations to see how Ridge and Lasso
 regularization control a fixed set of measured operating features. Compare
 training and validation RMSE across penalty strengths, then contrast Ridge's
 coefficient shrinkage with Lasso's exact-zero feature selection.
