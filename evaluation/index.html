@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
+<meta name="generator" content="quarto-1.10.19">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -42,9 +42,9 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b626d73c4c936ccc3cb08be7d45d1df6.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-d0e9dd6581773c2d153725aefe2da3c3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
@@ -361,6 +361,7 @@ window.Quarto = {
    
   <ul>
   <li><a href="#polynomial-regression-and-overfitting" id="toc-polynomial-regression-and-overfitting">1. Polynomial regression and overfitting</a></li>
+  <li><a href="#ridge-and-lasso-regularization" id="toc-ridge-and-lasso-regularization">2. Ridge and Lasso regularization</a></li>
   </ul>
 </nav>
 <p>A fitted model is useful only if it performs well on new observations. These materials develop the tools for evaluating, comparing, and selecting models without mistaking a good fit to training data for reliable future performance.</p>
@@ -370,6 +371,12 @@ window.Quarto = {
 <p><strong>Estimated time:</strong> 25–35 minutes</p>
 <p>Fit linear, moderately flexible, and high-degree polynomial models to a limited turbine calibration sample. Compare training and test RMSE and <span class="math inline">\(R^2\)</span> to see why a flexible model can fit training observations well while predicting new observations poorly.</p>
 <p><a href="../evaluation/01-polynomial-model-validation.html">View the notebook</a></p>
+</section>
+<section id="ridge-and-lasso-regularization" class="level2">
+<h2 class="anchored" data-anchor-id="ridge-and-lasso-regularization">2. Ridge and Lasso regularization</h2>
+<p><strong>Estimated time:</strong> 25–35 minutes</p>
+<p>Use a limited turbine calibration campaign to see how Ridge and Lasso regularization control a fixed set of measured operating features. Compare training and validation RMSE across penalty strengths, then contrast Ridge’s coefficient shrinkage with Lasso’s exact-zero feature selection.</p>
+<p><a href="../evaluation/02-ridge-regularization.html">View the notebook</a></p>
 
 
 </section>
