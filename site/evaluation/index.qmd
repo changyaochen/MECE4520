@@ -19,3 +19,14 @@ $R^2$ to see why a flexible model can fit training observations well while
 predicting new observations poorly.
 
 [View the notebook](01-polynomial-model-validation.ipynb)
+
+## 2. Ridge and Lasso regularization
+
+**Estimated time:** 25–35 minutes
+
+Use a limited turbine calibration campaign to see how Ridge and Lasso
+regularization control a fixed set of measured operating features. Compare
+training and validation RMSE across penalty strengths, then contrast Ridge's
+coefficient shrinkage with Lasso's exact-zero feature selection.
+
+[View the notebook](02-ridge-regularization.ipynb)
