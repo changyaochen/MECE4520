@@ -4,6 +4,7 @@ project:
   resources:
     - data/gas-turbine-course.csv
     - assets/precision-recall-thresholds.js
+    - assets/b7e2a9c4.html
 
 website:
   title: "MECE 4520"
