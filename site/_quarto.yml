@@ -20,6 +20,8 @@ website:
         text: Regression
       - href: evaluation/index.qmd
         text: Evaluation
+      - href: tree-based/index.qmd
+        text: Tree-based
       - href: classification/index.qmd
         text: Classification
   page-footer:
