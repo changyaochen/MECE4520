@@ -22,6 +22,8 @@ website:
         text: Evaluation
       - href: classification/index.qmd
         text: Classification
+      - href: tree-based/index.qmd
+        text: Tree-based
   page-footer:
     left: "MECE 4520 · Data Science for Mechanical Systems"
     right: "Fall 2026"

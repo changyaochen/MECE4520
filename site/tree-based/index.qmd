@@ -1,0 +1,17 @@
+---
+title: "Tree-based"
+---
+
+Tree-based models make predictions by repeatedly dividing the feature space
+into smaller regions. Within each final region, a regression tree predicts an
+average response and a classification tree predicts a class frequency.
+
+## 1. Decision trees from scratch
+
+**Estimated time:** 45–60 minutes
+
+Build the first two splits of a high-CO decision tree from the gas-turbine
+measurements. Compute Gini impurity, search across features and cutpoints, and
+then use scikit-learn to draw the same shallow tree.
+
+[View the notebook](01-decision-trees-from-scratch.ipynb)
