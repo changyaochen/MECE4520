@@ -20,10 +20,10 @@ website:
         text: Regression
       - href: evaluation/index.qmd
         text: Evaluation
-      - href: tree-based/index.qmd
-        text: Tree-based
       - href: classification/index.qmd
         text: Classification
+      - href: tree-based/index.qmd
+        text: Tree-based
   page-footer:
     left: "MECE 4520 · Data Science for Mechanical Systems"
     right: "Fall 2026"
