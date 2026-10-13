@@ -574,46 +574,11 @@
     "text": "Try it\nChange the learning rate in the starter cell below. A smaller value makes slower progress; a much larger value can overshoot the low-loss region. Compare the final loss with the one above.\n\n# Try it: fit again with a smaller learning rate.\n# _, slower_history = gradient_descent(X, y, learning_rate=0.15, n_steps=100)\n# slower_history.tail()\n\n← Return to Classification"
   },
   {
-    "objectID": "tree-based/index.html",
-    "href": "tree-based/index.html",
-    "title": "Tree-based",
+    "objectID": "tree-based/02-tree-growth-animation.html",
+    "href": "tree-based/02-tree-growth-animation.html",
+    "title": "How a decision tree grows",
     "section": "",
-    "text": "Tree-based models make predictions by repeatedly dividing the feature space into smaller regions. Within each final region, a regression tree predicts an average response and a classification tree predicts a class frequency."
-  },
-  {
-    "objectID": "tree-based/index.html#decision-trees-from-scratch",
-    "href": "tree-based/index.html#decision-trees-from-scratch",
-    "title": "Tree-based",
-    "section": "1. Decision trees from scratch",
-    "text": "1. Decision trees from scratch\nEstimated time: 45–60 minutes\nBuild the first two splits of a high-CO decision tree from the gas-turbine measurements. Compute Gini impurity, search across features and cutpoints, and then use scikit-learn to draw the same shallow tree.\nView the notebook"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Data Science for Mechanical Systems",
-    "section": "",
-    "text": "MECE 4520 introduces data science and machine learning through real engineering systems.\nCourse materials and source files are available on GitHub."
-  },
-  {
-    "objectID": "index.html#course-focus",
-    "href": "index.html#course-focus",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Course focus",
-    "text": "Course focus\nRather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:\n\nunderstand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems\n\nStudents will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data."
-  },
-  {
-    "objectID": "index.html#grading-policy",
-    "href": "index.html#grading-policy",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Grading policy",
-    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n30%\n\n\nIn-class quizzes\n30%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately five homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.\n\nIn-class quizzes\nExpect a short, time-limited quiz about once each week. At the end of the semester, your 3 lowest quiz scores will be dropped.\nWe will use Poll Everywhere for in-class quizzes. You need to sign in Poll Everywhere with your Columbia UNI before the first quiz."
-  },
-  {
-    "objectID": "index.html#syllabus",
-    "href": "index.html#syllabus",
-    "title": "Data Science for Mechanical Systems",
-    "section": "Syllabus",
-    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\n\n\nSep. 15Sep. 17 — asynchronous\nSimple and multiple linear regression\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\n\n\nDec. 8 & 10\nFinal project presentations"
+    "text": "This deliberately small two-feature example shows how a decision tree builds a piecewise decision boundary. Red triangles are positive observations (label 1) and green circles are negative observations (label 0). The animation follows a single greedy tree: each new rule is applied only to the observations that reached its parent node.\n\n\n\n\n\n\nTipWhat to notice\n\n\n\nThe vertical rules do not extend over the entire feature space. They apply only inside the upper or lower region selected by an earlier rule on (x_2). A tree therefore creates a sequence of conditional decisions—not one global equation.\n\n\n\n  \n    Next split\n    Play all\n    Reset\n  \n\n  \n    Start with the labeled observations. No decision rule has been added yet.\n  \n\n  \n    \n      Feature space and decision regions\n      \n      ▲ Positive label (1) ● Negative label (0)\n    \n\n    \n      Corresponding decision process\n      \n    \n  \n\nAt the end, the tree has seven leaves. The lower central leaf has a negative majority, even though it contains one positive observation. A leaf predicts its majority class; it does not need to be perfectly pure.\n← Return to Tree-based"
   },
   {
     "objectID": "tree-based/01-decision-trees-from-scratch.html",
@@ -698,6 +663,55 @@
     "title": "Decision trees from scratch: classifying gas-turbine operating regions",
     "section": "Takeaways",
     "text": "Takeaways\n\nA classification tree creates regions in feature space and assigns each leaf the majority class. The fraction of positive-label observations in a leaf also provides a simple probability estimate.\nEach split greedily reduces weighted Gini impurity. It does not search jointly for every later split.\nWith max_depth=2, the recursion applies the same greedy split search independently within each child of the root.\nScikit-learn’s feature_importances_ attribute summarizes each feature’s share of the tree’s weighted Gini reduction; it is a predictive description, not a causal measure.\nTrees can keep splitting until they memorize training observations, so later we will tune their depth and leaf-size controls using held-out data.\n\nReturn to Tree-based"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Data Science for Mechanical Systems",
+    "section": "",
+    "text": "MECE 4520 introduces data science and machine learning through real engineering systems.\nCourse materials and source files are available on GitHub."
+  },
+  {
+    "objectID": "index.html#course-focus",
+    "href": "index.html#course-focus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Course focus",
+    "text": "Course focus\nRather than treating machine-learning methods as disconnected algorithms, the course follows a practical engineering progression:\n\nunderstand engineering data → build predictive models → diagnose systems → learn representations → make decisions and control systems\n\nStudents will work repeatedly with a small number of real mechanical-engineering datasets, including gas-turbine emissions and CNC milling tool-wear data. This makes it possible to connect model choices to the systems, sensors, variables, and operating conditions that produced the data."
+  },
+  {
+    "objectID": "index.html#grading-policy",
+    "href": "index.html#grading-policy",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Grading policy",
+    "text": "Grading policy\nThe course grade is based on:\n\n\n\nComponent\nWeight\n\n\n\n\nHomework assignments\n30%\n\n\nIn-class quizzes\n30%\n\n\nFinal project\n40%\n\n\n\nStudents should expect approximately five homework assignments. The final project will be completed in groups and presented as a five-minute presentation on a selected engineering-data topic.\n\nIn-class quizzes\nExpect a short, time-limited quiz about once each week. At the end of the semester, your 3 lowest quiz scores will be dropped.\nWe will use Poll Everywhere for in-class quizzes. You need to sign in Poll Everywhere with your Columbia UNI before the first quiz."
+  },
+  {
+    "objectID": "index.html#syllabus",
+    "href": "index.html#syllabus",
+    "title": "Data Science for Mechanical Systems",
+    "section": "Syllabus",
+    "text": "Syllabus\nThis syllabus may evolve as the Fall 2026 course is finalized.\n\n\n\n\n\n\n\nClass dates (2026)\nTopic\n\n\n\n\nBefore Sep. 8\nPython, NumPy/Pandas, linear algebra, and probability refresher\n\n\nSep. 8 — asynchronousSep. 10\nCourse launch, Python/data foundations, engineering EDA, and measurement variability\n\n\nSep. 15Sep. 17 — asynchronous\nSimple and multiple linear regression\n\n\nSep. 22 & 24\nStatistical inference for regression, prediction intervals, and regularization\n\n\nSep. 29 & Oct. 1\nLogistic regression and classification metrics\n\n\nOct. 6 & 8\nValidation, leakage, grouped splits, and temporal train/test splits\n\n\nOct. 13 & 15\nDecision trees, random forests, and gradient boosting\n\n\nOct. 20 & 22\nPCA, dimensionality reduction, and clustering\n\n\nOct. 27 & 29\nNeural networks and nonlinear function approximation\n\n\nNov. 3 — Election Day (no class)Nov. 5\nSequential data, degradation, and optional signal processing\n\n\nNov. 10 & 12\nReinforcement-learning foundations: bandits, states, actions, rewards, and MDPs\n\n\nNov. 17 & 19\nBellman equations, dynamic programming, Q-learning, and SARSA\n\n\nNov. 24Nov. 26 — Thanksgiving (no class)\nFunction approximation and deep Q-networks\n\n\nDec. 1 & 3\nPolicy gradients, PPO, continuous control, and RL versus classical control\n\n\nDec. 8 & 10\nFinal project presentations"
+  },
+  {
+    "objectID": "tree-based/index.html",
+    "href": "tree-based/index.html",
+    "title": "Tree-based",
+    "section": "",
+    "text": "Tree-based models make predictions by repeatedly dividing the feature space into smaller regions. Within each final region, a regression tree predicts an average response and a classification tree predicts a class frequency."
+  },
+  {
+    "objectID": "tree-based/index.html#decision-trees-from-scratch",
+    "href": "tree-based/index.html#decision-trees-from-scratch",
+    "title": "Tree-based",
+    "section": "1. Decision trees from scratch",
+    "text": "1. Decision trees from scratch\nEstimated time: 45–60 minutes\nBuild the first two splits of a high-CO decision tree from the gas-turbine measurements. Compute Gini impurity, search across features and cutpoints, and then use scikit-learn to draw the same shallow tree.\nView the notebook"
+  },
+  {
+    "objectID": "tree-based/index.html#how-a-decision-tree-grows",
+    "href": "tree-based/index.html#how-a-decision-tree-grows",
+    "title": "Tree-based",
+    "section": "2. How a decision tree grows",
+    "text": "2. How a decision tree grows\nEstimated time: 5–10 minutes\nWatch a simple two-feature classification tree add one conditional rule at a time. See how each split creates a local decision region and the corresponding decision process.\nOpen the interactive animation"
   },
   {
     "objectID": "classification/03-classification-metrics.html",
