@@ -410,6 +410,7 @@ window.Quarto = {
   <li><a href="#choose-the-second-split" id="toc-choose-the-second-split">5. Choose the second split</a></li>
   <li><a href="#build-a-tree-recursively" id="toc-build-a-tree-recursively">6. Build a tree recursively</a></li>
   <li><a href="#build-the-same-depth-limited-tree-with-scikit-learn" id="toc-build-the-same-depth-limited-tree-with-scikit-learn">7. Build the same depth-limited tree with scikit-learn</a></li>
+  <li><a href="#quantify-feature-importance" id="toc-quantify-feature-importance">8. Quantify feature importance</a></li>
   <li><a href="#advanced-topics" id="toc-advanced-topics">Advanced topics</a></li>
   <li><a href="#takeaways" id="toc-takeaways">Takeaways</a></li>
   </ul>
@@ -431,7 +432,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="set-up-the-classification-task">1. Set up the classification task</h2>
 <p>Each row in the dataset records one gas-turbine operating observation. <code>high_co</code> is our binary target. We offer the tree the measured operating quantities, but exclude <code>CO</code> itself because the target was defined from that measurement.</p>
 <p>We reserve 30% of the usable observations as a test set. We will build the tree only with the training observations, then check its simple held-out accuracy at the end.</p>
-<div id="45ca5ddc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-12T00:25:03.560168Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-12T00:25:03.559932Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-12T00:25:05.585525Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-12T00:25:05.585274Z&quot;}}" data-execution_count="1">
+<div id="45ca5ddc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-13T03:53:56.251818Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-13T03:53:56.251550Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-13T03:53:58.063733Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-13T03:53:58.063447Z&quot;}}" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> urllib.request <span class="im">import</span> urlretrieve</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -501,7 +502,7 @@ G(R) = 1 - \sum_{k=1}^{K} p_{R,k}^{2}.
 G(R) = 1-q_R^2-(1-q_R)^2 = 2q_R(1-q_R).
 \]</span></p>
 <p>It is zero when a region contains only one class, and largest when the two classes are evenly mixed. A classification tree chooses the split that produces the largest reduction in the sample-size-weighted Gini impurity.</p>
-<div id="c2399a84" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-12T00:25:05.588386Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-12T00:25:05.588283Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-12T00:25:05.595763Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-12T00:25:05.595526Z&quot;}}" data-execution_count="2">
+<div id="c2399a84" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-13T03:53:58.065002Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-13T03:53:58.064923Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-13T03:53:58.072133Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-13T03:53:58.071912Z&quot;}}" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gini_impurity(labels: pd.Series <span class="op">|</span> np.ndarray) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute binary Gini impurity for one region.</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -573,7 +574,7 @@ G(R) = 1-q_R^2-(1-q_R)^2 = 2q_R(1-q_R).
 G_{\mathrm{after}} = \frac{n_L}{n}G(R_L) + \frac{n_R}{n}G(R_R).
 \]</span></p>
 <p>The resulting Gini decrease is (G(R)-G_{}).</p>
-<div id="dd34e1b3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-12T00:25:05.596996Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-12T00:25:05.596921Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-12T00:25:05.603992Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-12T00:25:05.603780Z&quot;}}" data-execution_count="3">
+<div id="dd34e1b3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-13T03:53:58.073334Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-13T03:53:58.073265Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-13T03:53:58.079685Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-13T03:53:58.079484Z&quot;}}" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score_split(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    feature_values: pd.Series, labels: pd.Series, threshold: <span class="bu">float</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">float</span>], pd.Series, pd.Series]:</span>
@@ -680,7 +681,7 @@ dtype: float64</code></pre>
 <h2 class="anchored" data-anchor-id="search-for-the-best-first-split">4. Search for the best first split</h2>
 <p>Rather than specify one feature and cutpoint ourselves, the tree searches them. For each feature, candidate cutpoints lie halfway between adjacent distinct observed values.</p>
 <p>The function below sorts one feature at a time, uses cumulative counts of positive labels, and scores every valid cutpoint. This gives the same greedy search logic as a decision-tree library while keeping the calculation practical for the full training dataset.</p>
-<div id="5f30b0fb" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-12T00:25:05.605123Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-12T00:25:05.605038Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-12T00:25:05.627755Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-12T00:25:05.627479Z&quot;}}" data-execution_count="4">
+<div id="5f30b0fb" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-13T03:53:58.080780Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-13T03:53:58.080692Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-13T03:53:58.101463Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-13T03:53:58.101218Z&quot;}}" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_best_gini_split(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    features: pd.DataFrame, labels: pd.Series</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">float</span> <span class="op">|</span> <span class="bu">int</span> <span class="op">|</span> <span class="bu">str</span>]:</span>
@@ -792,7 +793,7 @@ dtype: float64</code></pre>
 <h2 class="anchored" data-anchor-id="choose-the-second-split">5. Choose the second split</h2>
 <p>After the first split, each child is a candidate for further division. A best-first tree asks which available child split delivers the largest <strong>overall</strong> reduction in training-set impurity. That requires weighting each child region’s local Gini decrease by the fraction of training observations that reach it.</p>
 <p>We inspect this second split manually so the selection logic remains easy to follow. The next section generalizes the same search recursively.</p>
-<div id="8f9f2223" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-12T00:25:05.629112Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-12T00:25:05.629026Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-12T00:25:05.650898Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-12T00:25:05.650682Z&quot;}}" data-execution_count="5">
+<div id="8f9f2223" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-13T03:53:58.102840Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-13T03:53:58.102753Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-13T03:53:58.123144Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-13T03:53:58.122901Z&quot;}}" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>root_feature <span class="op">=</span> <span class="bu">str</span>(first_split[<span class="st">"feature"</span>])</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>root_threshold <span class="op">=</span> <span class="bu">float</span>(first_split[<span class="st">"threshold"</span>])</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>left_mask <span class="op">=</span> X_train[root_feature] <span class="op">&lt;=</span> root_threshold</span>
@@ -886,7 +887,7 @@ dtype: float64</code></pre>
 <h2 class="anchored" data-anchor-id="build-a-tree-recursively">6. Build a tree recursively</h2>
 <p>The same split search can be repeated inside every child region. The recursive function below has one hyperparameter: max_depth, the maximum number of decision rules along any path from the root to a leaf. A value of 0 creates one leaf with no rules; a value of 2 permits up to two rules along a path.</p>
 <p>The recursion stops when it reaches the requested depth, when all labels in a region agree, when all feature values in a region are identical, or when no split lowers Gini impurity.</p>
-<div id="recursive-tree-code" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-12T00:25:05.652092Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-12T00:25:05.652013Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-12T00:25:05.701980Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-12T00:25:05.701721Z&quot;}}" data-execution_count="6">
+<div id="recursive-tree-code" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-13T03:53:58.124353Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-13T03:53:58.124277Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-13T03:53:58.171242Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-13T03:53:58.170987Z&quot;}}" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_leaf(labels: pd.Series) <span class="op">-&gt;</span> <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">float</span> <span class="op">|</span> <span class="bu">int</span> <span class="op">|</span> <span class="bu">bool</span>]:</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Create a final prediction region.</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1003,7 +1004,7 @@ Otherwise:
 <section id="build-the-same-depth-limited-tree-with-scikit-learn" class="level2">
 <h2 class="anchored" data-anchor-id="build-the-same-depth-limited-tree-with-scikit-learn">7. Build the same depth-limited tree with scikit-learn</h2>
 <p>The scikit-learn decision-tree implementation carries out this search efficiently. Setting max_depth=2 gives it the same depth limit used by our recursive implementation above. We use the same Gini criterion.</p>
-<div id="a55b970d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-12T00:25:05.703243Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-12T00:25:05.703165Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-12T00:25:05.844699Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-12T00:25:05.844417Z&quot;}}" data-execution_count="7">
+<div id="a55b970d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-13T03:53:58.172488Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-13T03:53:58.172409Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-13T03:53:58.302842Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-13T03:53:58.302596Z&quot;}}" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>sklearn_tree <span class="op">=</span> DecisionTreeClassifier(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    criterion<span class="op">=</span><span class="st">"gini"</span>,</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    max_depth<span class="op">=</span><span class="dv">2</span>,</span>
@@ -1035,7 +1036,7 @@ Otherwise:
 </div>
 </div>
 </div>
-<div id="0c524d08" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-12T00:25:05.845999Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-12T00:25:05.845900Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-12T00:25:05.851148Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-12T00:25:05.850912Z&quot;}}" data-execution_count="8">
+<div id="0c524d08" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-13T03:53:58.303990Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-13T03:53:58.303900Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-13T03:53:58.308302Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-13T03:53:58.308088Z&quot;}}" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training accuracy: </span><span class="sc">{</span>sklearn_tree<span class="sc">.</span>score(X<span class="op">=</span>X_train, y<span class="op">=</span>y_train)<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Held-out test accuracy: </span><span class="sc">{</span>sklearn_tree<span class="sc">.</span>score(X<span class="op">=</span>X_test, y<span class="op">=</span>y_test)<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1044,12 +1045,112 @@ Held-out test accuracy: 0.845</code></pre>
 </div>
 </div>
 </section>
+<section id="quantify-feature-importance" class="level2">
+<h2 class="anchored" data-anchor-id="quantify-feature-importance">8. Quantify feature importance</h2>
+<p>The depth-2 tree above is useful for inspecting individual rules, but it contains only a few splits. To make the importance profile richer, we fit a separate tree with max_depth=5. Scikit-learn provides a numerical importance for each feature through the feature_importances_ attribute.</p>
+<ul>
+<li>At each split, measure how much the feature makes the child regions less mixed in their labels: the reduction in Gini impurity.</li>
+<li>Weight that improvement by the number of observations reaching the split, so a helpful root split matters more than an equally helpful split in a small leaf.</li>
+<li>Add these weighted improvements across every split using the same feature, then normalize them so that the importances sum to 1.</li>
+</ul>
+<p>A value of 0.70 means that the feature accounts for 70% of this tree’s total weighted Gini reduction. It does not mean that the feature causes 70% of the outcome, or that it accounts for 70% of predictive accuracy. In practice, use held-out performance to choose the tree depth; we use depth 5 here only to make the example more informative.</p>
+<div id="feature-importance-plot" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-13T03:53:58.309401Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-13T03:53:58.309329Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-13T03:53:58.430931Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-13T03:53:58.430668Z&quot;}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>importance_tree <span class="op">=</span> DecisionTreeClassifier(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    criterion<span class="op">=</span><span class="st">"gini"</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    max_depth<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">4520</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>importance_tree.fit(X<span class="op">=</span>X_train, y<span class="op">=</span>y_train)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>feature_importance <span class="op">=</span> pd.Series(</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>importance_tree.feature_importances_,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    index<span class="op">=</span>FEATURES,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"Gini importance"</span>,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>).sort_values()</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>display(feature_importance.to_frame().<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>ax.barh(</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>feature_importance.index,</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    width<span class="op">=</span>feature_importance.to_numpy(),</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>sns.color_palette()[<span class="dv">0</span>],</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Feature importance in the depth-5 tree"</span>,</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"Share of total weighted Gini reduction"</span>,</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"Feature"</span>,</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    xlim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Gini importance</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">CDP</th>
+<td>0.000</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">AH</th>
+<td>0.003</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">TAT</th>
+<td>0.004</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">AT</th>
+<td>0.005</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">AP</th>
+<td>0.008</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">GTEP</th>
+<td>0.017</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">TEY</th>
+<td>0.035</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">AFDP</th>
+<td>0.056</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">TIT</th>
+<td>0.871</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01-decision-trees-from-scratch_files/figure-html/cell-10-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 <section id="advanced-topics" class="level2">
 <h2 class="anchored" data-anchor-id="advanced-topics">Advanced topics</h2>
 <p>This shallow tree is deliberately simple so that its rules are easy to inspect. In practice, several extensions matter:</p>
 <ol type="1">
 <li><strong>Tree complexity and overfitting.</strong> A deep tree can keep adding rules until it memorizes details of the training observations. Parameters such as max_depth, min_samples_split, and min_samples_leaf limit that complexity; choose them by performance on held-out data.</li>
-<li><strong>Feature importance.</strong> A tree can summarize how much each feature reduced weighted Gini impurity across its splits. This is useful for exploration, although correlated features can share or distort that importance.</li>
 <li><strong>Regression trees.</strong> For a continuous target such as NOx, a leaf predicts the average response in its region and splits can be chosen by reduction in mean squared error.</li>
 <li><strong>Ensembles.</strong> Random forests and gradient-boosted trees combine many trees. They generally predict better than a single tree, at the cost of some interpretability.</li>
 </ol>
@@ -1060,6 +1161,7 @@ Held-out test accuracy: 0.845</code></pre>
 <li>A classification tree creates regions in feature space and assigns each leaf the majority class. The fraction of positive-label observations in a leaf also provides a simple probability estimate.</li>
 <li>Each split greedily reduces weighted Gini impurity. It does not search jointly for every later split.</li>
 <li>With max_depth=2, the recursion applies the same greedy split search independently within each child of the root.</li>
+<li>Scikit-learn’s feature_importances_ attribute summarizes each feature’s share of the tree’s weighted Gini reduction; it is a predictive description, not a causal measure.</li>
 <li>Trees can keep splitting until they memorize training observations, so later we will tune their depth and leaf-size controls using held-out data.</li>
 </ul>
 <p><a href="../tree-based/index.html">Return to Tree-based</a></p>
