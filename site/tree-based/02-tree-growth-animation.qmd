@@ -1,0 +1,335 @@
+---
+title: "How a decision tree grows"
+toc: false
+page-layout: full
+---
+
+This deliberately small two-feature example shows how a decision tree builds a
+piecewise decision boundary. Red triangles are positive observations (label 1)
+and green circles are negative observations (label 0). The animation follows a
+single greedy tree: each new rule is applied only to the observations that
+reached its parent node.
+
+::: {.callout-tip}
+## What to notice
+
+The vertical rules do not extend over the entire feature space. They apply only
+inside the upper or lower region selected by an earlier rule on \(x_2\). A tree
+therefore creates a sequence of conditional decisions—not one global equation.
+:::
+
+```{=html}
+<div id="tree-growth-explorer" class="tree-growth-explorer" aria-label="Interactive animation showing a decision tree grow from labeled observations">
+  <div class="tree-growth-controls" aria-label="Animation controls">
+    <button id="tree-growth-next" class="tree-growth-primary" type="button">Next split</button>
+    <button id="tree-growth-play" type="button">Play all</button>
+    <button id="tree-growth-reset" type="button" disabled>Reset</button>
+  </div>
+
+  <p id="tree-growth-status" class="tree-growth-status" aria-live="polite">
+    Start with the labeled observations. No decision rule has been added yet.
+  </p>
+
+  <div class="tree-growth-layout">
+    <figure class="tree-growth-figure">
+      <figcaption>Feature space and decision regions</figcaption>
+      <svg id="tree-growth-regions" role="img" aria-label="Two-feature observations and the decision boundaries added by a growing tree"></svg>
+      <p class="tree-growth-legend" aria-label="Legend"><span class="tree-growth-positive">▲</span> Positive label (1) <span class="tree-growth-negative">●</span> Negative label (0)</p>
+    </figure>
+
+    <figure class="tree-growth-figure">
+      <figcaption>Corresponding decision process</figcaption>
+      <svg id="tree-growth-tree" role="img" aria-label="Decision tree rules appearing as the tree grows"></svg>
+    </figure>
+  </div>
+</div>
+```
+
+At the end, the tree has seven leaves. The lower central leaf has a negative
+majority, even though it contains one positive observation. A leaf predicts its
+majority class; it does not need to be perfectly pure.
+
+<a href="index.qmd">← Return to Tree-based</a>
+
+<script>
+(() => {
+  const root = document.getElementById("tree-growth-explorer");
+  if (!root) return;
+
+  const nextButton = root.querySelector("#tree-growth-next");
+  const playButton = root.querySelector("#tree-growth-play");
+  const resetButton = root.querySelector("#tree-growth-reset");
+  const status = root.querySelector("#tree-growth-status");
+  const regionChart = root.querySelector("#tree-growth-regions");
+  const treeChart = root.querySelector("#tree-growth-tree");
+
+  const positivePoints = [
+    [0.7, 3.5], [1.15, 3.5], [0.7, 3.0], [1.38, 3.17], [1.08, 2.65],
+    [2.62, 3.4], [3.36, 3.43], [2.8, 2.98], [3.2, 2.82], [2.7, 2.65],
+    [0.48, 0.52], [0.75, 0.82], [1.0, 1.12], [1.2, 0.82], [1.58, 1.04],
+    [2.92, 0.46], [3.15, 0.86], [3.48, 0.33], [3.75, 0.72]
+  ];
+  const negativePoints = [
+    [1.87, 3.42], [2.22, 3.53], [1.73, 3.02], [2.18, 2.87], [1.92, 2.65],
+    [0.42, 2.2], [1.0, 2.2], [1.6, 2.15], [2.3, 2.2], [2.7, 1.95],
+    [3.45, 2.02], [0.6, 1.52], [1.2, 1.6], [1.8, 1.75], [2.4, 1.5],
+    [1.7, 0.4], [1.95, 0.85], [1.95, 1.28], [2.3, 0.95], [2.4, 0.48]
+  ];
+
+  const steps = [
+    "Start with the labeled observations. No decision rule has been added yet.",
+    "Split 1: ask whether x₂ > 2.4. This separates the upper observations from the rest.",
+    "Split 2: within the upper region, ask whether x₁ > 2.5. The upper-right region becomes a positive leaf.",
+    "Split 3: within the remaining upper region, ask whether x₁ > 1.5. The central upper region is negative; the upper-left region is positive.",
+    "Split 4: among the observations not in the upper region, ask whether x₂ < 1.3. The middle band becomes a negative leaf.",
+    "Split 5: within the lower region, ask whether x₁ > 2.65. The lower-right region becomes a positive leaf.",
+    "Split 6: within the remaining lower region, ask whether x₁ > 1.4. The lower centre is negative and the lower-left region is positive."
+  ];
+
+  const svgElement = (name, attributes = {}) => {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  };
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", { x, y, ...attributes });
+    element.textContent = text;
+    svg.append(element);
+    return element;
+  }
+
+  function drawRegions(step) {
+    const width = 640;
+    const height = 470;
+    const margin = { top: 22, right: 28, bottom: 58, left: 65 };
+    const xDomain = [0, 4];
+    const yDomain = [0, 4];
+    const plotWidth = width - margin.left - margin.right;
+    const plotHeight = height - margin.top - margin.bottom;
+    const x = value => margin.left + ((value - xDomain[0]) / (xDomain[1] - xDomain[0])) * plotWidth;
+    const y = value => margin.top + plotHeight - ((value - yDomain[0]) / (yDomain[1] - yDomain[0])) * plotHeight;
+
+    regionChart.replaceChildren();
+    regionChart.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    regionChart.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+    const title = svgElement("title", { id: "tree-growth-regions-title" });
+    title.textContent = "Labeled observations and decision regions";
+    const description = svgElement("desc", { id: "tree-growth-regions-description" });
+    description.textContent = steps[step];
+    regionChart.append(title, description);
+    regionChart.setAttribute("aria-labelledby", `${title.id} ${description.id}`);
+
+    function region(x0, x1, y0, y1, label) {
+      regionChart.append(svgElement("rect", {
+        x: x(x0), y: y(y1), width: x(x1) - x(x0), height: y(y0) - y(y1),
+        class: `tree-growth-region tree-growth-region-${label}`
+      }));
+    }
+
+    if (step >= 2) region(2.5, 4, 2.4, 4, "positive");
+    if (step >= 3) {
+      region(1.5, 2.5, 2.4, 4, "negative");
+      region(0, 1.5, 2.4, 4, "positive");
+    }
+    if (step >= 4) region(0, 4, 1.3, 2.4, "negative");
+    if (step >= 5) region(2.65, 4, 0, 1.3, "positive");
+    if (step >= 6) {
+      region(1.4, 2.65, 0, 1.3, "negative");
+      region(0, 1.4, 0, 1.3, "positive");
+    }
+
+    for (let tick = 0; tick <= 4; tick += 1) {
+      const xPosition = x(tick);
+      const yPosition = y(tick);
+      regionChart.append(svgElement("line", {
+        x1: xPosition, y1: margin.top, x2: xPosition, y2: height - margin.bottom,
+        class: "tree-growth-grid"
+      }));
+      regionChart.append(svgElement("line", {
+        x1: margin.left, y1: yPosition, x2: width - margin.right, y2: yPosition,
+        class: "tree-growth-grid"
+      }));
+      if (tick < 4) {
+        addText(regionChart, String(tick), xPosition, height - margin.bottom + 22, {
+          class: "tree-growth-tick", "text-anchor": "middle"
+        });
+        if (tick > 0) {
+          addText(regionChart, String(tick), margin.left - 12, yPosition + 4, {
+            class: "tree-growth-tick", "text-anchor": "end"
+          });
+        }
+      }
+    }
+
+    regionChart.append(svgElement("line", {
+      x1: margin.left, y1: height - margin.bottom, x2: width - margin.right + 8, y2: height - margin.bottom,
+      class: "tree-growth-axis"
+    }));
+    regionChart.append(svgElement("line", {
+      x1: margin.left, y1: height - margin.bottom, x2: margin.left, y2: margin.top - 8,
+      class: "tree-growth-axis"
+    }));
+    addText(regionChart, "x₁", width - margin.right + 13, height - margin.bottom + 5, { class: "tree-growth-axis-label" });
+    addText(regionChart, "x₂", margin.left - 10, margin.top - 10, { class: "tree-growth-axis-label" });
+
+    const splitLines = [
+      { step: 1, x1: 0, y1: 2.4, x2: 4, y2: 2.4 },
+      { step: 2, x1: 2.5, y1: 2.4, x2: 2.5, y2: 4 },
+      { step: 3, x1: 1.5, y1: 2.4, x2: 1.5, y2: 4 },
+      { step: 4, x1: 0, y1: 1.3, x2: 4, y2: 1.3 },
+      { step: 5, x1: 2.65, y1: 0, x2: 2.65, y2: 1.3 },
+      { step: 6, x1: 1.4, y1: 0, x2: 1.4, y2: 1.3 }
+    ];
+    splitLines.filter(line => line.step <= step).forEach(line => {
+      regionChart.append(svgElement("line", {
+        x1: x(line.x1), y1: y(line.y1), x2: x(line.x2), y2: y(line.y2),
+        class: line.step === step ? "tree-growth-split tree-growth-split-new" : "tree-growth-split"
+      }));
+    });
+
+    negativePoints.forEach(([xValue, yValue]) => {
+      regionChart.append(svgElement("circle", {
+        cx: x(xValue), cy: y(yValue), r: 10,
+        class: "tree-growth-point tree-growth-point-negative"
+      }));
+    });
+    positivePoints.forEach(([xValue, yValue]) => {
+      const pointX = x(xValue);
+      const pointY = y(yValue);
+      regionChart.append(svgElement("path", {
+        d: `M ${pointX} ${pointY - 12} L ${pointX - 11} ${pointY + 9} L ${pointX + 11} ${pointY + 9} Z`,
+        class: "tree-growth-point tree-growth-point-positive"
+      }));
+    });
+  }
+
+  function drawTree(step) {
+    const width = 620;
+    const height = 490;
+    treeChart.replaceChildren();
+    treeChart.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    treeChart.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+    const title = svgElement("title", { id: "tree-growth-tree-title" });
+    title.textContent = "Decision tree built one split at a time";
+    const description = svgElement("desc", { id: "tree-growth-tree-description" });
+    description.textContent = steps[step];
+    treeChart.append(title, description);
+    treeChart.setAttribute("aria-labelledby", `${title.id} ${description.id}`);
+
+    if (step === 0) {
+      addText(treeChart, "No rules yet", width / 2, height / 2 - 10, {
+        class: "tree-growth-placeholder", "text-anchor": "middle"
+      });
+      addText(treeChart, "Use Next split to grow the tree.", width / 2, height / 2 + 18, {
+        class: "tree-growth-placeholder tree-growth-placeholder-detail", "text-anchor": "middle"
+      });
+      return;
+    }
+
+    const nodes = {
+      root: { step: 1, x: 300, y: 42, text: "x₂ > 2.4?", type: "split" },
+      upper: { step: 2, x: 150, y: 132, text: "x₁ > 2.5?", type: "split" },
+      upperRight: { step: 2, x: 65, y: 222, text: "1", type: "positive" },
+      upperMiddle: { step: 3, x: 230, y: 222, text: "x₁ > 1.5?", type: "split" },
+      upperCentreLeaf: { step: 3, x: 178, y: 312, text: "0", type: "negative" },
+      upperLeftLeaf: { step: 3, x: 300, y: 312, text: "1", type: "positive" },
+      lower: { step: 4, x: 455, y: 132, text: "x₂ < 1.3?", type: "split" },
+      middleLeaf: { step: 4, x: 565, y: 222, text: "0", type: "negative" },
+      bottom: { step: 5, x: 420, y: 222, text: "x₁ > 2.65?", type: "split" },
+      lowerRightLeaf: { step: 5, x: 365, y: 312, text: "1", type: "positive" },
+      lowerMiddle: { step: 6, x: 490, y: 312, text: "x₁ > 1.4?", type: "split" },
+      lowerCentreLeaf: { step: 6, x: 440, y: 402, text: "0", type: "negative" },
+      lowerLeftLeaf: { step: 6, x: 555, y: 402, text: "1", type: "positive" }
+    };
+    const edges = [
+      ["root", "upper", "Yes"], ["root", "lower", "No"],
+      ["upper", "upperRight", "Yes"], ["upper", "upperMiddle", "No"],
+      ["upperMiddle", "upperCentreLeaf", "Yes"], ["upperMiddle", "upperLeftLeaf", "No"],
+      ["lower", "bottom", "Yes"], ["lower", "middleLeaf", "No"],
+      ["bottom", "lowerRightLeaf", "Yes"], ["bottom", "lowerMiddle", "No"],
+      ["lowerMiddle", "lowerCentreLeaf", "Yes"], ["lowerMiddle", "lowerLeftLeaf", "No"]
+    ];
+
+    edges.forEach(([fromId, toId, label]) => {
+      const from = nodes[fromId];
+      const to = nodes[toId];
+      if (from.step > step || to.step > step) return;
+      const directionX = to.x - from.x;
+      const directionY = to.y - from.y;
+      const length = Math.hypot(directionX, directionY);
+      const startX = from.x + (directionX / length) * 30;
+      const startY = from.y + (directionY / length) * 21;
+      const endX = to.x - (directionX / length) * 30;
+      const endY = to.y - (directionY / length) * 21;
+      treeChart.append(svgElement("line", {
+        x1: startX, y1: startY, x2: endX, y2: endY, class: "tree-growth-edge"
+      }));
+      addText(treeChart, label, (startX + endX) / 2, (startY + endY) / 2 - 5, {
+        class: label === "Yes" ? "tree-growth-yes" : "tree-growth-no", "text-anchor": "middle"
+      });
+    });
+
+    Object.values(nodes).filter(node => node.step <= step).forEach(node => {
+      const width = node.type === "split" ? 115 : 54;
+      const height = node.type === "split" ? 42 : 38;
+      treeChart.append(svgElement("rect", {
+        x: node.x - width / 2, y: node.y - height / 2, width, height, rx: 12,
+        class: `tree-growth-node tree-growth-node-${node.type}${node.step === step ? " tree-growth-node-current" : ""}`
+      }));
+      addText(treeChart, node.text, node.x, node.y + 5, {
+        class: "tree-growth-node-text", "text-anchor": "middle"
+      });
+    });
+  }
+
+  let currentStep = 0;
+  let timerId = null;
+
+  function update() {
+    drawRegions(currentStep);
+    drawTree(currentStep);
+    status.textContent = steps[currentStep];
+    nextButton.disabled = currentStep === steps.length - 1;
+    resetButton.disabled = currentStep === 0;
+    playButton.disabled = currentStep === steps.length - 1;
+    playButton.textContent = timerId ? "Playing…" : "Play all";
+  }
+
+  function stopPlayback() {
+    if (timerId !== null) window.clearInterval(timerId);
+    timerId = null;
+  }
+
+  nextButton.addEventListener("click", () => {
+    stopPlayback();
+    currentStep = Math.min(currentStep + 1, steps.length - 1);
+    update();
+  });
+
+  resetButton.addEventListener("click", () => {
+    stopPlayback();
+    currentStep = 0;
+    update();
+  });
+
+  playButton.addEventListener("click", () => {
+    if (timerId !== null) return;
+    if (currentStep === steps.length - 1) currentStep = 0;
+    timerId = window.setInterval(() => {
+      currentStep += 1;
+      if (currentStep >= steps.length - 1) {
+        currentStep = steps.length - 1;
+        stopPlayback();
+      }
+      update();
+    }, 950);
+    update();
+  });
+
+  window.addEventListener("resize", update);
+  update();
+})();
+</script>

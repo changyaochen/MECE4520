@@ -15,3 +15,13 @@ measurements. Compute Gini impurity, search across features and cutpoints, and
 then use scikit-learn to draw the same shallow tree.
 
 [View the notebook](01-decision-trees-from-scratch.ipynb)
+
+## 2. How a decision tree grows
+
+**Estimated time:** 5–10 minutes
+
+Watch a simple two-feature classification tree add one conditional rule at a
+time. See how each split creates a local decision region and the corresponding
+decision process.
+
+[Open the interactive animation](02-tree-growth-animation.qmd)
