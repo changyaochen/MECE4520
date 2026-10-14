@@ -394,9 +394,17 @@
   fill: #f0f4f5;
 }
 
-@media (max-width: 780px) {
+@media (max-width: 540px) {
   .tree-growth-layout {
-    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+
+  .tree-growth-figure {
+    padding: 0.55rem;
+  }
+
+  .tree-growth-figure figcaption {
+    font-size: 0.8rem;
   }
 }
 
