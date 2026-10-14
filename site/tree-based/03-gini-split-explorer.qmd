@@ -46,7 +46,8 @@ Here, a larger $\Delta G$ is better.
 <svg id="tree-gini-svg" viewBox="0 0 660 470" role="img" aria-label="Mock two-feature classification data and selected tree splits"></svg>
 <figcaption>
 Red triangles are positive labels; green circles are negative labels.
-Solid blue and red dashed lines are selected splits.
+The gold dashed line and contrasting shaded regions show the candidate currently
+being evaluated. Blue and red dashed lines are selected splits.
 </figcaption>
 </figure>
 
@@ -289,6 +290,13 @@ per feature and evaluate only legal boundaries between distinct values.
     return candidates(currentNode(), features[state.featureIndex]);
   }
 
+  function currentEvaluatedCandidate() {
+    if (state.completed || state.evaluated === 0) {
+      return null;
+    }
+    return currentCandidates()[state.evaluated - 1];
+  }
+
   function loopFinished() {
     return state.evaluated >= currentCandidates().length;
   }
@@ -443,7 +451,7 @@ per feature and evaluate only legal boundaries between distinct values.
     rows.forEach((candidate, index) => {
       const row = document.createElement("tr");
       const isEvaluated = index < state.evaluated;
-      const isCurrent = index === state.evaluated && !loopFinished();
+      const isCurrent = index === state.evaluated - 1;
       if (isEvaluated) {
         row.classList.add("tree-gini-evaluated");
       }
@@ -559,6 +567,54 @@ per feature and evaluate only legal boundaries between distinct values.
       svg.appendChild(rect);
     });
 
+    const activeCandidate = currentEvaluatedCandidate();
+    if (activeCandidate) {
+      const bounds = activeCandidate.node.bounds;
+      let firstBounds;
+      let secondBounds;
+      if (activeCandidate.feature === "x1") {
+        firstBounds = {
+          xMin: bounds.xMin,
+          xMax: activeCandidate.threshold,
+          yMin: bounds.yMin,
+          yMax: bounds.yMax
+        };
+        secondBounds = {
+          xMin: activeCandidate.threshold,
+          xMax: bounds.xMax,
+          yMin: bounds.yMin,
+          yMax: bounds.yMax
+        };
+      } else {
+        firstBounds = {
+          xMin: bounds.xMin,
+          xMax: bounds.xMax,
+          yMin: bounds.yMin,
+          yMax: activeCandidate.threshold
+        };
+        secondBounds = {
+          xMin: bounds.xMin,
+          xMax: bounds.xMax,
+          yMin: activeCandidate.threshold,
+          yMax: bounds.yMax
+        };
+      }
+
+      [
+        { bounds: firstBounds, fill: "#dbeafe" },
+        { bounds: secondBounds, fill: "#ffedd5" }
+      ].forEach((region) => {
+        svg.appendChild(svgElement("rect", {
+          x: xPixel(region.bounds.xMin),
+          y: yPixel(region.bounds.yMax),
+          width: xPixel(region.bounds.xMax) - xPixel(region.bounds.xMin),
+          height: yPixel(region.bounds.yMin) - yPixel(region.bounds.yMax),
+          fill: region.fill,
+          opacity: "0.72"
+        }));
+      });
+    }
+
     [1, 2, 3].forEach((tick) => {
       const vertical = svgElement("line", {
         x1: xPixel(tick), y1: chart.top, x2: xPixel(tick), y2: chart.bottom,
@@ -624,6 +680,23 @@ per feature and evaluate only legal boundaries between distinct values.
         }));
       }
     });
+
+    if (activeCandidate) {
+      const bounds = activeCandidate.node.bounds;
+      if (activeCandidate.feature === "x1") {
+        svg.appendChild(svgElement("line", {
+          x1: xPixel(activeCandidate.threshold), y1: yPixel(bounds.yMin),
+          x2: xPixel(activeCandidate.threshold), y2: yPixel(bounds.yMax),
+          stroke: "#d97706", "stroke-width": "4.5", "stroke-dasharray": "7 6"
+        }));
+      } else {
+        svg.appendChild(svgElement("line", {
+          x1: xPixel(bounds.xMin), y1: yPixel(activeCandidate.threshold),
+          x2: xPixel(bounds.xMax), y2: yPixel(activeCandidate.threshold),
+          stroke: "#d97706", "stroke-width": "4.5", "stroke-dasharray": "7 6"
+        }));
+      }
+    }
 
     samples.forEach((sample) => {
       const x = xPixel(sample.x1);
