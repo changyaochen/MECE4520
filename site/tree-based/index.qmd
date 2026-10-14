@@ -25,3 +25,8 @@ time. See how each split creates a local decision region and the corresponding
 decision process.
 
 [Open the interactive animation](02-tree-growth-animation.qmd)
+
+Use a small labeled dataset to see how a tree evaluates every available
+cutpoint with weighted Gini impurity, then chooses the best one.
+
+[Explore how a tree chooses a split](03-gini-split-explorer.qmd)

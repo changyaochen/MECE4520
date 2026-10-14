@@ -1,0 +1,694 @@
+---
+title: "How a tree chooses a split"
+toc: false
+page-layout: full
+---
+
+A binary classification tree builds a rule one decision at a time. At each
+node, it tries candidate cutpoints along every available feature, measures how
+much each candidate makes the two child regions purer, and selects the
+largest improvement.
+
+::: {.callout-tip}
+## Follow the search
+
+This page makes the search explicit. Run the $x_1$ loop and the $x_2$
+loop for the root node, select the winning split, and then repeat that process
+for each of its two children. The table records the Gini decrease for every
+candidate cutpoint that the tree evaluates.
+:::
+
+For a region $R$, the Gini impurity and the decrease from a candidate split
+are
+
+$$
+G(R) = 1 - \sum_{k=1}^{K} \hat{p}_{R,k}^{\,2},
+\qquad
+\Delta G
+= G(R) -
+\left[
+\frac{n_L}{n}G(R_L) + \frac{n_R}{n}G(R_R)
+\right].
+$$
+
+Here, a larger $\Delta G$ is better.
+
+<div id="tree-gini-explorer" class="tree-gini-explorer">
+<div class="tree-gini-controls">
+<button id="tree-gini-next" type="button">Evaluate next candidate</button>
+<button id="tree-gini-run" type="button">Run this feature loop</button>
+<button id="tree-gini-reset" type="button">Reset</button>
+</div>
+<p id="tree-gini-status" class="tree-gini-status" aria-live="polite"></p>
+
+<div class="tree-gini-layout">
+<figure class="tree-gini-figure">
+<svg id="tree-gini-svg" viewBox="0 0 660 470" role="img" aria-label="Mock two-feature classification data and selected tree splits"></svg>
+<figcaption>
+Red triangles are positive labels; green circles are negative labels.
+Solid blue and red dashed lines are selected splits.
+</figcaption>
+</figure>
+
+<section class="tree-gini-summary" aria-live="polite">
+<h2>Current search</h2>
+<p id="tree-gini-node-summary" class="tree-gini-node-summary"></p>
+<div id="tree-gini-feature-winner" class="tree-gini-feature-winner"></div>
+<div id="tree-gini-winner" class="tree-gini-winner"></div>
+
+<details class="tree-gini-data">
+<summary>Observations in this node</summary>
+<div id="tree-gini-data-table"></div>
+</details>
+</section>
+</div>
+
+<section class="tree-gini-candidates">
+<div class="tree-gini-candidate-header">
+<div>
+<h2 id="tree-gini-table-title">Candidate cutpoints</h2>
+<p>Each row is one possible rule in the current feature loop.</p>
+</div>
+<div class="tree-gini-key" aria-hidden="true">
+<span class="tree-gini-key-current"></span> current
+<span class="tree-gini-key-evaluated"></span> evaluated
+</div>
+</div>
+<div class="tree-gini-table-wrap">
+<table id="tree-gini-table">
+<thead>
+<tr>
+<th scope="col">Feature</th>
+<th scope="col">Cutpoint</th>
+<th scope="col">&le; child<br>(positive / negative)</th>
+<th scope="col">&gt; child<br>(positive / negative)</th>
+<th scope="col">Weighted child Gini</th>
+<th scope="col">Gini decrease</th>
+</tr>
+</thead>
+<tbody id="tree-gini-table-body"></tbody>
+</table>
+</div>
+</section>
+
+<section class="tree-gini-rules">
+<h2>Selected rules</h2>
+<ol id="tree-gini-rules-list"></ol>
+</section>
+</div>
+
+The data are deliberately small and hand-designed so the full search fits on
+one page. Real implementations use the same logic, but sort observations once
+per feature and evaluate only legal boundaries between distinct values.
+
+[Return to Tree-based models](index.qmd)
+
+<script>
+(() => {
+  const samples = [
+    { id: 1, x1: 0.45, x2: 3.30, label: 0 },
+    { id: 2, x1: 0.80, x2: 2.75, label: 0 },
+    { id: 3, x1: 1.30, x2: 3.50, label: 1 },
+    { id: 4, x1: 2.10, x2: 2.70, label: 1 },
+    { id: 5, x1: 2.40, x2: 3.15, label: 1 },
+    { id: 6, x1: 2.80, x2: 3.45, label: 1 },
+    { id: 7, x1: 3.10, x2: 2.85, label: 1 },
+    { id: 8, x1: 3.60, x2: 3.30, label: 0 },
+    { id: 9, x1: 0.50, x2: 0.60, label: 0 },
+    { id: 10, x1: 0.85, x2: 1.40, label: 0 },
+    { id: 11, x1: 1.15, x2: 2.10, label: 0 },
+    { id: 12, x1: 1.45, x2: 0.90, label: 0 },
+    { id: 13, x1: 1.70, x2: 1.80, label: 0 },
+    { id: 14, x1: 2.10, x2: 0.55, label: 0 },
+    { id: 15, x1: 2.60, x2: 1.30, label: 1 },
+    { id: 16, x1: 3.00, x2: 1.90, label: 1 }
+  ];
+
+  const features = ["x1", "x2"];
+  const featureLabels = { x1: "x₁", x2: "x₂" };
+  const svg = document.getElementById("tree-gini-svg");
+  const nextButton = document.getElementById("tree-gini-next");
+  const runButton = document.getElementById("tree-gini-run");
+  const resetButton = document.getElementById("tree-gini-reset");
+  const status = document.getElementById("tree-gini-status");
+  const nodeSummary = document.getElementById("tree-gini-node-summary");
+  const featureWinner = document.getElementById("tree-gini-feature-winner");
+  const winner = document.getElementById("tree-gini-winner");
+  const dataTable = document.getElementById("tree-gini-data-table");
+  const tableTitle = document.getElementById("tree-gini-table-title");
+  const tableBody = document.getElementById("tree-gini-table-body");
+  const rulesList = document.getElementById("tree-gini-rules-list");
+
+  const chart = {
+    left: 76,
+    right: 618,
+    top: 32,
+    bottom: 404,
+    xMin: 0.2,
+    xMax: 3.9,
+    yMin: 0.2,
+    yMax: 3.9
+  };
+
+  const rootBounds = {
+    xMin: chart.xMin,
+    xMax: chart.xMax,
+    yMin: chart.yMin,
+    yMax: chart.yMax
+  };
+
+  let state;
+
+  function round(value, digits) {
+    return Number(value.toFixed(digits || 3));
+  }
+
+  function xPixel(value) {
+    return chart.left + ((value - chart.xMin) / (chart.xMax - chart.xMin)) * (chart.right - chart.left);
+  }
+
+  function yPixel(value) {
+    return chart.bottom - ((value - chart.yMin) / (chart.yMax - chart.yMin)) * (chart.bottom - chart.top);
+  }
+
+  function countLabels(observations) {
+    const positive = observations.filter((sample) => sample.label === 1).length;
+    return { positive: positive, negative: observations.length - positive };
+  }
+
+  function gini(observations) {
+    if (observations.length === 0) {
+      return 0;
+    }
+    const counts = countLabels(observations);
+    const positiveShare = counts.positive / observations.length;
+    const negativeShare = counts.negative / observations.length;
+    return 1 - positiveShare * positiveShare - negativeShare * negativeShare;
+  }
+
+  function thresholds(observations, feature) {
+    const values = Array.from(new Set(observations.map((sample) => sample[feature]))).sort((a, b) => a - b);
+    return values.slice(0, -1).map((value, index) => (value + values[index + 1]) / 2);
+  }
+
+  function evaluate(node, feature, threshold) {
+    const left = node.samples.filter((sample) => sample[feature] <= threshold);
+    const right = node.samples.filter((sample) => sample[feature] > threshold);
+    const parentGini = gini(node.samples);
+    const weightedChildGini =
+      (left.length / node.samples.length) * gini(left) +
+      (right.length / node.samples.length) * gini(right);
+
+    return {
+      node: node,
+      feature: feature,
+      threshold: threshold,
+      left: left,
+      right: right,
+      parentGini: parentGini,
+      weightedChildGini: weightedChildGini,
+      decrease: parentGini - weightedChildGini
+    };
+  }
+
+  function candidates(node, feature) {
+    return thresholds(node.samples, feature).map((threshold) => evaluate(node, feature, threshold));
+  }
+
+  function bestCandidate(node, feature) {
+    return candidates(node, feature).reduce((best, candidate) => {
+      return candidate.decrease > best.decrease ? candidate : best;
+    });
+  }
+
+  function makeChildren(node, split) {
+    const leftBounds = {
+      xMin: node.bounds.xMin,
+      xMax: node.bounds.xMax,
+      yMin: node.bounds.yMin,
+      yMax: node.bounds.yMax
+    };
+    const rightBounds = {
+      xMin: node.bounds.xMin,
+      xMax: node.bounds.xMax,
+      yMin: node.bounds.yMin,
+      yMax: node.bounds.yMax
+    };
+
+    if (split.feature === "x1") {
+      leftBounds.xMax = split.threshold;
+      rightBounds.xMin = split.threshold;
+    } else {
+      leftBounds.yMax = split.threshold;
+      rightBounds.yMin = split.threshold;
+    }
+
+    return [
+      {
+        id: node.id + "-left",
+        title: node.id === "root" ? "root: ≤ child" : node.title + ": ≤ child",
+        samples: split.left,
+        bounds: leftBounds,
+        depth: node.depth + 1
+      },
+      {
+        id: node.id + "-right",
+        title: node.id === "root" ? "root: > child" : node.title + ": > child",
+        samples: split.right,
+        bounds: rightBounds,
+        depth: node.depth + 1
+      }
+    ];
+  }
+
+  function reset() {
+    const root = {
+      id: "root",
+      title: "root node",
+      samples: samples,
+      bounds: rootBounds,
+      depth: 0
+    };
+    state = {
+      queue: [root],
+      nodeIndex: 0,
+      featureIndex: 0,
+      evaluated: 0,
+      leaves: [root],
+      rules: [],
+      completed: false
+    };
+    update();
+  }
+
+  function currentNode() {
+    return state.queue[state.nodeIndex];
+  }
+
+  function currentCandidates() {
+    return candidates(currentNode(), features[state.featureIndex]);
+  }
+
+  function loopFinished() {
+    return state.evaluated >= currentCandidates().length;
+  }
+
+  function bothFeatureLoopsFinished() {
+    return state.featureIndex === 1 && loopFinished();
+  }
+
+  function nodeName(node) {
+    return node.id === "root" ? "the root node" : "the " + node.title;
+  }
+
+  function groupText(observations) {
+    const counts = countLabels(observations);
+    return counts.positive + " / " + counts.negative;
+  }
+
+  function selectedRuleText(rule) {
+    return featureLabels[rule.split.feature] + " ≤ " + rule.split.threshold.toFixed(2);
+  }
+
+  function selectBestSplit() {
+    const node = currentNode();
+    const first = bestCandidate(node, "x1");
+    const second = bestCandidate(node, "x2");
+    const split = second.decrease > first.decrease ? second : first;
+    const children = makeChildren(node, split);
+
+    state.rules.push({ node: node, split: split });
+    state.leaves = state.leaves.filter((leaf) => leaf.id !== node.id).concat(children);
+
+    if (node.id === "root") {
+      state.queue.push(children[0], children[1]);
+    }
+
+    state.nodeIndex += 1;
+    state.featureIndex = 0;
+    state.evaluated = 0;
+    if (state.nodeIndex >= state.queue.length) {
+      state.completed = true;
+    }
+    update();
+  }
+
+  function advance() {
+    if (state.completed) {
+      return;
+    }
+
+    if (!loopFinished()) {
+      state.evaluated += 1;
+      update();
+      return;
+    }
+
+    if (state.featureIndex === 0) {
+      state.featureIndex = 1;
+      state.evaluated = 0;
+      update();
+      return;
+    }
+
+    selectBestSplit();
+  }
+
+  function runLoop() {
+    if (state.completed) {
+      return;
+    }
+    if (!loopFinished()) {
+      state.evaluated = currentCandidates().length;
+      update();
+    }
+  }
+
+  function updateControls() {
+    if (state.completed) {
+      nextButton.textContent = "All three split decisions complete";
+      nextButton.disabled = true;
+      runButton.disabled = true;
+      return;
+    }
+
+    if (!loopFinished()) {
+      nextButton.textContent = "Evaluate next candidate";
+      runButton.textContent = "Run this feature loop";
+      nextButton.disabled = false;
+      runButton.disabled = false;
+      return;
+    }
+
+    if (state.featureIndex === 0) {
+      nextButton.textContent = "Move to x₂ candidates";
+      runButton.textContent = "Feature loop complete";
+      nextButton.disabled = false;
+      runButton.disabled = true;
+      return;
+    }
+
+    nextButton.textContent = "Choose the best split";
+    runButton.textContent = "Feature loop complete";
+    nextButton.disabled = false;
+    runButton.disabled = true;
+  }
+
+  function updateStatus() {
+    if (state.completed) {
+      status.textContent = "Three split decisions are complete: the root and each of its two children were searched independently.";
+      return;
+    }
+
+    const node = currentNode();
+    const feature = featureLabels[features[state.featureIndex]];
+    const total = currentCandidates().length;
+    if (!loopFinished()) {
+      status.textContent =
+        "For loop: evaluate " + feature + " candidates in " + nodeName(node) +
+        " (" + state.evaluated + " of " + total + " completed).";
+      return;
+    }
+    if (state.featureIndex === 0) {
+      status.textContent =
+        "The " + feature + " loop is complete for " + nodeName(node) +
+        ". Now repeat the same search for x₂.";
+      return;
+    }
+    status.textContent =
+      "Both feature loops are complete for " + nodeName(node) +
+      ". Compare their best Gini decreases and choose one split.";
+  }
+
+  function makeCell(row, content) {
+    const cell = document.createElement("td");
+    cell.textContent = content;
+    row.appendChild(cell);
+  }
+
+  function updateTable() {
+    if (state.completed) {
+      tableTitle.textContent = "Final selected split rules";
+      tableBody.replaceChildren();
+      return;
+    }
+
+    const node = currentNode();
+    const feature = features[state.featureIndex];
+    const rows = candidates(node, feature);
+    tableTitle.textContent =
+      "Candidate cutpoints: " + featureLabels[feature] + " in " + node.title;
+    tableBody.replaceChildren();
+
+    rows.forEach((candidate, index) => {
+      const row = document.createElement("tr");
+      const isEvaluated = index < state.evaluated;
+      const isCurrent = index === state.evaluated && !loopFinished();
+      if (isEvaluated) {
+        row.classList.add("tree-gini-evaluated");
+      }
+      if (isCurrent) {
+        row.classList.add("tree-gini-current");
+      }
+
+      makeCell(row, featureLabels[feature]);
+      makeCell(row, candidate.threshold.toFixed(2));
+      if (isEvaluated) {
+        makeCell(row, groupText(candidate.left));
+        makeCell(row, groupText(candidate.right));
+        makeCell(row, candidate.weightedChildGini.toFixed(3));
+        makeCell(row, candidate.decrease.toFixed(3));
+      } else {
+        makeCell(row, "—");
+        makeCell(row, "—");
+        makeCell(row, "—");
+        makeCell(row, "—");
+      }
+      tableBody.appendChild(row);
+    });
+  }
+
+  function updateSummary() {
+    if (state.completed) {
+      nodeSummary.textContent = "All three nodes have been searched.";
+      featureWinner.textContent = "Each winning rule is listed below.";
+      winner.textContent = "The colored regions on the left show the resulting three splits.";
+      dataTable.replaceChildren();
+      return;
+    }
+
+    const node = currentNode();
+    const counts = countLabels(node.samples);
+    nodeSummary.textContent =
+      node.title + ": " + node.samples.length + " observations (" +
+      counts.positive + " positive, " + counts.negative + " negative); " +
+      "parent Gini = " + gini(node.samples).toFixed(3) + ".";
+
+    const feature = features[state.featureIndex];
+    if (state.evaluated > 0) {
+      const bestSoFar = currentCandidates()
+        .slice(0, state.evaluated)
+        .reduce((best, candidate) => candidate.decrease > best.decrease ? candidate : best);
+      featureWinner.textContent =
+        "Best evaluated " + featureLabels[feature] + " candidate so far: " +
+        selectedRuleText({ split: bestSoFar }) +
+        ", with Gini decrease " + bestSoFar.decrease.toFixed(3) + ".";
+    } else {
+      featureWinner.textContent =
+        "No " + featureLabels[feature] + " cutpoint has been evaluated yet.";
+    }
+
+    if (bothFeatureLoopsFinished()) {
+      const bestX1 = bestCandidate(node, "x1");
+      const bestX2 = bestCandidate(node, "x2");
+      const best = bestX2.decrease > bestX1.decrease ? bestX2 : bestX1;
+      winner.textContent =
+        "Winner across both features: " + selectedRuleText({ split: best }) +
+        ", with Gini decrease " + best.decrease.toFixed(3) + ".";
+    } else {
+      winner.textContent =
+        "Complete both feature loops before selecting a split for this node.";
+    }
+
+    const table = document.createElement("table");
+    const head = document.createElement("thead");
+    const headRow = document.createElement("tr");
+    ["ID", "x₁", "x₂", "Label"].forEach((label) => {
+      const cell = document.createElement("th");
+      cell.scope = "col";
+      cell.textContent = label;
+      headRow.appendChild(cell);
+    });
+    head.appendChild(headRow);
+    const body = document.createElement("tbody");
+    node.samples.forEach((sample) => {
+      const row = document.createElement("tr");
+      [sample.id, sample.x1.toFixed(2), sample.x2.toFixed(2), sample.label].forEach((value) => {
+        makeCell(row, String(value));
+      });
+      body.appendChild(row);
+    });
+    table.appendChild(head);
+    table.appendChild(body);
+    dataTable.replaceChildren(table);
+  }
+
+  function leafColor(leaf) {
+    const counts = countLabels(leaf.samples);
+    return counts.positive >= counts.negative ? "#fff1ed" : "#ecfdf5";
+  }
+
+  function svgElement(name, attributes) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function drawPlot() {
+    svg.replaceChildren();
+
+    state.leaves.forEach((leaf) => {
+      const rect = svgElement("rect", {
+        x: xPixel(leaf.bounds.xMin),
+        y: yPixel(leaf.bounds.yMax),
+        width: xPixel(leaf.bounds.xMax) - xPixel(leaf.bounds.xMin),
+        height: yPixel(leaf.bounds.yMin) - yPixel(leaf.bounds.yMax),
+        fill: leafColor(leaf),
+        opacity: "0.82"
+      });
+      svg.appendChild(rect);
+    });
+
+    [1, 2, 3].forEach((tick) => {
+      const vertical = svgElement("line", {
+        x1: xPixel(tick), y1: chart.top, x2: xPixel(tick), y2: chart.bottom,
+        stroke: "#cbd5e1", "stroke-dasharray": "5 6", "stroke-width": "1"
+      });
+      const horizontal = svgElement("line", {
+        x1: chart.left, y1: yPixel(tick), x2: chart.right, y2: yPixel(tick),
+        stroke: "#cbd5e1", "stroke-dasharray": "5 6", "stroke-width": "1"
+      });
+      svg.appendChild(vertical);
+      svg.appendChild(horizontal);
+
+      const xLabel = svgElement("text", {
+        x: xPixel(tick), y: chart.bottom + 30, "text-anchor": "middle",
+        fill: "#334155", "font-size": "18"
+      });
+      xLabel.textContent = tick;
+      svg.appendChild(xLabel);
+      const yLabel = svgElement("text", {
+        x: chart.left - 22, y: yPixel(tick) + 6, "text-anchor": "end",
+        fill: "#334155", "font-size": "18"
+      });
+      yLabel.textContent = tick;
+      svg.appendChild(yLabel);
+    });
+
+    svg.appendChild(svgElement("line", {
+      x1: chart.left, y1: chart.bottom, x2: chart.right + 18, y2: chart.bottom,
+      stroke: "#334155", "stroke-width": "2"
+    }));
+    svg.appendChild(svgElement("line", {
+      x1: chart.left, y1: chart.bottom, x2: chart.left, y2: chart.top - 12,
+      stroke: "#334155", "stroke-width": "2"
+    }));
+    const xAxis = svgElement("text", {
+      x: chart.right + 30, y: chart.bottom + 8, fill: "#0f172a",
+      "font-size": "24", "font-style": "italic"
+    });
+    xAxis.textContent = "x₁";
+    svg.appendChild(xAxis);
+    const yAxis = svgElement("text", {
+      x: chart.left - 10, y: chart.top - 16, fill: "#0f172a",
+      "font-size": "24", "font-style": "italic"
+    });
+    yAxis.textContent = "x₂";
+    svg.appendChild(yAxis);
+
+    state.rules.forEach((rule) => {
+      const split = rule.split;
+      const isRoot = rule.node.id === "root";
+      const color = isRoot ? "#2563eb" : "#dc2626";
+      if (split.feature === "x1") {
+        svg.appendChild(svgElement("line", {
+          x1: xPixel(split.threshold), y1: yPixel(rule.node.bounds.yMin),
+          x2: xPixel(split.threshold), y2: yPixel(rule.node.bounds.yMax),
+          stroke: color, "stroke-width": "4", "stroke-dasharray": "10 8"
+        }));
+      } else {
+        svg.appendChild(svgElement("line", {
+          x1: xPixel(rule.node.bounds.xMin), y1: yPixel(split.threshold),
+          x2: xPixel(rule.node.bounds.xMax), y2: yPixel(split.threshold),
+          stroke: color, "stroke-width": "4", "stroke-dasharray": "10 8"
+        }));
+      }
+    });
+
+    samples.forEach((sample) => {
+      const x = xPixel(sample.x1);
+      const y = yPixel(sample.x2);
+      if (sample.label === 1) {
+        const size = 10;
+        const triangle = svgElement("path", {
+          d: "M " + x + " " + (y - size) + " L " + (x - size) + " " + (y + size) +
+             " L " + (x + size) + " " + (y + size) + " Z",
+          fill: "#ef4444", stroke: "#b91c1c", "stroke-width": "1.2"
+        });
+        svg.appendChild(triangle);
+      } else {
+        svg.appendChild(svgElement("circle", {
+          cx: x, cy: y, r: "10", fill: "#34d399", stroke: "#047857", "stroke-width": "1.2"
+        }));
+      }
+    });
+
+    const legend = svgElement("g", {});
+    legend.appendChild(svgElement("path", {
+      d: "M 103 438 L 94 454 L 112 454 Z", fill: "#ef4444", stroke: "#b91c1c", "stroke-width": "1"
+    }));
+    const positive = svgElement("text", { x: "120", y: "452", fill: "#334155", "font-size": "15" });
+    positive.textContent = "positive label";
+    legend.appendChild(positive);
+    legend.appendChild(svgElement("circle", {
+      cx: "260", cy: "446", r: "8", fill: "#34d399", stroke: "#047857", "stroke-width": "1"
+    }));
+    const negative = svgElement("text", { x: "274", y: "452", fill: "#334155", "font-size": "15" });
+    negative.textContent = "negative label";
+    legend.appendChild(negative);
+    svg.appendChild(legend);
+  }
+
+  function updateRules() {
+    rulesList.replaceChildren();
+    if (state.rules.length === 0) {
+      const item = document.createElement("li");
+      item.textContent = "No split has been selected yet.";
+      rulesList.appendChild(item);
+      return;
+    }
+
+    state.rules.forEach((rule) => {
+      const item = document.createElement("li");
+      item.textContent =
+        rule.node.title + ": " + selectedRuleText(rule) +
+        " (Gini decrease = " + rule.split.decrease.toFixed(3) + ").";
+      rulesList.appendChild(item);
+    });
+  }
+
+  function update() {
+    updateControls();
+    updateStatus();
+    updateTable();
+    updateSummary();
+    drawPlot();
+    updateRules();
+  }
+
+  nextButton.addEventListener("click", advance);
+  runButton.addEventListener("click", runLoop);
+  resetButton.addEventListener("click", reset);
+  reset();
+})();
+</script>
