@@ -1,0 +1,447 @@
+---
+title: "How a fully grown tree can overfit"
+toc: false
+page-layout: full
+---
+
+The same Gini-split procedure can be allowed to continue until every terminal
+region contains observations of only one label. This animation grows a tree on
+a slightly more mingled version of the mock dataset from the split explorer,
+with no limit on depth, no minimum leaf size, and no required minimum Gini
+decrease.
+
+::: {.callout-warning}
+## Perfect training fit is not necessarily a good model
+
+The final tree classifies all 16 observations correctly. But notice how it
+creates increasingly narrow regions to accommodate individual observations.
+That is a sign that the tree is memorizing this dataset and may not generalize
+well to new operating points.
+:::
+
+<div id="tree-overfit-animation" class="tree-overfit-animation">
+<p id="tree-overfit-status" class="tree-overfit-status" aria-live="polite"></p>
+
+<div class="tree-overfit-layout">
+<figure class="tree-overfit-figure">
+<svg id="tree-overfit-svg" viewBox="0 0 660 470" role="img" aria-label="A decision tree grows classification regions around labeled mock observations"></svg>
+<figcaption>
+Red triangles are positive labels; green circles are negative labels. The
+gold rule is the split added in the current frame; blue rules were selected
+earlier.
+</figcaption>
+</figure>
+
+<section class="tree-overfit-summary" aria-live="polite">
+<h2 id="tree-overfit-step-title"></h2>
+<p id="tree-overfit-step-text"></p>
+
+<div class="tree-overfit-metrics">
+<div>
+<span>Terminal regions</span>
+<strong id="tree-overfit-leaves"></strong>
+</div>
+<div>
+<span>Training accuracy</span>
+<strong id="tree-overfit-accuracy"></strong>
+</div>
+<div>
+<span>Deepest region</span>
+<strong id="tree-overfit-depth"></strong>
+</div>
+</div>
+
+<h3>Rules selected so far</h3>
+<ol id="tree-overfit-rules"></ol>
+</section>
+</div>
+
+<p id="tree-overfit-conclusion" class="tree-overfit-conclusion"></p>
+</div>
+
+The remedy is not to abandon trees. Instead, use validation performance to
+limit their complexity, for example with <code>max_depth</code>,
+<code>min_samples_leaf</code>, or <code>min_impurity_decrease</code>.
+
+[Return to Tree-based models](index.qmd)
+
+<script>
+(() => {
+  const samples = [
+    { id: 1, x1: 0.45, x2: 3.30, label: 0 },
+    { id: 2, x1: 0.80, x2: 2.75, label: 0 },
+    { id: 3, x1: 1.30, x2: 3.50, label: 0 },
+    { id: 4, x1: 2.10, x2: 2.70, label: 1 },
+    { id: 5, x1: 2.40, x2: 3.15, label: 1 },
+    { id: 6, x1: 2.80, x2: 3.45, label: 1 },
+    { id: 7, x1: 3.10, x2: 2.85, label: 1 },
+    { id: 8, x1: 3.60, x2: 3.30, label: 0 },
+    { id: 9, x1: 0.50, x2: 0.60, label: 1 },
+    { id: 10, x1: 0.85, x2: 1.40, label: 1 },
+    { id: 11, x1: 1.15, x2: 2.10, label: 0 },
+    { id: 12, x1: 1.45, x2: 0.90, label: 1 },
+    { id: 13, x1: 1.70, x2: 1.80, label: 1 },
+    { id: 14, x1: 2.10, x2: 0.55, label: 0 },
+    { id: 15, x1: 2.60, x2: 1.30, label: 1 },
+    { id: 16, x1: 3.00, x2: 1.90, label: 0 }
+  ];
+
+  const chart = {
+    left: 76,
+    right: 618,
+    top: 32,
+    bottom: 404,
+    xMin: 0.2,
+    xMax: 3.9,
+    yMin: 0.2,
+    yMax: 3.9
+  };
+  const rootBounds = {
+    xMin: chart.xMin,
+    xMax: chart.xMax,
+    yMin: chart.yMin,
+    yMax: chart.yMax
+  };
+
+  const svg = document.getElementById("tree-overfit-svg");
+  const status = document.getElementById("tree-overfit-status");
+  const title = document.getElementById("tree-overfit-step-title");
+  const stepText = document.getElementById("tree-overfit-step-text");
+  const leafCount = document.getElementById("tree-overfit-leaves");
+  const accuracy = document.getElementById("tree-overfit-accuracy");
+  const depth = document.getElementById("tree-overfit-depth");
+  const rulesList = document.getElementById("tree-overfit-rules");
+  const conclusion = document.getElementById("tree-overfit-conclusion");
+
+  function xPixel(value) {
+    return chart.left + ((value - chart.xMin) / (chart.xMax - chart.xMin)) * (chart.right - chart.left);
+  }
+
+  function yPixel(value) {
+    return chart.bottom - ((value - chart.yMin) / (chart.yMax - chart.yMin)) * (chart.bottom - chart.top);
+  }
+
+  function countLabels(observations) {
+    const positive = observations.filter((sample) => sample.label === 1).length;
+    return { positive: positive, negative: observations.length - positive };
+  }
+
+  function gini(observations) {
+    if (observations.length === 0) {
+      return 0;
+    }
+    const counts = countLabels(observations);
+    const positiveShare = counts.positive / observations.length;
+    const negativeShare = counts.negative / observations.length;
+    return 1 - positiveShare * positiveShare - negativeShare * negativeShare;
+  }
+
+  function legalThresholds(observations, feature) {
+    const values = Array.from(new Set(observations.map((sample) => sample[feature]))).sort((a, b) => a - b);
+    return values.slice(0, -1).map((value, index) => (value + values[index + 1]) / 2);
+  }
+
+  function evaluate(node, feature, threshold) {
+    const left = node.samples.filter((sample) => sample[feature] <= threshold);
+    const right = node.samples.filter((sample) => sample[feature] > threshold);
+    const weightedChildGini =
+      (left.length / node.samples.length) * gini(left) +
+      (right.length / node.samples.length) * gini(right);
+    return {
+      node: node,
+      feature: feature,
+      threshold: threshold,
+      left: left,
+      right: right,
+      decrease: gini(node.samples) - weightedChildGini
+    };
+  }
+
+  function bestSplit(node) {
+    const candidates = ["x1", "x2"].flatMap((feature) => {
+      return legalThresholds(node.samples, feature).map((threshold) => evaluate(node, feature, threshold));
+    });
+    if (candidates.length === 0) {
+      return null;
+    }
+    return candidates.reduce((best, candidate) => {
+      return candidate.decrease > best.decrease ? candidate : best;
+    });
+  }
+
+  function childrenFor(node, split) {
+    const leftBounds = {
+      xMin: node.bounds.xMin,
+      xMax: node.bounds.xMax,
+      yMin: node.bounds.yMin,
+      yMax: node.bounds.yMax
+    };
+    const rightBounds = {
+      xMin: node.bounds.xMin,
+      xMax: node.bounds.xMax,
+      yMin: node.bounds.yMin,
+      yMax: node.bounds.yMax
+    };
+
+    if (split.feature === "x1") {
+      leftBounds.xMax = split.threshold;
+      rightBounds.xMin = split.threshold;
+    } else {
+      leftBounds.yMax = split.threshold;
+      rightBounds.yMin = split.threshold;
+    }
+
+    return [
+      {
+        id: node.id + "-left",
+        path: node.path + " then ≤",
+        samples: split.left,
+        bounds: leftBounds,
+        depth: node.depth + 1
+      },
+      {
+        id: node.id + "-right",
+        path: node.path + " then >",
+        samples: split.right,
+        bounds: rightBounds,
+        depth: node.depth + 1
+      }
+    ];
+  }
+
+  function snapshot(leaves, rules, lastRule, finished) {
+    return {
+      leaves: leaves.slice(),
+      rules: rules.slice(),
+      lastRule: lastRule,
+      finished: finished
+    };
+  }
+
+  function buildFrames() {
+    const root = {
+      id: "root",
+      path: "root",
+      samples: samples,
+      bounds: rootBounds,
+      depth: 0
+    };
+    let leaves = [root];
+    let rules = [];
+    const frames = [snapshot(leaves, rules, null, false)];
+
+    while (true) {
+      const options = leaves
+        .filter((leaf) => gini(leaf.samples) > 0)
+        .map((leaf) => bestSplit(leaf))
+        .filter((split) => split && split.decrease > 0);
+      if (options.length === 0) {
+        frames.push(snapshot(leaves, rules, null, true));
+        return frames;
+      }
+
+      const selected = options.reduce((best, candidate) => {
+        return candidate.decrease > best.decrease ? candidate : best;
+      });
+      const children = childrenFor(selected.node, selected);
+      leaves = leaves.filter((leaf) => leaf.id !== selected.node.id).concat(children);
+      rules = rules.concat([{ node: selected.node, split: selected }]);
+      frames.push(snapshot(leaves, rules, selected, false));
+    }
+  }
+
+  function svgElement(name, attributes) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function leafFill(leaf) {
+    const counts = countLabels(leaf.samples);
+    return counts.positive > counts.negative ? "#fee2e2" : "#dcfce7";
+  }
+
+  function drawRule(rule, color, width) {
+    const split = rule.split;
+    const bounds = rule.node.bounds;
+    if (split.feature === "x1") {
+      svg.appendChild(svgElement("line", {
+        x1: xPixel(split.threshold), y1: yPixel(bounds.yMin),
+        x2: xPixel(split.threshold), y2: yPixel(bounds.yMax),
+        stroke: color, "stroke-width": String(width), "stroke-dasharray": "9 7"
+      }));
+    } else {
+      svg.appendChild(svgElement("line", {
+        x1: xPixel(bounds.xMin), y1: yPixel(split.threshold),
+        x2: xPixel(bounds.xMax), y2: yPixel(split.threshold),
+        stroke: color, "stroke-width": String(width), "stroke-dasharray": "9 7"
+      }));
+    }
+  }
+
+  function drawPlot(frame) {
+    svg.replaceChildren();
+
+    frame.leaves.forEach((leaf) => {
+      svg.appendChild(svgElement("rect", {
+        x: xPixel(leaf.bounds.xMin),
+        y: yPixel(leaf.bounds.yMax),
+        width: xPixel(leaf.bounds.xMax) - xPixel(leaf.bounds.xMin),
+        height: yPixel(leaf.bounds.yMin) - yPixel(leaf.bounds.yMax),
+        fill: leafFill(leaf),
+        opacity: "0.84"
+      }));
+    });
+
+    [1, 2, 3].forEach((tick) => {
+      svg.appendChild(svgElement("line", {
+        x1: xPixel(tick), y1: chart.top, x2: xPixel(tick), y2: chart.bottom,
+        stroke: "#cbd5e1", "stroke-dasharray": "5 6", "stroke-width": "1"
+      }));
+      svg.appendChild(svgElement("line", {
+        x1: chart.left, y1: yPixel(tick), x2: chart.right, y2: yPixel(tick),
+        stroke: "#cbd5e1", "stroke-dasharray": "5 6", "stroke-width": "1"
+      }));
+      const xLabel = svgElement("text", {
+        x: xPixel(tick), y: chart.bottom + 30, "text-anchor": "middle",
+        fill: "#334155", "font-size": "18"
+      });
+      xLabel.textContent = tick;
+      svg.appendChild(xLabel);
+      const yLabel = svgElement("text", {
+        x: chart.left - 22, y: yPixel(tick) + 6, "text-anchor": "end",
+        fill: "#334155", "font-size": "18"
+      });
+      yLabel.textContent = tick;
+      svg.appendChild(yLabel);
+    });
+
+    svg.appendChild(svgElement("line", {
+      x1: chart.left, y1: chart.bottom, x2: chart.right + 18, y2: chart.bottom,
+      stroke: "#334155", "stroke-width": "2"
+    }));
+    svg.appendChild(svgElement("line", {
+      x1: chart.left, y1: chart.bottom, x2: chart.left, y2: chart.top - 12,
+      stroke: "#334155", "stroke-width": "2"
+    }));
+    const xAxis = svgElement("text", {
+      x: chart.right + 30, y: chart.bottom + 8, fill: "#0f172a",
+      "font-size": "24", "font-style": "italic"
+    });
+    xAxis.textContent = "x₁";
+    svg.appendChild(xAxis);
+    const yAxis = svgElement("text", {
+      x: chart.left - 10, y: chart.top - 16, fill: "#0f172a",
+      "font-size": "24", "font-style": "italic"
+    });
+    yAxis.textContent = "x₂";
+    svg.appendChild(yAxis);
+
+    frame.rules.forEach((rule) => {
+      const isCurrent = frame.lastRule && rule.split === frame.lastRule;
+      drawRule(rule, isCurrent ? "#d97706" : "#2563eb", isCurrent ? 4.5 : 3.5);
+    });
+
+    samples.forEach((sample) => {
+      const x = xPixel(sample.x1);
+      const y = yPixel(sample.x2);
+      if (sample.label === 1) {
+        svg.appendChild(svgElement("path", {
+          d: "M " + x + " " + (y - 10) + " L " + (x - 10) + " " + (y + 10) +
+             " L " + (x + 10) + " " + (y + 10) + " Z",
+          fill: "#ef4444", stroke: "#b91c1c", "stroke-width": "1.2"
+        }));
+      } else {
+        svg.appendChild(svgElement("circle", {
+          cx: x, cy: y, r: "10", fill: "#34d399", stroke: "#047857", "stroke-width": "1.2"
+        }));
+      }
+    });
+  }
+
+  function trainingAccuracy(leaves) {
+    const correctlyClassified = leaves.reduce((total, leaf) => {
+      const counts = countLabels(leaf.samples);
+      return total + Math.max(counts.positive, counts.negative);
+    }, 0);
+    return correctlyClassified / samples.length;
+  }
+
+  function ruleText(rule) {
+    const feature = rule.split.feature === "x1" ? "x₁" : "x₂";
+    return rule.node.path + ": " + feature + " ≤ " + rule.split.threshold.toFixed(2);
+  }
+
+  function render(frameIndex, frames) {
+    const frame = frames[frameIndex];
+    const currentStep = frame.rules.length;
+    const totalSteps = frames[frames.length - 2].rules.length;
+    const deepest = Math.max(...frame.leaves.map((leaf) => leaf.depth));
+    const singletonLeaves = frame.leaves.filter((leaf) => leaf.samples.length === 1).length;
+
+    drawPlot(frame);
+    status.textContent =
+      frame.finished
+        ? "Fully grown tree: no impure leaf remains that can be improved by a split."
+        : "Growing the tree: split " + currentStep + " of " + totalSteps + ".";
+    title.textContent =
+      frame.finished
+        ? "Every terminal region is pure"
+        : currentStep === 0
+          ? "Start with one mixed region"
+          : "Add rule " + currentStep;
+    stepText.textContent =
+      frame.finished
+        ? "The resulting model has zero training error, but it has created " +
+          frame.leaves.length + " local regions to do so; " +
+          singletonLeaves + " contain only one observation."
+        : currentStep === 0
+          ? "The tree has not yet made any rules."
+          : "The new gold rule is " + ruleText(frame.rules[frame.rules.length - 1]) + ".";
+    leafCount.textContent = String(frame.leaves.length);
+    accuracy.textContent = (100 * trainingAccuracy(frame.leaves)).toFixed(1) + "%";
+    depth.textContent = String(deepest);
+
+    rulesList.replaceChildren();
+    if (frame.rules.length === 0) {
+      const item = document.createElement("li");
+      item.textContent = "No split yet.";
+      rulesList.appendChild(item);
+    } else {
+      frame.rules.forEach((rule, index) => {
+        const item = document.createElement("li");
+        item.textContent = ruleText(rule) + ".";
+        if (!frame.finished && index === frame.rules.length - 1) {
+          item.classList.add("tree-overfit-current-rule");
+        }
+        rulesList.appendChild(item);
+      });
+    }
+
+    conclusion.textContent =
+      frame.finished
+        ? "This is overfitting in miniature: a perfect fit to the observed labels achieved through a mix of broad regions and tiny one-observation regions."
+        : "The animation advances automatically and restarts after the full tree is shown.";
+  }
+
+  const frames = buildFrames();
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let frameIndex = reducedMotion ? frames.length - 1 : 0;
+  let timer;
+
+  function play() {
+    render(frameIndex, frames);
+    if (reducedMotion) {
+      return;
+    }
+    const delay = frameIndex === frames.length - 1 ? 4000 : 1200;
+    timer = window.setTimeout(() => {
+      frameIndex = (frameIndex + 1) % frames.length;
+      play();
+    }, delay);
+  }
+
+  window.addEventListener("beforeunload", () => window.clearTimeout(timer));
+  play();
+})();
+</script>
