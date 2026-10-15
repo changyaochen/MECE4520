@@ -30,3 +30,9 @@ Use a small labeled dataset to see how a tree evaluates every available
 cutpoint with weighted Gini impurity, then chooses the best one.
 
 [Explore how a tree chooses a split](03-gini-split-explorer.qmd)
+
+Watch a more mingled version of the mock data continue splitting until it
+classifies every training observation correctly. See how a perfect training fit
+can require increasingly local rules.
+
+[Watch the overfitting animation](04-tree-overfitting-animation.qmd)

@@ -816,6 +816,163 @@
   }
 }
 
+/* Fully-grown tree overfitting animation. */
+.tree-overfit-animation {
+  margin: 1.5rem 0 2rem;
+}
+
+.tree-overfit-status,
+.tree-overfit-conclusion {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-left: 4px solid #457eaa;
+  background: #f5f7f8;
+  color: #35444c;
+}
+
+.tree-overfit-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.tree-overfit-figure,
+.tree-overfit-summary {
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid #d9e1e5;
+  border-radius: 0.35rem;
+}
+
+.tree-overfit-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tree-overfit-figure figcaption {
+  margin-top: 0.65rem;
+  color: #4c5961;
+  font-size: 0.9rem;
+}
+
+.tree-overfit-summary h2 {
+  margin: 0 0 0.55rem;
+  font-size: 1.15rem;
+}
+
+.tree-overfit-summary h3 {
+  margin: 1rem 0 0.45rem;
+  font-size: 1rem;
+}
+
+.tree-overfit-summary p {
+  min-height: 3.2rem;
+  margin: 0;
+}
+
+.tree-overfit-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
+.tree-overfit-metrics div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem;
+  border: 1px solid #d9e1e5;
+  border-radius: 0.25rem;
+  background: #f8fafc;
+}
+
+.tree-overfit-metrics span {
+  color: #4c5961;
+  font-size: 0.78rem;
+}
+
+.tree-overfit-metrics strong {
+  color: #355766;
+  font-size: 1.15rem;
+}
+
+.tree-overfit-summary ol {
+  max-height: 15rem;
+  margin: 0;
+  padding-left: 1.5rem;
+  overflow: auto;
+  font-size: 0.9rem;
+}
+
+.tree-overfit-summary li + li {
+  margin-top: 0.35rem;
+}
+
+.tree-overfit-current-rule {
+  color: #b45309;
+  font-weight: 700;
+}
+
+.tree-overfit-conclusion {
+  margin-top: 1.25rem;
+  border-left-color: #d77732;
+  background: #fff2e3;
+  font-weight: 600;
+}
+
+.quarto-dark .tree-overfit-status,
+.quarto-dark .tree-overfit-conclusion {
+  color: #e5ecef;
+}
+
+.quarto-dark .tree-overfit-status {
+  background: #2a353b;
+}
+
+.quarto-dark .tree-overfit-conclusion {
+  background: #3b3023;
+}
+
+.quarto-dark .tree-overfit-figure,
+.quarto-dark .tree-overfit-summary,
+.quarto-dark .tree-overfit-metrics div {
+  border-color: #607781;
+}
+
+.quarto-dark .tree-overfit-metrics div {
+  background: #23353f;
+}
+
+.quarto-dark .tree-overfit-metrics span,
+.quarto-dark .tree-overfit-figure figcaption {
+  color: #c5d0d5;
+}
+
+.quarto-dark .tree-overfit-metrics strong {
+  color: #a7cce2;
+}
+
+@media (max-width: 540px) {
+  .tree-overfit-layout {
+    gap: 0.55rem;
+  }
+
+  .tree-overfit-figure,
+  .tree-overfit-summary {
+    padding: 0.55rem;
+  }
+
+  .tree-overfit-metrics {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .tree-overfit-summary ol {
+    font-size: 0.78rem;
+  }
+}
+
 /* Classification-threshold explorer. */
 .threshold-metrics-controls {
   grid-template-columns: minmax(220px, 1fr);
