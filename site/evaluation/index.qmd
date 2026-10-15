@@ -30,3 +30,14 @@ training and validation RMSE across penalty strengths, then contrast Ridge's
 coefficient shrinkage with Lasso's exact-zero feature selection.
 
 [View the notebook](02-ridge-regularization.ipynb)
+
+## 3. Tuning decision-tree complexity
+
+**Estimated time:** 25–35 minutes
+
+Use the gas-turbine positive/negative CO-emission label to compare decision
+trees of different complexity. Tune maximum depth and minimum leaf size with
+a fixed train/test split, then use ROC AUC to see why a fully grown tree can
+fit the training set perfectly while generalizing poorly.
+
+[View the notebook](03-decision-tree-hyperparameter-tuning.ipynb)
