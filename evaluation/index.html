@@ -366,6 +366,7 @@ window.Quarto = {
   <ul>
   <li><a href="#polynomial-regression-and-overfitting" id="toc-polynomial-regression-and-overfitting">1. Polynomial regression and overfitting</a></li>
   <li><a href="#ridge-and-lasso-regularization" id="toc-ridge-and-lasso-regularization">2. Ridge and Lasso regularization</a></li>
+  <li><a href="#tuning-decision-tree-complexity" id="toc-tuning-decision-tree-complexity">3. Tuning decision-tree complexity</a></li>
   </ul>
 </nav>
 <p>A fitted model is useful only if it performs well on new observations. These materials develop the tools for evaluating, comparing, and selecting models without mistaking a good fit to training data for reliable future performance.</p>
@@ -381,6 +382,12 @@ window.Quarto = {
 <p><strong>Estimated time:</strong> 30–45 minutes</p>
 <p>Use 75 gas-turbine operating observations to see how Ridge and Lasso regularization control a fixed set of measured operating features. Compare training and validation RMSE across penalty strengths, then contrast Ridge’s coefficient shrinkage with Lasso’s exact-zero feature selection.</p>
 <p><a href="../evaluation/02-ridge-regularization.html">View the notebook</a></p>
+</section>
+<section id="tuning-decision-tree-complexity" class="level2">
+<h2 class="anchored" data-anchor-id="tuning-decision-tree-complexity">3. Tuning decision-tree complexity</h2>
+<p><strong>Estimated time:</strong> 25–35 minutes</p>
+<p>Use the gas-turbine positive/negative CO-emission label to compare decision trees of different complexity. Tune maximum depth and minimum leaf size with a fixed train/test split, then use ROC AUC to see why a fully grown tree can fit the training set perfectly while generalizing poorly.</p>
+<p><a href="../evaluation/03-decision-tree-hyperparameter-tuning.html">View the notebook</a></p>
 
 
 </section>
