@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>How a tree chooses a split – MECE 4520</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b626d73c4c936ccc3cb08be7d45d1df6.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d0e9dd6581773c2d153725aefe2da3c3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-90b0ccabdf50233fb893b00cd6e33405.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d0e9dd6581773c2d153725aefe2da3c3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">⚙️</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../foundations/index.html"> 
+<span class="menu-text">Foundations</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../regression/index.html"> 
+<span class="menu-text">Regression</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../evaluation/index.html"> 
+<span class="menu-text">Evaluation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../classification/index.html"> 
+<span class="menu-text">Classification</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../tree-based/index.html"> 
+<span class="menu-text">Tree-based</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content column-page" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">How a tree chooses a split</h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-page">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>A binary classification tree builds a rule one decision at a time. At each node, it tries candidate cutpoints along every available feature, measures how much each candidate makes the two child regions purer, and selects the largest improvement.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Follow the search
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This page makes the search explicit. Run the <span class="math inline">\(x_1\)</span> loop and the <span class="math inline">\(x_2\)</span> loop for the root node, select the winning split, and then repeat that process for each of its two children. The table records the Gini decrease for every candidate cutpoint that the tree evaluates.</p>
+</div>
+</div>
+<p>For a region <span class="math inline">\(R\)</span>, the Gini impurity and the decrease from a candidate split are</p>
+<p><span class="math display">\[
+G(R) = 1 - \sum_{k=1}^{K} \hat{p}_{R,k}^{\,2},
+\qquad
+\Delta G
+= G(R) -
+\left[
+\frac{n_L}{n}G(R_L) + \frac{n_R}{n}G(R_R)
+\right].
+\]</span></p>
+<p>Here, a larger <span class="math inline">\(\Delta G\)</span> is better.</p>
+<div id="tree-gini-explorer" class="tree-gini-explorer">
+<div class="tree-gini-controls">
+<button id="tree-gini-next" type="button">
+Evaluate next candidate
+</button>
+<button id="tree-gini-run" type="button">
+Run this feature loop
+</button>
+<button id="tree-gini-reset" type="button">
+Reset
+</button>
+</div>
+<p id="tree-gini-status" class="tree-gini-status" aria-live="polite">
+</p>
+<div class="tree-gini-layout">
+<figure class="tree-gini-figure figure">
+<svg id="tree-gini-svg" viewbox="0 0 660 470" role="img" aria-label="Mock two-feature classification data and selected tree splits">
+</svg>
+<figcaption>
+Red triangles are positive labels; green circles are negative labels. The gold dashed line and contrasting shaded regions show the candidate currently being evaluated. Blue and red dashed lines are selected splits.
+</figcaption>
+</figure>
+<section class="tree-gini-summary" aria-live="polite">
+<h2 class="anchored">
+Current search
+</h2>
+<p id="tree-gini-node-summary" class="tree-gini-node-summary">
+</p>
+<div id="tree-gini-feature-winner" class="tree-gini-feature-winner">
+
+</div>
+<div id="tree-gini-winner" class="tree-gini-winner">
+
+</div>
+<details class="tree-gini-data">
+<summary>
+Observations in this node
+</summary>
+<div id="tree-gini-data-table">
+
+</div>
+</details>
+</section>
+</div>
+<section class="tree-gini-candidates">
+<div class="tree-gini-candidate-header">
+<div>
+<h2 id="tree-gini-table-title" class="anchored">
+Candidate cutpoints
+</h2>
+<p>
+Each row is one possible rule in the current feature loop.
+</p>
+</div>
+<div class="tree-gini-key" aria-hidden="true">
+<p><span class="tree-gini-key-current"></span> current <span class="tree-gini-key-evaluated"></span> evaluated</p>
+</div>
+</div>
+<div class="tree-gini-table-wrap">
+<table id="tree-gini-table">
+<thead>
+<tr>
+<th scope="col">
+Feature
+</th>
+<th scope="col">
+Cutpoint
+</th>
+<th scope="col">
+≤ child<br>(positive / negative)
+</th>
+<th scope="col">
+&gt; child<br>(positive / negative)
+</th>
+<th scope="col">
+Weighted child Gini
+</th>
+<th scope="col">
+Gini decrease
+</th>
+</tr>
+</thead>
+<tbody id="tree-gini-table-body">
+</tbody>
+</table>
+</div>
+</section>
+<section class="tree-gini-rules">
+<h2 class="anchored">
+Selected rules
+</h2>
+<ol id="tree-gini-rules-list">
+</ol>
+</section>
+</div>
+<p>The data are deliberately small and hand-designed so the full search fits on one page. Real implementations use the same logic, but sort observations once per feature and evaluate only legal boundaries between distinct values.</p>
+<p><a href="../tree-based/index.html">Return to Tree-based models</a></p>
+<script>
+(() => {
+  const samples = [
+    { id: 1, x1: 0.45, x2: 3.30, label: 0 },
+    { id: 2, x1: 0.80, x2: 2.75, label: 0 },
+    { id: 3, x1: 1.30, x2: 3.50, label: 1 },
+    { id: 4, x1: 2.10, x2: 2.70, label: 1 },
+    { id: 5, x1: 2.40, x2: 3.15, label: 1 },
+    { id: 6, x1: 2.80, x2: 3.45, label: 1 },
+    { id: 7, x1: 3.10, x2: 2.85, label: 1 },
+    { id: 8, x1: 3.60, x2: 3.30, label: 0 },
+    { id: 9, x1: 0.50, x2: 0.60, label: 0 },
+    { id: 10, x1: 0.85, x2: 1.40, label: 0 },
+    { id: 11, x1: 1.15, x2: 2.10, label: 0 },
+    { id: 12, x1: 1.45, x2: 0.90, label: 0 },
+    { id: 13, x1: 1.70, x2: 1.80, label: 0 },
+    { id: 14, x1: 2.10, x2: 0.55, label: 0 },
+    { id: 15, x1: 2.60, x2: 1.30, label: 1 },
+    { id: 16, x1: 3.00, x2: 1.90, label: 1 }
+  ];
+
+  const features = ["x1", "x2"];
+  const featureLabels = { x1: "x₁", x2: "x₂" };
+  const svg = document.getElementById("tree-gini-svg");
+  const nextButton = document.getElementById("tree-gini-next");
+  const runButton = document.getElementById("tree-gini-run");
+  const resetButton = document.getElementById("tree-gini-reset");
+  const status = document.getElementById("tree-gini-status");
+  const nodeSummary = document.getElementById("tree-gini-node-summary");
+  const featureWinner = document.getElementById("tree-gini-feature-winner");
+  const winner = document.getElementById("tree-gini-winner");
+  const dataTable = document.getElementById("tree-gini-data-table");
+  const tableTitle = document.getElementById("tree-gini-table-title");
+  const tableBody = document.getElementById("tree-gini-table-body");
+  const rulesList = document.getElementById("tree-gini-rules-list");
+
+  const chart = {
+    left: 76,
+    right: 618,
+    top: 32,
+    bottom: 404,
+    xMin: 0.2,
+    xMax: 3.9,
+    yMin: 0.2,
+    yMax: 3.9
+  };
+
+  const rootBounds = {
+    xMin: chart.xMin,
+    xMax: chart.xMax,
+    yMin: chart.yMin,
+    yMax: chart.yMax
+  };
+
+  let state;
+
+  function round(value, digits) {
+    return Number(value.toFixed(digits || 3));
+  }
+
+  function xPixel(value) {
+    return chart.left + ((value - chart.xMin) / (chart.xMax - chart.xMin)) * (chart.right - chart.left);
+  }
+
+  function yPixel(value) {
+    return chart.bottom - ((value - chart.yMin) / (chart.yMax - chart.yMin)) * (chart.bottom - chart.top);
+  }
+
+  function countLabels(observations) {
+    const positive = observations.filter((sample) => sample.label === 1).length;
+    return { positive: positive, negative: observations.length - positive };
+  }
+
+  function gini(observations) {
+    if (observations.length === 0) {
+      return 0;
+    }
+    const counts = countLabels(observations);
+    const positiveShare = counts.positive / observations.length;
+    const negativeShare = counts.negative / observations.length;
+    return 1 - positiveShare * positiveShare - negativeShare * negativeShare;
+  }
+
+  function thresholds(observations, feature) {
+    const values = Array.from(new Set(observations.map((sample) => sample[feature]))).sort((a, b) => a - b);
+    return values.slice(0, -1).map((value, index) => (value + values[index + 1]) / 2);
+  }
+
+  function evaluate(node, feature, threshold) {
+    const left = node.samples.filter((sample) => sample[feature] <= threshold);
+    const right = node.samples.filter((sample) => sample[feature] > threshold);
+    const parentGini = gini(node.samples);
+    const weightedChildGini =
+      (left.length / node.samples.length) * gini(left) +
+      (right.length / node.samples.length) * gini(right);
+
+    return {
+      node: node,
+      feature: feature,
+      threshold: threshold,
+      left: left,
+      right: right,
+      parentGini: parentGini,
+      weightedChildGini: weightedChildGini,
+      decrease: parentGini - weightedChildGini
+    };
+  }
+
+  function candidates(node, feature) {
+    return thresholds(node.samples, feature).map((threshold) => evaluate(node, feature, threshold));
+  }
+
+  function bestCandidate(node, feature) {
+    return candidates(node, feature).reduce((best, candidate) => {
+      return candidate.decrease > best.decrease ? candidate : best;
+    });
+  }
+
+  function makeChildren(node, split) {
+    const leftBounds = {
+      xMin: node.bounds.xMin,
+      xMax: node.bounds.xMax,
+      yMin: node.bounds.yMin,
+      yMax: node.bounds.yMax
+    };
+    const rightBounds = {
+      xMin: node.bounds.xMin,
+      xMax: node.bounds.xMax,
+      yMin: node.bounds.yMin,
+      yMax: node.bounds.yMax
+    };
+
+    if (split.feature === "x1") {
+      leftBounds.xMax = split.threshold;
+      rightBounds.xMin = split.threshold;
+    } else {
+      leftBounds.yMax = split.threshold;
+      rightBounds.yMin = split.threshold;
+    }
+
+    return [
+      {
+        id: node.id + "-left",
+        title: node.id === "root" ? "root: ≤ child" : node.title + ": ≤ child",
+        samples: split.left,
+        bounds: leftBounds,
+        depth: node.depth + 1
+      },
+      {
+        id: node.id + "-right",
+        title: node.id === "root" ? "root: > child" : node.title + ": > child",
+        samples: split.right,
+        bounds: rightBounds,
+        depth: node.depth + 1
+      }
+    ];
+  }
+
+  function reset() {
+    const root = {
+      id: "root",
+      title: "root node",
+      samples: samples,
+      bounds: rootBounds,
+      depth: 0
+    };
+    state = {
+      queue: [root],
+      nodeIndex: 0,
+      featureIndex: 0,
+      evaluated: 0,
+      leaves: [root],
+      rules: [],
+      completed: false
+    };
+    update();
+  }
+
+  function currentNode() {
+    return state.queue[state.nodeIndex];
+  }
+
+  function currentCandidates() {
+    return candidates(currentNode(), features[state.featureIndex]);
+  }
+
+  function currentEvaluatedCandidate() {
+    if (state.completed || state.evaluated === 0) {
+      return null;
+    }
+    return currentCandidates()[state.evaluated - 1];
+  }
+
+  function loopFinished() {
+    return state.evaluated >= currentCandidates().length;
+  }
+
+  function bothFeatureLoopsFinished() {
+    return state.featureIndex === 1 && loopFinished();
+  }
+
+  function nodeName(node) {
+    return node.id === "root" ? "the root node" : "the " + node.title;
+  }
+
+  function groupText(observations) {
+    const counts = countLabels(observations);
+    return counts.positive + " / " + counts.negative;
+  }
+
+  function selectedRuleText(rule) {
+    return featureLabels[rule.split.feature] + " ≤ " + rule.split.threshold.toFixed(2);
+  }
+
+  function selectBestSplit() {
+    const node = currentNode();
+    const first = bestCandidate(node, "x1");
+    const second = bestCandidate(node, "x2");
+    const split = second.decrease > first.decrease ? second : first;
+    const children = makeChildren(node, split);
+
+    state.rules.push({ node: node, split: split });
+    state.leaves = state.leaves.filter((leaf) => leaf.id !== node.id).concat(children);
+
+    if (node.id === "root") {
+      state.queue.push(children[0], children[1]);
+    }
+
+    state.nodeIndex += 1;
+    state.featureIndex = 0;
+    state.evaluated = 0;
+    if (state.nodeIndex >= state.queue.length) {
+      state.completed = true;
+    }
+    update();
+  }
+
+  function advance() {
+    if (state.completed) {
+      return;
+    }
+
+    if (!loopFinished()) {
+      state.evaluated += 1;
+      update();
+      return;
+    }
+
+    if (state.featureIndex === 0) {
+      state.featureIndex = 1;
+      state.evaluated = 0;
+      update();
+      return;
+    }
+
+    selectBestSplit();
+  }
+
+  function runLoop() {
+    if (state.completed) {
+      return;
+    }
+    if (!loopFinished()) {
+      state.evaluated = currentCandidates().length;
+      update();
+    }
+  }
+
+  function updateControls() {
+    if (state.completed) {
+      nextButton.textContent = "All three split decisions complete";
+      nextButton.disabled = true;
+      runButton.disabled = true;
+      return;
+    }
+
+    if (!loopFinished()) {
+      nextButton.textContent = "Evaluate next candidate";
+      runButton.textContent = "Run this feature loop";
+      nextButton.disabled = false;
+      runButton.disabled = false;
+      return;
+    }
+
+    if (state.featureIndex === 0) {
+      nextButton.textContent = "Move to x₂ candidates";
+      runButton.textContent = "Feature loop complete";
+      nextButton.disabled = false;
+      runButton.disabled = true;
+      return;
+    }
+
+    nextButton.textContent = "Choose the best split";
+    runButton.textContent = "Feature loop complete";
+    nextButton.disabled = false;
+    runButton.disabled = true;
+  }
+
+  function updateStatus() {
+    if (state.completed) {
+      status.textContent = "Three split decisions are complete: the root and each of its two children were searched independently.";
+      return;
+    }
+
+    const node = currentNode();
+    const feature = featureLabels[features[state.featureIndex]];
+    const total = currentCandidates().length;
+    if (!loopFinished()) {
+      status.textContent =
+        "For loop: evaluate " + feature + " candidates in " + nodeName(node) +
+        " (" + state.evaluated + " of " + total + " completed).";
+      return;
+    }
+    if (state.featureIndex === 0) {
+      status.textContent =
+        "The " + feature + " loop is complete for " + nodeName(node) +
+        ". Now repeat the same search for x₂.";
+      return;
+    }
+    status.textContent =
+      "Both feature loops are complete for " + nodeName(node) +
+      ". Compare their best Gini decreases and choose one split.";
+  }
+
+  function makeCell(row, content) {
+    const cell = document.createElement("td");
+    cell.textContent = content;
+    row.appendChild(cell);
+  }
+
+  function updateTable() {
+    if (state.completed) {
+      tableTitle.textContent = "Final selected split rules";
+      tableBody.replaceChildren();
+      return;
+    }
+
+    const node = currentNode();
+    const feature = features[state.featureIndex];
+    const rows = candidates(node, feature);
+    tableTitle.textContent =
+      "Candidate cutpoints: " + featureLabels[feature] + " in " + node.title;
+    tableBody.replaceChildren();
+
+    rows.forEach((candidate, index) => {
+      const row = document.createElement("tr");
+      const isEvaluated = index < state.evaluated;
+      const isCurrent = index === state.evaluated - 1;
+      if (isEvaluated) {
+        row.classList.add("tree-gini-evaluated");
+      }
+      if (isCurrent) {
+        row.classList.add("tree-gini-current");
+      }
+
+      makeCell(row, featureLabels[feature]);
+      makeCell(row, candidate.threshold.toFixed(2));
+      if (isEvaluated) {
+        makeCell(row, groupText(candidate.left));
+        makeCell(row, groupText(candidate.right));
+        makeCell(row, candidate.weightedChildGini.toFixed(3));
+        makeCell(row, candidate.decrease.toFixed(3));
+      } else {
+        makeCell(row, "—");
+        makeCell(row, "—");
+        makeCell(row, "—");
+        makeCell(row, "—");
+      }
+      tableBody.appendChild(row);
+    });
+  }
+
+  function updateSummary() {
+    if (state.completed) {
+      nodeSummary.textContent = "All three nodes have been searched.";
+      featureWinner.textContent = "Each winning rule is listed below.";
+      winner.textContent = "The colored regions on the left show the resulting three splits.";
+      dataTable.replaceChildren();
+      return;
+    }
+
+    const node = currentNode();
+    const counts = countLabels(node.samples);
+    nodeSummary.textContent =
+      node.title + ": " + node.samples.length + " observations (" +
+      counts.positive + " positive, " + counts.negative + " negative); " +
+      "parent Gini = " + gini(node.samples).toFixed(3) + ".";
+
+    const feature = features[state.featureIndex];
+    if (state.evaluated > 0) {
+      const bestSoFar = currentCandidates()
+        .slice(0, state.evaluated)
+        .reduce((best, candidate) => candidate.decrease > best.decrease ? candidate : best);
+      featureWinner.textContent =
+        "Best evaluated " + featureLabels[feature] + " candidate so far: " +
+        selectedRuleText({ split: bestSoFar }) +
+        ", with Gini decrease " + bestSoFar.decrease.toFixed(3) + ".";
+    } else {
+      featureWinner.textContent =
+        "No " + featureLabels[feature] + " cutpoint has been evaluated yet.";
+    }
+
+    if (bothFeatureLoopsFinished()) {
+      const bestX1 = bestCandidate(node, "x1");
+      const bestX2 = bestCandidate(node, "x2");
+      const best = bestX2.decrease > bestX1.decrease ? bestX2 : bestX1;
+      winner.textContent =
+        "Winner across both features: " + selectedRuleText({ split: best }) +
+        ", with Gini decrease " + best.decrease.toFixed(3) + ".";
+    } else {
+      winner.textContent =
+        "Complete both feature loops before selecting a split for this node.";
+    }
+
+    const table = document.createElement("table");
+    const head = document.createElement("thead");
+    const headRow = document.createElement("tr");
+    ["ID", "x₁", "x₂", "Label"].forEach((label) => {
+      const cell = document.createElement("th");
+      cell.scope = "col";
+      cell.textContent = label;
+      headRow.appendChild(cell);
+    });
+    head.appendChild(headRow);
+    const body = document.createElement("tbody");
+    node.samples.forEach((sample) => {
+      const row = document.createElement("tr");
+      [sample.id, sample.x1.toFixed(2), sample.x2.toFixed(2), sample.label].forEach((value) => {
+        makeCell(row, String(value));
+      });
+      body.appendChild(row);
+    });
+    table.appendChild(head);
+    table.appendChild(body);
+    dataTable.replaceChildren(table);
+  }
+
+  function leafColor(leaf) {
+    const counts = countLabels(leaf.samples);
+    return counts.positive >= counts.negative ? "#fff1ed" : "#ecfdf5";
+  }
+
+  function svgElement(name, attributes) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function drawPlot() {
+    svg.replaceChildren();
+
+    state.leaves.forEach((leaf) => {
+      const rect = svgElement("rect", {
+        x: xPixel(leaf.bounds.xMin),
+        y: yPixel(leaf.bounds.yMax),
+        width: xPixel(leaf.bounds.xMax) - xPixel(leaf.bounds.xMin),
+        height: yPixel(leaf.bounds.yMin) - yPixel(leaf.bounds.yMax),
+        fill: leafColor(leaf),
+        opacity: "0.82"
+      });
+      svg.appendChild(rect);
+    });
+
+    const activeCandidate = currentEvaluatedCandidate();
+    if (activeCandidate) {
+      const bounds = activeCandidate.node.bounds;
+      let firstBounds;
+      let secondBounds;
+      if (activeCandidate.feature === "x1") {
+        firstBounds = {
+          xMin: bounds.xMin,
+          xMax: activeCandidate.threshold,
+          yMin: bounds.yMin,
+          yMax: bounds.yMax
+        };
+        secondBounds = {
+          xMin: activeCandidate.threshold,
+          xMax: bounds.xMax,
+          yMin: bounds.yMin,
+          yMax: bounds.yMax
+        };
+      } else {
+        firstBounds = {
+          xMin: bounds.xMin,
+          xMax: bounds.xMax,
+          yMin: bounds.yMin,
+          yMax: activeCandidate.threshold
+        };
+        secondBounds = {
+          xMin: bounds.xMin,
+          xMax: bounds.xMax,
+          yMin: activeCandidate.threshold,
+          yMax: bounds.yMax
+        };
+      }
+
+      [
+        { bounds: firstBounds, fill: "#dbeafe" },
+        { bounds: secondBounds, fill: "#ffedd5" }
+      ].forEach((region) => {
+        svg.appendChild(svgElement("rect", {
+          x: xPixel(region.bounds.xMin),
+          y: yPixel(region.bounds.yMax),
+          width: xPixel(region.bounds.xMax) - xPixel(region.bounds.xMin),
+          height: yPixel(region.bounds.yMin) - yPixel(region.bounds.yMax),
+          fill: region.fill,
+          opacity: "0.72"
+        }));
+      });
+    }
+
+    [1, 2, 3].forEach((tick) => {
+      const vertical = svgElement("line", {
+        x1: xPixel(tick), y1: chart.top, x2: xPixel(tick), y2: chart.bottom,
+        stroke: "#cbd5e1", "stroke-dasharray": "5 6", "stroke-width": "1"
+      });
+      const horizontal = svgElement("line", {
+        x1: chart.left, y1: yPixel(tick), x2: chart.right, y2: yPixel(tick),
+        stroke: "#cbd5e1", "stroke-dasharray": "5 6", "stroke-width": "1"
+      });
+      svg.appendChild(vertical);
+      svg.appendChild(horizontal);
+
+      const xLabel = svgElement("text", {
+        x: xPixel(tick), y: chart.bottom + 30, "text-anchor": "middle",
+        fill: "#334155", "font-size": "18"
+      });
+      xLabel.textContent = tick;
+      svg.appendChild(xLabel);
+      const yLabel = svgElement("text", {
+        x: chart.left - 22, y: yPixel(tick) + 6, "text-anchor": "end",
+        fill: "#334155", "font-size": "18"
+      });
+      yLabel.textContent = tick;
+      svg.appendChild(yLabel);
+    });
+
+    svg.appendChild(svgElement("line", {
+      x1: chart.left, y1: chart.bottom, x2: chart.right + 18, y2: chart.bottom,
+      stroke: "#334155", "stroke-width": "2"
+    }));
+    svg.appendChild(svgElement("line", {
+      x1: chart.left, y1: chart.bottom, x2: chart.left, y2: chart.top - 12,
+      stroke: "#334155", "stroke-width": "2"
+    }));
+    const xAxis = svgElement("text", {
+      x: chart.right + 30, y: chart.bottom + 8, fill: "#0f172a",
+      "font-size": "24", "font-style": "italic"
+    });
+    xAxis.textContent = "x₁";
+    svg.appendChild(xAxis);
+    const yAxis = svgElement("text", {
+      x: chart.left - 10, y: chart.top - 16, fill: "#0f172a",
+      "font-size": "24", "font-style": "italic"
+    });
+    yAxis.textContent = "x₂";
+    svg.appendChild(yAxis);
+
+    state.rules.forEach((rule) => {
+      const split = rule.split;
+      const isRoot = rule.node.id === "root";
+      const color = isRoot ? "#2563eb" : "#dc2626";
+      if (split.feature === "x1") {
+        svg.appendChild(svgElement("line", {
+          x1: xPixel(split.threshold), y1: yPixel(rule.node.bounds.yMin),
+          x2: xPixel(split.threshold), y2: yPixel(rule.node.bounds.yMax),
+          stroke: color, "stroke-width": "4", "stroke-dasharray": "10 8"
+        }));
+      } else {
+        svg.appendChild(svgElement("line", {
+          x1: xPixel(rule.node.bounds.xMin), y1: yPixel(split.threshold),
+          x2: xPixel(rule.node.bounds.xMax), y2: yPixel(split.threshold),
+          stroke: color, "stroke-width": "4", "stroke-dasharray": "10 8"
+        }));
+      }
+    });
+
+    if (activeCandidate) {
+      const bounds = activeCandidate.node.bounds;
+      if (activeCandidate.feature === "x1") {
+        svg.appendChild(svgElement("line", {
+          x1: xPixel(activeCandidate.threshold), y1: yPixel(bounds.yMin),
+          x2: xPixel(activeCandidate.threshold), y2: yPixel(bounds.yMax),
+          stroke: "#d97706", "stroke-width": "4.5", "stroke-dasharray": "7 6"
+        }));
+      } else {
+        svg.appendChild(svgElement("line", {
+          x1: xPixel(bounds.xMin), y1: yPixel(activeCandidate.threshold),
+          x2: xPixel(bounds.xMax), y2: yPixel(activeCandidate.threshold),
+          stroke: "#d97706", "stroke-width": "4.5", "stroke-dasharray": "7 6"
+        }));
+      }
+    }
+
+    samples.forEach((sample) => {
+      const x = xPixel(sample.x1);
+      const y = yPixel(sample.x2);
+      if (sample.label === 1) {
+        const size = 10;
+        const triangle = svgElement("path", {
+          d: "M " + x + " " + (y - size) + " L " + (x - size) + " " + (y + size) +
+             " L " + (x + size) + " " + (y + size) + " Z",
+          fill: "#ef4444", stroke: "#b91c1c", "stroke-width": "1.2"
+        });
+        svg.appendChild(triangle);
+      } else {
+        svg.appendChild(svgElement("circle", {
+          cx: x, cy: y, r: "10", fill: "#34d399", stroke: "#047857", "stroke-width": "1.2"
+        }));
+      }
+    });
+
+    const legend = svgElement("g", {});
+    legend.appendChild(svgElement("path", {
+      d: "M 103 438 L 94 454 L 112 454 Z", fill: "#ef4444", stroke: "#b91c1c", "stroke-width": "1"
+    }));
+    const positive = svgElement("text", { x: "120", y: "452", fill: "#334155", "font-size": "15" });
+    positive.textContent = "positive label";
+    legend.appendChild(positive);
+    legend.appendChild(svgElement("circle", {
+      cx: "260", cy: "446", r: "8", fill: "#34d399", stroke: "#047857", "stroke-width": "1"
+    }));
+    const negative = svgElement("text", { x: "274", y: "452", fill: "#334155", "font-size": "15" });
+    negative.textContent = "negative label";
+    legend.appendChild(negative);
+    svg.appendChild(legend);
+  }
+
+  function updateRules() {
+    rulesList.replaceChildren();
+    if (state.rules.length === 0) {
+      const item = document.createElement("li");
+      item.textContent = "No split has been selected yet.";
+      rulesList.appendChild(item);
+      return;
+    }
+
+    state.rules.forEach((rule) => {
+      const item = document.createElement("li");
+      item.textContent =
+        rule.node.title + ": " + selectedRuleText(rule) +
+        " (Gini decrease = " + rule.split.decrease.toFixed(3) + ").";
+      rulesList.appendChild(item);
+    });
+  }
+
+  function update() {
+    updateControls();
+    updateStatus();
+    updateTable();
+    updateSummary();
+    drawPlot();
+    updateRules();
+  }
+
+  nextButton.addEventListener("click", advance);
+  runButton.addEventListener("click", runLoop);
+  resetButton.addEventListener("click", reset);
+  reset();
+})();
+</script>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/changyaochen\.github\.io\/MECE4520\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>MECE 4520 · Data Science for Mechanical Systems</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Fall 2026</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

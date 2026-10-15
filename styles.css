@@ -408,6 +408,571 @@
   }
 }
 
+/* Decision-tree Gini-split explorer. */
+.tree-gini-explorer {
+  margin: 1.5rem 0 2rem;
+}
+
+.tree-gini-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.8rem;
+  margin-bottom: 0.85rem;
+}
+
+.tree-gini-controls label {
+  display: grid;
+  gap: 0.25rem;
+  color: #35444c;
+  font-weight: 600;
+}
+
+.tree-gini-controls select,
+.tree-gini-controls input {
+  accent-color: #457eaa;
+}
+
+.tree-gini-controls select {
+  min-width: 7rem;
+  min-height: 2.3rem;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid #9daeb8;
+  border-radius: 0.35rem;
+}
+
+.tree-gini-controls input[type="range"] {
+  width: min(17rem, 47vw);
+}
+
+.tree-gini-controls button {
+  min-height: 2.35rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #457eaa;
+  border-radius: 999px;
+  background: #fff;
+  color: #355766;
+  font-weight: 600;
+}
+
+.tree-gini-controls .tree-gini-primary {
+  background: #457eaa;
+  color: #fff;
+}
+
+.tree-gini-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.tree-gini-status {
+  min-height: 3rem;
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-left: 4px solid #457eaa;
+  background: #f5f7f8;
+  color: #35444c;
+}
+
+.tree-gini-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.tree-gini-figure,
+.tree-gini-summary,
+.tree-gini-score-figure {
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid #d9e1e5;
+  border-radius: 0.35rem;
+}
+
+.tree-gini-figure figcaption,
+.tree-gini-score-figure figcaption,
+.tree-gini-summary h2 {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.tree-gini-figure svg,
+.tree-gini-score-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tree-gini-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.45rem 0 0;
+  color: #4c5961;
+  font-size: 0.9rem;
+}
+
+.tree-gini-positive {
+  color: #e45756;
+}
+
+.tree-gini-negative {
+  margin-left: 0.5rem;
+  color: #55a97c;
+}
+
+.tree-gini-parent,
+.tree-gini-rule,
+.tree-gini-result,
+.tree-gini-summary-note {
+  margin: 0 0 0.85rem;
+}
+
+.tree-gini-rule {
+  color: #355766;
+  font-weight: 600;
+}
+
+.tree-gini-metric-rows {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0 0 0.85rem;
+}
+
+.tree-gini-metric-row {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0.8rem;
+  border-left: 4px solid #457eaa;
+  background: #edf4fb;
+}
+
+.tree-gini-metric-row:nth-child(2) {
+  border-left-color: #d77732;
+  background: #fff2e3;
+}
+
+.tree-gini-result {
+  padding: 0.75rem 0.8rem;
+  border: 1px solid #b8c9d2;
+  border-radius: 0.25rem;
+  font-weight: 600;
+}
+
+.tree-gini-summary-note {
+  color: #4c5961;
+  font-size: 0.92rem;
+}
+
+.tree-gini-score-figure {
+  margin-top: 1.25rem;
+}
+
+.tree-gini-node-summary,
+.tree-gini-feature-winner,
+.tree-gini-winner {
+  margin: 0 0 0.85rem;
+}
+
+.tree-gini-node-summary {
+  font-weight: 600;
+}
+
+.tree-gini-feature-winner,
+.tree-gini-winner {
+  padding: 0.75rem 0.85rem;
+  border-left: 4px solid #457eaa;
+  background: #edf4fb;
+  color: #35444c;
+}
+
+.tree-gini-winner {
+  border-left-color: #d77732;
+  background: #fff2e3;
+  font-weight: 600;
+}
+
+.tree-gini-data {
+  margin-top: 1rem;
+  color: #35444c;
+}
+
+.tree-gini-data summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tree-gini-data table {
+  width: 100%;
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+}
+
+.tree-gini-data th,
+.tree-gini-data td {
+  padding: 0.25rem 0.35rem;
+  text-align: right;
+}
+
+.tree-gini-candidates,
+.tree-gini-rules {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #d9e1e5;
+  border-radius: 0.35rem;
+}
+
+.tree-gini-candidate-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: start;
+  gap: 0.8rem;
+}
+
+.tree-gini-candidate-header h2,
+.tree-gini-rules h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+.tree-gini-candidate-header p {
+  margin: 0;
+  color: #4c5961;
+  font-size: 0.92rem;
+}
+
+.tree-gini-key {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #4c5961;
+  font-size: 0.82rem;
+}
+
+.tree-gini-key-current,
+.tree-gini-key-evaluated {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 0.15rem;
+}
+
+.tree-gini-key-current {
+  margin-left: 0.35rem;
+  border: 1px solid #d77732;
+  background: #fff2e3;
+}
+
+.tree-gini-key-evaluated {
+  margin-left: 0.35rem;
+  border: 1px solid #86aeca;
+  background: #edf4fb;
+}
+
+.tree-gini-table-wrap {
+  max-height: 25rem;
+  margin-top: 0.9rem;
+  overflow: auto;
+  border: 1px solid #d9e1e5;
+}
+
+.tree-gini-table-wrap table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.tree-gini-table-wrap th,
+.tree-gini-table-wrap td {
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid #e6ecef;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tree-gini-table-wrap th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f5f7f8;
+  color: #35444c;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.tree-gini-table-wrap th:first-child,
+.tree-gini-table-wrap td:first-child {
+  text-align: left;
+}
+
+.tree-gini-evaluated {
+  background: #edf4fb;
+}
+
+.tree-gini-current {
+  background: #fff2e3;
+  box-shadow: inset 4px 0 0 #d77732;
+}
+
+.tree-gini-rules ol {
+  margin: 0.55rem 0 0;
+}
+
+.tree-gini-rules li + li {
+  margin-top: 0.35rem;
+}
+
+.quarto-dark .tree-gini-controls label,
+.quarto-dark .tree-gini-legend,
+.quarto-dark .tree-gini-summary-note,
+.quarto-dark .tree-gini-data,
+.quarto-dark .tree-gini-candidate-header p,
+.quarto-dark .tree-gini-key {
+  color: #c5d0d5;
+}
+
+.quarto-dark .tree-gini-controls select,
+.quarto-dark .tree-gini-controls button {
+  background: #2a353b;
+  color: #e5ecef;
+}
+
+.quarto-dark .tree-gini-controls .tree-gini-primary {
+  background: #457eaa;
+  color: #fff;
+}
+
+.quarto-dark .tree-gini-status {
+  background: #2a353b;
+  color: #e5ecef;
+}
+
+.quarto-dark .tree-gini-metric-row {
+  background: #23353f;
+}
+
+.quarto-dark .tree-gini-metric-row:nth-child(2) {
+  background: #3b3023;
+}
+
+.quarto-dark .tree-gini-result {
+  border-color: #607781;
+}
+
+.quarto-dark .tree-gini-feature-winner,
+.quarto-dark .tree-gini-table-wrap th {
+  background: #23353f;
+  color: #e5ecef;
+}
+
+.quarto-dark .tree-gini-winner,
+.quarto-dark .tree-gini-current {
+  background: #3b3023;
+  color: #e5ecef;
+}
+
+.quarto-dark .tree-gini-evaluated {
+  background: #23353f;
+}
+
+.quarto-dark .tree-gini-candidates,
+.quarto-dark .tree-gini-rules,
+.quarto-dark .tree-gini-table-wrap {
+  border-color: #607781;
+}
+
+.quarto-dark .tree-gini-table-wrap td {
+  border-bottom-color: #42545d;
+}
+
+@media (max-width: 540px) {
+  .tree-gini-layout {
+    gap: 0.55rem;
+  }
+
+  .tree-gini-figure,
+  .tree-gini-summary,
+  .tree-gini-score-figure {
+    padding: 0.55rem;
+  }
+
+  .tree-gini-figure figcaption,
+  .tree-gini-summary h2 {
+    font-size: 0.8rem;
+  }
+
+  .tree-gini-candidates,
+  .tree-gini-rules {
+    padding: 0.65rem;
+  }
+
+  .tree-gini-table-wrap th,
+  .tree-gini-table-wrap td {
+    padding: 0.4rem 0.45rem;
+    font-size: 0.78rem;
+  }
+}
+
+/* Fully-grown tree overfitting animation. */
+.tree-overfit-animation {
+  margin: 1.5rem 0 2rem;
+}
+
+.tree-overfit-status,
+.tree-overfit-conclusion {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-left: 4px solid #457eaa;
+  background: #f5f7f8;
+  color: #35444c;
+}
+
+.tree-overfit-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.tree-overfit-figure,
+.tree-overfit-summary {
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid #d9e1e5;
+  border-radius: 0.35rem;
+}
+
+.tree-overfit-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tree-overfit-figure figcaption {
+  margin-top: 0.65rem;
+  color: #4c5961;
+  font-size: 0.9rem;
+}
+
+.tree-overfit-summary h2 {
+  margin: 0 0 0.55rem;
+  font-size: 1.15rem;
+}
+
+.tree-overfit-summary h3 {
+  margin: 1rem 0 0.45rem;
+  font-size: 1rem;
+}
+
+.tree-overfit-summary p {
+  min-height: 3.2rem;
+  margin: 0;
+}
+
+.tree-overfit-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
+.tree-overfit-metrics div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem;
+  border: 1px solid #d9e1e5;
+  border-radius: 0.25rem;
+  background: #f8fafc;
+}
+
+.tree-overfit-metrics span {
+  color: #4c5961;
+  font-size: 0.78rem;
+}
+
+.tree-overfit-metrics strong {
+  color: #355766;
+  font-size: 1.15rem;
+}
+
+.tree-overfit-summary ol {
+  max-height: 15rem;
+  margin: 0;
+  padding-left: 1.5rem;
+  overflow: auto;
+  font-size: 0.9rem;
+}
+
+.tree-overfit-summary li + li {
+  margin-top: 0.35rem;
+}
+
+.tree-overfit-current-rule {
+  color: #b45309;
+  font-weight: 700;
+}
+
+.tree-overfit-conclusion {
+  margin-top: 1.25rem;
+  border-left-color: #d77732;
+  background: #fff2e3;
+  font-weight: 600;
+}
+
+.quarto-dark .tree-overfit-status,
+.quarto-dark .tree-overfit-conclusion {
+  color: #e5ecef;
+}
+
+.quarto-dark .tree-overfit-status {
+  background: #2a353b;
+}
+
+.quarto-dark .tree-overfit-conclusion {
+  background: #3b3023;
+}
+
+.quarto-dark .tree-overfit-figure,
+.quarto-dark .tree-overfit-summary,
+.quarto-dark .tree-overfit-metrics div {
+  border-color: #607781;
+}
+
+.quarto-dark .tree-overfit-metrics div {
+  background: #23353f;
+}
+
+.quarto-dark .tree-overfit-metrics span,
+.quarto-dark .tree-overfit-figure figcaption {
+  color: #c5d0d5;
+}
+
+.quarto-dark .tree-overfit-metrics strong {
+  color: #a7cce2;
+}
+
+@media (max-width: 540px) {
+  .tree-overfit-layout {
+    gap: 0.55rem;
+  }
+
+  .tree-overfit-figure,
+  .tree-overfit-summary {
+    padding: 0.55rem;
+  }
+
+  .tree-overfit-metrics {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .tree-overfit-summary ol {
+    font-size: 0.78rem;
+  }
+}
+
 /* Classification-threshold explorer. */
 .threshold-metrics-controls {
   grid-template-columns: minmax(220px, 1fr);
