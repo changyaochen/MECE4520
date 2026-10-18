@@ -16,7 +16,7 @@ Add trees one at a time. Each bootstrap sample produces a different fitted
 tree—inspect its root rule and held-out AUC. For the fixed new observation,
 compare the individual tree probabilities with their pooled average, then watch
 how the ensemble's held-out AUC changes as more trees are added. Each individual
-tree is limited to depth 7, so it can vary across bootstrap samples without
+tree is limited to depth 5, so it can vary across bootstrap samples without
 fitting every leaf perfectly.
 :::
 
@@ -49,7 +49,7 @@ fitting every leaf perfectly.
       <span class="bagging-step-number">2</span>
       <div>
         <h2 id="bagging-tree-heading">Fit one tree to that dataset</h2>
-        <p>Each bootstrap dataset produces a different fitted tree. To keep the mechanism visible, we show only its root rule.</p>
+        <p>Each bootstrap dataset produces a different fitted tree. Beyond its root rule, the heatmap shows how the tree distributes its total Gini reduction across the nine features.</p>
       </div>
     </div>
     <div id="bagging-tree-card" class="bagging-tree-card" aria-label="Root rule and held-out performance of the newest tree"></div>
@@ -109,6 +109,7 @@ train models in the browser.
 
   const colors = {
     bagging: "#d77732",
+    individual: "#457eaa",
     grid: "#d8e1e5",
     axis: "#5d6a72",
     text: "#34454d",
@@ -184,21 +185,43 @@ train models in the browser.
     const tree = activeTree();
     const rootNode = tree.root;
     treeCard.replaceChildren();
-    const values = [
-      ["Root rule", rootNode.feature + " ≤ " + rootNode.threshold.toFixed(3)],
-      ["Root Gini", rootNode.gini.toFixed(3)],
-      ["This tree's held-out AUC", tree.testAuc.toFixed(3)],
-    ];
-    values.forEach(([labelText, valueText]) => {
-      const metric = document.createElement("div");
-      metric.className = "bagging-tree-metric";
-      const label = document.createElement("span");
-      const value = document.createElement("strong");
-      label.textContent = labelText;
-      value.textContent = valueText;
-      metric.append(label, value);
-      treeCard.append(metric);
+    const rootMetric = document.createElement("div");
+    rootMetric.className = "bagging-tree-metric";
+    const rootLabel = document.createElement("span");
+    const rootValue = document.createElement("strong");
+    rootLabel.textContent = "Root rule";
+    rootValue.textContent = rootNode.feature + " ≤ " + rootNode.threshold.toFixed(3);
+    rootMetric.append(rootLabel, rootValue);
+    treeCard.append(rootMetric);
+
+    const importance = document.createElement("div");
+    importance.className = "bagging-feature-importance";
+    const heading = document.createElement("div");
+    heading.className = "bagging-feature-importance-heading";
+    const title = document.createElement("span");
+    title.textContent = "Feature importance in this tree (0.000 = unused)";
+    const auc = document.createElement("strong");
+    auc.textContent = "This tree's held-out AUC: " + tree.testAuc.toFixed(3);
+    heading.append(title, auc);
+
+    const grid = document.createElement("div");
+    grid.className = "bagging-feature-importance-grid";
+    Object.entries(tree.featureImportances).forEach(([feature, value]) => {
+      const cell = document.createElement("div");
+      cell.className = "bagging-feature-importance-cell";
+      cell.style.backgroundColor = "hsl(25 62% " + (98 - 52 * value) + "%)";
+      cell.style.color = value >= 0.6 ? "#ffffff" : "#23495f";
+      cell.setAttribute("aria-label", feature + ": feature importance " + value.toFixed(3));
+      const name = document.createElement("span");
+      const number = document.createElement("strong");
+      name.textContent = feature;
+      number.textContent = value.toFixed(3);
+      cell.append(name, number);
+      grid.append(cell);
     });
+
+    importance.append(heading, grid);
+    treeCard.append(importance);
   }
 
   function renderPredictionCard() {
@@ -275,14 +298,20 @@ train models in the browser.
   }
 
   function drawAucChart() {
-    const auc = explorer.ensemble.cumulativeTestAuc;
+    const ensembleAuc = explorer.ensemble.cumulativeTestAuc;
+    const individualAuc = explorer.ensemble.trees.map((tree) => tree.testAuc);
+    let individualAucSum = 0;
+    const meanIndividualAuc = individualAuc.map((value, index) => {
+      individualAucSum += value;
+      return individualAucSum / (index + 1);
+    });
     const width = 600;
     const height = 275;
-    const margin = { top: 24, right: 25, bottom: 54, left: 61 };
+    const margin = { top: 38, right: 25, bottom: 54, left: 61 };
     const plotRight = width - margin.right;
     const plotBottom = height - margin.bottom;
-    const minimumAuc = Math.min(...auc);
-    const maximumAuc = Math.max(...auc);
+    const minimumAuc = Math.min(...ensembleAuc, ...meanIndividualAuc);
+    const maximumAuc = Math.max(...ensembleAuc, ...meanIndividualAuc);
     const padding = Math.max(0.003, 0.12 * (maximumAuc - minimumAuc));
     const domain = [
       Math.max(0, minimumAuc - padding),
@@ -297,7 +326,10 @@ train models in the browser.
     addTitleAndDescription(
       aucChart,
       "Held-out AUC while bagged trees are added",
-      "The selected ensemble has held-out AUC " + auc[includedTrees - 1].toFixed(3) + " after " + includedTrees + " trees."
+      "After " + includedTrees + " trees, the bagged ensemble has held-out AUC "
+      + ensembleAuc[includedTrees - 1].toFixed(3)
+      + ", compared with a mean individual-tree AUC of "
+      + meanIndividualAuc[includedTrees - 1].toFixed(3) + "."
     );
     const tickStep = maximumAuc - minimumAuc <= 0.04 ? 0.01 : 0.02;
     const yTicks = [];
@@ -314,21 +346,40 @@ train models in the browser.
     });
     aucChart.append(svgElement("line", { x1: margin.left, y1: margin.top, x2: margin.left, y2: plotBottom, class: "bagging-chart-axis" }));
     aucChart.append(svgElement("line", { x1: margin.left, y1: plotBottom, x2: plotRight, y2: plotBottom, class: "bagging-chart-axis" }));
-    const path = auc.slice(0, includedTrees).map((value, index) => (index === 0 ? "M" : "L") + xScale(index + 1).toFixed(2) + " " + yScale(value).toFixed(2)).join(" ");
-    aucChart.append(svgElement("path", { d: path, class: "bagging-auc-line" }));
+    const drawLegendItem = (x, label, color, dashed) => {
+      aucChart.append(svgElement("line", {
+        x1: x,
+        y1: 18,
+        x2: x + 18,
+        y2: 18,
+        stroke: color,
+        "stroke-width": 2.8,
+        "stroke-dasharray": dashed ? "6 4" : "",
+      }));
+      addText(aucChart, label, x + 24, 22, { class: "bagging-chart-note" });
+    };
+    drawLegendItem(margin.left, "Bagged ensemble", colors.bagging, false);
+    drawLegendItem(margin.left + 160, "Mean individual-tree AUC", colors.individual, true);
+
+    const ensemblePath = ensembleAuc.slice(0, includedTrees).map((value, index) => (index === 0 ? "M" : "L") + xScale(index + 1).toFixed(2) + " " + yScale(value).toFixed(2)).join(" ");
+    const individualPath = meanIndividualAuc.slice(0, includedTrees).map((value, index) => (index === 0 ? "M" : "L") + xScale(index + 1).toFixed(2) + " " + yScale(value).toFixed(2)).join(" ");
+    aucChart.append(svgElement("path", { d: individualPath, class: "bagging-mean-tree-auc-line" }));
+    aucChart.append(svgElement("path", { d: ensemblePath, class: "bagging-auc-line" }));
     const tooltip = svgElement("g", { class: "bagging-auc-tooltip", visibility: "hidden" });
-    const tooltipBox = svgElement("rect", { x: 0, y: -19, width: 135, height: 22, rx: 3 });
+    const tooltipBox = svgElement("rect", { x: 0, y: -19, width: 285, height: 22, rx: 3 });
     const tooltipText = svgElement("text", { x: 7, y: -5 });
     tooltip.append(tooltipBox, tooltipText);
-    auc.slice(0, includedTrees).forEach((value, index) => {
+    ensembleAuc.slice(0, includedTrees).forEach((value, index) => {
       const x = xScale(index + 1);
       const y = yScale(value);
       aucChart.append(svgElement("circle", { cx: x, cy: y, r: 1.75, class: "bagging-auc-point" }));
       const hitTarget = svgElement("circle", { cx: x, cy: y, r: 6, class: "bagging-auc-hit-target", tabindex: 0 });
       const showTooltip = () => {
-        const tooltipX = Math.min(plotRight - 136, Math.max(margin.left, x + 8));
+        const tooltipX = Math.min(plotRight - 286, Math.max(margin.left, x + 8));
         const tooltipY = Math.max(margin.top + 20, y - 5);
-        tooltipText.textContent = "Trees: " + (index + 1) + " · AUC: " + value.toFixed(3);
+        tooltipText.textContent = "B: " + (index + 1)
+          + " · Ensemble: " + value.toFixed(3)
+          + " · Mean tree: " + meanIndividualAuc[index].toFixed(3);
         tooltip.setAttribute("transform", "translate(" + tooltipX + " " + tooltipY + ")");
         tooltip.setAttribute("visibility", "visible");
       };
@@ -339,7 +390,8 @@ train models in the browser.
       aucChart.append(hitTarget);
     });
     aucChart.append(tooltip);
-    aucChart.append(svgElement("circle", { cx: xScale(includedTrees), cy: yScale(auc[includedTrees - 1]), r: 5, fill: colors.bagging, class: "bagging-auc-marker" }));
+    aucChart.append(svgElement("circle", { cx: xScale(includedTrees), cy: yScale(meanIndividualAuc[includedTrees - 1]), r: 4, fill: colors.individual, class: "bagging-auc-marker" }));
+    aucChart.append(svgElement("circle", { cx: xScale(includedTrees), cy: yScale(ensembleAuc[includedTrees - 1]), r: 5, fill: colors.bagging, class: "bagging-auc-marker" }));
     addText(aucChart, "Number of bagged trees", (margin.left + plotRight) / 2, height - 11, { class: "bagging-chart-axis-title", "text-anchor": "middle" });
     const yTitle = addText(aucChart, "Held-out ROC AUC", 16, (margin.top + plotBottom) / 2, { class: "bagging-chart-axis-title", "text-anchor": "middle" });
     yTitle.setAttribute("transform", "rotate(-90 16 " + (margin.top + plotBottom) / 2 + ")");

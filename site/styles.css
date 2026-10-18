@@ -2063,7 +2063,7 @@
 
 .bagging-tree-card {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(180px, 0.8fr) minmax(0, 2.6fr);
   gap: 0.75rem;
   align-items: stretch;
 }
@@ -2085,6 +2085,96 @@
 .bagging-tree-metric strong {
   color: #733b19;
   font-size: 1.12rem;
+}
+
+.bagging-feature-importance {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border-left: 4px solid #457eaa;
+  background: #eef7fc;
+}
+
+.bagging-feature-importance-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  color: #52616a;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.bagging-feature-importance-heading strong {
+  color: #23495f;
+  font-variant-numeric: tabular-nums;
+}
+
+.bagging-feature-importance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+
+.bagging-feature-importance-cell {
+  display: flex;
+  position: relative;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid rgba(80, 100, 110, 0.16);
+  border-radius: 0.16rem;
+  color: #23495f;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.bagging-feature-importance-cell span {
+  font-weight: 700;
+}
+
+.bagging-feature-importance-cell strong {
+  font-weight: 600;
+}
+
+.bagging-feature-importance-cell-unused {
+  border-style: dashed;
+  background: #edf0f1 !important;
+  color: #68777e !important;
+}
+
+.bagging-feature-importance-cell-unused::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 100'%3E%3Cpath d='M0 0L100 100M100 0L0 100' fill='none' stroke='%23be352c' stroke-linecap='butt' stroke-opacity='.78' stroke-width='3' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+}
+
+.bagging-feature-importance-legend {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 0.35rem;
+  color: #5d6a72;
+  font-size: 0.72rem;
+}
+
+.bagging-feature-importance-legend i {
+  display: block;
+  width: 5.5rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, hsl(25 62% 98%), hsl(25 62% 46%));
+}
+
+.bagging-feature-importance-legend-rf i {
+  background: linear-gradient(90deg, hsl(205 56% 98%), hsl(205 56% 46%));
 }
 
 .bagging-prediction-card {
@@ -2230,6 +2320,13 @@
   stroke-width: 2.8;
 }
 
+.bagging-mean-tree-auc-line {
+  fill: none;
+  stroke: #457eaa;
+  stroke-dasharray: 6 4;
+  stroke-width: 2.25;
+}
+
 .bagging-auc-marker {
   stroke: #fff;
   stroke-width: 1.8;
@@ -2336,6 +2433,29 @@
   color: #cfe8f7;
 }
 
+.quarto-dark .bagging-feature-importance {
+  border-left-color: #79a9cc;
+  background: #28383f;
+}
+
+.quarto-dark .bagging-feature-importance-heading,
+.quarto-dark .bagging-feature-importance-legend {
+  color: #c8d1d6;
+}
+
+.quarto-dark .bagging-feature-importance-heading strong {
+  color: #d9edf8;
+}
+
+.quarto-dark .bagging-feature-importance-cell {
+  border-color: rgba(220, 235, 242, 0.2);
+}
+
+.quarto-dark .bagging-feature-importance-cell-unused {
+  background: #3b454a !important;
+  color: #d5dde1 !important;
+}
+
 .quarto-dark .bagging-bootstrap-summary strong,
 .quarto-dark .bagging-tree-metric strong,
 .quarto-dark .bagging-prediction-result strong {
@@ -2410,6 +2530,10 @@
   .bagging-tree-card,
   .bagging-prediction-card {
     grid-template-columns: 1fr;
+  }
+
+  .bagging-feature-importance-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .rf-observation-card {

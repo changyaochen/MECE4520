@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import BaggingClassifier, RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
@@ -17,103 +18,21 @@ FEATURES = ["AT", "AP", "AH", "AFDP", "GTEP", "TIT", "TAT", "TEY", "CDP"]
 TARGET = "high_co"
 RANDOM_STATE = 4520
 N_TREES = 200
+MAX_DEPTH = 5
+FEATURE_CANDIDATES_PER_SPLIT = 3
+# This position is fixed from the reproducible test split before fitting any
+# random forest. It is not selected from a fitted probability or prediction.
+FIXED_TEST_POSITION = 4520
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "site" / "data" / "gas-turbine-course.csv"
 OUTPUT_PATH = ROOT / "site" / "assets" / "random-forest-explorer.js"
 
 
-def individual_tree_probabilities(*, model: object, X: pd.DataFrame) -> np.ndarray:
-    """Collect positive-label probabilities from every tree.
+def rounded(values: Sequence[float] | np.ndarray, digits: int = 5) -> list[float]:
+    """Convert numeric values into compact JSON-ready floats.
 
     Args:
-        model: A fitted ensemble whose estimators are decision trees.
-        X: Observations to score.
-
-    Returns:
-        A matrix with one row per observation and one column per tree.
-    """
-    X_values = X.to_numpy()
-    return np.column_stack(
-        [tree.predict_proba(X_values)[:, 1] for tree in model.estimators_]
-    )
-
-
-def cumulative_auc(*, tree_probabilities: np.ndarray, labels: pd.Series) -> np.ndarray:
-    """Calculate test AUC as trees are added to an ensemble.
-
-    Args:
-        tree_probabilities: Test-set probabilities from every individual tree.
-        labels: Held-out binary labels.
-
-    Returns:
-        AUC values for forests containing one through all trees.
-    """
-    counts = np.arange(1, tree_probabilities.shape[1] + 1)
-    running_probability = np.cumsum(tree_probabilities, axis=1) / counts
-    return np.array(
-        [
-            roc_auc_score(labels, running_probability[:, index])
-            for index in range(tree_probabilities.shape[1])
-        ]
-    )
-
-
-def mean_pairwise_correlation(*, tree_probabilities: np.ndarray) -> float:
-    """Summarize similarity among tree predictions.
-
-    Args:
-        tree_probabilities: Test-set probabilities from every individual tree.
-
-    Returns:
-        The mean upper-triangle correlation between individual trees.
-    """
-    correlation = np.corrcoef(tree_probabilities, rowvar=False)
-    indices = np.triu_indices_from(correlation, k=1)
-    return float(correlation[indices].mean())
-
-
-def root_features(*, model: object) -> list[str]:
-    """Return the feature selected at the root of each tree.
-
-    Args:
-        model: A fitted ensemble whose estimators are decision trees.
-
-    Returns:
-        Root-split feature names, in ensemble order.
-    """
-    return [FEATURES[int(tree.tree_.feature[0])] for tree in model.estimators_]
-
-
-def choose_position(
-    *,
-    probability: np.ndarray,
-    labels: pd.Series,
-    target_probability: float,
-    target_label: int,
-) -> int:
-    """Find one held-out observation near a requested probability and label.
-
-    Args:
-        probability: Final forest probabilities on the test set.
-        labels: Test-set binary labels.
-        target_probability: Desired final forest probability.
-        target_label: Required observed label.
-
-    Returns:
-        Positional index of the selected held-out observation.
-    """
-    eligible_positions = np.flatnonzero(labels.to_numpy() == target_label)
-    closest = np.argmin(
-        np.abs(probability[eligible_positions] - target_probability)
-    )
-    return int(eligible_positions[closest])
-
-
-def rounded(values: np.ndarray, digits: int = 5) -> list[float]:
-    """Convert a numeric array into compact JSON-friendly values.
-
-    Args:
-        values: Numeric values to serialize.
+        values: Values to serialize.
         digits: Number of decimal places to retain.
 
     Returns:
@@ -122,8 +41,95 @@ def rounded(values: np.ndarray, digits: int = 5) -> list[float]:
     return [round(float(value), digits) for value in values]
 
 
+def cumulative_auc(*, tree_probability: np.ndarray, labels: pd.Series) -> np.ndarray:
+    """Calculate held-out AUC as successive tree predictions are averaged.
+
+    Args:
+        tree_probability: One probability column for each fitted tree.
+        labels: Held-out binary labels.
+
+    Returns:
+        AUC values for forests containing one through all trees.
+    """
+    tree_counts = np.arange(1, tree_probability.shape[1] + 1)
+    running_probability = np.cumsum(tree_probability, axis=1) / tree_counts
+    return np.array(
+        [
+            roc_auc_score(labels, running_probability[:, index])
+            for index in range(tree_probability.shape[1])
+        ]
+    )
+
+
+def bootstrap_summary(
+    *, sample_positions: np.ndarray, training_size: int
+) -> dict[str, int]:
+    """Summarize one actual bootstrap sample without serializing all draws.
+
+    Args:
+        sample_positions: Training-set positions drawn with replacement.
+        training_size: Number of rows in the original training dataset.
+
+    Returns:
+        Counts describing one bootstrap dataset.
+    """
+    counts = np.bincount(sample_positions, minlength=training_size)
+    return {
+        "draws": int(len(sample_positions)),
+        "uniqueRows": int(np.sum(counts > 0)),
+        "omittedRows": int(np.sum(counts == 0)),
+    }
+
+
+def root_details(*, tree: DecisionTreeClassifier) -> dict[str, object]:
+    """Extract a concise description of a fitted tree's root node.
+
+    Args:
+        tree: A fitted decision tree.
+
+    Returns:
+        Root feature, cutpoint, and impurity.
+    """
+    root_feature_index = int(tree.tree_.feature[0])
+    return {
+        "feature": FEATURES[root_feature_index],
+        "threshold": round(float(tree.tree_.threshold[0]), 3),
+        "gini": round(float(tree.tree_.impurity[0]), 3),
+    }
+
+
+def feature_importances(*, tree: DecisionTreeClassifier) -> dict[str, float]:
+    """Return the relative total Gini reduction attributed to each feature.
+
+    Args:
+        tree: A fitted decision tree.
+
+    Returns:
+        One normalized feature-importance value for each course feature.
+    """
+    return {
+        feature: round(float(importance), 5)
+        for feature, importance in zip(FEATURES, tree.feature_importances_)
+    }
+
+
+def unused_features(*, tree: DecisionTreeClassifier) -> list[str]:
+    """Identify features that do not appear in any split of one tree.
+
+    Args:
+        tree: A fitted decision tree.
+
+    Returns:
+        Feature names never selected at any internal node.
+    """
+    used_indices = set(tree.tree_.feature[tree.tree_.feature >= 0])
+    return [
+        feature for index, feature in enumerate(FEATURES) if index not in used_indices
+    ]
+
+
 def main() -> None:
-    """Fit the two ensembles and write their explorer data as JavaScript."""
+    """Fit a random forest and write the data used by the web explorer."""
     data = pd.read_csv(DATA_PATH)
     model_data = data[FEATURES + [TARGET]].dropna().copy()
     X_train, X_test, y_train, y_test = train_test_split(
@@ -134,131 +140,63 @@ def main() -> None:
         stratify=model_data[TARGET],
     )
 
-    bagging = BaggingClassifier(
-        estimator=DecisionTreeClassifier(),
-        n_estimators=N_TREES,
-        bootstrap=True,
-        random_state=RANDOM_STATE,
-        n_jobs=-1,
-    )
     forest = RandomForestClassifier(
         n_estimators=N_TREES,
-        max_features="sqrt",
+        max_depth=MAX_DEPTH,
+        max_features=FEATURE_CANDIDATES_PER_SPLIT,
         bootstrap=True,
         random_state=RANDOM_STATE,
         n_jobs=-1,
     )
-    bagging.fit(X=X_train, y=y_train)
     forest.fit(X=X_train, y=y_train)
 
-    bagging_tree_probability = individual_tree_probabilities(
-        model=bagging, X=X_test
+    X_test_values = X_test.to_numpy()
+    tree_probability = np.column_stack(
+        [tree.predict_proba(X_test_values)[:, 1] for tree in forest.estimators_]
     )
-    forest_tree_probability = individual_tree_probabilities(model=forest, X=X_test)
-    forest_probability = forest.predict_proba(X_test)[:, 1]
 
-    positions = [
-        (
-            "clearly-negative",
-            "Clearly negative",
-            choose_position(
-                probability=forest_probability,
-                labels=y_test,
-                target_probability=0.02,
-                target_label=0,
-            ),
-        ),
-        (
-            "borderline",
-            "Borderline",
-            choose_position(
-                probability=forest_probability,
-                labels=y_test,
-                target_probability=0.50,
-                target_label=0,
-            ),
-        ),
-        (
-            "clearly-positive",
-            "Clearly positive",
-            choose_position(
-                probability=forest_probability,
-                labels=y_test,
-                target_probability=0.98,
-                target_label=1,
-            ),
-        ),
-    ]
-
-    selected_features = ["TIT", "CDP", "TEY"]
-    observations = []
-    for observation_id, name, position in positions:
-        row = X_test.iloc[position]
-        observations.append(
+    tree_summaries = []
+    for tree, sample_positions, probability in zip(
+        forest.estimators_, forest.estimators_samples_, tree_probability.T
+    ):
+        tree_summaries.append(
             {
-                "id": observation_id,
-                "name": name,
-                "actualLabel": int(y_test.iloc[position]),
-                "features": {
-                    feature: round(float(row[feature]), 2)
-                    for feature in selected_features
-                },
-                "models": {
-                    "bagging": {
-                        "treeProbabilities": rounded(
-                            bagging_tree_probability[position]
-                        )
-                    },
-                    "randomForest": {
-                        "treeProbabilities": rounded(
-                            forest_tree_probability[position]
-                        )
-                    },
-                },
+                "bootstrap": bootstrap_summary(
+                    sample_positions=sample_positions,
+                    training_size=len(X_train),
+                ),
+                "root": root_details(tree=tree),
+                "featureImportances": feature_importances(tree=tree),
+                "unusedFeatures": unused_features(tree=tree),
+                "testAuc": round(float(roc_auc_score(y_test, probability)), 5),
             }
         )
+
+    fixed_row = X_test.iloc[FIXED_TEST_POSITION]
+    prediction_observation = {
+        "actualLabel": int(y_test.iloc[FIXED_TEST_POSITION]),
+        "features": {
+            feature: round(float(fixed_row[feature]), 2) for feature in FEATURES
+        },
+        "treeProbabilities": rounded(tree_probability[FIXED_TEST_POSITION]),
+    }
 
     payload = {
         "metadata": {
             "nTrees": N_TREES,
+            "nFeatures": len(FEATURES),
             "nTraining": int(len(X_train)),
             "nTest": int(len(X_test)),
-            "positiveFraction": round(float(y_train.mean()), 4),
-            "featureCandidatesPerSplit": 3,
+            "maxDepth": MAX_DEPTH,
+            "featureCandidatesPerSplit": FEATURE_CANDIDATES_PER_SPLIT,
         },
-        "models": {
-            "bagging": {
-                "label": "Bagging",
-                "auc": rounded(
-                    cumulative_auc(
-                        tree_probabilities=bagging_tree_probability, labels=y_test
-                    )
-                ),
-                "roots": root_features(model=bagging),
-                "meanPairwiseCorrelation": round(
-                    mean_pairwise_correlation(
-                        tree_probabilities=bagging_tree_probability
-                    ),
-                    4,
-                ),
-            },
-            "randomForest": {
-                "label": "Random forest",
-                "auc": rounded(
-                    cumulative_auc(
-                        tree_probabilities=forest_tree_probability, labels=y_test
-                    )
-                ),
-                "roots": root_features(model=forest),
-                "meanPairwiseCorrelation": round(
-                    mean_pairwise_correlation(
-                        tree_probabilities=forest_tree_probability
-                    ),
-                    4,
-                ),
-            },
+        "forest": {
+            "cumulativeTestAuc": rounded(
+                cumulative_auc(tree_probability=tree_probability, labels=y_test)
+            ),
+            "trees": tree_summaries,
         },
-        "observations": observations,
+        "predictionObservation": prediction_observation,
     }
 
     OUTPUT_PATH.write_text(

@@ -18,7 +18,7 @@ FEATURES = ["AT", "AP", "AH", "AFDP", "GTEP", "TIT", "TAT", "TEY", "CDP"]
 TARGET = "high_co"
 RANDOM_STATE = 4520
 N_TREES = 200
-MAX_DEPTH = 7
+MAX_DEPTH = 5
 # This position is fixed from the reproducible test split before fitting any
 # bagged model. It is not chosen from its fitted probability or classification.
 FIXED_TEST_POSITION = 4520
@@ -105,6 +105,21 @@ def root_details(*, tree: DecisionTreeClassifier, positive_fraction: float) -> d
     }
 
 
+def feature_importances(*, tree: DecisionTreeClassifier) -> dict[str, float]:
+    """Return the relative total Gini reduction attributed to each feature.
+
+    Args:
+        tree: A fitted decision tree.
+
+    Returns:
+        One normalized feature-importance value for each course feature.
+    """
+    return {
+        feature: round(float(importance), 5)
+        for feature, importance in zip(FEATURES, tree.feature_importances_)
+    }
+
+
 def main() -> None:
     """Fit real bagged trees and write the data used by the web explorer."""
     data = pd.read_csv(DATA_PATH)
@@ -153,6 +168,7 @@ def main() -> None:
                     tree=tree,
                     positive_fraction=y_train_values[sample_positions].mean(),
                 ),
+                "featureImportances": feature_importances(tree=tree),
                 "testAuc": round(float(roc_auc_score(y_test, probability)), 5),
             }
         )
