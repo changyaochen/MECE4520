@@ -1,0 +1,451 @@
+---
+title: "Explore bagging"
+toc: false
+page-layout: full
+---
+
+Bagging builds many models from one training dataset. Each tree receives a
+different **bootstrap sample**: the same number of draws as the original
+training set, sampled *with replacement*. The tree predictions are then
+averaged.
+
+::: {.callout-tip}
+## What to watch
+
+Add trees one at a time. Each bootstrap sample produces a different fitted
+tree—inspect its root rule and held-out AUC. For the fixed new observation,
+compare the individual tree probabilities with their pooled average, then watch
+how the ensemble's held-out AUC changes as more trees are added. Each individual
+tree is limited to depth 5, so it can vary across bootstrap samples without
+fitting every leaf perfectly.
+:::
+
+```{=html}
+<div id="bagging-explorer" class="bagging-explorer" aria-label="Interactive bagging explorer">
+  <div class="bagging-toolbar">
+    <div class="clt-buttons" aria-label="Bagging-growth controls">
+      <button id="bagging-next-tree" type="button" class="regression-sampling-primary">Add next tree</button>
+      <button id="bagging-run-all" type="button">Run all trees</button>
+      <button id="bagging-reset" type="button">Reset</button>
+    </div>
+    <div class="bagging-progress" aria-live="polite">
+      <span>Trees built:</span>
+      <strong><output id="bagging-tree-count">1</output>/<span id="bagging-total-tree-count">200</span></strong>
+    </div>
+  </div>
+
+  <section class="bagging-step" aria-labelledby="bagging-bootstrap-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">1</span>
+      <div>
+        <h2 id="bagging-bootstrap-heading">Make a bootstrap dataset</h2>
+      </div>
+    </div>
+    <div id="bagging-bootstrap-summary" class="bagging-bootstrap-summary"></div>
+  </section>
+
+  <section class="bagging-step bagging-tree-step" aria-labelledby="bagging-tree-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">2</span>
+      <div>
+        <h2 id="bagging-tree-heading">Fit one tree to that dataset</h2>
+        <p>Each bootstrap dataset produces a different fitted tree. Beyond its root rule, the heatmap shows how the tree distributes its total Gini reduction across the nine features.</p>
+      </div>
+    </div>
+    <div id="bagging-tree-card" class="bagging-tree-card" aria-label="Root rule and held-out performance of the newest tree"></div>
+  </section>
+
+  <section class="bagging-step" aria-labelledby="bagging-prediction-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">3</span>
+      <div>
+        <h2 id="bagging-prediction-heading">Pool the tree predictions for one new observation</h2>
+      </div>
+    </div>
+    <div id="bagging-prediction-card" class="bagging-prediction-card" aria-label="Fixed held-out operating observation and the current ensemble prediction"></div>
+  </section>
+
+  <section class="bagging-step" aria-labelledby="bagging-evaluation-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">4</span>
+      <div>
+        <h2 id="bagging-evaluation-heading">Evaluate the bagged ensemble</h2>
+        <p>Every model is evaluated against the same held-out dataset. Adding trees changes the averaged ensemble probability, not the data used for evaluation.</p>
+      </div>
+    </div>
+    <figure class="bagging-figure">
+      <figcaption>Held-out AUC as bagged trees are added</figcaption>
+      <svg id="bagging-auc-chart" role="img" aria-label="Held-out AUC as bagged trees are added, compared with one full-data tree"></svg>
+    </figure>
+  </section>
+</div>
+
+The samples, fitted-tree summaries, predictions, and AUC values are precomputed
+from the gas-turbine data. The page reveals real fitted trees; it does not
+train models in the browser.
+
+<p style="margin-top: 1.5rem;"><a href="index.html">← Return to Tree-based models</a></p>
+
+<script src="../assets/bagging-explorer.js"></script>
+<script>
+(() => {
+  const root = document.getElementById("bagging-explorer");
+  const explorer = window.MECE4520BaggingExplorer;
+  if (!root || !explorer) return;
+
+  const treeCountOutput = root.querySelector("#bagging-tree-count");
+  const totalTreeCount = root.querySelector("#bagging-total-tree-count");
+  const nextButton = root.querySelector("#bagging-next-tree");
+  const runButton = root.querySelector("#bagging-run-all");
+  const resetButton = root.querySelector("#bagging-reset");
+  const bootstrapSummary = root.querySelector("#bagging-bootstrap-summary");
+  const treeCard = root.querySelector("#bagging-tree-card");
+  const predictionCard = root.querySelector("#bagging-prediction-card");
+  const aucChart = root.querySelector("#bagging-auc-chart");
+
+  if (!treeCountOutput || !totalTreeCount || !nextButton
+      || !runButton || !resetButton || !bootstrapSummary || !treeCard
+      || !predictionCard || !aucChart) return;
+
+  const colors = {
+    bagging: "#d77732",
+    individual: "#457eaa",
+    grid: "#d8e1e5",
+    axis: "#5d6a72",
+    text: "#34454d",
+    muted: "#6b7b83",
+    single: "#6d6d6d"
+  };
+  const nTrees = explorer.metadata.nTrees;
+  let includedTrees = 1;
+  let animationFrame = null;
+  let lastFrameTime = 0;
+  let isRunning = false;
+
+  totalTreeCount.textContent = String(nTrees);
+
+  function svgElement(name, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", Object.assign({ x, y }, attributes));
+    element.textContent = text;
+    svg.append(element);
+    return element;
+  }
+
+  function addTitleAndDescription(svg, titleText, descriptionText) {
+    const title = svgElement("title", { id: svg.id + "-title" });
+    const description = svgElement("desc", { id: svg.id + "-description" });
+    title.textContent = titleText;
+    description.textContent = descriptionText;
+    svg.append(title, description);
+    svg.setAttribute("aria-labelledby", title.id + " " + description.id);
+  }
+
+  function scale(value, domain, range) {
+    return range[0] + ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]);
+  }
+
+  function activeTree() {
+    return explorer.ensemble.trees[includedTrees - 1];
+  }
+
+  function currentProbability() {
+    const probabilities = explorer.predictionObservation.treeProbabilities.slice(0, includedTrees);
+    return probabilities.reduce((sum, value) => sum + value, 0) / probabilities.length;
+  }
+
+  function renderBootstrapSummary() {
+    const bootstrap = activeTree().bootstrap;
+    bootstrapSummary.replaceChildren();
+    const values = [
+      ["Draws", bootstrap.draws.toLocaleString(), "same size as the original training set"],
+      ["Unique source rows", bootstrap.uniqueRows.toLocaleString() + " (" + (100 * bootstrap.uniqueRows / explorer.metadata.nTraining).toFixed(1) + "%)", "rows appearing at least once"],
+      ["Omitted source rows", bootstrap.omittedRows.toLocaleString() + " (" + (100 * bootstrap.omittedRows / explorer.metadata.nTraining).toFixed(1) + "%)", "rows not selected at all"],
+    ];
+    values.forEach(([label, value, note]) => {
+      const card = document.createElement("div");
+      const title = document.createElement("span");
+      const number = document.createElement("strong");
+      const description = document.createElement("small");
+      title.textContent = label;
+      number.textContent = value;
+      description.textContent = note;
+      card.append(title, number, description);
+      bootstrapSummary.append(card);
+    });
+
+  }
+
+  function renderTreeCard() {
+    const tree = activeTree();
+    const rootNode = tree.root;
+    treeCard.replaceChildren();
+    const rootMetric = document.createElement("div");
+    rootMetric.className = "bagging-tree-metric";
+    const rootLabel = document.createElement("span");
+    const rootValue = document.createElement("strong");
+    rootLabel.textContent = "Root rule";
+    rootValue.textContent = rootNode.feature + " ≤ " + rootNode.threshold.toFixed(3);
+    rootMetric.append(rootLabel, rootValue);
+    treeCard.append(rootMetric);
+
+    const importance = document.createElement("div");
+    importance.className = "bagging-feature-importance";
+    const heading = document.createElement("div");
+    heading.className = "bagging-feature-importance-heading";
+    const title = document.createElement("span");
+    title.textContent = "Feature importance in this tree (0.000 = unused)";
+    const auc = document.createElement("strong");
+    auc.textContent = "This tree's held-out AUC: " + tree.testAuc.toFixed(3);
+    heading.append(title, auc);
+
+    const grid = document.createElement("div");
+    grid.className = "bagging-feature-importance-grid";
+    Object.entries(tree.featureImportances).forEach(([feature, value]) => {
+      const cell = document.createElement("div");
+      cell.className = "bagging-feature-importance-cell";
+      cell.style.backgroundColor = "hsl(25 62% " + (98 - 52 * value) + "%)";
+      cell.style.color = value >= 0.6 ? "#ffffff" : "#23495f";
+      cell.setAttribute("aria-label", feature + ": feature importance " + value.toFixed(3));
+      const name = document.createElement("span");
+      const number = document.createElement("strong");
+      name.textContent = feature;
+      number.textContent = value.toFixed(3);
+      cell.append(name, number);
+      grid.append(cell);
+    });
+
+    importance.append(heading, grid);
+    treeCard.append(importance);
+  }
+
+  function renderPredictionCard() {
+    const observation = explorer.predictionObservation;
+    const probabilities = observation.treeProbabilities;
+    const probability = currentProbability();
+    predictionCard.replaceChildren();
+
+    const treeOutputs = document.createElement("div");
+    treeOutputs.className = "bagging-tree-outputs";
+    const outputLabel = document.createElement("span");
+    outputLabel.className = "bagging-prediction-label";
+    outputLabel.textContent = "One predicted probability from each tree (0 = red; 1 = green)";
+    const outputGrid = document.createElement("div");
+    outputGrid.className = "bagging-tree-output-grid";
+    outputGrid.setAttribute("role", "list");
+    for (let index = 0; index < nTrees; index += 1) {
+      const output = document.createElement("span");
+      output.setAttribute("role", "listitem");
+      if (index < includedTrees) {
+        const treeProbability = probabilities[index];
+        output.className = "bagging-tree-output bagging-tree-output-fitted";
+        output.style.setProperty("--probability-hue", String(5 + 130 * treeProbability));
+        output.textContent = treeProbability.toFixed(3);
+        output.setAttribute("aria-label", "Tree " + (index + 1) + ": predicted probability " + treeProbability.toFixed(3));
+      } else {
+        output.className = "bagging-tree-output bagging-tree-output-pending";
+        output.setAttribute("aria-label", "Tree " + (index + 1) + " has not been fitted yet");
+      }
+      outputGrid.append(output);
+    }
+    treeOutputs.append(outputLabel, outputGrid);
+    predictionCard.append(treeOutputs);
+
+    const summary = document.createElement("div");
+    summary.className = "bagging-prediction-summary";
+    const input = document.createElement("div");
+    input.className = "bagging-prediction-input";
+    const inputLabel = document.createElement("span");
+    inputLabel.className = "bagging-prediction-label";
+    inputLabel.textContent = "New observation (" + explorer.metadata.nFeatures + " features total; label: " + observation.actualLabel + ")";
+    const featureTableWrap = document.createElement("div");
+    featureTableWrap.className = "bagging-feature-table-wrap";
+    const featureTable = document.createElement("table");
+    featureTable.className = "bagging-feature-table";
+    const header = document.createElement("thead");
+    header.innerHTML = "<tr><th scope=\"col\">Feature</th><th scope=\"col\">Value</th></tr>";
+    const body = document.createElement("tbody");
+    Object.entries(observation.features).forEach(([feature, value]) => {
+      const row = document.createElement("tr");
+      const name = document.createElement("th");
+      name.scope = "row";
+      name.textContent = feature;
+      const featureValue = document.createElement("td");
+      featureValue.textContent = Number(value).toFixed(2);
+      row.append(name, featureValue);
+      body.append(row);
+    });
+    featureTable.append(header, body);
+    featureTableWrap.append(featureTable);
+    input.append(inputLabel, featureTableWrap);
+
+    const result = document.createElement("div");
+    result.className = "bagging-prediction-result";
+    const resultLabel = document.createElement("span");
+    resultLabel.className = "bagging-prediction-label";
+    resultLabel.textContent = "Pooled average";
+    const resultValue = document.createElement("strong");
+    resultValue.textContent = probability.toFixed(3);
+    result.append(resultLabel, resultValue);
+    summary.append(input, result);
+    predictionCard.append(summary);
+
+  }
+
+  function drawAucChart() {
+    const ensembleAuc = explorer.ensemble.cumulativeTestAuc;
+    const individualAuc = explorer.ensemble.trees.map((tree) => tree.testAuc);
+    let individualAucSum = 0;
+    const meanIndividualAuc = individualAuc.map((value, index) => {
+      individualAucSum += value;
+      return individualAucSum / (index + 1);
+    });
+    const width = 600;
+    const height = 275;
+    const margin = { top: 38, right: 25, bottom: 54, left: 61 };
+    const plotRight = width - margin.right;
+    const plotBottom = height - margin.bottom;
+    const minimumAuc = Math.min(...ensembleAuc, ...meanIndividualAuc);
+    const maximumAuc = Math.max(...ensembleAuc, ...meanIndividualAuc);
+    const padding = Math.max(0.003, 0.12 * (maximumAuc - minimumAuc));
+    const domain = [
+      Math.max(0, minimumAuc - padding),
+      Math.min(1, maximumAuc + padding),
+    ];
+    const xScale = (value) => scale(value, [1, nTrees], [margin.left, plotRight]);
+    const yScale = (value) => scale(value, domain, [plotBottom, margin.top]);
+
+    aucChart.replaceChildren();
+    aucChart.setAttribute("viewBox", "0 0 " + width + " " + height);
+    aucChart.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    addTitleAndDescription(
+      aucChart,
+      "Held-out AUC while bagged trees are added",
+      "After " + includedTrees + " trees, the bagged ensemble has held-out AUC "
+      + ensembleAuc[includedTrees - 1].toFixed(3)
+      + ", compared with a mean individual-tree AUC of "
+      + meanIndividualAuc[includedTrees - 1].toFixed(3) + "."
+    );
+    const tickStep = maximumAuc - minimumAuc <= 0.04 ? 0.01 : 0.02;
+    const yTicks = [];
+    for (let tick = Math.ceil(domain[0] / tickStep) * tickStep; tick <= domain[1] + 1e-9; tick += tickStep) {
+      yTicks.push(Number(tick.toFixed(3)));
+    }
+    yTicks.forEach((tick) => {
+      const y = yScale(tick);
+      aucChart.append(svgElement("line", { x1: margin.left, y1: y, x2: plotRight, y2: y, class: "bagging-chart-grid" }));
+      addText(aucChart, tick.toFixed(3), margin.left - 9, y + 4, { class: "bagging-chart-tick", "text-anchor": "end" });
+    });
+    [1, 50, 100, 150, 200].forEach((tick) => {
+      addText(aucChart, String(tick), xScale(tick), plotBottom + 20, { class: "bagging-chart-tick", "text-anchor": "middle" });
+    });
+    aucChart.append(svgElement("line", { x1: margin.left, y1: margin.top, x2: margin.left, y2: plotBottom, class: "bagging-chart-axis" }));
+    aucChart.append(svgElement("line", { x1: margin.left, y1: plotBottom, x2: plotRight, y2: plotBottom, class: "bagging-chart-axis" }));
+    const drawLegendItem = (x, label, color, dashed) => {
+      aucChart.append(svgElement("line", {
+        x1: x,
+        y1: 18,
+        x2: x + 18,
+        y2: 18,
+        stroke: color,
+        "stroke-width": 2.8,
+        "stroke-dasharray": dashed ? "6 4" : "",
+      }));
+      addText(aucChart, label, x + 24, 22, { class: "bagging-chart-note" });
+    };
+    drawLegendItem(margin.left, "Bagged ensemble", colors.bagging, false);
+    drawLegendItem(margin.left + 160, "Mean individual-tree AUC", colors.individual, true);
+
+    const ensemblePath = ensembleAuc.slice(0, includedTrees).map((value, index) => (index === 0 ? "M" : "L") + xScale(index + 1).toFixed(2) + " " + yScale(value).toFixed(2)).join(" ");
+    const individualPath = meanIndividualAuc.slice(0, includedTrees).map((value, index) => (index === 0 ? "M" : "L") + xScale(index + 1).toFixed(2) + " " + yScale(value).toFixed(2)).join(" ");
+    aucChart.append(svgElement("path", { d: individualPath, class: "bagging-mean-tree-auc-line" }));
+    aucChart.append(svgElement("path", { d: ensemblePath, class: "bagging-auc-line" }));
+    const tooltip = svgElement("g", { class: "bagging-auc-tooltip", visibility: "hidden" });
+    const tooltipBox = svgElement("rect", { x: 0, y: -19, width: 285, height: 22, rx: 3 });
+    const tooltipText = svgElement("text", { x: 7, y: -5 });
+    tooltip.append(tooltipBox, tooltipText);
+    ensembleAuc.slice(0, includedTrees).forEach((value, index) => {
+      const x = xScale(index + 1);
+      const y = yScale(value);
+      aucChart.append(svgElement("circle", { cx: x, cy: y, r: 1.75, class: "bagging-auc-point" }));
+      const hitTarget = svgElement("circle", { cx: x, cy: y, r: 6, class: "bagging-auc-hit-target", tabindex: 0 });
+      const showTooltip = () => {
+        const tooltipX = Math.min(plotRight - 286, Math.max(margin.left, x + 8));
+        const tooltipY = Math.max(margin.top + 20, y - 5);
+        tooltipText.textContent = "B: " + (index + 1)
+          + " · Ensemble: " + value.toFixed(3)
+          + " · Mean tree: " + meanIndividualAuc[index].toFixed(3);
+        tooltip.setAttribute("transform", "translate(" + tooltipX + " " + tooltipY + ")");
+        tooltip.setAttribute("visibility", "visible");
+      };
+      hitTarget.addEventListener("mouseenter", showTooltip);
+      hitTarget.addEventListener("focus", showTooltip);
+      hitTarget.addEventListener("mouseleave", () => tooltip.setAttribute("visibility", "hidden"));
+      hitTarget.addEventListener("blur", () => tooltip.setAttribute("visibility", "hidden"));
+      aucChart.append(hitTarget);
+    });
+    aucChart.append(tooltip);
+    aucChart.append(svgElement("circle", { cx: xScale(includedTrees), cy: yScale(meanIndividualAuc[includedTrees - 1]), r: 4, fill: colors.individual, class: "bagging-auc-marker" }));
+    aucChart.append(svgElement("circle", { cx: xScale(includedTrees), cy: yScale(ensembleAuc[includedTrees - 1]), r: 5, fill: colors.bagging, class: "bagging-auc-marker" }));
+    addText(aucChart, "Number of bagged trees", (margin.left + plotRight) / 2, height - 11, { class: "bagging-chart-axis-title", "text-anchor": "middle" });
+    const yTitle = addText(aucChart, "Held-out ROC AUC", 16, (margin.top + plotBottom) / 2, { class: "bagging-chart-axis-title", "text-anchor": "middle" });
+    yTitle.setAttribute("transform", "rotate(-90 16 " + (margin.top + plotBottom) / 2 + ")");
+  }
+
+  function render() {
+    treeCountOutput.textContent = String(includedTrees);
+    renderBootstrapSummary();
+    renderTreeCard();
+    drawAucChart();
+    renderPredictionCard();
+  }
+
+  function stopAnimation() {
+    isRunning = false;
+    if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+  }
+
+  function runAll(timestamp) {
+    if (!isRunning) return;
+    if (!lastFrameTime || timestamp - lastFrameTime >= 22) {
+      // The one-step button reveals every tree. The animation advances two
+      // at a time so that a full 200-tree run remains easy to watch.
+      includedTrees = Math.min(nTrees, includedTrees + 2);
+      render();
+      lastFrameTime = timestamp;
+    }
+    if (includedTrees < nTrees) {
+      animationFrame = requestAnimationFrame(runAll);
+    } else {
+      stopAnimation();
+    }
+  }
+
+  nextButton.addEventListener("click", () => {
+    stopAnimation();
+    includedTrees = Math.min(nTrees, includedTrees + 1);
+    render();
+  });
+  runButton.addEventListener("click", () => {
+    stopAnimation();
+    if (includedTrees >= nTrees) includedTrees = 1;
+    isRunning = true;
+    lastFrameTime = 0;
+    animationFrame = requestAnimationFrame(runAll);
+  });
+  resetButton.addEventListener("click", () => {
+    stopAnimation();
+    includedTrees = 1;
+    render();
+  });
+
+  render();
+})();
+</script>
+```

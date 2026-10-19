@@ -36,3 +36,47 @@ classifies every training observation correctly. See how a perfect training fit
 can require increasingly local rules.
 
 [Watch the overfitting animation](04-tree-overfitting-animation.qmd)
+
+## 3. Bagging
+
+**Estimated time:** 30–40 minutes
+
+See how bootstrap samples create different decision trees, how their predictions
+are averaged, and why the resulting ensemble has stronger held-out performance
+than one fully grown tree.
+
+[View the notebook](05-bagging.ipynb)
+
+Use real bootstrap samples, fitted tree roots, individual tree votes, and
+held-out AUC to watch a bagged ensemble grow one tree at a time.
+
+[Explore bagging](05-bagging-explorer.qmd)
+
+## 4. Random forests
+
+**Estimated time:** 40–50 minutes
+
+See how averaging many fully grown trees can stabilize predictions, and how
+random feature subsets make the trees less alike. We compare one tree, bagging,
+and a random forest on the same gas-turbine classification task.
+
+[View the notebook](05-random-forests.ipynb)
+
+Use actual fitted gas-turbine models to watch individual tree votes, the
+running ensemble probability, root-feature diversity, and held-out AUC evolve
+as a forest grows.
+
+[Explore a random forest](06-random-forest-explorer.qmd)
+
+## 5. AdaBoost
+
+See how AdaBoost trains a sequence of shallow trees on the same
+gas-turbine observations. Each new stump gives more influence to observations
+missed by the earlier stumps, and the final model pools their weighted votes.
+
+[View the notebook](07-adaboost.ipynb)
+
+Use fitted stumps to see how each round shifts observation weight, contributes
+a weighted vote for one new observation, and changes held-out AUC.
+
+[Explore AdaBoost](07-adaboost-explorer.qmd)
