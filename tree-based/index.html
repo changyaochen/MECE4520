@@ -337,6 +337,9 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#decision-trees-from-scratch" id="toc-decision-trees-from-scratch">1. Decision trees from scratch</a></li>
   <li><a href="#how-a-decision-tree-grows" id="toc-how-a-decision-tree-grows">2. How a decision tree grows</a></li>
+  <li><a href="#bagging" id="toc-bagging">3. Bagging</a></li>
+  <li><a href="#random-forests" id="toc-random-forests">4. Random forests</a></li>
+  <li><a href="#adaboost" id="toc-adaboost">5. AdaBoost</a></li>
   </ul>
 </nav>
 <p>Tree-based models make predictions by repeatedly dividing the feature space into smaller regions. Within each final region, a regression tree predicts an average response and a classification tree predicts a class frequency.</p>
@@ -355,6 +358,29 @@ ul.task-list li input[type="checkbox"] {
 <p><a href="../tree-based/03-gini-split-explorer.html">Explore how a tree chooses a split</a></p>
 <p>Watch a more mingled version of the mock data continue splitting until it classifies every training observation correctly. See how a perfect training fit can require increasingly local rules.</p>
 <p><a href="../tree-based/04-tree-overfitting-animation.html">Watch the overfitting animation</a></p>
+</section>
+<section id="bagging" class="level2">
+<h2 class="anchored" data-anchor-id="bagging">3. Bagging</h2>
+<p><strong>Estimated time:</strong> 30–40 minutes</p>
+<p>See how bootstrap samples create different decision trees, how their predictions are averaged, and why the resulting ensemble has stronger held-out performance than one fully grown tree.</p>
+<p><a href="../tree-based/05-bagging.html">View the notebook</a></p>
+<p>Use real bootstrap samples, fitted tree roots, individual tree votes, and held-out AUC to watch a bagged ensemble grow one tree at a time.</p>
+<p><a href="../tree-based/05-bagging-explorer.html">Explore bagging</a></p>
+</section>
+<section id="random-forests" class="level2">
+<h2 class="anchored" data-anchor-id="random-forests">4. Random forests</h2>
+<p><strong>Estimated time:</strong> 40–50 minutes</p>
+<p>See how averaging many fully grown trees can stabilize predictions, and how random feature subsets make the trees less alike. We compare one tree, bagging, and a random forest on the same gas-turbine classification task.</p>
+<p><a href="../tree-based/05-random-forests.html">View the notebook</a></p>
+<p>Use actual fitted gas-turbine models to watch individual tree votes, the running ensemble probability, root-feature diversity, and held-out AUC evolve as a forest grows.</p>
+<p><a href="../tree-based/06-random-forest-explorer.html">Explore a random forest</a></p>
+</section>
+<section id="adaboost" class="level2">
+<h2 class="anchored" data-anchor-id="adaboost">5. AdaBoost</h2>
+<p>See how AdaBoost trains a sequence of shallow trees on the same gas-turbine observations. Each new stump gives more influence to observations missed by the earlier stumps, and the final model pools their weighted votes.</p>
+<p><a href="../tree-based/07-adaboost.html">View the notebook</a></p>
+<p>Use fitted stumps to see how each round shifts observation weight, contributes a weighted vote for one new observation, and changes held-out AUC.</p>
+<p><a href="../tree-based/07-adaboost-explorer.html">Explore AdaBoost</a></p>
 
 
 </section>
