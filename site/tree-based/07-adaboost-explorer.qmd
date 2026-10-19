@@ -1,0 +1,437 @@
+---
+title: "Explore AdaBoost"
+toc: false
+page-layout: full
+---
+
+AdaBoost (**Adaptive Boosting**) builds an ensemble **sequentially**. It starts
+with equal weight on every training observation and fits a *decision stump*: a
+depth-1 tree with one split. Before fitting the next stump, it gives more
+weight to the samples the current stump misclassifies. Each later stump therefore
+pays more attention to earlier mistakes. We use stumps here deliberately to
+make that mechanism easy to see; AdaBoost can also use deeper trees as its base
+models.
+
+::: {.callout-tip}
+## What to watch
+
+Add stumps one at a time. Every round uses the same training observations—not a
+bootstrap sample—but with a new set of observation weights. Compare the weight
+carried by the samples misclassified by the current stump before and after its update. Then inspect
+how the stumps cast weighted votes for one new observation and how held-out AUC
+changes across rounds.
+:::
+
+```{=html}
+<div id="adaboost-explorer" class="bagging-explorer adaboost-explorer" aria-label="Interactive AdaBoost explorer">
+  <div class="bagging-toolbar">
+    <div class="clt-buttons" aria-label="AdaBoost round controls">
+      <button id="adaboost-next-round" type="button" class="regression-sampling-primary">Add next stump</button>
+      <button id="adaboost-run-all" type="button">Run all stumps</button>
+      <button id="adaboost-reset" type="button">Reset</button>
+    </div>
+    <div class="bagging-progress" aria-live="polite">
+      <span>Stumps fitted:</span>
+      <strong><output id="adaboost-round-count">1</output>/<span id="adaboost-total-round-count">12</span></strong>
+    </div>
+  </div>
+
+  <section class="bagging-step adaboost-stump-step" aria-labelledby="adaboost-stump-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">1</span>
+      <div>
+        <h2 id="adaboost-stump-heading">Fit one decision stump using the current weights</h2>
+        <p>All original training observations remain in the dataset. Their current weights determine how strongly they influence this stump's split.</p>
+      </div>
+    </div>
+    <div id="adaboost-stump-card" class="adaboost-stump-card" aria-label="Current decision stump and its weighted error"></div>
+  </section>
+
+  <section class="bagging-step" aria-labelledby="adaboost-weight-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">2</span>
+      <div>
+        <h2 id="adaboost-weight-heading">Give misclassified samples more influence</h2>
+        <p>The next stump sees the same training samples, but not with equal weight. The samples this stump misclassifies are upweighted.</p>
+      </div>
+    </div>
+    <div id="adaboost-weight-card" class="adaboost-weight-card" aria-label="How the current stump changes training-observation weights"></div>
+  </section>
+
+  <section class="bagging-step" aria-labelledby="adaboost-vote-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">3</span>
+      <div>
+        <h2 id="adaboost-vote-heading">Pool weighted stump votes for one new observation</h2>
+        <p>A more accurate stump receives a larger vote weight. The pooled positive vote is a ranking score, not a calibrated probability.</p>
+      </div>
+    </div>
+    <div id="adaboost-vote-card" class="adaboost-vote-card" aria-label="Weighted stump votes for one held-out observation"></div>
+  </section>
+
+  <section class="bagging-step" aria-labelledby="adaboost-evaluation-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">4</span>
+      <div>
+        <h2 id="adaboost-evaluation-heading">Evaluate the growing boosted ensemble</h2>
+        <p>Every intermediate ensemble is evaluated against the same held-out observations. Each point includes all stumps up to that round.</p>
+      </div>
+    </div>
+    <figure class="bagging-figure">
+      <figcaption>Held-out AUC as sequential stumps are added</figcaption>
+      <svg id="adaboost-auc-chart" role="img" aria-label="Held-out AUC after each AdaBoost round"></svg>
+    </figure>
+  </section>
+</div>
+
+The stump summaries, observation-weight changes, votes, and AUC values are
+precomputed from the gas-turbine data. The page reveals real fitted stumps; it
+does not train models in the browser.
+
+<p style="margin-top: 1.5rem;"><a href="index.html">← Return to Tree-based models</a></p>
+
+<script src="../assets/adaboost-explorer.js"></script>
+<script>
+(() => {
+  const root = document.getElementById("adaboost-explorer");
+  const explorer = window.MECE4520AdaBoostExplorer;
+  if (!root || !explorer) return;
+
+  const roundCountOutput = root.querySelector("#adaboost-round-count");
+  const totalRoundCount = root.querySelector("#adaboost-total-round-count");
+  const nextButton = root.querySelector("#adaboost-next-round");
+  const runButton = root.querySelector("#adaboost-run-all");
+  const resetButton = root.querySelector("#adaboost-reset");
+  const stumpCard = root.querySelector("#adaboost-stump-card");
+  const weightCard = root.querySelector("#adaboost-weight-card");
+  const voteCard = root.querySelector("#adaboost-vote-card");
+  const aucChart = root.querySelector("#adaboost-auc-chart");
+  if (!roundCountOutput || !totalRoundCount || !nextButton || !runButton
+      || !resetButton || !stumpCard || !weightCard || !voteCard || !aucChart) return;
+
+  const colors = {
+    boost: "#8558a1",
+    accent: "#d77732",
+    positive: "#3f8b64",
+    negative: "#b64a4a",
+    grid: "#d8e1e5",
+    axis: "#5d6a72"
+  };
+  const nRounds = explorer.metadata.nRounds;
+  let includedRounds = 1;
+  let animationFrame = null;
+  let lastFrameTime = 0;
+  let isRunning = false;
+
+  totalRoundCount.textContent = String(nRounds);
+
+  function activeRound() {
+    return explorer.rounds[includedRounds - 1];
+  }
+
+  function svgElement(name, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", Object.assign({ x, y }, attributes));
+    element.textContent = text;
+    svg.append(element);
+    return element;
+  }
+
+  function scale(value, domain, range) {
+    return range[0] + ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]);
+  }
+
+  function makeMetric(label, value, note) {
+    const metric = document.createElement("div");
+    metric.className = "adaboost-metric";
+    const title = document.createElement("span");
+    const number = document.createElement("strong");
+    const description = document.createElement("small");
+    title.textContent = label;
+    number.textContent = value;
+    description.textContent = note;
+    metric.append(title, number, description);
+    return metric;
+  }
+
+  function renderStumpCard() {
+    const round = activeRound();
+    stumpCard.replaceChildren();
+    stumpCard.append(
+      makeMetric(
+        "Stump rule",
+        round.root.feature + " ≤ " + round.root.threshold.toFixed(3),
+        "the single split selected this round"
+      ),
+      makeMetric(
+        "Weighted error eₜ",
+        round.weightedError.toFixed(3),
+        "fraction of current training weight misclassified"
+      ),
+      makeMetric(
+        "Vote weight αₜ",
+        round.alpha.toFixed(3),
+        "larger when the stump has lower weighted error"
+      )
+    );
+  }
+
+  function weightPanel({ title, errorMass }) {
+    const panel = document.createElement("div");
+    panel.className = "adaboost-weight-panel";
+    const heading = document.createElement("strong");
+    heading.textContent = title;
+    const bar = document.createElement("div");
+    bar.className = "adaboost-weight-bar";
+    const correctPercentage = 100 * (1 - errorMass);
+    const errorPercentage = 100 * errorMass;
+    const correct = document.createElement("span");
+    correct.className = "adaboost-weight-correct";
+    correct.style.width = correctPercentage.toFixed(1) + "%";
+    correct.textContent = correctPercentage.toFixed(1) + "%";
+    correct.setAttribute("aria-label", "Correctly classified samples: " + correctPercentage.toFixed(1) + "% of total weight");
+    const error = document.createElement("span");
+    error.className = "adaboost-weight-error";
+    error.style.width = errorPercentage.toFixed(1) + "%";
+    error.textContent = errorPercentage.toFixed(1) + "%";
+    error.setAttribute("aria-label", "Misclassified samples: " + errorPercentage.toFixed(1) + "% of total weight");
+    bar.append(correct, error);
+    panel.append(heading, bar);
+    return panel;
+  }
+
+  function renderWeightCard() {
+    const round = activeRound();
+    const misclassifiedCount = round.incorrectRows;
+    const correctCount = explorer.metadata.nTraining - misclassifiedCount;
+    weightCard.replaceChildren();
+    const sampleSummary = document.createElement("div");
+    sampleSummary.className = "adaboost-weight-sample-summary";
+    const summaryHeading = document.createElement("strong");
+    summaryHeading.textContent = "Sample counts (unchanged by reweighting)";
+    const sampleCounts = document.createElement("div");
+    sampleCounts.className = "adaboost-weight-sample-counts";
+    const correctSamples = document.createElement("span");
+    correctSamples.className = "adaboost-weight-sample-correct";
+    correctSamples.innerHTML = "<strong>Correctly classified:</strong> "
+      + correctCount.toLocaleString() + " ("
+      + (100 * correctCount / explorer.metadata.nTraining).toFixed(1) + "%)";
+    const misclassifiedSamples = document.createElement("span");
+    misclassifiedSamples.className = "adaboost-weight-sample-error";
+    misclassifiedSamples.innerHTML = "<strong>Misclassified:</strong> "
+      + misclassifiedCount.toLocaleString() + " ("
+      + (100 * misclassifiedCount / explorer.metadata.nTraining).toFixed(1) + "%)";
+    sampleCounts.append(correctSamples, misclassifiedSamples);
+    sampleSummary.append(summaryHeading, sampleCounts);
+    const transition = document.createElement("div");
+    transition.className = "adaboost-weight-transition";
+    transition.append(
+      weightPanel(
+        {
+          title: "Before updating weights",
+          errorMass: round.weightedError
+        }
+      ),
+      weightPanel(
+        {
+          title: "After updating weights",
+          errorMass: round.incorrectWeightAfter
+        }
+      )
+    );
+
+    const detail = document.createElement("div");
+    detail.className = "adaboost-weight-detail";
+    const largest = document.createElement("span");
+    largest.innerHTML = "<strong>Largest next weight:</strong> "
+      + round.largestWeightRelativeToUniform.toFixed(2) + "× the initial equal weight";
+    detail.append(largest);
+    weightCard.append(sampleSummary, transition, detail);
+  }
+
+  function renderVoteCard() {
+    const observation = explorer.predictionObservation;
+    const round = activeRound();
+    voteCard.replaceChildren();
+
+    const votes = document.createElement("div");
+    votes.className = "adaboost-votes";
+    const label = document.createElement("span");
+    label.className = "bagging-prediction-label";
+    label.textContent = "One class vote from each stump (green = positive; red = negative)";
+    const grid = document.createElement("div");
+    grid.className = "adaboost-vote-grid";
+    explorer.rounds.forEach((stumpRound, index) => {
+      const vote = document.createElement("div");
+      if (index >= includedRounds) {
+        vote.className = "adaboost-vote adaboost-vote-pending";
+        vote.setAttribute("aria-label", "Stump " + (index + 1) + " has not been fitted yet");
+      } else {
+        const isPositive = stumpRound.testPrediction === 1;
+        vote.className = "adaboost-vote " + (isPositive ? "adaboost-vote-positive" : "adaboost-vote-negative");
+        vote.style.setProperty("--vote-opacity", String(0.32 + 0.68 * stumpRound.alpha / explorer.rounds[0].alpha));
+        vote.setAttribute(
+          "aria-label",
+          "Stump " + (index + 1) + ": " + (isPositive ? "positive" : "negative")
+            + " vote, weight " + stumpRound.alpha.toFixed(3)
+        );
+        const stumpName = document.createElement("strong");
+        const voteWeight = document.createElement("small");
+        stumpName.textContent = "h" + (index + 1) + " = " + stumpRound.testPrediction;
+        voteWeight.textContent = "α = " + stumpRound.alpha.toFixed(3);
+        vote.append(stumpName, voteWeight);
+      }
+      grid.append(vote);
+    });
+    votes.append(label, grid);
+
+    const summary = document.createElement("div");
+    summary.className = "adaboost-vote-summary";
+    const input = document.createElement("div");
+    input.className = "bagging-prediction-input";
+    const inputTitle = document.createElement("strong");
+    inputTitle.textContent = "New observation (" + explorer.metadata.nFeatures + " features; label: " + observation.actualLabel + ")";
+    const tableWrap = document.createElement("div");
+    tableWrap.className = "bagging-feature-table-wrap";
+    const table = document.createElement("table");
+    table.className = "bagging-feature-table";
+    table.innerHTML = "<thead><tr><th>Feature</th><th>Value</th></tr></thead>";
+    const body = document.createElement("tbody");
+    Object.entries(observation.features).forEach(([feature, value]) => {
+      const row = document.createElement("tr");
+      row.innerHTML = "<th scope=\"row\">" + feature + "</th><td>" + value.toFixed(2) + "</td>";
+      body.append(row);
+    });
+    table.append(body);
+    tableWrap.append(table);
+    input.append(inputTitle, tableWrap);
+
+    const result = document.createElement("div");
+    result.className = "bagging-prediction-result";
+    const resultTitle = document.createElement("span");
+    const resultValue = document.createElement("strong");
+    resultTitle.textContent = "Pooled positive vote after " + includedRounds + " stump" + (includedRounds === 1 ? "" : "s");
+    resultValue.textContent = round.cumulativePositiveVote.toFixed(3);
+    result.append(resultTitle, resultValue);
+    summary.append(input, result);
+    voteCard.append(votes, summary);
+  }
+
+  function renderAucChart() {
+    const rounds = explorer.rounds.slice(0, includedRounds);
+    const width = 900;
+    const height = 300;
+    const margin = { top: 22, right: 26, bottom: 52, left: 74 };
+    const plotRight = width - margin.right;
+    const plotBottom = height - margin.bottom;
+    const aucValues = explorer.rounds.map((round) => round.testAuc);
+    const minAuc = Math.floor((Math.min(...aucValues) - 0.005) * 100) / 100;
+    const maxAuc = Math.ceil((Math.max(...aucValues) + 0.005) * 100) / 100;
+    const x = (value) => scale(value, [1, nRounds], [margin.left, plotRight]);
+    const y = (value) => scale(value, [minAuc, maxAuc], [plotBottom, margin.top]);
+    aucChart.replaceChildren();
+    aucChart.setAttribute("viewBox", "0 0 " + width + " " + height);
+    aucChart.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+    const title = svgElement("title", { id: "adaboost-auc-title" });
+    title.textContent = "Held-out AUC as AdaBoost stumps are added";
+    aucChart.append(title);
+    aucChart.setAttribute("aria-labelledby", title.id);
+
+    for (let tick = minAuc; tick <= maxAuc + 0.0001; tick += 0.01) {
+      const tickY = y(tick);
+      aucChart.append(
+        svgElement("line", { x1: margin.left, y1: tickY, x2: plotRight, y2: tickY, class: "bagging-chart-grid" })
+      );
+      addText(aucChart, tick.toFixed(2), margin.left - 10, tickY + 4, { class: "bagging-chart-tick", "text-anchor": "end" });
+    }
+    [1, 3, 6, 9, 12].filter((tick) => tick <= nRounds).forEach((tick) => {
+      addText(aucChart, String(tick), x(tick), plotBottom + 20, { class: "bagging-chart-tick", "text-anchor": "middle" });
+    });
+    aucChart.append(
+      svgElement("line", { x1: margin.left, y1: margin.top, x2: margin.left, y2: plotBottom, class: "bagging-chart-axis" }),
+      svgElement("line", { x1: margin.left, y1: plotBottom, x2: plotRight, y2: plotBottom, class: "bagging-chart-axis" })
+    );
+    addText(aucChart, "Number of sequential stumps", (margin.left + plotRight) / 2, height - 11, { class: "bagging-chart-axis-title", "text-anchor": "middle" });
+    const yTitle = addText(aucChart, "Held-out ROC AUC", 18, (margin.top + plotBottom) / 2, { class: "bagging-chart-axis-title", "text-anchor": "middle" });
+    yTitle.setAttribute("transform", "rotate(-90 18 " + ((margin.top + plotBottom) / 2) + ")");
+
+    const path = rounds.map((round, index) => (index === 0 ? "M" : "L") + x(round.round) + " " + y(round.testAuc)).join(" ");
+    aucChart.append(svgElement("path", { d: path, fill: "none", stroke: colors.boost, "stroke-width": 3 }));
+    rounds.forEach((round) => {
+      aucChart.append(svgElement("circle", { cx: x(round.round), cy: y(round.testAuc), r: 4.3, fill: colors.boost, stroke: "#fff", "stroke-width": 1.5 }));
+    });
+    const active = rounds[rounds.length - 1];
+    addText(aucChart, "Round " + active.round + ": " + active.testAuc.toFixed(3), x(active.round), y(active.testAuc) - 11, { class: "bagging-chart-value", "text-anchor": active.round > nRounds - 2 ? "end" : "start", dx: active.round > nRounds - 2 ? -7 : 7 });
+  }
+
+  function render() {
+    roundCountOutput.value = String(includedRounds);
+    roundCountOutput.textContent = String(includedRounds);
+    nextButton.disabled = includedRounds >= nRounds;
+    runButton.disabled = includedRounds >= nRounds;
+    renderStumpCard();
+    renderWeightCard();
+    renderVoteCard();
+    renderAucChart();
+  }
+
+  function stopRunAll() {
+    if (animationFrame !== null) {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = null;
+    }
+    isRunning = false;
+    runButton.textContent = "Run all stumps";
+  }
+
+  function advanceOneRound() {
+    if (includedRounds < nRounds) {
+      includedRounds += 1;
+      render();
+    }
+  }
+
+  function runAll(timestamp) {
+    if (!isRunning) return;
+    if (!lastFrameTime) lastFrameTime = timestamp;
+    if (timestamp - lastFrameTime >= 115) {
+      lastFrameTime = timestamp;
+      if (includedRounds < nRounds) advanceOneRound();
+      else {
+        stopRunAll();
+        return;
+      }
+    }
+    animationFrame = window.requestAnimationFrame(runAll);
+  }
+
+  nextButton.addEventListener("click", () => {
+    stopRunAll();
+    advanceOneRound();
+  });
+  runButton.addEventListener("click", () => {
+    if (isRunning) {
+      stopRunAll();
+      return;
+    }
+    if (includedRounds >= nRounds) return;
+    isRunning = true;
+    runButton.textContent = "Pause";
+    lastFrameTime = 0;
+    animationFrame = window.requestAnimationFrame(runAll);
+  });
+  resetButton.addEventListener("click", () => {
+    stopRunAll();
+    includedRounds = 1;
+    render();
+  });
+  render();
+})();
+</script>
+```

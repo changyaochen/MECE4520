@@ -6,6 +6,7 @@ project:
     - assets/precision-recall-thresholds.js
     - assets/bagging-explorer.js
     - assets/random-forest-explorer.js
+    - assets/adaboost-explorer.js
     - assets/b7e2a9c4.html
 
 website:

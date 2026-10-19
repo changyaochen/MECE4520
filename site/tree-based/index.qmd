@@ -67,3 +67,16 @@ running ensemble probability, root-feature diversity, and held-out AUC evolve
 as a forest grows.
 
 [Explore a random forest](06-random-forest-explorer.qmd)
+
+## 5. AdaBoost
+
+See how AdaBoost trains a sequence of shallow trees on the same
+gas-turbine observations. Each new stump gives more influence to observations
+missed by the earlier stumps, and the final model pools their weighted votes.
+
+[View the notebook](07-adaboost.ipynb)
+
+Use fitted stumps to see how each round shifts observation weight, contributes
+a weighted vote for one new observation, and changes held-out AUC.
+
+[Explore AdaBoost](07-adaboost-explorer.qmd)
