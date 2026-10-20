@@ -13,7 +13,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 
 
-FEATURES = ["AT", "CDP", "TEY"]
+FEATURES = ["AT", "GTEP", "TIT", "TAT", "TEY", "CDP"]
 TARGET = "NOX"
 RANDOM_STATE = 4520
 N_STAGES = 60
