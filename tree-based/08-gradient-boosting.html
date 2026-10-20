@@ -1026,33 +1026,61 @@ r_i = y_i - \hat{y}_i.
 </section>
 <section id="optional-why-gradient-boosting" class="level2">
 <h2 class="anchored" data-anchor-id="optional-why-gradient-boosting">7. (Optional) Why <em>gradient</em> boosting?</h2>
-<p>The residual-correction procedure above is already enough to use gradient boosting. The word <em>gradient</em> explains why residuals are the right target for squared-error regression—and how the same recipe extends to other losses.</p>
-<p>Let <span class="math inline">\(F_t(\mathbf{x})\)</span> denote the <strong>entire ensemble prediction function</strong> after <span class="math inline">\(t\)</span> trees, not one individual tree. Let <span class="math inline">\(g_t(\mathbf{x})\)</span> denote the new regression tree added at stage <span class="math inline">\(t\)</span>:</p>
-<p><span class="math display">\[
-F_t(\mathbf{x})
-= F_{t-1}(\mathbf{x}) + \eta g_t(\mathbf{x}).
-\]</span></p>
-<p>Here, <span class="math inline">\(\eta\)</span> is the learning rate. The question is: what should the new tree <span class="math inline">\(g_t\)</span> try to predict?</p>
-<section id="from-parameter-space-gradient-descent-to-function-space-gradient-descent" class="level3">
-<h3 class="anchored" data-anchor-id="from-parameter-space-gradient-descent-to-function-space-gradient-descent">1. From parameter-space gradient descent to function-space gradient descent</h3>
-<p>For a linear model, ordinary gradient descent updates a fixed vector of parameters:</p>
+<p>We have built a model by adding small corrections to its predictions. Let’s connect that process to the gradient descent we already know: both methods start with an initial guess and accumulate steps that aim to reduce a loss.</p>
+<section id="ordinary-gradient-descent-accumulate-parameter-updates" class="level3">
+<h3 class="anchored" data-anchor-id="ordinary-gradient-descent-accumulate-parameter-updates">1. Ordinary gradient descent: accumulate parameter updates</h3>
+<p>In ordinary gradient descent, we search for parameters <span class="math inline">\(\boldsymbol{\theta}\)</span> that minimize <span class="math inline">\(\mathcal{L}(\boldsymbol{\theta})\)</span>. Starting from an initial guess <span class="math inline">\(\boldsymbol{\theta}_0\)</span>, we repeatedly use the familiar update:</p>
 <p><span class="math display">\[
 \boldsymbol{\theta}_t
 = \boldsymbol{\theta}_{t-1}
 - \eta\,\nabla_{\boldsymbol{\theta}}
 \mathcal{L}(\boldsymbol{\theta}_{t-1}).
 \]</span></p>
-<p>Gradient boosting instead updates the prediction function <span class="math inline">\(F\)</span>. On the training data, that function can be represented by the vector of its current predictions:</p>
+<p>Let’s name the change made at iteration <span class="math inline">\(t\)</span>:</p>
 <p><span class="math display">\[
-\mathbf{f}
-= \begin{bmatrix}
-F(\mathbf{x}_1) \\
-F(\mathbf{x}_2) \\
-\vdots \\
-F(\mathbf{x}_n)
-\end{bmatrix}.
+\Delta\boldsymbol{\theta}_t
+= -\eta\,\nabla_{\boldsymbol{\theta}}
+\mathcal{L}(\boldsymbol{\theta}_{t-1}),
+\qquad
+\boldsymbol{\theta}_t
+= \boldsymbol{\theta}_{t-1} + \Delta\boldsymbol{\theta}_t.
 \]</span></p>
-<p>Thus, instead of first asking how each parameter should change, we ask how each current training prediction should change. A regression tree turns those desired, observation-level changes into feature-based rules that can also be applied to a new observation.</p>
+<p>After <span class="math inline">\(T\)</span> iterations, the final parameter vector is the initial guess plus all the changes we have accumulated:</p>
+<p><span class="math display">\[
+\boldsymbol{\theta}_T
+= \boldsymbol{\theta}_0
++ \Delta\boldsymbol{\theta}_1
++ \Delta\boldsymbol{\theta}_2
++ \cdots
++ \Delta\boldsymbol{\theta}_T
+= \boldsymbol{\theta}_0
++ \sum_{t=1}^{T}\Delta\boldsymbol{\theta}_t.
+\]</span></p>
+<p>Each step changes the parameters of the same model. The gradient is recomputed at the current parameters, so the direction can change from one iteration to the next.</p>
+</section>
+<section id="gradient-boosting-accumulate-prediction-function-updates" class="level3">
+<h3 class="anchored" data-anchor-id="gradient-boosting-accumulate-prediction-function-updates">2. Gradient boosting: accumulate prediction-function updates</h3>
+<p>Now let’s search for a prediction function <span class="math inline">\(F\)</span> that minimizes <span class="math inline">\(\mathcal{L}(F)\)</span>. In our regression example, <span class="math inline">\(F(\mathbf{x})\)</span> predicts NOx. We start with the constant function <span class="math inline">\(F_0(\mathbf{x})=\bar{y}_{\mathrm{train}}\)</span>. At each stage, we ask: <strong>how should the current predictions change to reduce the loss?</strong> This is the function-space version of asking how the parameters should change.</p>
+<p>The negative gradient gives a desired correction at each training input. Those corrections can have a closed-form expression—we will derive them below. But a list of corrections for the training observations does not yet tell us how to correct a prediction for a new input. We fit a regression tree <span class="math inline">\(g_t(\mathbf{x})\)</span> to these targets so it learns a correction as a function of the features.</p>
+<p>With learning rate <span class="math inline">\(\eta\)</span>, our function update is</p>
+<p><span class="math display">\[
+\Delta F_t(\mathbf{x}) = \eta g_t(\mathbf{x}),
+\qquad
+F_t(\mathbf{x})
+= F_{t-1}(\mathbf{x}) + \eta g_t(\mathbf{x}).
+\]</span></p>
+<p>Here, <span class="math inline">\(F_t\)</span> is the <strong>entire ensemble prediction function</strong> after <span class="math inline">\(t\)</span> trees; <span class="math inline">\(g_t\)</span> is the new tree added at that stage. Expanding the updates gives</p>
+<p><span class="math display">\[
+\begin{aligned}
+F_1(\mathbf{x}) &amp;= F_0(\mathbf{x}) + \eta g_1(\mathbf{x}), \\
+F_2(\mathbf{x}) &amp;= F_0(\mathbf{x}) + \eta g_1(\mathbf{x})
++ \eta g_2(\mathbf{x}), \\
+F_T(\mathbf{x}) &amp;= F_0(\mathbf{x})
++ \sum_{t=1}^{T}\Delta F_t(\mathbf{x})
+= F_0(\mathbf{x}) + \eta\sum_{t=1}^{T}g_t(\mathbf{x}).
+\end{aligned}
+\]</span></p>
+<p>Just as <span class="math inline">\(\Delta\boldsymbol{\theta}_t\)</span> is a step in parameter space, <span class="math inline">\(\eta g_t\)</span> is a step in prediction-function space. A shallow tree can only represent certain patterns of corrections, so it <strong>approximates</strong> the negative-gradient direction. After adding it, we recompute the correction targets using the updated ensemble before fitting the next tree.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -1066,26 +1094,26 @@ F(\mathbf{x}_n)
 </thead>
 <tbody>
 <tr class="odd">
-<td>Update parameters <span class="math inline">\(\boldsymbol{\theta}\)</span></td>
-<td>Update the prediction function <span class="math inline">\(F\)</span></td>
+<td>Start from <span class="math inline">\(\boldsymbol{\theta}_0\)</span></td>
+<td>Start from <span class="math inline">\(F_0\)</span></td>
 </tr>
 <tr class="even">
-<td>Take <span class="math inline">\(-\nabla_{\boldsymbol{\theta}}\mathcal{L}\)</span></td>
-<td>Find a tree-shaped approximation to <span class="math inline">\(-\nabla_F\mathcal{L}\)</span></td>
+<td>Compute a parameter update <span class="math inline">\(\Delta\boldsymbol{\theta}_t\)</span> from the gradient</td>
+<td>Learn a function update <span class="math inline">\(\Delta F_t=\eta g_t\)</span> from negative-gradient targets</td>
 </tr>
 <tr class="odd">
-<td>Keep the same model form</td>
-<td>Add one new regression tree</td>
+<td>Add the update to the current parameters</td>
+<td>Add the correction tree to the current function</td>
 </tr>
 <tr class="even">
-<td>Final model is one parameterized equation</td>
-<td>Final model is a sum of trees</td>
+<td>Accumulate parameter updates</td>
+<td>Accumulate learned correction functions</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="squared-error-regression-the-negative-gradient-is-the-residual" class="level3">
-<h3 class="anchored" data-anchor-id="squared-error-regression-the-negative-gradient-is-the-residual">2. Squared-error regression: the negative gradient is the residual</h3>
+<section id="squared-error-regression-where-do-the-correction-targets-come-from" class="level3">
+<h3 class="anchored" data-anchor-id="squared-error-regression-where-do-the-correction-targets-come-from">3. Squared-error regression: where do the correction targets come from?</h3>
 <p>For the mean squared-error objective, written in terms of the prediction function,</p>
 <p><span class="math display">\[
 \mathcal{L}_{\mathrm{MSE}}(F)
@@ -1103,7 +1131,7 @@ F(\mathbf{x}_n)
 r_i^{(t)}
 = y_i - F_{t-1}(\mathbf{x}_i).
 \]</span></p>
-<p>Equivalently, the negative gradient over all <span class="math inline">\(n\)</span> current training predictions is</p>
+<p>If we collect the current predictions into <span class="math inline">\(\mathbf{f}=[F(\mathbf{x}_1),\ldots,F(\mathbf{x}_n)]^T\)</span>, the negative gradient over these <span class="math inline">\(n\)</span> predictions is</p>
 <p><span class="math display">\[
 -\nabla_{\mathbf{f}}\mathcal{L}_{\mathrm{MSE}}(F)
 = \frac{2}{n}
@@ -1121,10 +1149,10 @@ g_t
 \sum_{i=1}^{n}
 \left[r_i^{(t)} - g(\mathbf{x}_i)\right]^2,
 \]</span></p>
-<p>where <span class="math inline">\(\mathcal{G}\)</span> is the family of allowed regression trees. The tree is an approximation to the unrestricted, observation-by-observation negative gradient because it cannot prescribe an independent change for every training observation. Instead, it identifies feature regions that need similar corrections.</p>
+<p>where <span class="math inline">\(\mathcal{G}\)</span> is the family of allowed regression trees. The tree is an approximation to the unrestricted, observation-by-observation negative gradient because it cannot prescribe an independent change for every training observation. Instead, it identifies feature regions that need similar corrections. This is why the residual-fitting loop we implemented earlier is a form of gradient descent: each fitted tree supplies the next function update, using the residuals as its negative-gradient targets.</p>
 </section>
-<section id="binary-classification-binary-cross-entropy-gives-a-different-correction" class="level3">
-<h3 class="anchored" data-anchor-id="binary-classification-binary-cross-entropy-gives-a-different-correction">3. Binary classification: binary cross-entropy gives a different correction</h3>
+<section id="binary-classification-the-same-process-with-a-different-loss" class="level3">
+<h3 class="anchored" data-anchor-id="binary-classification-the-same-process-with-a-different-loss">4. Binary classification: the same process with a different loss</h3>
 <p>For binary classification, gradient boosting still adds regression-tree corrections. We maintain an unbounded <strong>score</strong> <span class="math inline">\(F(\mathbf{x})\)</span>, then convert it to a probability with the sigmoid function:</p>
 <p><span class="math display">\[
 p_i = \sigma\!\left(F(\mathbf{x}_i)\right)
@@ -1160,6 +1188,9 @@ p_t(\mathbf{x})
 = \sigma\!\left(F_t(\mathbf{x})\right).
 \]</span></p>
 <p>The tree changes the raw score, not the probability directly. In practical implementations, the tree’s terminal values may receive an additional loss-based optimization; the central first-order idea remains the same: each new tree approximates the negative gradient of the current loss.</p>
+<blockquote class="blockquote">
+<p><strong>The connection:</strong> ordinary gradient descent accumulates changes to the parameters. Gradient boosting accumulates learned changes to the prediction function. The loss determines the correction targets at each stage.</p>
+</blockquote>
 <p><a href="../tree-based/08-gradient-boosting-explorer.html">Open the gradient-boosting explorer</a><br>
 <a href="../tree-based/index.html">Return to Tree-based models</a></p>
 
