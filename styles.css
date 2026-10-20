@@ -2268,7 +2268,33 @@
   color: #5d6a72;
 }
 
-.gradient-boosting-residual-metrics,
+.gradient-boosting-residuals > small {
+  color: #5d6a72;
+  font-size: 0.78rem;
+}
+
+.gradient-boosting-residual-histogram {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 0.05rem;
+  background: #fff;
+}
+
+.gradient-boosting-residual-zero-line {
+  stroke: #34454d;
+  stroke-width: 1.35;
+  stroke-dasharray: 4 3;
+}
+
+.gradient-boosting-residual-bar-positive {
+  fill: #4b9b73;
+}
+
+.gradient-boosting-residual-bar-negative {
+  fill: #d77768;
+}
+
 .gradient-boosting-update-metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2279,19 +2305,10 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.gradient-boosting-residual-metrics .gradient-boosting-metric,
 .gradient-boosting-update-metrics .gradient-boosting-metric {
   padding: 0.65rem 0.7rem;
   border-left-width: 3px;
   background: #fff;
-}
-
-.gradient-boosting-residual-metrics .gradient-boosting-metric:nth-child(1) {
-  border-left-color: #287a51;
-}
-
-.gradient-boosting-residual-metrics .gradient-boosting-metric:nth-child(2) {
-  border-left-color: #b64a4a;
 }
 
 .gradient-boosting-leaves {
@@ -2454,6 +2471,26 @@
   color: #c8d1d6;
 }
 
+.quarto-dark .gradient-boosting-residuals > small {
+  color: #c8d1d6;
+}
+
+.quarto-dark .gradient-boosting-residual-histogram {
+  background: #1f2529;
+}
+
+.quarto-dark .gradient-boosting-residual-zero-line {
+  stroke: #d5dde1;
+}
+
+.quarto-dark .gradient-boosting-residual-bar-positive {
+  fill: #62b888;
+}
+
+.quarto-dark .gradient-boosting-residual-bar-negative {
+  fill: #e0887b;
+}
+
 .quarto-dark .gradient-boosting-metric strong {
   color: #a8e1dc;
 }
@@ -2465,7 +2502,6 @@
   color: #e5ecef;
 }
 
-.quarto-dark .gradient-boosting-residual-metrics .gradient-boosting-metric,
 .quarto-dark .gradient-boosting-update-metrics .gradient-boosting-metric,
 .quarto-dark .gradient-boosting-leaf {
   border-color: #56616a;
@@ -3135,7 +3171,6 @@
   .gradient-boosting-baseline-card,
   .gradient-boosting-tree-card,
   .gradient-boosting-update-card,
-  .gradient-boosting-residual-metrics,
   .gradient-boosting-update-metrics {
     grid-template-columns: 1fr;
   }
