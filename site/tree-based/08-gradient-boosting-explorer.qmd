@@ -266,9 +266,10 @@ trees; it does not train models in the browser.
       leafCard.append(rule, correction, count);
       leaves.append(leafCard);
     });
-    const note = document.createElement("small");
-    note.textContent = "The highlighted leaf supplies the unshrunk tree output; the next step applies the learning rate.";
-    tree.append(treeTitle, rootRule, leaves, note);
+    const connection = document.createElement("p");
+    connection.className = "gradient-boosting-tree-connection";
+    connection.innerHTML = "<strong>Connection to Section 3:</strong> The orange-highlighted leaf is where the new observation below falls. Its unshrunk output is the correction used in Section 3 before applying the learning rate.";
+    tree.append(treeTitle, rootRule, leaves, connection);
 
     treeCard.replaceChildren(residuals, tree);
   }
