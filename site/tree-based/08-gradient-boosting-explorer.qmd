@@ -55,7 +55,8 @@ watch training and held-out MSE as stages are added.
 
 For each training observation, $r_i = y_i - \hat{y}_i$. A positive residual
 calls for a higher NOx prediction; a negative residual calls for a lower
-prediction.
+prediction. The histogram uses one fixed residual scale across all stages, so
+its spread shows how much error remains for the next tree to correct.
 
 ```{=html}
       </div>
@@ -95,7 +96,7 @@ prediction.
   </section>
 </div>
 
-The residual summaries, fitted-tree rules, prediction corrections, and evaluation
+The residual histograms, fitted-tree rules, prediction corrections, and evaluation
 metrics are precomputed from the gas-turbine data. The page reveals real fitted
 trees; it does not train models in the browser.
 
@@ -230,36 +231,25 @@ trees; it does not train models in the browser.
     const residuals = document.createElement("div");
     residuals.className = "gradient-boosting-residuals";
     const residualTitle = document.createElement("strong");
-    residualTitle.textContent = "Current residuals on the training data";
+    residualTitle.textContent = "Residual targets before Stage " + round.stage;
     const residualFormula = document.createElement("p");
-    residualFormula.innerHTML = "<code>r = y − ŷ</code> is the remaining error this tree is asked to correct: positive values mean the current prediction is too low; negative values mean it is too high.";
-    const residualMetrics = document.createElement("div");
-    residualMetrics.className = "gradient-boosting-residual-metrics";
-    residualMetrics.append(
-      makeMetric(
-        "Mean positive residual",
-        (round.residualSummary.positiveMean >= 0 ? "+" : "") + round.residualSummary.positiveMean.toFixed(3),
-        "these samples are underpredicted on average"
-      ),
-      makeMetric(
-        "Mean negative residual",
-        round.residualSummary.negativeMean.toFixed(3),
-        "these samples are overpredicted on average"
-      ),
-      makeMetric(
-        "Mean |r|",
-        round.residualSummary.meanAbsolute.toFixed(3),
-        "average magnitude still to correct (mg/m³)"
-      )
-    );
-    residuals.append(residualTitle, residualFormula, residualMetrics);
+    residualFormula.innerHTML = "<code>r = y − ŷ</code> is the target for this tree. Positive residuals need an upward correction; negative residuals need a downward correction.";
+    const histogram = svgElement("svg", {
+      class: "gradient-boosting-residual-histogram",
+      role: "img"
+    });
+    drawResidualHistogram(histogram, round);
+    const residualNote = document.createElement("small");
+    residualNote.textContent = "The horizontal scale is fixed across stages: a tighter distribution means less remaining error.";
+    residuals.append(residualTitle, residualFormula, histogram, residualNote);
 
     const tree = document.createElement("div");
     tree.className = "gradient-boosting-tree";
     const treeTitle = document.createElement("strong");
-    treeTitle.textContent = "Stage " + round.stage + ": regression-tree NOx corrections";
+    treeTitle.textContent = "Stage " + round.stage + ": learned residual-correction tree";
     const rootRule = document.createElement("p");
-    rootRule.innerHTML = "<strong>Root rule:</strong> " + round.root.feature + " ≤ " + round.root.threshold.toFixed(3);
+    rootRule.innerHTML = "<strong>Root rule:</strong> " + round.root.feature + " ≤ " + round.root.threshold.toFixed(3)
+      + ". Each leaf predicts the mean residual for its training samples.";
     const leaves = document.createElement("div");
     leaves.className = "gradient-boosting-leaves";
     round.leaves.forEach((leaf) => {
@@ -281,6 +271,93 @@ trees; it does not train models in the browser.
     tree.append(treeTitle, rootRule, leaves, note);
 
     treeCard.replaceChildren(residuals, tree);
+  }
+
+  function drawResidualHistogram(svg, round) {
+    const width = 420;
+    const height = 245;
+    const padding = { top: 14, right: 14, bottom: 42, left: 48 };
+    const histogram = explorer.metadata.residualHistogram;
+    const edges = histogram.binEdges;
+    const counts = round.residualHistogram;
+    const xDomain = [edges[0], edges[edges.length - 1]];
+    const yMaximum = Math.max(1, histogram.maxCount);
+    const x = (value) => scale(value, xDomain, [padding.left, width - padding.right]);
+    const y = (value) => scale(value, [0, yMaximum], [height - padding.bottom, padding.top]);
+
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    const title = svgElement("title", { id: "gradient-boosting-residual-histogram-title" });
+    const description = svgElement("desc", { id: "gradient-boosting-residual-histogram-description" });
+    title.textContent = "Training residual distribution before Stage " + round.stage;
+    description.textContent = "Histogram of residuals with a fixed horizontal scale across all gradient-boosting stages.";
+    svg.append(title, description);
+    svg.setAttribute("aria-labelledby", title.id + " " + description.id);
+
+    for (let index = 0; index <= 4; index += 1) {
+      const count = (index / 4) * yMaximum;
+      const yPosition = y(count);
+      svg.append(svgElement("line", {
+        x1: padding.left,
+        y1: yPosition,
+        x2: width - padding.right,
+        y2: yPosition,
+        class: "gradient-boosting-chart-grid"
+      }));
+      addText(svg, String(Math.round(count)), padding.left - 8, yPosition + 4, {
+        class: "gradient-boosting-chart-tick",
+        "text-anchor": "end"
+      });
+    }
+    for (let index = 0; index <= 4; index += 1) {
+      const value = xDomain[0] + (index / 4) * (xDomain[1] - xDomain[0]);
+      const xPosition = x(value);
+      svg.append(svgElement("line", {
+        x1: xPosition,
+        y1: padding.top,
+        x2: xPosition,
+        y2: height - padding.bottom,
+        class: "gradient-boosting-chart-grid"
+      }));
+      addText(svg, value.toFixed(0), xPosition, height - padding.bottom + 18, {
+        class: "gradient-boosting-chart-tick",
+        "text-anchor": "middle"
+      });
+    }
+    const zeroPosition = x(0);
+    svg.append(svgElement("line", {
+      x1: zeroPosition,
+      y1: padding.top,
+      x2: zeroPosition,
+      y2: height - padding.bottom,
+      class: "gradient-boosting-residual-zero-line"
+    }));
+    counts.forEach((count, index) => {
+      const left = x(edges[index]);
+      const right = x(edges[index + 1]);
+      const center = (edges[index] + edges[index + 1]) / 2;
+      const top = y(count);
+      svg.append(svgElement("rect", {
+        x: left + 1,
+        y: top,
+        width: Math.max(0, right - left - 2),
+        height: height - padding.bottom - top,
+        class: center < 0
+          ? "gradient-boosting-residual-bar-negative"
+          : "gradient-boosting-residual-bar-positive"
+      }));
+    });
+    svg.append(
+      svgElement("line", { x1: padding.left, y1: padding.top, x2: padding.left, y2: height - padding.bottom, class: "gradient-boosting-chart-axis" }),
+      svgElement("line", { x1: padding.left, y1: height - padding.bottom, x2: width - padding.right, y2: height - padding.bottom, class: "gradient-boosting-chart-axis" })
+    );
+    addChartLabel(svg, "Residual, r = y − ŷ (mg/m³)", (padding.left + width - padding.right) / 2, height - 6);
+    addText(svg, "Training samples", 14, height / 2, {
+      class: "gradient-boosting-chart-axis-title",
+      transform: "rotate(-90 14 " + (height / 2) + ")",
+      "text-anchor": "middle"
+    });
   }
 
   function renderUpdateCard() {
