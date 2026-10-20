@@ -20,6 +20,7 @@ N_STAGES = 60
 LEARNING_RATE = 0.1
 MAX_DEPTH = 2
 MIN_SAMPLES_LEAF = 50
+RESIDUAL_HISTOGRAM_BINS = 32
 # Fixed illustrative held-out observation used throughout the explorer.
 FIXED_TEST_POSITION = 133
 ROOT = Path(__file__).resolve().parents[1]
@@ -140,12 +141,14 @@ def main() -> None:
     test_predictions = baseline_test_predictions.copy()
 
     rounds: list[dict[str, object]] = []
+    residuals_by_stage: list[np.ndarray] = []
     train_values = X_train.to_numpy()
     test_values = X_test.to_numpy()
 
     for stage_index in range(N_STAGES):
         correction_tree = model.estimators_[stage_index, 0]
         residuals = train_targets - train_predictions
+        residuals_by_stage.append(residuals.copy())
         tree_output_train = correction_tree.predict(train_values)
         tree_output_test = correction_tree.predict(test_values)
         leaves = tree_leaves(tree=correction_tree)
@@ -165,18 +168,6 @@ def main() -> None:
                     "threshold": round(float(correction_tree.tree_.threshold[0]), 3),
                 },
                 "leaves": leaves,
-                "residualSummary": {
-                    "positiveMean": round(
-                        float(residuals[residuals > 0].mean()),
-                        5,
-                    ),
-                    "negativeMean": round(
-                        float(residuals[residuals < 0].mean()),
-                        5,
-                    ),
-                    "meanAbsolute": round(float(np.abs(residuals).mean()), 5),
-                    "mse": round(float(np.mean(residuals**2)), 5),
-                },
                 "fixedObservation": {
                     "predictionBefore": round(fixed_prediction_before, 5),
                     "treeCorrection": round(fixed_correction, 5),
@@ -208,6 +199,27 @@ def main() -> None:
             }
         )
 
+    residual_limit = float(
+        np.ceil(
+            max(float(np.abs(residuals).max()) for residuals in residuals_by_stage)
+            / 5.0
+        )
+        * 5.0
+    )
+    residual_bin_edges = np.linspace(
+        -residual_limit,
+        residual_limit,
+        RESIDUAL_HISTOGRAM_BINS + 1,
+    )
+    residual_histogram_max_count = 0
+    for round_data, residuals in zip(rounds, residuals_by_stage, strict=True):
+        counts, _ = np.histogram(residuals, bins=residual_bin_edges)
+        residual_histogram_max_count = max(
+            residual_histogram_max_count,
+            int(counts.max()),
+        )
+        round_data["residualHistogram"] = counts.tolist()
+
     final_model_prediction = model.predict(X_test)
     if not np.allclose(test_predictions, final_model_prediction):
         raise RuntimeError(
@@ -226,6 +238,10 @@ def main() -> None:
             "minSamplesLeaf": MIN_SAMPLES_LEAF,
             "targetName": "NOx",
             "targetUnit": "mg/m³",
+            "residualHistogram": {
+                "binEdges": [round(float(edge), 3) for edge in residual_bin_edges],
+                "maxCount": residual_histogram_max_count,
+            },
         },
         "baseline": {
             "prediction": round(baseline_prediction, 5),
