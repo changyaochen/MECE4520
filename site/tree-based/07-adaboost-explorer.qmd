@@ -63,19 +63,24 @@ changes across rounds.
       <span class="bagging-step-number">3</span>
       <div>
         <h2 id="adaboost-vote-heading">Pool weighted stump votes for one new observation</h2>
-        <p>A more accurate stump receives a larger vote weight. With each stump prediction
-        \(h_t(\mathbf{x})\) equal to 0 or 1, we compute the normalized positive vote</p>
+```
 
-        <p>\[
-        s_T(\mathbf{x}) =
-        \frac{\sum_{t=1}^{T} \alpha_t h_t(\mathbf{x})}
-        {\sum_{t=1}^{T} \alpha_t}.
-        \]</p>
+A more accurate stump receives a larger vote weight. With each stump prediction
+$h_t(\mathbf{x})$ equal to 0 or 1, we compute the normalized positive vote:
 
-        <p>Because this is a weighted average, \(0 \leq s_T(\mathbf{x}) \leq 1\).
-        It is a ranking score, however—not automatically a calibrated probability.</p>
+$$
+s_T(\mathbf{x}) =
+\frac{\sum_{t=1}^{T} \alpha_t h_t(\mathbf{x})}
+{\sum_{t=1}^{T} \alpha_t}.
+$$
+
+Because this is a weighted average, $0 \leq s_T(\mathbf{x}) \leq 1$. It is
+a ranking score, however—not automatically a calibrated probability.
+
+```{=html}
       </div>
     </div>
+
     <div id="adaboost-vote-card" class="adaboost-vote-card" aria-label="Weighted stump votes for one held-out observation"></div>
   </section>
 
