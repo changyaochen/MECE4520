@@ -79,6 +79,35 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -385,19 +414,16 @@ ul.task-list li input[type="checkbox"] {
       <span class="bagging-step-number">3</span>
       <div>
         <h2 id="adaboost-vote-heading" class="anchored">Pool weighted stump votes for one new observation</h2>
-        <p>A more accurate stump receives a larger vote weight. With each stump prediction
-        \(h_t(\mathbf{x})\) equal to 0 or 1, we compute the normalized positive vote</p>
-
-        <p>\[
-        s_T(\mathbf{x}) =
-        \frac{\sum_{t=1}^{T} \alpha_t h_t(\mathbf{x})}
-        {\sum_{t=1}^{T} \alpha_t}.
-        \]</p>
-
-        <p>Because this is a weighted average, \(0 \leq s_T(\mathbf{x}) \leq 1\).
-        It is a ranking score, however—not automatically a calibrated probability.</p>
+<p>A more accurate stump receives a larger vote weight. With each stump prediction <span class="math inline">\(h_t(\mathbf{x})\)</span> equal to 0 or 1, we compute the normalized positive vote:</p>
+<p><span class="math display">\[
+s_T(\mathbf{x}) =
+\frac{\sum_{t=1}^{T} \alpha_t h_t(\mathbf{x})}
+{\sum_{t=1}^{T} \alpha_t}.
+\]</span></p>
+<p>Because this is a weighted average, <span class="math inline">\(0 \leq s_T(\mathbf{x}) \leq 1\)</span>. It is a ranking score, however—not automatically a calibrated probability.</p>
       </div>
     </div>
+
     <div id="adaboost-vote-card" class="adaboost-vote-card" aria-label="Weighted stump votes for one held-out observation"></div>
   </section>
 
