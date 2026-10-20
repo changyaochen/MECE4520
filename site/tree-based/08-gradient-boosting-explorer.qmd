@@ -1,0 +1,480 @@
+---
+title: "Explore gradient boosting"
+toc: false
+page-layout: full
+---
+
+Gradient boosting also builds an ensemble **sequentially**, but it takes a
+different route from AdaBoost. Here, we predict continuous NOx concentration
+from AT, CDP, and TEY. The model starts with one constant NOx prediction. Each
+new small **regression tree** then learns a continuous correction to the
+current prediction. With squared-error loss, the quantity it learns from is
+the ordinary residual $r_i = y_i - \hat{y}_i$.
+
+::: {.callout-tip}
+## What to watch
+
+Every stage uses the same training observations—there is no bootstrap sample
+and no observation-weight update. The new tree sees the current residuals:
+positive values mean the model underpredicts NOx, and negative values mean it
+overpredicts. Follow the tree's correction for one held-out observation, then
+watch training and held-out MSE as stages are added.
+:::
+
+```{=html}
+<div id="gradient-boosting-explorer" class="bagging-explorer gradient-boosting-explorer" aria-label="Interactive gradient boosting explorer">
+  <div class="bagging-toolbar">
+    <div class="clt-buttons" aria-label="Gradient-boosting stage controls">
+      <button id="gradient-boosting-next-stage" type="button" class="regression-sampling-primary">Add next correction tree</button>
+      <button id="gradient-boosting-run-all" type="button">Run all stages</button>
+      <button id="gradient-boosting-reset" type="button">Reset</button>
+    </div>
+    <div class="bagging-progress" aria-live="polite">
+      <span>Correction trees fitted:</span>
+      <strong><output id="gradient-boosting-stage-count">1</output>/<span id="gradient-boosting-total-stage-count">60</span></strong>
+    </div>
+  </div>
+
+  <section class="bagging-step gradient-boosting-baseline-step" aria-labelledby="gradient-boosting-baseline-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">1</span>
+      <div>
+        <h2 id="gradient-boosting-baseline-heading">Start with one constant model</h2>
+        <p>Before any tree is fitted, every observation receives the average training NOx concentration.</p>
+      </div>
+    </div>
+    <div id="gradient-boosting-baseline-card" class="gradient-boosting-baseline-card" aria-label="Initial constant model"></div>
+  </section>
+
+  <section class="bagging-step gradient-boosting-tree-step" aria-labelledby="gradient-boosting-tree-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">2</span>
+      <div>
+        <h2 id="gradient-boosting-tree-heading">Fit a shallow regression tree to the residuals</h2>
+```
+
+For each training observation, $r_i = y_i - \hat{y}_i$. A positive residual
+calls for a higher NOx prediction; a negative residual calls for a lower
+prediction.
+
+```{=html}
+      </div>
+    </div>
+    <div id="gradient-boosting-tree-card" class="gradient-boosting-tree-card" aria-label="Current residuals and regression-tree NOx corrections"></div>
+  </section>
+
+  <section class="bagging-step" aria-labelledby="gradient-boosting-update-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">3</span>
+      <div>
+        <h2 id="gradient-boosting-update-heading">Apply the correction to one new observation</h2>
+        <p>The tree uses only the observation's features to add a continuous adjustment to the current NOx prediction. Its measured NOx is shown afterward only for comparison.</p>
+      </div>
+    </div>
+    <div id="gradient-boosting-update-card" class="gradient-boosting-update-card" aria-label="Current NOx prediction update for one held-out observation"></div>
+  </section>
+
+  <section class="bagging-step" aria-labelledby="gradient-boosting-evaluation-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">4</span>
+      <div>
+        <h2 id="gradient-boosting-evaluation-heading">Evaluate the growing model</h2>
+        <p>Each intermediate ensemble is evaluated against the same held-out observations. Training MSE shows fit to the training data; held-out MSE tells us whether the corrections generalize.</p>
+      </div>
+    </div>
+    <div class="gradient-boosting-charts">
+      <figure class="gradient-boosting-figure">
+        <figcaption>Mean squared error as correction trees are added</figcaption>
+        <svg id="gradient-boosting-loss-chart" role="img" aria-label="Training and held-out mean squared error after each gradient-boosting stage"></svg>
+      </figure>
+      <figure class="gradient-boosting-figure">
+        <figcaption>Held-out R<sup>2</sup> as correction trees are added</figcaption>
+        <svg id="gradient-boosting-r2-chart" role="img" aria-label="Held-out R-squared after each gradient-boosting stage"></svg>
+      </figure>
+    </div>
+  </section>
+</div>
+
+The residual summaries, fitted-tree rules, prediction corrections, and evaluation
+metrics are precomputed from the gas-turbine data. The page reveals real fitted
+trees; it does not train models in the browser.
+
+<p style="margin-top: 1.5rem;"><a href="index.html">← Return to Tree-based models</a></p>
+
+<script src="../assets/gradient-boosting-explorer.js"></script>
+<script>
+(() => {
+  const root = document.getElementById("gradient-boosting-explorer");
+  const explorer = window.MECE4520GradientBoostingExplorer;
+  if (!root || !explorer) return;
+
+  const stageCountOutput = root.querySelector("#gradient-boosting-stage-count");
+  const totalStageCount = root.querySelector("#gradient-boosting-total-stage-count");
+  const nextButton = root.querySelector("#gradient-boosting-next-stage");
+  const runButton = root.querySelector("#gradient-boosting-run-all");
+  const resetButton = root.querySelector("#gradient-boosting-reset");
+  const baselineCard = root.querySelector("#gradient-boosting-baseline-card");
+  const treeCard = root.querySelector("#gradient-boosting-tree-card");
+  const updateCard = root.querySelector("#gradient-boosting-update-card");
+  const lossChart = root.querySelector("#gradient-boosting-loss-chart");
+  const r2Chart = root.querySelector("#gradient-boosting-r2-chart");
+  if (!stageCountOutput || !totalStageCount || !nextButton || !runButton || !resetButton
+      || !baselineCard || !treeCard || !updateCard || !lossChart || !r2Chart) return;
+
+  const colors = {
+    boost: "#2b7a78",
+    train: "#457eaa",
+    test: "#d77732",
+    positive: "#287a51",
+    negative: "#b64a4a",
+    grid: "#d8e1e5",
+    axis: "#5d6a72",
+    text: "#34454d"
+  };
+  const nStages = explorer.metadata.nStages;
+  let includedStages = 1;
+  let animationFrame = null;
+  let lastFrameTime = 0;
+  let isRunning = false;
+
+  totalStageCount.textContent = String(nStages);
+
+  function activeRound() {
+    return explorer.rounds[includedStages - 1];
+  }
+
+  function svgElement(name, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", Object.assign({ x, y }, attributes));
+    element.textContent = text;
+    svg.append(element);
+    return element;
+  }
+
+  function scale(value, domain, range) {
+    return range[0] + ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]);
+  }
+
+  function makeMetric(label, value, note) {
+    const metric = document.createElement("div");
+    metric.className = "gradient-boosting-metric";
+    const title = document.createElement("span");
+    const number = document.createElement("strong");
+    const description = document.createElement("small");
+    title.textContent = label;
+    number.textContent = value;
+    description.textContent = note;
+    metric.append(title, number, description);
+    return metric;
+  }
+
+  function formatR2(value) {
+    if (Math.abs(value) < 0.0005) return "≈ 0.000";
+    return value.toFixed(3);
+  }
+
+  function makeFeatureTable() {
+    const table = document.createElement("table");
+    table.className = "bagging-feature-table";
+    const head = document.createElement("thead");
+    const headRow = document.createElement("tr");
+    ["Feature", "Value"].forEach((label) => {
+      const cell = document.createElement("th");
+      cell.scope = "col";
+      cell.textContent = label;
+      headRow.append(cell);
+    });
+    head.append(headRow);
+    const body = document.createElement("tbody");
+    Object.entries(explorer.predictionObservation.features).forEach(([feature, value]) => {
+      const row = document.createElement("tr");
+      const featureCell = document.createElement("td");
+      const valueCell = document.createElement("td");
+      featureCell.textContent = feature;
+      valueCell.textContent = Number(value).toFixed(2);
+      row.append(featureCell, valueCell);
+      body.append(row);
+    });
+    table.append(head, body);
+    return table;
+  }
+
+  function renderBaseline() {
+    baselineCard.replaceChildren();
+    baselineCard.append(
+      makeMetric(
+        "Initial NOx prediction",
+        explorer.baseline.prediction.toFixed(2) + " mg/m³",
+        "the average NOx concentration in the training data"
+      ),
+      makeMetric(
+        "Held-out MSE",
+        explorer.baseline.testMse.toFixed(2),
+        "before any correction tree is added"
+      ),
+      makeMetric(
+        "Held-out R²",
+        formatR2(explorer.baseline.testR2),
+        "relative to the held-out mean baseline"
+      )
+    );
+  }
+
+  function renderTreeCard() {
+    const round = activeRound();
+    const residuals = document.createElement("div");
+    residuals.className = "gradient-boosting-residuals";
+    const residualTitle = document.createElement("strong");
+    residualTitle.textContent = "Current residuals on the training data";
+    const residualFormula = document.createElement("p");
+    residualFormula.innerHTML = "<code>r = y − ŷ</code> is the remaining error this tree is asked to correct: positive values mean the current prediction is too low; negative values mean it is too high.";
+    const residualMetrics = document.createElement("div");
+    residualMetrics.className = "gradient-boosting-residual-metrics";
+    residualMetrics.append(
+      makeMetric(
+        "Mean positive residual",
+        (round.residualSummary.positiveMean >= 0 ? "+" : "") + round.residualSummary.positiveMean.toFixed(3),
+        "these samples are underpredicted on average"
+      ),
+      makeMetric(
+        "Mean negative residual",
+        round.residualSummary.negativeMean.toFixed(3),
+        "these samples are overpredicted on average"
+      ),
+      makeMetric(
+        "Mean |r|",
+        round.residualSummary.meanAbsolute.toFixed(3),
+        "average magnitude still to correct (mg/m³)"
+      )
+    );
+    residuals.append(residualTitle, residualFormula, residualMetrics);
+
+    const tree = document.createElement("div");
+    tree.className = "gradient-boosting-tree";
+    const treeTitle = document.createElement("strong");
+    treeTitle.textContent = "Stage " + round.stage + ": regression-tree NOx corrections";
+    const rootRule = document.createElement("p");
+    rootRule.innerHTML = "<strong>Root rule:</strong> " + round.root.feature + " ≤ " + round.root.threshold.toFixed(3);
+    const leaves = document.createElement("div");
+    leaves.className = "gradient-boosting-leaves";
+    round.leaves.forEach((leaf) => {
+      const leafCard = document.createElement("div");
+      const selected = leaf.rule === round.fixedObservation.leafRule;
+      leafCard.className = "gradient-boosting-leaf" + (selected ? " gradient-boosting-leaf-selected" : "");
+      const rule = document.createElement("span");
+      const correction = document.createElement("strong");
+      const count = document.createElement("small");
+      rule.textContent = leaf.rule;
+      correction.textContent = (leaf.correction >= 0 ? "+" : "")
+        + leaf.correction.toFixed(2) + " mg/m³";
+      count.textContent = leaf.nSamples.toLocaleString() + " training samples";
+      leafCard.append(rule, correction, count);
+      leaves.append(leafCard);
+    });
+    const note = document.createElement("small");
+    note.textContent = "The highlighted leaf supplies the unshrunk tree output; the next step applies the learning rate.";
+    tree.append(treeTitle, rootRule, leaves, note);
+
+    treeCard.replaceChildren(residuals, tree);
+  }
+
+  function renderUpdateCard() {
+    const round = activeRound();
+    const observation = document.createElement("div");
+    observation.className = "gradient-boosting-observation";
+    const observationTitle = document.createElement("strong");
+    observationTitle.textContent = "Held-out observation ("
+      + explorer.metadata.nFeatures + " features; observed NOx: "
+      + explorer.predictionObservation.observedTarget.toFixed(2) + " mg/m³)";
+    const tableContainer = document.createElement("div");
+    tableContainer.className = "bagging-feature-table-wrap";
+    tableContainer.append(makeFeatureTable());
+    observation.append(observationTitle, tableContainer);
+
+    const update = document.createElement("div");
+    update.className = "gradient-boosting-score-update";
+    const updateTitle = document.createElement("strong");
+    updateTitle.textContent = "Stage " + round.stage + " prediction update";
+    const equation = document.createElement("p");
+    equation.className = "gradient-boosting-equation";
+    equation.textContent = "ŷ ← ŷ + " + explorer.metadata.learningRate.toFixed(2)
+      + " × (" + (round.fixedObservation.treeCorrection >= 0 ? "+" : "")
+      + round.fixedObservation.treeCorrection.toFixed(2) + " mg/m³)";
+    const metrics = document.createElement("div");
+    metrics.className = "gradient-boosting-update-metrics";
+    metrics.append(
+      makeMetric("Prediction before", round.fixedObservation.predictionBefore.toFixed(2) + " mg/m³", "current model prediction"),
+      makeMetric("Correction", (round.fixedObservation.predictionChange >= 0 ? "+" : "") + round.fixedObservation.predictionChange.toFixed(2) + " mg/m³", "learning rate × tree correction"),
+      makeMetric("Prediction after", round.fixedObservation.predictionAfter.toFixed(2) + " mg/m³", "new model prediction"),
+      makeMetric("Observed NOx", explorer.predictionObservation.observedTarget.toFixed(2) + " mg/m³", "shown only for comparison after prediction")
+    );
+    update.append(updateTitle, equation, metrics);
+    updateCard.replaceChildren(observation, update);
+  }
+
+  function addChartLabel(svg, text, x, y, attributes = {}) {
+    return addText(svg, text, x, y, Object.assign({
+      class: "gradient-boosting-chart-label",
+      "text-anchor": "middle"
+    }, attributes));
+  }
+
+  function drawLineChart(svg, configuration) {
+    const width = 720;
+    const height = 315;
+    const padding = { top: 20, right: 22, bottom: 47, left: 58 };
+    const values = configuration.fullSeries.flatMap((series) => series.values);
+    const rawMin = Math.min(...values);
+    const rawMax = Math.max(...values);
+    const span = Math.max(rawMax - rawMin, 0.03);
+    const domain = [rawMin - 0.08 * span, rawMax + 0.08 * span];
+    const x = (stage) => scale(stage, [0, nStages], [padding.left, width - padding.right]);
+    const y = (value) => scale(value, domain, [height - padding.bottom, padding.top]);
+    const visibleStages = Array.from({ length: includedStages + 1 }, (_, index) => index);
+
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    const title = svgElement("title", { id: svg.id + "-title" });
+    const description = svgElement("desc", { id: svg.id + "-description" });
+    title.textContent = configuration.title;
+    description.textContent = configuration.description;
+    svg.append(title, description);
+    svg.setAttribute("aria-labelledby", title.id + " " + description.id);
+
+    for (let index = 0; index <= 4; index += 1) {
+      const value = domain[0] + (index / 4) * (domain[1] - domain[0]);
+      const yPosition = y(value);
+      svg.append(svgElement("line", {
+        x1: padding.left,
+        y1: yPosition,
+        x2: width - padding.right,
+        y2: yPosition,
+        class: "gradient-boosting-chart-grid"
+      }));
+      addText(svg, value.toFixed(2), padding.left - 8, yPosition + 4, {
+        class: "gradient-boosting-chart-tick",
+        "text-anchor": "end"
+      });
+    }
+    [0, 10, 20, 30, 40, 50, 60].forEach((stage) => {
+      addText(svg, String(stage), x(stage), height - padding.bottom + 19, {
+        class: "gradient-boosting-chart-tick",
+        "text-anchor": "middle"
+      });
+    });
+    svg.append(
+      svgElement("line", { x1: padding.left, y1: padding.top, x2: padding.left, y2: height - padding.bottom, class: "gradient-boosting-chart-axis" }),
+      svgElement("line", { x1: padding.left, y1: height - padding.bottom, x2: width - padding.right, y2: height - padding.bottom, class: "gradient-boosting-chart-axis" })
+    );
+    addChartLabel(svg, "Correction trees added", (padding.left + width - padding.right) / 2, height - 7);
+    addText(svg, configuration.yLabel, 15, height / 2, {
+      class: "gradient-boosting-chart-axis-title",
+      transform: "rotate(-90 15 " + (height / 2) + ")",
+      "text-anchor": "middle"
+    });
+
+    configuration.visibleSeries.forEach((series) => {
+      const points = visibleStages.map((stage, index) => [x(stage), y(series.values[index])]);
+      const path = points.map((point, index) => (index === 0 ? "M " : "L ") + point[0].toFixed(2) + " " + point[1].toFixed(2)).join(" ");
+      svg.append(svgElement("path", { d: path, fill: "none", stroke: series.color, "stroke-width": 3 }));
+      const finalPoint = points[points.length - 1];
+      svg.append(svgElement("circle", { cx: finalPoint[0], cy: finalPoint[1], r: 4.6, fill: series.color, stroke: "#fff", "stroke-width": 1.6 }));
+    });
+    configuration.visibleSeries.forEach((series, index) => {
+      const legendX = padding.left + index * 175;
+      const legendY = 15;
+      svg.append(svgElement("line", { x1: legendX, y1: legendY, x2: legendX + 25, y2: legendY, stroke: series.color, "stroke-width": 3 }));
+      addText(svg, series.label, legendX + 32, legendY + 4, { class: "gradient-boosting-chart-value" });
+    });
+  }
+
+  function renderCharts() {
+    const allStages = explorer.rounds;
+    const trainLoss = [explorer.baseline.trainMse, ...allStages.map((round) => round.trainMse)];
+    const testLoss = [explorer.baseline.testMse, ...allStages.map((round) => round.testMse)];
+    const testR2 = [explorer.baseline.testR2, ...allStages.map((round) => round.testR2)];
+    drawLineChart(lossChart, {
+      title: "Mean squared error",
+      description: "Training and held-out mean squared error as gradient-boosting correction trees are added.",
+      yLabel: "MSE",
+      fullSeries: [{ values: trainLoss }, { values: testLoss }],
+      visibleSeries: [
+        { label: "Training", values: trainLoss, color: colors.train },
+        { label: "Held-out", values: testLoss, color: colors.test }
+      ]
+    });
+    drawLineChart(r2Chart, {
+      title: "Held-out R²",
+      description: "Held-out R-squared as gradient-boosting correction trees are added.",
+      yLabel: "Held-out R²",
+      fullSeries: [{ values: testR2 }],
+      visibleSeries: [{ label: "Held-out R²", values: testR2, color: colors.boost }]
+    });
+  }
+
+  function stopAnimation() {
+    if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+    isRunning = false;
+    runButton.textContent = "Run all stages";
+  }
+
+  function render() {
+    const atLastStage = includedStages === nStages;
+    stageCountOutput.textContent = String(includedStages);
+    nextButton.disabled = atLastStage;
+    runButton.disabled = atLastStage;
+    renderBaseline();
+    renderTreeCard();
+    renderUpdateCard();
+    renderCharts();
+  }
+
+  function runAll(timestamp) {
+    if (!isRunning) return;
+    if (!lastFrameTime || timestamp - lastFrameTime >= 95) {
+      lastFrameTime = timestamp;
+      if (includedStages < nStages) {
+        includedStages += 1;
+        render();
+      }
+    }
+    if (includedStages < nStages) {
+      animationFrame = requestAnimationFrame(runAll);
+    } else {
+      stopAnimation();
+      render();
+    }
+  }
+
+  nextButton.addEventListener("click", () => {
+    stopAnimation();
+    if (includedStages < nStages) includedStages += 1;
+    render();
+  });
+  runButton.addEventListener("click", () => {
+    if (isRunning) {
+      stopAnimation();
+      return;
+    }
+    isRunning = true;
+    lastFrameTime = 0;
+    runButton.textContent = "Pause";
+    animationFrame = requestAnimationFrame(runAll);
+  });
+  resetButton.addEventListener("click", () => {
+    stopAnimation();
+    includedStages = 1;
+    render();
+  });
+
+  render();
+})();
+</script>
+```

@@ -80,3 +80,14 @@ Use fitted stumps to see how each round shifts observation weight, contributes
 a weighted vote for one new observation, and changes held-out AUC.
 
 [Explore AdaBoost](07-adaboost-explorer.qmd)
+
+## 6. Gradient boosting
+
+See how gradient boosting starts with one mean NOx prediction, then adds small
+regression trees that correct the current model's residuals. Unlike AdaBoost,
+it does not reweight observations: each tree adds a continuous correction to
+the current prediction.
+
+[View the notebook](08-gradient-boosting.ipynb)
+
+[Explore gradient boosting](08-gradient-boosting-explorer.qmd)
