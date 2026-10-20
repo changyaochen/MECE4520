@@ -6,10 +6,10 @@ page-layout: full
 
 Gradient boosting also builds an ensemble **sequentially**, but it takes a
 different route from AdaBoost. Here, we predict continuous NOx concentration
-from AT, CDP, and TEY. The model starts with one constant NOx prediction. Each
-new small **regression tree** then learns a continuous correction to the
-current prediction. With squared-error loss, the quantity it learns from is
-the ordinary residual $r_i = y_i - \hat{y}_i$.
+from six gas-turbine operating features. The model starts with one constant
+NOx prediction. Each new small **regression tree** then learns a continuous
+correction to the current prediction. With squared-error loss, the quantity it
+learns from is the ordinary residual $r_i = y_i - \hat{y}_i$.
 
 ::: {.callout-tip}
 ## What to watch
