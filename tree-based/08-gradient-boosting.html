@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Gradient boosting: correct the current model – MECE 4520</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b626d73c4c936ccc3cb08be7d45d1df6.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d0e9dd6581773c2d153725aefe2da3c3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-90b0ccabdf50233fb893b00cd6e33405.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d0e9dd6581773c2d153725aefe2da3c3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">⚙️</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../foundations/index.html"> 
+<span class="menu-text">Foundations</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../regression/index.html"> 
+<span class="menu-text">Regression</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../evaluation/index.html"> 
+<span class="menu-text">Evaluation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../classification/index.html"> 
+<span class="menu-text">Classification</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../tree-based/index.html"> 
+<span class="menu-text">Tree-based</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Gradient boosting: correct the current model</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#what-you-will-do" id="toc-what-you-will-do">What you will do</a></li>
+  <li><a href="#the-high-level-idea-repair-a-running-forecast" id="toc-the-high-level-idea-repair-a-running-forecast">The high-level idea: repair a running forecast</a></li>
+  <li><a href="#set-up-one-regression-task" id="toc-set-up-one-regression-task">1. Set up one regression task</a></li>
+  <li><a href="#start-from-one-simple-forecast" id="toc-start-from-one-simple-forecast">2. Start from one simple forecast</a></li>
+  <li><a href="#fit-the-first-correction-tree" id="toc-fit-the-first-correction-tree">3. Fit the first correction tree</a></li>
+  <li><a href="#add-the-trees-correction-to-the-current-prediction" id="toc-add-the-trees-correction-to-the-current-prediction">4. Add the tree’s correction to the current prediction</a></li>
+  <li><a href="#repeat-the-correction-process" id="toc-repeat-the-correction-process">5. Repeat the correction process</a></li>
+  <li><a href="#the-main-knobs-and-takeaways" id="toc-the-main-knobs-and-takeaways">6. The main knobs and takeaways</a></li>
+  <li><a href="#optional-why-gradient-boosting" id="toc-optional-why-gradient-boosting">7. (Optional) Why <em>gradient</em> boosting?</a></li>
+  </ul>
+</nav>
+<p><a target="_blank" href="https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/tree-based/08-gradient-boosting.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a></p>
+<p>Gradient boosting builds an ensemble sequentially, just as AdaBoost does. But its mechanism is different. To make the idea direct, we use a <strong>regression</strong> problem: predict continuous NOx concentration from gas-turbine operating measurements.</p>
+<p>The model starts with one constant prediction. Each new shallow <strong>regression tree</strong> then learns a continuous correction to the current prediction.</p>
+<section id="what-you-will-do" class="level2">
+<h2 class="anchored" data-anchor-id="what-you-will-do">What you will do</h2>
+<ol type="1">
+<li>Build a high-level mental model of boosting as sequential error correction.</li>
+<li>Contrast gradient boosting with bagging and AdaBoost.</li>
+<li>Set up one NOx regression task with a fixed train/test split.</li>
+<li>Connect residual correction to the word <em>gradient</em> (optional).</li>
+<li>Fit small regression trees that supply continuous corrections.</li>
+<li>Add the corrections gradually, then evaluate the growing model on the same held-out observations.</li>
+</ol>
+</section>
+<section id="the-high-level-idea-repair-a-running-forecast" class="level2">
+<h2 class="anchored" data-anchor-id="the-high-level-idea-repair-a-running-forecast">The high-level idea: repair a running forecast</h2>
+<p>Gradient boosting builds one prediction through a sequence of small revisions. It does <strong>not</strong> ask every tree to predict NOx from scratch. Instead, each new tree asks: <strong>where is the current model still systematically too high or too low?</strong></p>
+<p>During training, we repeat this repair loop:</p>
+<ol type="1">
+<li>Start from the current prediction for every training observation.</li>
+<li>Compare it with the measured NOx and calculate the remaining error.</li>
+<li>Fit a small regression tree to recognize operating regions with similar remaining errors.</li>
+<li>Add only part of that tree’s correction to the current prediction.</li>
+<li>Repeat, so the next tree focuses only on what remains unexplained.</li>
+</ol>
+<p>Thus, the final model is an <strong>additive model</strong>:</p>
+<p><span class="math display">\[
+\hat{y}^{(T)}(\mathbf{x})
+= \overline{y}_{\mathrm{train}}
++ \eta g_1(\mathbf{x})
++ \eta g_2(\mathbf{x})
++ \cdots
++ \eta g_T(\mathbf{x}).
+\]</span></p>
+<p>Here, <span class="math inline">\(\overline{y}_{\mathrm{train}}\)</span> is the initial mean-NOx forecast, each <span class="math inline">\(g_t(\mathbf{x})\)</span> is the continuous correction supplied by a shallow regression tree, and <span class="math inline">\(\eta\)</span> retains only a fraction of each correction.</p>
+<blockquote class="blockquote">
+<p><strong>Key idea:</strong> a tree in gradient boosting predicts a <strong>correction</strong>, not a complete NOx value. Many small corrections, added together, form a flexible nonlinear model.</p>
+</blockquote>
+<p>At prediction time, measured NOx is unknown. A new observation simply passes through the already-fitted trees, and the model adds their learned feature-dependent corrections to the baseline.</p>
+<section id="a-tiny-staged-example" class="level3">
+<h3 class="anchored" data-anchor-id="a-tiny-staged-example">A tiny staged example</h3>
+<p>For one <em>training</em> observation, imagine that the current forecast is <span class="math inline">\(65.0\ \mathrm{mg/m^3}\)</span> while the measured NOx is <span class="math inline">\(78.0\ \mathrm{mg/m^3}\)</span>. The numbers below are illustrative; a real tree learns its correction from many observations with similar operating conditions.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 21%">
+<col style="width: 21%">
+<col style="width: 21%">
+<col style="width: 21%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Stage</th>
+<th style="text-align: right;">Current forecast</th>
+<th style="text-align: right;">Remaining residual</th>
+<th style="text-align: right;">Next tree’s correction</th>
+<th style="text-align: right;">Applied update, <span class="math inline">\(\eta=0.1\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Baseline</td>
+<td style="text-align: right;">65.0</td>
+<td style="text-align: right;"><span class="math inline">\(78.0 - 65.0 = +13.0\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(+9.0\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(+0.9\)</span></td>
+</tr>
+<tr class="even">
+<td>After tree 1</td>
+<td style="text-align: right;">65.9</td>
+<td style="text-align: right;"><span class="math inline">\(78.0 - 65.9 = +12.1\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(+7.0\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(+0.7\)</span></td>
+</tr>
+<tr class="odd">
+<td>After tree 2</td>
+<td style="text-align: right;">66.6</td>
+<td style="text-align: right;"><span class="math inline">\(78.0 - 66.6 = +11.4\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\cdots\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\cdots\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>The next tree does not redo the entire prediction. It targets the remaining residual after the earlier corrections have already been applied.</p>
+</section>
+<section id="how-this-differs-from-the-earlier-ensembles" class="level3">
+<h3 class="anchored" data-anchor-id="how-this-differs-from-the-earlier-ensembles">How this differs from the earlier ensembles</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>How trees are trained</th>
+<th>What later trees respond to</th>
+<th>How predictions combine</th>
+<th>Main intuition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bagging / random forest</td>
+<td>Independently</td>
+<td>No earlier-tree result</td>
+<td>Average tree predictions</td>
+<td>Reduce the variance of an unstable tree</td>
+</tr>
+<tr class="even">
+<td>AdaBoost</td>
+<td>Sequentially, with changing sample weights</td>
+<td>Samples earlier stumps misclassify</td>
+<td>Weighted vote</td>
+<td>Put more attention on hard classification cases</td>
+</tr>
+<tr class="odd">
+<td>Gradient boosting</td>
+<td>Sequentially</td>
+<td>The current numerical residual</td>
+<td>Sum of shrunken corrections</td>
+<td>Reduce the remaining prediction error stage by stage</td>
+</tr>
+</tbody>
+</table>
+<p>So gradient boosting is sequential like AdaBoost, but it is <strong>not</strong> bootstrap aggregation and it is <strong>not</strong> sample reweighting. Its next tree is trained on what the current model still gets wrong.</p>
+<div id="a9d9006a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-19T23:26:05.067656Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-19T23:26:05.067410Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-19T23:26:07.154732Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-19T23:26:07.154425Z&quot;}}" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> GradientBoostingRegressor</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error, r2_score</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeRegressor, plot_tree</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>sns.set_theme(style<span class="op">=</span><span class="st">"whitegrid"</span>, context<span class="op">=</span><span class="st">"notebook"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="set-up-one-regression-task" class="level2">
+<h2 class="anchored" data-anchor-id="set-up-one-regression-task">1. Set up one regression task</h2>
+<p>We predict measured NOx concentration using three familiar gas-turbine measurements: ambient temperature (AT), compressor discharge pressure (CDP), and turbine energy yield (TEY). We keep one fixed 70/30 train/test split throughout this notebook. The test observations are never used to fit a correction tree.</p>
+<div id="43d3dedc" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-19T23:26:07.156776Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-19T23:26:07.156550Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-19T23:26:07.187919Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-19T23:26:07.187652Z&quot;}}" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>FEATURES <span class="op">=</span> [<span class="st">"AT"</span>, <span class="st">"CDP"</span>, <span class="st">"TEY"</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>TARGET <span class="op">=</span> <span class="st">"NOX"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>RANDOM_STATE <span class="op">=</span> <span class="dv">4520</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>data_candidates <span class="op">=</span> [</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"../data/gas-turbine-course.csv"</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"site/data/gas-turbine-course.csv"</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">"gas-turbine-course.csv"</span>),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> <span class="bu">next</span>(</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    (path <span class="cf">for</span> path <span class="kw">in</span> data_candidates <span class="cf">if</span> path.exists()),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    data_candidates[<span class="op">-</span><span class="dv">1</span>],</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(filepath_or_buffer<span class="op">=</span>data_path)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>model_data <span class="op">=</span> data[FEATURES <span class="op">+</span> [TARGET]].dropna().copy()</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    model_data[FEATURES],</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    model_data[TARGET],</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    test_size<span class="op">=</span><span class="fl">0.30</span>,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span>RANDOM_STATE,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training observations: </span><span class="sc">{</span><span class="bu">len</span>(X_train)<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test observations: </span><span class="sc">{</span><span class="bu">len</span>(X_test)<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training mean NOx: </span><span class="sc">{</span>y_train<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss"> mg/m³"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Training observations: 25,713
+Test observations: 11,020
+Training mean NOx: 65.28 mg/m³</code></pre>
+</div>
+</div>
+</section>
+<section id="start-from-one-simple-forecast" class="level2">
+<h2 class="anchored" data-anchor-id="start-from-one-simple-forecast">2. Start from one simple forecast</h2>
+<p>Before fitting any tree, let us predict the same value for every training observation: the average training NOx. It is intentionally crude, but it gives the first correction tree a clear place to start.</p>
+<p>For training observation <span class="math inline">\(i\)</span>, the remaining error is its <strong>residual</strong>:</p>
+<p><span class="math display">\[
+r_i = y_i - \hat{y}_i.
+\]</span></p>
+<p>A positive residual means that the current forecast is too low; a negative residual means it is too high. The table below shows two actual training observations. A correction tree will receive every observation’s operating features together with a residual like this one, then look for regions that need similar signed corrections.</p>
+<div id="a6f6f362" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-19T23:26:07.189630Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-19T23:26:07.189529Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-19T23:26:07.233527Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-19T23:26:07.233296Z&quot;}}" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> residuals(<span class="op">*</span>, targets: np.ndarray, predictions: np.ndarray) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute observed-minus-predicted residuals.</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">        targets: Measured target values.</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">        predictions: Current model predictions.</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">        One residual per observation.</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> targets <span class="op">-</span> predictions</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>train_targets <span class="op">=</span> y_train.to_numpy(dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>test_targets <span class="op">=</span> y_test.to_numpy(dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>baseline_prediction <span class="op">=</span> <span class="bu">float</span>(train_targets.mean())</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>baseline_train_predictions <span class="op">=</span> np.full(</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    shape<span class="op">=</span><span class="bu">len</span>(X_train),</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    fill_value<span class="op">=</span>baseline_prediction,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    dtype<span class="op">=</span><span class="bu">float</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>baseline_test_predictions <span class="op">=</span> np.full(</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    shape<span class="op">=</span><span class="bu">len</span>(X_test),</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    fill_value<span class="op">=</span>baseline_prediction,</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    dtype<span class="op">=</span><span class="bu">float</span>,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>baseline_residuals <span class="op">=</span> residuals(</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>train_targets,</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    predictions<span class="op">=</span>baseline_train_predictions,</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Select one representative positive and negative residual for display.</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>representative_residuals <span class="op">=</span> (<span class="fl">12.5</span>, <span class="op">-</span><span class="fl">10.0</span>)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>example_train_positions <span class="op">=</span> [</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    <span class="bu">int</span>(np.argmin(np.<span class="bu">abs</span>(baseline_residuals <span class="op">-</span> representative_residual)))</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> representative_residual <span class="kw">in</span> representative_residuals</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>residual_examples <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Example"</span>: [<span class="st">"Forecast too low"</span>, <span class="st">"Forecast too high"</span>],</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>        <span class="st">"AT (°C)"</span>: X_train.iloc[example_train_positions][<span class="st">"AT"</span>].to_numpy(),</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>        <span class="st">"CDP"</span>: X_train.iloc[example_train_positions][<span class="st">"CDP"</span>].to_numpy(),</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>        <span class="st">"TEY"</span>: X_train.iloc[example_train_positions][<span class="st">"TEY"</span>].to_numpy(),</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Measured NOx (mg/m³)"</span>: train_targets[example_train_positions],</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Forecast (mg/m³)"</span>: baseline_train_predictions[example_train_positions],</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Residual (mg/m³)"</span>: baseline_residuals[example_train_positions],</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Initial forecast for every training row: </span><span class="sc">{</span>baseline_prediction<span class="sc">:.2f}</span><span class="ss"> mg/m³"</span>)</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>residual_examples.style.hide(axis<span class="op">=</span><span class="st">"index"</span>).<span class="bu">format</span>(</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>        <span class="st">"AT (°C)"</span>: <span class="st">"</span><span class="sc">{:.2f}</span><span class="st">"</span>,</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>        <span class="st">"CDP"</span>: <span class="st">"</span><span class="sc">{:.2f}</span><span class="st">"</span>,</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>        <span class="st">"TEY"</span>: <span class="st">"</span><span class="sc">{:.2f}</span><span class="st">"</span>,</span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Measured NOx (mg/m³)"</span>: <span class="st">"</span><span class="sc">{:.2f}</span><span class="st">"</span>,</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Forecast (mg/m³)"</span>: <span class="st">"</span><span class="sc">{:.2f}</span><span class="st">"</span>,</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Residual (mg/m³)"</span>: <span class="st">"</span><span class="sc">{:+.2f}</span><span class="st">"</span>,</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Initial forecast for every training row: 65.28 mg/m³</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<style type="text/css">
+</style>
+
+<table id="T_2212d" class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th id="T_2212d_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">Example</th>
+<th id="T_2212d_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">AT (°C)</th>
+<th id="T_2212d_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">CDP</th>
+<th id="T_2212d_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">TEY</th>
+<th id="T_2212d_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">Measured NOx (mg/m³)</th>
+<th id="T_2212d_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">Forecast (mg/m³)</th>
+<th id="T_2212d_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">Residual (mg/m³)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td id="T_2212d_row0_col0" class="data row0 col0">Forecast too low</td>
+<td id="T_2212d_row0_col1" class="data row0 col1">8.97</td>
+<td id="T_2212d_row0_col2" class="data row0 col2">14.05</td>
+<td id="T_2212d_row0_col3" class="data row0 col3">163.29</td>
+<td id="T_2212d_row0_col4" class="data row0 col4">77.78</td>
+<td id="T_2212d_row0_col5" class="data row0 col5">65.28</td>
+<td id="T_2212d_row0_col6" class="data row0 col6">+12.50</td>
+</tr>
+<tr class="even">
+<td id="T_2212d_row1_col0" class="data row1 col0">Forecast too high</td>
+<td id="T_2212d_row1_col1" class="data row1 col1">29.59</td>
+<td id="T_2212d_row1_col2" class="data row1 col2">13.08</td>
+<td id="T_2212d_row1_col3" class="data row1 col3">145.17</td>
+<td id="T_2212d_row1_col4" class="data row1 col4">55.28</td>
+<td id="T_2212d_row1_col5" class="data row1 col5">65.28</td>
+<td id="T_2212d_row1_col6" class="data row1 col6">-10.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="fit-the-first-correction-tree" class="level2">
+<h2 class="anchored" data-anchor-id="fit-the-first-correction-tree">3. Fit the first correction tree</h2>
+<p>The first tree is not asked to predict NOx itself. Its training target is the current residual, so its leaf values say how much the baseline prediction should move within each region.</p>
+<p>At a boosting stage, the base learner is a <strong>regression tree</strong>. Its output is a continuous correction, in NOx units, rather than a class label or a probability. Here, the tree is trained to approximate the current residuals.</p>
+<p>A depth-1 tree stump would be valid, just as it was for AdaBoost. We use a depth-2 tree here so one correction can distinguish up to four simple operating regions; the depth is a hyperparameter, not a rule. Each terminal-region value shown below is the unshrunk tree output <span class="math inline">\(g_t(\mathbf{x})\)</span>. The learning rate is applied to that output in the next step.</p>
+<p>For this first stage, we fit a <strong>DecisionTreeRegressor</strong> directly. Later, we will use <strong>GradientBoostingRegressor</strong> to automate the repeated correction process.</p>
+<div id="c9e7cd31" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-19T23:26:07.235591Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-19T23:26:07.235441Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-19T23:26:07.376513Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-19T23:26:07.376231Z&quot;}}" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>LEARNING_RATE <span class="op">=</span> <span class="fl">0.10</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>MAX_DEPTH <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>MIN_SAMPLES_LEAF <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>first_correction_tree <span class="op">=</span> DecisionTreeRegressor(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    max_depth<span class="op">=</span>MAX_DEPTH,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    min_samples_leaf<span class="op">=</span>MIN_SAMPLES_LEAF,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span>RANDOM_STATE,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>first_correction_tree.fit(X<span class="op">=</span>X_train, y<span class="op">=</span>baseline_residuals)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">6</span>))</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>plot_tree(</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    decision_tree<span class="op">=</span>first_correction_tree,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    feature_names<span class="op">=</span>FEATURES,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    filled<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    rounded<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    impurity<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    precision<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>ax,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"First depth-2 regression tree: leaf values are NOx corrections (mg/m³)"</span>)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="08-gradient-boosting_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="add-the-trees-correction-to-the-current-prediction" class="level2">
+<h2 class="anchored" data-anchor-id="add-the-trees-correction-to-the-current-prediction">4. Add the tree’s correction to the current prediction</h2>
+<p>Let <span class="math inline">\(g_t(\mathbf{x})\)</span> be the correction supplied by tree <span class="math inline">\(t\)</span>. The update is</p>
+<p><span class="math display">\[
+\hat{y}_t(\mathbf{x})
+= \hat{y}_{t-1}(\mathbf{x})
++ \eta g_t(\mathbf{x}),
+\]</span></p>
+<p>where <span class="math inline">\(\eta\)</span> is the learning rate. It shrinks each correction so one tree does not change the model too aggressively. Here, <span class="math inline">\(\eta = 0.10\)</span>.</p>
+<p>For a genuinely new observation, its measured NOx value is unknown. The tree selects <span class="math inline">\(g_t(\mathbf{x})\)</span> using only its features. In the worked held-out example below, we reveal the measured NOx <strong>afterward</strong> so that we can compare the evolving prediction with the ground truth.</p>
+<div id="9d949a07" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-19T23:26:07.378115Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-19T23:26:07.378024Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-19T23:26:07.384777Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-19T23:26:07.384494Z&quot;}}" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>first_tree_correction <span class="op">=</span> first_correction_tree.predict(X<span class="op">=</span>X_train)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>manual_first_predictions <span class="op">=</span> (</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    baseline_train_predictions <span class="op">+</span> LEARNING_RATE <span class="op">*</span> first_tree_correction</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Training MSE before / after the first correction: "</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>mean_squared_error(y_true<span class="op">=</span>train_targets, y_pred<span class="op">=</span>baseline_train_predictions)<span class="sc">:.2f}</span><span class="ss">"</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">" / "</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>mean_squared_error(y_true<span class="op">=</span>train_targets, y_pred<span class="op">=</span>manual_first_predictions)<span class="sc">:.2f}</span><span class="ss">"</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>EXAMPLE_TEST_POSITION <span class="op">=</span> <span class="dv">133</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>example_features <span class="op">=</span> X_test.iloc[[EXAMPLE_TEST_POSITION]]</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>example_target <span class="op">=</span> <span class="bu">float</span>(test_targets[EXAMPLE_TEST_POSITION])</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>example_prediction_before <span class="op">=</span> <span class="bu">float</span>(baseline_test_predictions[EXAMPLE_TEST_POSITION])</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>example_residual_before <span class="op">=</span> example_target <span class="op">-</span> example_prediction_before</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>example_tree_correction <span class="op">=</span> <span class="bu">float</span>(</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    first_correction_tree.predict(X<span class="op">=</span>example_features)[<span class="dv">0</span>]</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>example_prediction_after <span class="op">=</span> (</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    example_prediction_before <span class="op">+</span> LEARNING_RATE <span class="op">*</span> example_tree_correction</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>example_update <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Observed NOx (post-hoc, mg/m³)"</span>: [example_target],</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Prediction before (mg/m³)"</span>: [example_prediction_before],</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Post-hoc error before (mg/m³)"</span>: [example_residual_before],</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Tree correction g₁(x) (mg/m³)"</span>: [example_tree_correction],</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Prediction after (mg/m³)"</span>: [example_prediction_after],</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>example_update.style.<span class="bu">format</span>(</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Observed NOx (post-hoc, mg/m³)"</span>: <span class="st">"</span><span class="sc">{:.2f}</span><span class="st">"</span>,</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Prediction before (mg/m³)"</span>: <span class="st">"</span><span class="sc">{:.2f}</span><span class="st">"</span>,</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Post-hoc error before (mg/m³)"</span>: <span class="st">"</span><span class="sc">{:+.2f}</span><span class="st">"</span>,</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Tree correction g₁(x) (mg/m³)"</span>: <span class="st">"</span><span class="sc">{:+.2f}</span><span class="st">"</span>,</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Prediction after (mg/m³)"</span>: <span class="st">"</span><span class="sc">{:.2f}</span><span class="st">"</span>,</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Training MSE before / after the first correction: 135.56 / 125.90</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<style type="text/css">
+</style>
+
+<table id="T_9b45c" class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
+<th id="T_9b45c_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">Observed NOx (post-hoc, mg/m³)</th>
+<th id="T_9b45c_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Prediction before (mg/m³)</th>
+<th id="T_9b45c_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">Post-hoc error before (mg/m³)</th>
+<th id="T_9b45c_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">Tree correction g₁(x) (mg/m³)</th>
+<th id="T_9b45c_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">Prediction after (mg/m³)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th id="T_9b45c_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">0</th>
+<td id="T_9b45c_row0_col0" class="data row0 col0">77.91</td>
+<td id="T_9b45c_row0_col1" class="data row0 col1">65.28</td>
+<td id="T_9b45c_row0_col2" class="data row0 col2">+12.63</td>
+<td id="T_9b45c_row0_col3" class="data row0 col3">+4.34</td>
+<td id="T_9b45c_row0_col4" class="data row0 col4">65.71</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="repeat-the-correction-process" class="level2">
+<h2 class="anchored" data-anchor-id="repeat-the-correction-process">5. Repeat the correction process</h2>
+<p>We have now carried out one boosting step by hand: fit a tree to the current residuals, shrink its correction, and add it to the forecast. Next, <strong>GradientBoostingRegressor</strong> automates 60 repetitions of that same loop. At every stage, the next tree sees the residuals left by all earlier trees and adds another shrunk correction. We evaluate every intermediate model on the same test data.</p>
+<div id="2551a7ef" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-19T23:26:07.386052Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-19T23:26:07.385963Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-19T23:26:08.297859Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-19T23:26:08.297443Z&quot;}}" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> staged_metrics(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    model: GradientBoostingRegressor,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    training_features: pd.DataFrame,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    training_targets: pd.Series,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    test_features: pd.DataFrame,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    test_targets: pd.Series,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> pd.DataFrame:</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Measure regression performance after each boosting stage.</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">        model: A fitted gradient-boosting regressor.</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">        training_features: Feature table used to fit the model.</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">        training_targets: Continuous training targets.</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">        test_features: Held-out feature table.</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">        test_targets: Continuous held-out targets.</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">        One row per boosting stage with training/test MSE and test R-squared.</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> []</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    staged_training_predictions <span class="op">=</span> model.staged_predict(X<span class="op">=</span>training_features)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    staged_test_predictions <span class="op">=</span> model.staged_predict(X<span class="op">=</span>test_features)</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> stage, (training_prediction, test_prediction) <span class="kw">in</span> <span class="bu">enumerate</span>(</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">zip</span>(</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>            staged_training_predictions,</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>            staged_test_predictions,</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>            strict<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        start<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>        rows.append(</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>            {</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Stage"</span>: stage,</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Training MSE"</span>: mean_squared_error(</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>                    y_true<span class="op">=</span>training_targets,</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>                    y_pred<span class="op">=</span>training_prediction,</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>                ),</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Test MSE"</span>: mean_squared_error(</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>                    y_true<span class="op">=</span>test_targets,</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>                    y_pred<span class="op">=</span>test_prediction,</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>                ),</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Test R²"</span>: r2_score(</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>                    y_true<span class="op">=</span>test_targets,</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>                    y_pred<span class="op">=</span>test_prediction,</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>                ),</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.DataFrame(rows)</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>boosted_model <span class="op">=</span> GradientBoostingRegressor(</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>    loss<span class="op">=</span><span class="st">"squared_error"</span>,</span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>    n_estimators<span class="op">=</span><span class="dv">60</span>,</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>    learning_rate<span class="op">=</span>LEARNING_RATE,</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>    max_depth<span class="op">=</span>MAX_DEPTH,</span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>    min_samples_leaf<span class="op">=</span>MIN_SAMPLES_LEAF,</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span>RANDOM_STATE,</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>boosted_model.fit(X<span class="op">=</span>X_train, y<span class="op">=</span>y_train)</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> staged_metrics(</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>boosted_model,</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>    training_features<span class="op">=</span>X_train,</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>    training_targets<span class="op">=</span>y_train,</span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>    test_features<span class="op">=</span>X_test,</span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>    test_targets<span class="op">=</span>y_test,</span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>history.loc[</span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>    history[<span class="st">"Stage"</span>].isin([<span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">40</span>, <span class="dv">60</span>]),</span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>].reset_index(drop<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Stage</th>
+<th data-quarto-table-cell-role="th">Training MSE</th>
+<th data-quarto-table-cell-role="th">Test MSE</th>
+<th data-quarto-table-cell-role="th">Test R²</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>1</td>
+<td>125.902271</td>
+<td>128.289323</td>
+<td>0.072358</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>10</td>
+<td>83.549990</td>
+<td>84.500501</td>
+<td>0.388989</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>20</td>
+<td>68.484672</td>
+<td>68.884370</td>
+<td>0.501907</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>40</td>
+<td>60.479339</td>
+<td>61.029373</td>
+<td>0.558705</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>60</td>
+<td>56.917286</td>
+<td>57.511010</td>
+<td>0.584146</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="e3d5e82a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-10-19T23:26:08.299538Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-10-19T23:26:08.299406Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-10-19T23:26:08.508545Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-10-19T23:26:08.508278Z&quot;}}" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>figure, axes <span class="op">=</span> plt.subplots(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    ncols<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="fl">4.5</span>),</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    constrained_layout<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>sns.lineplot(</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>history,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">"Stage"</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">"Training MSE"</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>axes[<span class="dv">0</span>],</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"Training"</span>,</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"tab:blue"</span>,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>sns.lineplot(</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>history,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">"Stage"</span>,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">"Test MSE"</span>,</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>axes[<span class="dv">0</span>],</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"Test"</span>,</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"tab:orange"</span>,</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">"Training and held-out squared error across stages"</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"Mean squared error"</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>sns.lineplot(</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>history,</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">"Stage"</span>,</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">"Test R²"</span>,</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>axes[<span class="dv">1</span>],</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"tab:green"</span>,</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].axhline(y<span class="op">=</span><span class="dv">0</span>, color<span class="op">=</span><span class="st">"0.4"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">"Held-out R² across stages"</span>)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">"Test R²"</span>)</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="08-gradient-boosting_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="the-main-knobs-and-takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="the-main-knobs-and-takeaways">6. The main knobs and takeaways</h2>
+<ul>
+<li><strong>Learning rate <span class="math inline">\(\eta\)</span></strong> controls the size of each correction. A smaller value usually requires more trees.</li>
+<li><strong>Number of trees</strong> controls how long the sequential process runs. We use held-out performance to decide when additional corrections stop helping.</li>
+<li><strong>Tree depth and minimum leaf size</strong> control the flexibility of each correction tree. Deeper trees can learn more complex corrections, but they also make overfitting easier.</li>
+</ul>
+<p>A shallow tree can identify one broad, simple error pattern. The next tree is then free to explain a different pattern left behind. Many small, learning-rate-shrunk corrections can represent a complex response while we monitor held-out performance and stop before overfitting.</p>
+<p>AdaBoost and gradient boosting are both sequential ensembles, but their training mechanisms differ:</p>
+<ul>
+<li><strong>AdaBoost:</strong> reweights samples that earlier classifier stumps misclassify, then takes a weighted vote.</li>
+<li><strong>Gradient boosting:</strong> fits regression trees to current residuals (more generally, negative loss gradients) and adds their continuous corrections.</li>
+</ul>
+</section>
+<section id="optional-why-gradient-boosting" class="level2">
+<h2 class="anchored" data-anchor-id="optional-why-gradient-boosting">7. (Optional) Why <em>gradient</em> boosting?</h2>
+<p>The residual-correction procedure above is already enough to use gradient boosting. The word <em>gradient</em> explains why residuals are the right target for squared-error regression—and how the same recipe extends to other losses.</p>
+<p>Let <span class="math inline">\(F_t(\mathbf{x})\)</span> denote the <strong>entire ensemble prediction function</strong> after <span class="math inline">\(t\)</span> trees, not one individual tree. Let <span class="math inline">\(g_t(\mathbf{x})\)</span> denote the new regression tree added at stage <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[
+F_t(\mathbf{x})
+= F_{t-1}(\mathbf{x}) + \eta g_t(\mathbf{x}).
+\]</span></p>
+<p>Here, <span class="math inline">\(\eta\)</span> is the learning rate. The question is: what should the new tree <span class="math inline">\(g_t\)</span> try to predict?</p>
+<section id="from-parameter-space-gradient-descent-to-function-space-gradient-descent" class="level3">
+<h3 class="anchored" data-anchor-id="from-parameter-space-gradient-descent-to-function-space-gradient-descent">1. From parameter-space gradient descent to function-space gradient descent</h3>
+<p>For a linear model, ordinary gradient descent updates a fixed vector of parameters:</p>
+<p><span class="math display">\[
+\boldsymbol{\theta}_t
+= \boldsymbol{\theta}_{t-1}
+- \eta\,\nabla_{\boldsymbol{\theta}}
+\mathcal{L}(\boldsymbol{\theta}_{t-1}).
+\]</span></p>
+<p>Gradient boosting instead updates the prediction function <span class="math inline">\(F\)</span>. On the training data, that function can be represented by the vector of its current predictions:</p>
+<p><span class="math display">\[
+\mathbf{f}
+= \begin{bmatrix}
+F(\mathbf{x}_1) \\
+F(\mathbf{x}_2) \\
+\vdots \\
+F(\mathbf{x}_n)
+\end{bmatrix}.
+\]</span></p>
+<p>Thus, instead of first asking how each parameter should change, we ask how each current training prediction should change. A regression tree turns those desired, observation-level changes into feature-based rules that can also be applied to a new observation.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Ordinary gradient descent</th>
+<th>Gradient boosting</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Update parameters <span class="math inline">\(\boldsymbol{\theta}\)</span></td>
+<td>Update the prediction function <span class="math inline">\(F\)</span></td>
+</tr>
+<tr class="even">
+<td>Take <span class="math inline">\(-\nabla_{\boldsymbol{\theta}}\mathcal{L}\)</span></td>
+<td>Find a tree-shaped approximation to <span class="math inline">\(-\nabla_F\mathcal{L}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Keep the same model form</td>
+<td>Add one new regression tree</td>
+</tr>
+<tr class="even">
+<td>Final model is one parameterized equation</td>
+<td>Final model is a sum of trees</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="squared-error-regression-the-negative-gradient-is-the-residual" class="level3">
+<h3 class="anchored" data-anchor-id="squared-error-regression-the-negative-gradient-is-the-residual">2. Squared-error regression: the negative gradient is the residual</h3>
+<p>For the mean squared-error objective, written in terms of the prediction function,</p>
+<p><span class="math display">\[
+\mathcal{L}_{\mathrm{MSE}}(F)
+= \frac{1}{n}\sum_{i=1}^{n}
+\left[y_i - F(\mathbf{x}_i)\right]^2.
+\]</span></p>
+<p>The derivative is taken with respect to the function’s value at a particular training input, <span class="math inline">\(F(\mathbf{x}_i)\)</span>:</p>
+<p><span class="math display">\[
+-\frac{\partial \mathcal{L}_{\mathrm{MSE}}(F)}
+{\partial F(\mathbf{x}_i)}
+= \frac{2}{n}\left[y_i - F(\mathbf{x}_i)\right].
+\]</span></p>
+<p>At stage <span class="math inline">\(t\)</span>, define the current residual as</p>
+<p><span class="math display">\[
+r_i^{(t)}
+= y_i - F_{t-1}(\mathbf{x}_i).
+\]</span></p>
+<p>Equivalently, the negative gradient over all <span class="math inline">\(n\)</span> current training predictions is</p>
+<p><span class="math display">\[
+-\nabla_{\mathbf{f}}\mathcal{L}_{\mathrm{MSE}}(F)
+= \frac{2}{n}
+\begin{bmatrix}
+r_1^{(t)} \\
+r_2^{(t)} \\
+\vdots \\
+r_n^{(t)}
+\end{bmatrix}.
+\]</span></p>
+<p>Therefore, the residual vector points in exactly the same direction as the negative gradient; the positive constant <span class="math inline">\(2/n\)</span> only changes its scale and can be absorbed into the learning rate. The next tree is fitted to these residuals:</p>
+<p><span class="math display">\[
+g_t
+= \operatorname*{arg\,min}_{g\in\mathcal{G}}
+\sum_{i=1}^{n}
+\left[r_i^{(t)} - g(\mathbf{x}_i)\right]^2,
+\]</span></p>
+<p>where <span class="math inline">\(\mathcal{G}\)</span> is the family of allowed regression trees. The tree is an approximation to the unrestricted, observation-by-observation negative gradient because it cannot prescribe an independent change for every training observation. Instead, it identifies feature regions that need similar corrections.</p>
+</section>
+<section id="binary-classification-binary-cross-entropy-gives-a-different-correction" class="level3">
+<h3 class="anchored" data-anchor-id="binary-classification-binary-cross-entropy-gives-a-different-correction">3. Binary classification: binary cross-entropy gives a different correction</h3>
+<p>For binary classification, gradient boosting still adds regression-tree corrections. We maintain an unbounded <strong>score</strong> <span class="math inline">\(F(\mathbf{x})\)</span>, then convert it to a probability with the sigmoid function:</p>
+<p><span class="math display">\[
+p_i = \sigma\!\left(F(\mathbf{x}_i)\right)
+= \frac{1}{1 + \exp\!\left[-F(\mathbf{x}_i)\right]}.
+\]</span></p>
+<p>Using binary cross-entropy,</p>
+<p><span class="math display">\[
+\mathcal{L}_{\mathrm{BCE}}(F)
+= -\frac{1}{n}\sum_{i=1}^{n}
+\left[y_i\log(p_i) + (1-y_i)\log(1-p_i)\right],
+\qquad y_i\in\{0,1\},
+\]</span></p>
+<p>the negative gradient with respect to the <strong>score</strong> is</p>
+<p><span class="math display">\[
+-\frac{\partial \mathcal{L}_{\mathrm{BCE}}(F)}
+{\partial F(\mathbf{x}_i)}
+= \frac{1}{n}\left(y_i-p_i\right).
+\]</span></p>
+<p>Thus the next regression tree is fitted to the continuous <strong>pseudo-residual</strong></p>
+<p><span class="math display">\[
+q_i^{(t)}
+= y_i - p_i^{(t-1)},
+\qquad
+p_i^{(t-1)}
+= \sigma\!\left(F_{t-1}(\mathbf{x}_i)\right).
+\]</span></p>
+<p>The sign of <span class="math inline">\(q_i^{(t)}\)</span> is fixed by the label: it is positive when <span class="math inline">\(y_i=1\)</span> and negative when <span class="math inline">\(y_i=0\)</span>. Its <strong>magnitude</strong> is the useful information. For a positive-label sample, <span class="math inline">\(p_i^{(t-1)}\approx 0\)</span> gives <span class="math inline">\(q_i^{(t)}\approx 1\)</span> and calls for a large upward correction, whereas <span class="math inline">\(p_i^{(t-1)}\approx 1\)</span> gives <span class="math inline">\(q_i^{(t)}\approx 0\)</span>. Likewise, a negative-label sample with <span class="math inline">\(p_i^{(t-1)}\approx 1\)</span> has <span class="math inline">\(q_i^{(t)}\approx -1\)</span> and calls for a large downward correction; when <span class="math inline">\(p_i^{(t-1)}\approx 0\)</span>, its correction is near zero. The update remains</p>
+<p><span class="math display">\[
+F_t(\mathbf{x})
+= F_{t-1}(\mathbf{x}) + \eta g_t(\mathbf{x}),
+\qquad
+p_t(\mathbf{x})
+= \sigma\!\left(F_t(\mathbf{x})\right).
+\]</span></p>
+<p>The tree changes the raw score, not the probability directly. In practical implementations, the tree’s terminal values may receive an additional loss-based optimization; the central first-order idea remains the same: each new tree approximates the negative gradient of the current loss.</p>
+<p><a href="../tree-based/08-gradient-boosting-explorer.html">Open the gradient-boosting explorer</a><br>
+<a href="../tree-based/index.html">Return to Tree-based models</a></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/changyaochen\.github\.io\/MECE4520\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>MECE 4520 · Data Science for Mechanical Systems</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Fall 2026</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

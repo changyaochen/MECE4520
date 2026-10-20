@@ -340,6 +340,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#bagging" id="toc-bagging">3. Bagging</a></li>
   <li><a href="#random-forests" id="toc-random-forests">4. Random forests</a></li>
   <li><a href="#adaboost" id="toc-adaboost">5. AdaBoost</a></li>
+  <li><a href="#gradient-boosting" id="toc-gradient-boosting">6. Gradient boosting</a></li>
   </ul>
 </nav>
 <p>Tree-based models make predictions by repeatedly dividing the feature space into smaller regions. Within each final region, a regression tree predicts an average response and a classification tree predicts a class frequency.</p>
@@ -381,6 +382,12 @@ ul.task-list li input[type="checkbox"] {
 <p><a href="../tree-based/07-adaboost.html">View the notebook</a></p>
 <p>Use fitted stumps to see how each round shifts observation weight, contributes a weighted vote for one new observation, and changes held-out AUC.</p>
 <p><a href="../tree-based/07-adaboost-explorer.html">Explore AdaBoost</a></p>
+</section>
+<section id="gradient-boosting" class="level2">
+<h2 class="anchored" data-anchor-id="gradient-boosting">6. Gradient boosting</h2>
+<p>See how gradient boosting starts with one mean NOx prediction, then adds small regression trees that correct the current model’s residuals. Unlike AdaBoost, it does not reweight observations: each tree adds a continuous correction to the current prediction.</p>
+<p><a href="../tree-based/08-gradient-boosting.html">View the notebook</a></p>
+<p><a href="../tree-based/08-gradient-boosting-explorer.html">Explore gradient boosting</a></p>
 
 
 </section>

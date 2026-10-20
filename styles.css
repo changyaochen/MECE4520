@@ -2186,6 +2186,331 @@
   background: #445058;
 }
 
+/* Gradient-boosting explorer. */
+.bagging-step.gradient-boosting-baseline-step {
+  border-color: #b9dcd9;
+  background: #f1faf9;
+}
+
+.bagging-step.gradient-boosting-tree-step {
+  border-color: #c5dce8;
+  background: #f4f9fc;
+}
+
+.gradient-boosting-baseline-step .bagging-step-number,
+.gradient-boosting-tree-step .bagging-step-number {
+  background: #2b7a78;
+}
+
+.gradient-boosting-baseline-card {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.gradient-boosting-metric {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.8rem 0.9rem;
+  border-left: 4px solid #2b7a78;
+  background: #e9f5f3;
+}
+
+.gradient-boosting-metric span,
+.gradient-boosting-metric small {
+  color: #5d6a72;
+}
+
+.gradient-boosting-metric span {
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.gradient-boosting-metric strong {
+  color: #1d5e5c;
+  font-size: 1.08rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.gradient-boosting-tree-card {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.9fr) minmax(360px, 1.2fr);
+  gap: 1rem;
+}
+
+.gradient-boosting-residuals,
+.gradient-boosting-tree,
+.gradient-boosting-observation,
+.gradient-boosting-score-update {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.9rem 1rem;
+  border-left: 4px solid #2b7a78;
+  background: #f2f8f8;
+}
+
+.gradient-boosting-tree {
+  border-left-color: #457eaa;
+  background: #f1f7fb;
+}
+
+.gradient-boosting-residuals > strong,
+.gradient-boosting-tree > strong,
+.gradient-boosting-observation > strong,
+.gradient-boosting-score-update > strong {
+  color: #34454d;
+}
+
+.gradient-boosting-residuals p,
+.gradient-boosting-tree p,
+.gradient-boosting-score-update p {
+  margin: 0;
+  color: #5d6a72;
+}
+
+.gradient-boosting-residual-metrics,
+.gradient-boosting-update-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.gradient-boosting-update-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gradient-boosting-residual-metrics .gradient-boosting-metric,
+.gradient-boosting-update-metrics .gradient-boosting-metric {
+  padding: 0.65rem 0.7rem;
+  border-left-width: 3px;
+  background: #fff;
+}
+
+.gradient-boosting-residual-metrics .gradient-boosting-metric:nth-child(1) {
+  border-left-color: #287a51;
+}
+
+.gradient-boosting-residual-metrics .gradient-boosting-metric:nth-child(2) {
+  border-left-color: #b64a4a;
+}
+
+.gradient-boosting-leaves {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.gradient-boosting-leaf {
+  display: grid;
+  gap: 0.18rem;
+  min-height: 5.2rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #c7d9e4;
+  background: #fff;
+}
+
+.gradient-boosting-leaf span {
+  color: #4f6069;
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.gradient-boosting-leaf strong {
+  color: #245d81;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.gradient-boosting-leaf small {
+  color: #68777e;
+  font-size: 0.73rem;
+}
+
+.gradient-boosting-leaf-selected {
+  border: 2px solid #d77732;
+  background: #fff7f0;
+}
+
+.gradient-boosting-tree > small {
+  color: #5d6a72;
+}
+
+.gradient-boosting-update-card {
+  display: grid;
+  grid-template-columns: minmax(225px, 0.75fr) minmax(340px, 1.25fr);
+  gap: 1rem;
+}
+
+.gradient-boosting-observation {
+  border-left-color: #778891;
+  background: #f5f7f8;
+}
+
+.gradient-boosting-score-update {
+  background: #f2f8f8;
+}
+
+.gradient-boosting-equation {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #b9dcd9;
+  background: #fff;
+  color: #1d5e5c !important;
+  font-family: var(--bs-font-monospace, monospace);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.gradient-boosting-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.gradient-boosting-figure {
+  margin: 0;
+  padding: 0.9rem;
+  border: 1px solid #d5dfe3;
+  border-radius: 0.35rem;
+  background: #fff;
+}
+
+.gradient-boosting-figure figcaption {
+  margin-bottom: 0.45rem;
+  color: #34454d;
+  font-weight: 600;
+}
+
+.gradient-boosting-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.gradient-boosting-chart-axis {
+  stroke: #5d6a72;
+  stroke-width: 1.2;
+}
+
+.gradient-boosting-chart-grid {
+  stroke: #d8e1e5;
+  stroke-dasharray: 3 4;
+}
+
+.gradient-boosting-chart-tick,
+.gradient-boosting-chart-axis-title,
+.gradient-boosting-chart-label,
+.gradient-boosting-chart-value {
+  fill: #4c5961;
+  font-family: inherit;
+}
+
+.gradient-boosting-chart-tick {
+  font-size: 11px;
+}
+
+.gradient-boosting-chart-axis-title,
+.gradient-boosting-chart-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gradient-boosting-chart-value {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.quarto-dark .bagging-step.gradient-boosting-baseline-step {
+  border-color: #477d79;
+  background: #233532;
+}
+
+.quarto-dark .bagging-step.gradient-boosting-tree-step {
+  border-color: #52768b;
+  background: #25343d;
+}
+
+.quarto-dark .gradient-boosting-metric,
+.quarto-dark .gradient-boosting-residuals,
+.quarto-dark .gradient-boosting-score-update {
+  background: #263a39;
+}
+
+.quarto-dark .gradient-boosting-tree {
+  background: #26343c;
+}
+
+.quarto-dark .gradient-boosting-observation {
+  background: #2a3035;
+}
+
+.quarto-dark .gradient-boosting-metric span,
+.quarto-dark .gradient-boosting-metric small,
+.quarto-dark .gradient-boosting-residuals p,
+.quarto-dark .gradient-boosting-tree p,
+.quarto-dark .gradient-boosting-score-update p,
+.quarto-dark .gradient-boosting-tree > small,
+.quarto-dark .gradient-boosting-leaf span,
+.quarto-dark .gradient-boosting-leaf small {
+  color: #c8d1d6;
+}
+
+.quarto-dark .gradient-boosting-metric strong {
+  color: #a8e1dc;
+}
+
+.quarto-dark .gradient-boosting-residuals > strong,
+.quarto-dark .gradient-boosting-tree > strong,
+.quarto-dark .gradient-boosting-observation > strong,
+.quarto-dark .gradient-boosting-score-update > strong {
+  color: #e5ecef;
+}
+
+.quarto-dark .gradient-boosting-residual-metrics .gradient-boosting-metric,
+.quarto-dark .gradient-boosting-update-metrics .gradient-boosting-metric,
+.quarto-dark .gradient-boosting-leaf {
+  border-color: #56616a;
+  background: #1f2529;
+}
+
+.quarto-dark .gradient-boosting-leaf strong {
+  color: #a9d6f1;
+}
+
+.quarto-dark .gradient-boosting-leaf-selected {
+  border-color: #efa05e;
+  background: #3b3028;
+}
+
+.quarto-dark .gradient-boosting-equation {
+  border-color: #477d79;
+  background: #1f2529;
+  color: #a8e1dc !important;
+}
+
+.quarto-dark .gradient-boosting-figure {
+  border-color: #56616a;
+  background: #1f2529;
+}
+
+.quarto-dark .gradient-boosting-figure figcaption {
+  color: #e5ecef;
+}
+
+.quarto-dark .gradient-boosting-chart-axis {
+  stroke: #aebbc2;
+}
+
+.quarto-dark .gradient-boosting-chart-grid {
+  stroke: #445058;
+}
+
+.quarto-dark .gradient-boosting-chart-tick,
+.quarto-dark .gradient-boosting-chart-axis-title,
+.quarto-dark .gradient-boosting-chart-label,
+.quarto-dark .gradient-boosting-chart-value {
+  fill: #d5dde1;
+}
+
 /* Bagging explorer. */
 .bagging-explorer {
   margin: 1.5rem 0 2rem;
@@ -2794,6 +3119,10 @@
   .rf-plots {
     grid-template-columns: 1fr;
   }
+
+  .gradient-boosting-charts {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {
@@ -2802,7 +3131,12 @@
   .bagging-prediction-card,
   .adaboost-stump-card,
   .adaboost-weight-transition,
-  .adaboost-vote-card {
+  .adaboost-vote-card,
+  .gradient-boosting-baseline-card,
+  .gradient-boosting-tree-card,
+  .gradient-boosting-update-card,
+  .gradient-boosting-residual-metrics,
+  .gradient-boosting-update-metrics {
     grid-template-columns: 1fr;
   }
 

@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Explore gradient boosting – MECE 4520</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b626d73c4c936ccc3cb08be7d45d1df6.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d0e9dd6581773c2d153725aefe2da3c3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-90b0ccabdf50233fb893b00cd6e33405.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d0e9dd6581773c2d153725aefe2da3c3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">⚙️</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../foundations/index.html"> 
+<span class="menu-text">Foundations</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../regression/index.html"> 
+<span class="menu-text">Regression</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../evaluation/index.html"> 
+<span class="menu-text">Evaluation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../classification/index.html"> 
+<span class="menu-text">Classification</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../tree-based/index.html"> 
+<span class="menu-text">Tree-based</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content column-page" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Explore gradient boosting</h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-page">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Gradient boosting also builds an ensemble <strong>sequentially</strong>, but it takes a different route from AdaBoost. Here, we predict continuous NOx concentration from AT, CDP, and TEY. The model starts with one constant NOx prediction. Each new small <strong>regression tree</strong> then learns a continuous correction to the current prediction. With squared-error loss, the quantity it learns from is the ordinary residual <span class="math inline">\(r_i = y_i - \hat{y}_i\)</span>.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>What to watch
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Every stage uses the same training observations—there is no bootstrap sample and no observation-weight update. The new tree sees the current residuals: positive values mean the model underpredicts NOx, and negative values mean it overpredicts. Follow the tree’s correction for one held-out observation, then watch training and held-out MSE as stages are added.</p>
+</div>
+</div>
+<div id="gradient-boosting-explorer" class="bagging-explorer gradient-boosting-explorer" aria-label="Interactive gradient boosting explorer">
+  <div class="bagging-toolbar">
+    <div class="clt-buttons" aria-label="Gradient-boosting stage controls">
+      <button id="gradient-boosting-next-stage" type="button" class="regression-sampling-primary">Add next correction tree</button>
+      <button id="gradient-boosting-run-all" type="button">Run all stages</button>
+      <button id="gradient-boosting-reset" type="button">Reset</button>
+    </div>
+    <div class="bagging-progress" aria-live="polite">
+      <span>Correction trees fitted:</span>
+      <strong><output id="gradient-boosting-stage-count">1</output>/<span id="gradient-boosting-total-stage-count">60</span></strong>
+    </div>
+  </div>
+
+  <section class="bagging-step gradient-boosting-baseline-step" aria-labelledby="gradient-boosting-baseline-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">1</span>
+      <div>
+        <h2 id="gradient-boosting-baseline-heading" class="anchored">Start with one constant model</h2>
+        <p>Before any tree is fitted, every observation receives the average training NOx concentration.</p>
+      </div>
+    </div>
+    <div id="gradient-boosting-baseline-card" class="gradient-boosting-baseline-card" aria-label="Initial constant model"></div>
+  </section>
+
+  <section class="bagging-step gradient-boosting-tree-step" aria-labelledby="gradient-boosting-tree-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">2</span>
+      <div>
+        <h2 id="gradient-boosting-tree-heading" class="anchored">Fit a shallow regression tree to the residuals</h2>
+<p>For each training observation, <span class="math inline">\(r_i = y_i - \hat{y}_i\)</span>. A positive residual calls for a higher NOx prediction; a negative residual calls for a lower prediction.</p>
+      </div>
+    </div>
+    <div id="gradient-boosting-tree-card" class="gradient-boosting-tree-card" aria-label="Current residuals and regression-tree NOx corrections"></div>
+  </section>
+
+  <section class="bagging-step" aria-labelledby="gradient-boosting-update-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">3</span>
+      <div>
+        <h2 id="gradient-boosting-update-heading" class="anchored">Apply the correction to one new observation</h2>
+        <p>The tree uses only the observation's features to add a continuous adjustment to the current NOx prediction. Its measured NOx is shown afterward only for comparison.</p>
+      </div>
+    </div>
+    <div id="gradient-boosting-update-card" class="gradient-boosting-update-card" aria-label="Current NOx prediction update for one held-out observation"></div>
+  </section>
+
+  <section class="bagging-step" aria-labelledby="gradient-boosting-evaluation-heading">
+    <div class="bagging-step-heading">
+      <span class="bagging-step-number">4</span>
+      <div>
+        <h2 id="gradient-boosting-evaluation-heading" class="anchored">Evaluate the growing model</h2>
+        <p>Each intermediate ensemble is evaluated against the same held-out observations. Training MSE shows fit to the training data; held-out MSE tells us whether the corrections generalize.</p>
+      </div>
+    </div>
+    <div class="gradient-boosting-charts">
+      <figure class="gradient-boosting-figure figure">
+        <figcaption>Mean squared error as correction trees are added</figcaption>
+        <svg id="gradient-boosting-loss-chart" role="img" aria-label="Training and held-out mean squared error after each gradient-boosting stage"></svg>
+      </figure>
+      <figure class="gradient-boosting-figure figure">
+        <figcaption>Held-out R<sup>2</sup> as correction trees are added</figcaption>
+        <svg id="gradient-boosting-r2-chart" role="img" aria-label="Held-out R-squared after each gradient-boosting stage"></svg>
+      </figure>
+    </div>
+  </section>
+</div>
+
+The residual summaries, fitted-tree rules, prediction corrections, and evaluation
+metrics are precomputed from the gas-turbine data. The page reveals real fitted
+trees; it does not train models in the browser.
+
+<p style="margin-top: 1.5rem;"><a href="index.html">← Return to Tree-based models</a></p>
+
+<script src="../assets/gradient-boosting-explorer.js"></script>
+<script>
+(() => {
+  const root = document.getElementById("gradient-boosting-explorer");
+  const explorer = window.MECE4520GradientBoostingExplorer;
+  if (!root || !explorer) return;
+
+  const stageCountOutput = root.querySelector("#gradient-boosting-stage-count");
+  const totalStageCount = root.querySelector("#gradient-boosting-total-stage-count");
+  const nextButton = root.querySelector("#gradient-boosting-next-stage");
+  const runButton = root.querySelector("#gradient-boosting-run-all");
+  const resetButton = root.querySelector("#gradient-boosting-reset");
+  const baselineCard = root.querySelector("#gradient-boosting-baseline-card");
+  const treeCard = root.querySelector("#gradient-boosting-tree-card");
+  const updateCard = root.querySelector("#gradient-boosting-update-card");
+  const lossChart = root.querySelector("#gradient-boosting-loss-chart");
+  const r2Chart = root.querySelector("#gradient-boosting-r2-chart");
+  if (!stageCountOutput || !totalStageCount || !nextButton || !runButton || !resetButton
+      || !baselineCard || !treeCard || !updateCard || !lossChart || !r2Chart) return;
+
+  const colors = {
+    boost: "#2b7a78",
+    train: "#457eaa",
+    test: "#d77732",
+    positive: "#287a51",
+    negative: "#b64a4a",
+    grid: "#d8e1e5",
+    axis: "#5d6a72",
+    text: "#34454d"
+  };
+  const nStages = explorer.metadata.nStages;
+  let includedStages = 1;
+  let animationFrame = null;
+  let lastFrameTime = 0;
+  let isRunning = false;
+
+  totalStageCount.textContent = String(nStages);
+
+  function activeRound() {
+    return explorer.rounds[includedStages - 1];
+  }
+
+  function svgElement(name, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  }
+
+  function addText(svg, text, x, y, attributes = {}) {
+    const element = svgElement("text", Object.assign({ x, y }, attributes));
+    element.textContent = text;
+    svg.append(element);
+    return element;
+  }
+
+  function scale(value, domain, range) {
+    return range[0] + ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]);
+  }
+
+  function makeMetric(label, value, note) {
+    const metric = document.createElement("div");
+    metric.className = "gradient-boosting-metric";
+    const title = document.createElement("span");
+    const number = document.createElement("strong");
+    const description = document.createElement("small");
+    title.textContent = label;
+    number.textContent = value;
+    description.textContent = note;
+    metric.append(title, number, description);
+    return metric;
+  }
+
+  function formatR2(value) {
+    if (Math.abs(value) < 0.0005) return "≈ 0.000";
+    return value.toFixed(3);
+  }
+
+  function makeFeatureTable() {
+    const table = document.createElement("table");
+    table.className = "bagging-feature-table";
+    const head = document.createElement("thead");
+    const headRow = document.createElement("tr");
+    ["Feature", "Value"].forEach((label) => {
+      const cell = document.createElement("th");
+      cell.scope = "col";
+      cell.textContent = label;
+      headRow.append(cell);
+    });
+    head.append(headRow);
+    const body = document.createElement("tbody");
+    Object.entries(explorer.predictionObservation.features).forEach(([feature, value]) => {
+      const row = document.createElement("tr");
+      const featureCell = document.createElement("td");
+      const valueCell = document.createElement("td");
+      featureCell.textContent = feature;
+      valueCell.textContent = Number(value).toFixed(2);
+      row.append(featureCell, valueCell);
+      body.append(row);
+    });
+    table.append(head, body);
+    return table;
+  }
+
+  function renderBaseline() {
+    baselineCard.replaceChildren();
+    baselineCard.append(
+      makeMetric(
+        "Initial NOx prediction",
+        explorer.baseline.prediction.toFixed(2) + " mg/m³",
+        "the average NOx concentration in the training data"
+      ),
+      makeMetric(
+        "Held-out MSE",
+        explorer.baseline.testMse.toFixed(2),
+        "before any correction tree is added"
+      ),
+      makeMetric(
+        "Held-out R²",
+        formatR2(explorer.baseline.testR2),
+        "relative to the held-out mean baseline"
+      )
+    );
+  }
+
+  function renderTreeCard() {
+    const round = activeRound();
+    const residuals = document.createElement("div");
+    residuals.className = "gradient-boosting-residuals";
+    const residualTitle = document.createElement("strong");
+    residualTitle.textContent = "Current residuals on the training data";
+    const residualFormula = document.createElement("p");
+    residualFormula.innerHTML = "<code>r = y − ŷ</code> is the remaining error this tree is asked to correct: positive values mean the current prediction is too low; negative values mean it is too high.";
+    const residualMetrics = document.createElement("div");
+    residualMetrics.className = "gradient-boosting-residual-metrics";
+    residualMetrics.append(
+      makeMetric(
+        "Mean positive residual",
+        (round.residualSummary.positiveMean >= 0 ? "+" : "") + round.residualSummary.positiveMean.toFixed(3),
+        "these samples are underpredicted on average"
+      ),
+      makeMetric(
+        "Mean negative residual",
+        round.residualSummary.negativeMean.toFixed(3),
+        "these samples are overpredicted on average"
+      ),
+      makeMetric(
+        "Mean |r|",
+        round.residualSummary.meanAbsolute.toFixed(3),
+        "average magnitude still to correct (mg/m³)"
+      )
+    );
+    residuals.append(residualTitle, residualFormula, residualMetrics);
+
+    const tree = document.createElement("div");
+    tree.className = "gradient-boosting-tree";
+    const treeTitle = document.createElement("strong");
+    treeTitle.textContent = "Stage " + round.stage + ": regression-tree NOx corrections";
+    const rootRule = document.createElement("p");
+    rootRule.innerHTML = "<strong>Root rule:</strong> " + round.root.feature + " ≤ " + round.root.threshold.toFixed(3);
+    const leaves = document.createElement("div");
+    leaves.className = "gradient-boosting-leaves";
+    round.leaves.forEach((leaf) => {
+      const leafCard = document.createElement("div");
+      const selected = leaf.rule === round.fixedObservation.leafRule;
+      leafCard.className = "gradient-boosting-leaf" + (selected ? " gradient-boosting-leaf-selected" : "");
+      const rule = document.createElement("span");
+      const correction = document.createElement("strong");
+      const count = document.createElement("small");
+      rule.textContent = leaf.rule;
+      correction.textContent = (leaf.correction >= 0 ? "+" : "")
+        + leaf.correction.toFixed(2) + " mg/m³";
+      count.textContent = leaf.nSamples.toLocaleString() + " training samples";
+      leafCard.append(rule, correction, count);
+      leaves.append(leafCard);
+    });
+    const note = document.createElement("small");
+    note.textContent = "The highlighted leaf supplies the unshrunk tree output; the next step applies the learning rate.";
+    tree.append(treeTitle, rootRule, leaves, note);
+
+    treeCard.replaceChildren(residuals, tree);
+  }
+
+  function renderUpdateCard() {
+    const round = activeRound();
+    const observation = document.createElement("div");
+    observation.className = "gradient-boosting-observation";
+    const observationTitle = document.createElement("strong");
+    observationTitle.textContent = "Held-out observation ("
+      + explorer.metadata.nFeatures + " features; observed NOx: "
+      + explorer.predictionObservation.observedTarget.toFixed(2) + " mg/m³)";
+    const tableContainer = document.createElement("div");
+    tableContainer.className = "bagging-feature-table-wrap";
+    tableContainer.append(makeFeatureTable());
+    observation.append(observationTitle, tableContainer);
+
+    const update = document.createElement("div");
+    update.className = "gradient-boosting-score-update";
+    const updateTitle = document.createElement("strong");
+    updateTitle.textContent = "Stage " + round.stage + " prediction update";
+    const equation = document.createElement("p");
+    equation.className = "gradient-boosting-equation";
+    equation.textContent = "ŷ ← ŷ + " + explorer.metadata.learningRate.toFixed(2)
+      + " × (" + (round.fixedObservation.treeCorrection >= 0 ? "+" : "")
+      + round.fixedObservation.treeCorrection.toFixed(2) + " mg/m³)";
+    const metrics = document.createElement("div");
+    metrics.className = "gradient-boosting-update-metrics";
+    metrics.append(
+      makeMetric("Prediction before", round.fixedObservation.predictionBefore.toFixed(2) + " mg/m³", "current model prediction"),
+      makeMetric("Correction", (round.fixedObservation.predictionChange >= 0 ? "+" : "") + round.fixedObservation.predictionChange.toFixed(2) + " mg/m³", "learning rate × tree correction"),
+      makeMetric("Prediction after", round.fixedObservation.predictionAfter.toFixed(2) + " mg/m³", "new model prediction"),
+      makeMetric("Observed NOx", explorer.predictionObservation.observedTarget.toFixed(2) + " mg/m³", "shown only for comparison after prediction")
+    );
+    update.append(updateTitle, equation, metrics);
+    updateCard.replaceChildren(observation, update);
+  }
+
+  function addChartLabel(svg, text, x, y, attributes = {}) {
+    return addText(svg, text, x, y, Object.assign({
+      class: "gradient-boosting-chart-label",
+      "text-anchor": "middle"
+    }, attributes));
+  }
+
+  function drawLineChart(svg, configuration) {
+    const width = 720;
+    const height = 315;
+    const padding = { top: 20, right: 22, bottom: 47, left: 58 };
+    const values = configuration.fullSeries.flatMap((series) => series.values);
+    const rawMin = Math.min(...values);
+    const rawMax = Math.max(...values);
+    const span = Math.max(rawMax - rawMin, 0.03);
+    const domain = [rawMin - 0.08 * span, rawMax + 0.08 * span];
+    const x = (stage) => scale(stage, [0, nStages], [padding.left, width - padding.right]);
+    const y = (value) => scale(value, domain, [height - padding.bottom, padding.top]);
+    const visibleStages = Array.from({ length: includedStages + 1 }, (_, index) => index);
+
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    const title = svgElement("title", { id: svg.id + "-title" });
+    const description = svgElement("desc", { id: svg.id + "-description" });
+    title.textContent = configuration.title;
+    description.textContent = configuration.description;
+    svg.append(title, description);
+    svg.setAttribute("aria-labelledby", title.id + " " + description.id);
+
+    for (let index = 0; index <= 4; index += 1) {
+      const value = domain[0] + (index / 4) * (domain[1] - domain[0]);
+      const yPosition = y(value);
+      svg.append(svgElement("line", {
+        x1: padding.left,
+        y1: yPosition,
+        x2: width - padding.right,
+        y2: yPosition,
+        class: "gradient-boosting-chart-grid"
+      }));
+      addText(svg, value.toFixed(2), padding.left - 8, yPosition + 4, {
+        class: "gradient-boosting-chart-tick",
+        "text-anchor": "end"
+      });
+    }
+    [0, 10, 20, 30, 40, 50, 60].forEach((stage) => {
+      addText(svg, String(stage), x(stage), height - padding.bottom + 19, {
+        class: "gradient-boosting-chart-tick",
+        "text-anchor": "middle"
+      });
+    });
+    svg.append(
+      svgElement("line", { x1: padding.left, y1: padding.top, x2: padding.left, y2: height - padding.bottom, class: "gradient-boosting-chart-axis" }),
+      svgElement("line", { x1: padding.left, y1: height - padding.bottom, x2: width - padding.right, y2: height - padding.bottom, class: "gradient-boosting-chart-axis" })
+    );
+    addChartLabel(svg, "Correction trees added", (padding.left + width - padding.right) / 2, height - 7);
+    addText(svg, configuration.yLabel, 15, height / 2, {
+      class: "gradient-boosting-chart-axis-title",
+      transform: "rotate(-90 15 " + (height / 2) + ")",
+      "text-anchor": "middle"
+    });
+
+    configuration.visibleSeries.forEach((series) => {
+      const points = visibleStages.map((stage, index) => [x(stage), y(series.values[index])]);
+      const path = points.map((point, index) => (index === 0 ? "M " : "L ") + point[0].toFixed(2) + " " + point[1].toFixed(2)).join(" ");
+      svg.append(svgElement("path", { d: path, fill: "none", stroke: series.color, "stroke-width": 3 }));
+      const finalPoint = points[points.length - 1];
+      svg.append(svgElement("circle", { cx: finalPoint[0], cy: finalPoint[1], r: 4.6, fill: series.color, stroke: "#fff", "stroke-width": 1.6 }));
+    });
+    configuration.visibleSeries.forEach((series, index) => {
+      const legendX = padding.left + index * 175;
+      const legendY = 15;
+      svg.append(svgElement("line", { x1: legendX, y1: legendY, x2: legendX + 25, y2: legendY, stroke: series.color, "stroke-width": 3 }));
+      addText(svg, series.label, legendX + 32, legendY + 4, { class: "gradient-boosting-chart-value" });
+    });
+  }
+
+  function renderCharts() {
+    const allStages = explorer.rounds;
+    const trainLoss = [explorer.baseline.trainMse, ...allStages.map((round) => round.trainMse)];
+    const testLoss = [explorer.baseline.testMse, ...allStages.map((round) => round.testMse)];
+    const testR2 = [explorer.baseline.testR2, ...allStages.map((round) => round.testR2)];
+    drawLineChart(lossChart, {
+      title: "Mean squared error",
+      description: "Training and held-out mean squared error as gradient-boosting correction trees are added.",
+      yLabel: "MSE",
+      fullSeries: [{ values: trainLoss }, { values: testLoss }],
+      visibleSeries: [
+        { label: "Training", values: trainLoss, color: colors.train },
+        { label: "Held-out", values: testLoss, color: colors.test }
+      ]
+    });
+    drawLineChart(r2Chart, {
+      title: "Held-out R²",
+      description: "Held-out R-squared as gradient-boosting correction trees are added.",
+      yLabel: "Held-out R²",
+      fullSeries: [{ values: testR2 }],
+      visibleSeries: [{ label: "Held-out R²", values: testR2, color: colors.boost }]
+    });
+  }
+
+  function stopAnimation() {
+    if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+    isRunning = false;
+    runButton.textContent = "Run all stages";
+  }
+
+  function render() {
+    const atLastStage = includedStages === nStages;
+    stageCountOutput.textContent = String(includedStages);
+    nextButton.disabled = atLastStage;
+    runButton.disabled = atLastStage;
+    renderBaseline();
+    renderTreeCard();
+    renderUpdateCard();
+    renderCharts();
+  }
+
+  function runAll(timestamp) {
+    if (!isRunning) return;
+    if (!lastFrameTime || timestamp - lastFrameTime >= 95) {
+      lastFrameTime = timestamp;
+      if (includedStages < nStages) {
+        includedStages += 1;
+        render();
+      }
+    }
+    if (includedStages < nStages) {
+      animationFrame = requestAnimationFrame(runAll);
+    } else {
+      stopAnimation();
+      render();
+    }
+  }
+
+  nextButton.addEventListener("click", () => {
+    stopAnimation();
+    if (includedStages < nStages) includedStages += 1;
+    render();
+  });
+  runButton.addEventListener("click", () => {
+    if (isRunning) {
+      stopAnimation();
+      return;
+    }
+    isRunning = true;
+    lastFrameTime = 0;
+    runButton.textContent = "Pause";
+    animationFrame = requestAnimationFrame(runAll);
+  });
+  resetButton.addEventListener("click", () => {
+    stopAnimation();
+    includedStages = 1;
+    render();
+  });
+
+  render();
+})();
+</script>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/changyaochen\.github\.io\/MECE4520\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>MECE 4520 · Data Science for Mechanical Systems</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Fall 2026</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
