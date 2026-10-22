@@ -1,0 +1,17 @@
+---
+title: "Neural networks"
+---
+
+Neural networks make predictions by passing inputs through a sequence of
+linear transformations and activation functions. The first notebook traces
+that calculation with a small gas-turbine example before introducing how a
+network learns its weights.
+
+## 1. Forward propagation
+
+Follow a mini-batch of gas-turbine operating observations, using all nine
+measured operating features, through a neural network with one hidden layer.
+Inspect the shape of every array, compare ReLU with the identity activation,
+and count the model parameters.
+
+[View the notebook](01-forward-propagation.ipynb)

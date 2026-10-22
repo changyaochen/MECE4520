@@ -28,6 +28,8 @@ website:
         text: Classification
       - href: tree-based/index.qmd
         text: Tree-based
+      - href: neural-networks/index.qmd
+        text: Neural networks
   page-footer:
     left: "MECE 4520 · Data Science for Mechanical Systems"
     right: "Fall 2026"
