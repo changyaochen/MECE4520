@@ -1,0 +1,72 @@
+---
+title: "Explore forward propagation"
+toc: false
+page-layout: full
+---
+
+A neural network does not assign a fixed label to an input point. Its current
+weights and biases define a function that maps an input to a probability. In
+this two-input, three-hidden-unit network, edit the input and all thirteen trainable
+parameters to see that function change.
+
+::: {.callout-tip}
+## What to watch
+
+The labeled dots are a toy binary-classification dataset. The colored plane
+shows the network's current predicted probability, which need not match those
+labels because these parameters have not been trained. Click the plane or edit
+the selected input, then change a parameter and observe both the probability
+region and the forward-pass calculation.
+:::
+
+```{=html}
+<div id="nn-forward-explorer" class="nn-forward-explorer" aria-label="Interactive neural-network forward propagation explorer">
+  <div class="nn-forward-toolbar clt-buttons">
+    <button id="nn-animate" type="button" class="regression-sampling-primary">Animate forward pass</button>
+    <button id="nn-reset" type="button">Reset example</button>
+    <output id="nn-status" class="nn-forward-status" aria-live="polite">Ready</output>
+  </div>
+
+  <div class="nn-forward-workbench">
+    <aside class="nn-workbench-panel nn-parameter-panel" aria-labelledby="nn-parameter-heading">
+      <div class="nn-workbench-heading">
+        <h2 id="nn-parameter-heading">Parameters</h2>
+        <p>Set all weights and biases.</p>
+      </div>
+      <div class="nn-parameter-workspace">
+        <div id="nn-parameter-controls" class="nn-parameter-controls" aria-label="Neural-network parameter controls"></div>
+      </div>
+    </aside>
+
+    <section class="nn-workbench-panel nn-network-panel" aria-labelledby="nn-network-heading">
+      <div class="nn-workbench-heading nn-network-heading">
+        <div>
+          <h2 id="nn-network-heading">Forward pass</h2>
+          <p>Matching colors link each parameter row to the connections it controls; line thickness shows the magnitude of the corresponding weight.</p>
+        </div>
+      </div>
+      <div class="nn-forward-controls">
+        <div id="nn-input-controls" class="nn-input-controls" aria-label="Selected input controls"></div>
+        <div id="nn-dataset-controls" class="nn-dataset-controls" aria-label="Toy dataset controls"></div>
+      </div>
+      <div class="nn-network-stage">
+        <figure class="nn-forward-figure nn-architecture-figure">
+          <svg id="nn-network-diagram" role="img" aria-label="Two-input, three-hidden-unit, one-output neural network"></svg>
+        </figure>
+        <figure class="nn-forward-figure nn-probability-figure">
+          <svg id="nn-probability-plane" role="img" aria-label="Toy binary-classification observations and predicted positive-label probability in the x₁–x₂ input plane"></svg>
+        </figure>
+      </div>
+    </section>
+  </div>
+</div>
+```
+
+The positive region on the plane is the **model's** current predicted-positive
+region, using the default decision threshold of $0.5$. It is not a ground-truth
+label map. In the next lesson, backpropagation will explain how the parameters
+can be adjusted to reduce loss on labeled observations.
+
+<p style="margin-top: 1.5rem;"><a href="index.html">← Return to Neural networks</a></p>
+
+<script src="../assets/nn-forward-explorer.js"></script>

@@ -15,3 +15,9 @@ Inspect the shape of every array, compare ReLU with the identity activation,
 and count the model parameters.
 
 [View the notebook](01-forward-propagation.ipynb)
+
+Use a small $2 \rightarrow 3 \rightarrow 1$ network to edit the two inputs,
+every weight, and every bias. See how these choices define a probability field
+and produce a forward-pass prediction.
+
+[Explore forward propagation](02-forward-propagation-explorer.qmd)
