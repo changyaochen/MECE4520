@@ -519,13 +519,27 @@
     });
   }
 
-  function drawEdge(svg, from, to, weight, colorClass, active) {
-    const line = svgElement("line", {
-      x1: from.x, y1: from.y, x2: to.x, y2: to.y,
+  function curvedEdgePath(from, to, curveDirection = 1) {
+    const horizontalControlOffset = (to.x - from.x) * 0.4;
+    const isHorizontal = Math.abs(to.y - from.y) < 0.1;
+    const bow = isHorizontal ? 30 * curveDirection : 0;
+
+    return [
+      `M ${from.x} ${from.y}`,
+      `C ${from.x + horizontalControlOffset} ${from.y + bow}`,
+      `${to.x - horizontalControlOffset} ${to.y + bow}`,
+      `${to.x} ${to.y}`,
+    ].join(" ");
+  }
+
+  function drawEdge(svg, from, to, weight, colorClass, active, curveDirection) {
+    const path = svgElement("path", {
+      d: curvedEdgePath(from, to, curveDirection),
+      fill: "none",
       "stroke-width": weightWidth(weight),
       class: `nn-network-edge ${colorClass}${active ? " nn-network-edge-active" : ""}`,
     });
-    svg.append(line);
+    svg.append(path);
   }
 
   function appendNodeNotation(text, notation) {
@@ -599,6 +613,7 @@
           state.weightsHidden[hiddenIndex][inputIndex],
           `nn-network-edge-hidden-${hiddenIndex + 1}`,
           animationPhase === 1,
+          hiddenIndex === 1 ? -1 : 1,
         );
       });
     });
@@ -610,6 +625,7 @@
         state.weightsOutput[hiddenIndex],
         "nn-network-edge-output",
         animationPhase === 2,
+        hiddenIndex === 1 ? -1 : 1,
       );
     });
     positions.inputs.forEach((position, index) => {
