@@ -79,6 +79,35 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -347,6 +376,8 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="forward-propagation">1. Forward propagation</h2>
 <p>Follow a mini-batch of gas-turbine operating observations, using all nine measured operating features, through a neural network with one hidden layer. Inspect the shape of every array, compare ReLU with the identity activation, and count the model parameters.</p>
 <p><a href="../neural-networks/01-forward-propagation.html">View the notebook</a></p>
+<p>Use a small <span class="math inline">\(2 \rightarrow 3 \rightarrow 1\)</span> network to edit the two inputs, every weight, and every bias. See how these choices define a probability field and produce a forward-pass prediction.</p>
+<p><a href="../neural-networks/02-forward-propagation-explorer.html">Explore forward propagation</a></p>
 
 
 </section>

@@ -3195,3 +3195,1264 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Neural-network forward-propagation explorer. */
+.nn-forward-explorer {
+  margin: 1.5rem 0 2rem;
+}
+
+.nn-forward-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: 68rem;
+  margin: 0 auto 0.85rem;
+}
+
+.nn-forward-status {
+  min-height: 2.25rem;
+  padding: 0.42rem 0.7rem;
+  border: 1px solid #d9e1e5;
+  border-radius: 0.35rem;
+  background: #f5f7f8;
+  color: #52616a;
+  font-size: 0.88rem;
+}
+
+.nn-forward-section {
+  margin-top: 1.15rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #d5dfe3;
+  border-radius: 0.35rem;
+  background: #fff;
+}
+
+.nn-forward-input-section {
+  border-color: #c8d9e6;
+  background: #f5faff;
+}
+
+.nn-forward-parameter-section {
+  border-color: #decce8;
+  background: #fcf7fd;
+}
+
+.nn-forward-visual-section {
+  border-color: #c7dfd1;
+  background: #f4fbf7;
+}
+
+.nn-forward-result-section {
+  border-color: #e6d7c5;
+  background: #fffaf4;
+}
+
+.nn-forward-heading {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  margin-bottom: 0.8rem;
+}
+
+.nn-forward-heading h2,
+.nn-forward-heading p {
+  margin: 0;
+}
+
+.nn-forward-heading h2 {
+  font-size: 1.06rem;
+}
+
+.nn-forward-heading p {
+  margin-top: 0.2rem;
+  color: #52616a;
+}
+
+.nn-forward-step {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  border-radius: 999px;
+  background: #2f7395;
+  color: #fff;
+  font-weight: 700;
+}
+
+.nn-forward-parameter-section .nn-forward-step {
+  background: #8558a1;
+}
+
+.nn-forward-visual-section .nn-forward-step {
+  background: #3f8b64;
+}
+
+.nn-forward-result-section .nn-forward-step {
+  background: #c1793f;
+}
+
+.nn-input-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  max-width: 42rem;
+}
+
+.nn-input-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 5.5rem;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem 0.85rem;
+  border-left: 4px solid #2f7395;
+  background: #eaf4fb;
+}
+
+.nn-input-card label {
+  color: #23495f;
+  font-weight: 700;
+}
+
+.nn-input-card input[type="range"] {
+  width: 100%;
+  accent-color: #2f7395;
+}
+
+.nn-number-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.3rem 0.38rem;
+  border: 1px solid #aebec8;
+  border-radius: 0.22rem;
+  background: #fff;
+  color: #26363f;
+  font-variant-numeric: tabular-nums;
+}
+
+.nn-parameter-controls,
+.nn-forward-views,
+.nn-forward-calculation {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.nn-parameter-card,
+.nn-forward-figure,
+.nn-calculation-card {
+  margin: 0;
+  padding: 0.9rem;
+  border: 1px solid #d5dfe3;
+  border-radius: 0.32rem;
+  background: #fff;
+}
+
+.nn-parameter-card h3,
+.nn-calculation-card h3 {
+  margin: 0;
+  color: #34454d;
+  font-size: 0.98rem;
+}
+
+.nn-parameter-card p {
+  margin: 0.25rem 0 0.65rem;
+  color: #5d6a72;
+  font-size: 0.84rem;
+}
+
+.nn-parameter-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.nn-parameter-table th,
+.nn-parameter-table td {
+  padding: 0.35rem;
+  border-bottom: 1px solid #e1e7ea;
+  text-align: left;
+}
+
+.nn-parameter-table thead th {
+  color: #4e5f68;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.nn-parameter-table tbody th {
+  color: #52336a;
+  font-weight: 700;
+}
+
+.nn-parameter-input {
+  min-width: 4.8rem;
+  text-align: right;
+}
+
+.nn-forward-figure figcaption {
+  margin-bottom: 0.45rem;
+  color: #34454d;
+  font-weight: 600;
+}
+
+.nn-forward-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #fff;
+}
+
+.nn-forward-figure-note {
+  margin: 0.5rem 0 0;
+  color: #627179;
+  font-size: 0.79rem;
+  line-height: 1.35;
+}
+
+.nn-axis-line {
+  stroke: #4e6069;
+  stroke-width: 1.25;
+}
+
+.nn-grid-line {
+  stroke: #52636c;
+  stroke-width: 0.65;
+  stroke-dasharray: 2 3;
+  opacity: 0.35;
+}
+
+.nn-axis-text,
+.nn-marker-label {
+  fill: #4a5a62;
+  font-family: inherit;
+}
+
+.nn-axis-text {
+  font-size: 11px;
+}
+
+.nn-axis-label {
+  fill: #34454d;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.nn-marker-label {
+  font-size: 11px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 3px;
+}
+
+.nn-input-marker-outer {
+  fill: #fff;
+  stroke: #1f2b31;
+  stroke-width: 2.2;
+}
+
+.nn-input-marker-inner {
+  fill: #1f2b31;
+}
+
+.nn-network-edge {
+  stroke-linecap: round;
+  opacity: 0.86;
+  transition: stroke-width 160ms ease, opacity 160ms ease;
+}
+
+.nn-network-edge-hidden-1 {
+  stroke: #2f7395;
+}
+
+.nn-network-edge-hidden-2 {
+  stroke: #b65f00;
+}
+
+.nn-network-edge-hidden-3 {
+  stroke: #b3455d;
+}
+
+.nn-network-edge-output {
+  stroke: #287650;
+}
+
+.nn-network-edge-active {
+  opacity: 1;
+  filter: drop-shadow(0 0 3px rgba(20, 33, 40, 0.55));
+}
+
+.nn-layer-title {
+  fill: #41525a;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.nn-network-node rect {
+  stroke-width: 1.3;
+  transition: stroke-width 140ms ease, filter 140ms ease;
+}
+
+.nn-input-node rect {
+  fill: #eaf4fb;
+  stroke: #5a91b0;
+}
+
+.nn-hidden-node rect {
+  fill: #f4eaf8;
+  stroke: #9a6cad;
+}
+
+.nn-output-positive rect {
+  fill: #e4f3e9;
+  stroke: #3f8b64;
+}
+
+.nn-output-negative rect {
+  fill: #f8e7e5;
+  stroke: #bd594d;
+}
+
+.nn-network-node-active rect {
+  stroke-width: 3;
+  filter: drop-shadow(0 0 5px rgba(31, 43, 49, 0.35));
+}
+
+.nn-node-title {
+  fill: #2e3d44;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.nn-node-value {
+  fill: #42535b;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.nn-calculation-card {
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+}
+
+.nn-calculation-line {
+  display: grid;
+  gap: 0.18rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5eaec;
+}
+
+.nn-calculation-line strong {
+  color: #42535b;
+  font-size: 0.83rem;
+}
+
+.nn-calculation-line code {
+  color: #23495f;
+  font-size: 0.91rem;
+  font-variant-numeric: tabular-nums;
+  white-space: normal;
+}
+
+.nn-prediction-result {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.7rem;
+  border-left: 4px solid #3f8b64;
+  background: #edf7f0;
+}
+
+.nn-prediction-result strong {
+  color: #276343;
+  font-size: 1.25rem;
+}
+
+.nn-prediction-result span {
+  color: #52616a;
+  font-size: 0.82rem;
+}
+
+.nn-prediction-negative {
+  border-left-color: #bd594d;
+  background: #fcf0ee;
+}
+
+.nn-prediction-negative strong {
+  color: #933a34;
+}
+
+.quarto-dark .nn-forward-status,
+.quarto-dark .nn-forward-section,
+.quarto-dark .nn-parameter-card,
+.quarto-dark .nn-forward-figure,
+.quarto-dark .nn-calculation-card,
+.quarto-dark .nn-number-input {
+  border-color: #56616a;
+  background: #1f2529;
+  color: #e0e6e9;
+}
+
+.quarto-dark .nn-forward-input-section {
+  border-color: #47718a;
+  background: #24323b;
+}
+
+.quarto-dark .nn-forward-parameter-section {
+  border-color: #765886;
+  background: #312937;
+}
+
+.quarto-dark .nn-forward-visual-section {
+  border-color: #47765b;
+  background: #26372d;
+}
+
+.quarto-dark .nn-forward-result-section {
+  border-color: #846741;
+  background: #382f25;
+}
+
+.quarto-dark .nn-forward-heading p,
+.quarto-dark .nn-parameter-card p,
+.quarto-dark .nn-forward-figure-note,
+.quarto-dark .nn-prediction-result span,
+.quarto-dark .nn-calculation-line strong {
+  color: #c8d1d6;
+}
+
+.quarto-dark .nn-input-card {
+  background: #263b47;
+}
+
+.quarto-dark .nn-input-card label,
+.quarto-dark .nn-parameter-card h3,
+.quarto-dark .nn-calculation-card h3,
+.quarto-dark .nn-forward-figure figcaption,
+.quarto-dark .nn-parameter-table tbody th {
+  color: #e5ecef;
+}
+
+.quarto-dark .nn-parameter-table th,
+.quarto-dark .nn-parameter-table td,
+.quarto-dark .nn-calculation-line {
+  border-color: #445058;
+}
+
+.quarto-dark .nn-parameter-table thead th {
+  color: #c8d1d6;
+}
+
+.quarto-dark .nn-forward-figure svg {
+  background: #1f2529;
+}
+
+.quarto-dark .nn-axis-line {
+  stroke: #cbd6db;
+}
+
+.quarto-dark .nn-grid-line {
+  stroke: #aebbc2;
+}
+
+.quarto-dark .nn-axis-text,
+.quarto-dark .nn-marker-label,
+.quarto-dark .nn-layer-title,
+.quarto-dark .nn-node-title,
+.quarto-dark .nn-node-value {
+  fill: #e0e6e9;
+}
+
+.quarto-dark .nn-marker-label {
+  stroke: #1f2529;
+}
+
+.quarto-dark .nn-input-marker-outer {
+  fill: #1f2529;
+  stroke: #fff;
+}
+
+.quarto-dark .nn-input-marker-inner {
+  fill: #fff;
+}
+
+.quarto-dark .nn-input-node rect {
+  fill: #263b47;
+  stroke: #6ba8c9;
+}
+
+.quarto-dark .nn-hidden-node rect {
+  fill: #382b42;
+  stroke: #be8ad1;
+}
+
+.quarto-dark .nn-output-positive rect {
+  fill: #294333;
+  stroke: #72bd8c;
+}
+
+.quarto-dark .nn-output-negative rect {
+  fill: #492e2b;
+  stroke: #e27d73;
+}
+
+.quarto-dark .nn-calculation-line code {
+  color: #a9d6f1;
+}
+
+.quarto-dark .nn-prediction-result {
+  background: #294333;
+}
+
+.quarto-dark .nn-prediction-result strong {
+  color: #a8e1bc;
+}
+
+.quarto-dark .nn-prediction-negative {
+  background: #492e2b;
+}
+
+.quarto-dark .nn-prediction-negative strong {
+  color: #ffafa7;
+}
+
+@media (max-width: 900px) {
+  .nn-forward-views,
+  .nn-forward-calculation,
+  .nn-parameter-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .nn-input-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .nn-input-card {
+    grid-template-columns: auto minmax(0, 1fr) 4.8rem;
+  }
+
+  .nn-forward-section {
+    padding: 0.85rem;
+  }
+
+  .nn-parameter-table {
+    font-size: 0.72rem;
+  }
+
+  .nn-parameter-table th,
+  .nn-parameter-table td {
+    padding: 0.25rem;
+  }
+
+  .nn-parameter-input {
+    min-width: 3.8rem;
+  }
+}
+
+
+/* Compact, Playground-style layout for the forward-propagation explorer. */
+#nn-forward-explorer.nn-forward-explorer {
+  display: block !important;
+  grid-template-columns: none !important;
+}
+
+#nn-forward-explorer .nn-forward-toolbar,
+#nn-forward-explorer .nn-forward-workbench,
+#nn-forward-explorer .nn-forward-workbench > .nn-workbench-panel {
+  grid-column: auto !important;
+}
+
+.nn-forward-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) !important;
+  max-width: 68rem;
+  margin: 0 auto;
+  gap: 0.85rem;
+  align-items: start;
+}
+
+.nn-workbench-panel {
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid #d5dfe3;
+  border-radius: 0.42rem;
+  background: #fff;
+}
+
+.nn-data-panel {
+  border-color: #c8d9e6;
+  background: #f7fbfe;
+}
+
+.nn-network-panel {
+  border-color: #c7dfd1;
+  background: #f5fbf7;
+}
+
+.nn-parameter-panel {
+  border-color: #decce8;
+  background: #fcf8fd;
+}
+
+.nn-parameter-workspace {
+  display: block;
+}
+
+.nn-workbench-heading {
+  margin-bottom: 0.55rem;
+}
+
+.nn-workbench-heading h2,
+.nn-workbench-heading p {
+  margin: 0;
+}
+
+.nn-workbench-heading h2 {
+  color: #34454d;
+  font-size: 1rem;
+}
+
+.nn-workbench-heading p {
+  margin-top: 0.16rem;
+  color: #5d6a72;
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+.nn-network-heading {
+  display: block;
+}
+
+.nn-network-heading > div:first-child {
+  max-width: none;
+}
+
+.nn-forward-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 0 0.75rem;
+}
+
+.nn-dataset-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.38rem;
+  margin: 0 0 0.55rem;
+}
+
+.nn-dataset-button {
+  padding: 0.3rem 0.48rem;
+  border: 1px solid #9bbbd0;
+  border-radius: 999px;
+  background: #fff;
+  color: #2c5e7a;
+  font-size: 0.73rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.nn-dataset-button:hover,
+.nn-dataset-button:focus-visible {
+  border-color: #2f7395;
+  background: #eaf4fb;
+}
+
+.nn-dataset-button-active {
+  border-color: #2f7395;
+  background: #2f7395;
+  color: #fff;
+}
+
+.nn-input-controls {
+  width: min(100%, 42rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0 0 0.75rem;
+}
+
+.nn-forward-controls .nn-input-controls,
+.nn-forward-controls .nn-dataset-controls {
+  margin: 0;
+}
+
+.nn-input-card {
+  grid-template-areas:
+    "label number"
+    "slider slider";
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.45rem;
+  padding: 0.38rem 0.42rem;
+  border-left-width: 3px;
+}
+
+.nn-input-card label {
+  grid-area: label;
+  font-size: 0.8rem;
+}
+
+.nn-input-card .nn-number-input {
+  grid-area: number;
+  padding: 0.2rem 0.24rem;
+  font-size: 0.76rem;
+}
+
+.nn-input-slider {
+  grid-area: slider;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  accent-color: #2f7395;
+}
+
+.nn-workbench-panel .nn-forward-figure {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.nn-workbench-panel .nn-forward-figure figcaption {
+  margin-bottom: 0.32rem;
+  font-size: 0.82rem;
+}
+
+.nn-workbench-panel .nn-forward-figure svg {
+  border: 1px solid #d6e0e4;
+  border-radius: 0.28rem;
+}
+
+#nn-probability-plane {
+  cursor: crosshair;
+}
+
+.nn-data-point {
+  stroke: #fff;
+  stroke-width: 1.05;
+  opacity: 0.9;
+}
+
+.nn-data-point-positive {
+  fill: #21804d;
+}
+
+.nn-data-point-negative {
+  fill: #c7443e;
+}
+
+.nn-parameter-controls {
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 0.55rem;
+}
+
+.nn-parameter-card {
+  padding: 0.62rem;
+}
+
+.nn-parameter-card h3 {
+  font-size: 0.83rem;
+}
+
+.nn-parameter-card p {
+  margin: 0.14rem 0 0.4rem;
+  font-size: 0.71rem;
+}
+
+.nn-parameter-table {
+  font-size: 0.67rem;
+}
+
+.nn-parameter-table th,
+.nn-parameter-table td {
+  padding: 0.22rem 0.16rem;
+}
+
+.nn-parameter-input {
+  min-width: 0;
+  padding: 0.18rem 0.14rem;
+  font-size: 0.69rem;
+}
+
+.nn-parameter-card {
+  display: grid;
+  align-content: start;
+  gap: 0.32rem;
+}
+
+.nn-parameter-card p {
+  margin-bottom: 0.28rem;
+}
+
+.nn-matrix-pair {
+  display: flex;
+  max-width: 100%;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.65rem;
+  overflow-x: auto;
+}
+
+.nn-matrix-editor {
+  display: grid;
+  grid-template-columns: auto auto max-content;
+  align-items: center;
+  justify-content: start;
+  gap: 0.22rem;
+  min-height: 2.15rem;
+}
+
+.nn-matrix-symbol {
+  min-width: 2.55rem;
+  color: #47305c;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.nn-matrix-symbol i {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.nn-matrix-symbol sup {
+  margin-left: 0.04rem;
+  font-family: inherit;
+  font-size: 0.63em;
+}
+
+.nn-matrix-equals {
+  color: #6a747a;
+  font-size: 0.87rem;
+}
+
+.nn-matrix-brackets {
+  position: relative;
+  padding: 0.13rem 0.42rem;
+}
+
+.nn-matrix-brackets::before,
+.nn-matrix-brackets::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0.26rem;
+  content: "";
+}
+
+.nn-matrix-brackets::before {
+  left: 0;
+  border: 1.5px solid #785c8d;
+  border-right: 0;
+}
+
+.nn-matrix-brackets::after {
+  right: 0;
+  border: 1.5px solid #785c8d;
+  border-left: 0;
+}
+
+.nn-matrix-grid {
+  display: grid;
+  gap: 0.16rem;
+}
+
+.nn-matrix-editor .nn-parameter-input {
+  width: 3.25rem;
+  padding: 0.18rem 0.12rem;
+  text-align: center;
+}
+
+.nn-parameter-row-1 {
+  border-color: #2f7395;
+  background: #eaf4fb;
+}
+
+.nn-parameter-row-2 {
+  border-color: #b65f00;
+  background: #fff0e2;
+}
+
+.nn-parameter-row-3 {
+  border-color: #b3455d;
+  background: #fbe9ed;
+}
+
+.nn-parameter-row-output {
+  border-color: #287650;
+  background: #e4f3e9;
+}
+
+.nn-matrix-shape {
+  color: #758087;
+  font-size: 0.64rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.nn-matrix-value {
+  display: grid;
+  min-width: 3.25rem;
+  min-height: 1.45rem;
+  place-items: center;
+  padding: 0.18rem 0.12rem;
+  border: 1px solid #c7aed4;
+  border-radius: 0.2rem;
+  background: #f2e9f6;
+  color: #52336a;
+  font-size: 0.69rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+
+.nn-hidden-activation {
+  flex: 0 0 auto;
+}
+
+.nn-matrix-value-display .nn-matrix-shape {
+  color: #6a4b80;
+  font-weight: 650;
+}
+
+.nn-matrix-value-display {
+  grid-template-columns: auto auto max-content auto;
+}
+
+@media (max-width: 430px) {
+  .nn-matrix-pair { gap: 0.22rem; }
+
+  .nn-matrix-symbol {
+    min-width: 2.25rem;
+    font-size: 0.9rem;
+  }
+
+  .nn-matrix-editor {
+    gap: 0.14rem;
+  }
+
+  .nn-matrix-editor .nn-parameter-input {
+    width: 2.65rem;
+    font-size: 0.65rem;
+  }
+
+  .nn-matrix-brackets {
+    padding-right: 0.32rem;
+    padding-left: 0.32rem;
+  }
+
+  .nn-matrix-shape {
+    display: none;
+  }
+
+}
+
+.nn-forward-calculation {
+  display: block;
+  margin-top: 0;
+}
+
+.nn-network-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 17rem);
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.nn-architecture-figure {
+  min-width: 0;
+  width: min(100%, 47rem);
+  justify-self: center;
+}
+
+.nn-probability-figure {
+  min-width: 0;
+  width: min(100%, 17rem);
+  justify-self: end;
+}
+
+.nn-inline-data-panel {
+  min-width: 0;
+  max-width: 17rem;
+  justify-self: end;
+  padding: 0.65rem;
+  border: 1px solid #c8d9e6;
+  border-radius: 0.32rem;
+}
+
+.nn-inline-data-panel .nn-workbench-heading {
+  margin-bottom: 0.4rem;
+}
+
+.nn-inline-data-panel .nn-workbench-heading h2 {
+  font-size: 0.88rem;
+}
+
+.nn-inline-data-panel .nn-workbench-heading p {
+  font-size: 0.7rem;
+}
+
+.nn-inline-data-panel .nn-dataset-controls {
+  gap: 0.28rem;
+  margin-bottom: 0.4rem;
+}
+
+.nn-inline-data-panel .nn-dataset-button {
+  padding: 0.25rem 0.38rem;
+  font-size: 0.65rem;
+}
+
+.nn-inline-data-panel .nn-forward-figure-note {
+  margin-top: 0.35rem;
+  font-size: 0.68rem;
+}
+
+.nn-result-summary {
+  padding: 0.62rem;
+  border: 1px solid #d5dfe3;
+  border-radius: 0.32rem;
+  background: #fff;
+}
+
+.nn-result-summary h3 {
+  margin: 0 0 0.42rem;
+  color: #34454d;
+  font-size: 0.83rem;
+}
+
+.nn-activation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.32rem;
+  margin-bottom: 0.42rem;
+}
+
+.nn-activation-item {
+  padding: 0.28rem;
+  border-radius: 0.2rem;
+  background: #f2e9f6;
+  color: #52336a;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.nn-result-summary .nn-prediction-result {
+  padding: 0.46rem;
+}
+
+.nn-result-summary .nn-prediction-result strong {
+  font-size: 1.05rem;
+}
+
+.nn-result-summary .nn-prediction-result span {
+  font-size: 0.72rem;
+}
+
+.nn-calculation-details {
+  margin-top: 0.5rem;
+  color: #42535b;
+  font-size: 0.75rem;
+}
+
+.nn-calculation-details summary {
+  cursor: pointer;
+  color: #2f7395;
+  font-weight: 700;
+}
+
+.nn-calculation-detail-content {
+  display: grid;
+  gap: 0.42rem;
+  margin-top: 0.48rem;
+}
+
+.nn-calculation-detail-content .nn-calculation-line {
+  padding-bottom: 0.35rem;
+}
+
+.nn-calculation-detail-content .nn-calculation-line strong {
+  font-size: 0.72rem;
+}
+
+.nn-calculation-detail-content .nn-calculation-line code {
+  font-size: 0.74rem;
+}
+
+.quarto-dark .nn-workbench-panel,
+.quarto-dark .nn-result-summary {
+  border-color: #56616a;
+  background: #1f2529;
+}
+
+.quarto-dark .nn-data-panel {
+  border-color: #47718a;
+  background: #24323b;
+}
+
+.quarto-dark .nn-network-panel {
+  border-color: #47765b;
+  background: #26372d;
+}
+
+.quarto-dark .nn-parameter-panel {
+  border-color: #765886;
+  background: #312937;
+}
+
+.quarto-dark .nn-workbench-heading h2,
+.quarto-dark .nn-result-summary h3 {
+  color: #e5ecef;
+}
+
+.quarto-dark .nn-workbench-heading p,
+.quarto-dark .nn-calculation-details {
+  color: #c8d1d6;
+}
+
+.quarto-dark .nn-dataset-button {
+  border-color: #6ba8c9;
+  background: #263b47;
+  color: #cce4f2;
+}
+
+.quarto-dark .nn-dataset-button-active {
+  border-color: #6ba8c9;
+  background: #347da9;
+  color: #fff;
+}
+
+.quarto-dark .nn-workbench-panel .nn-forward-figure svg {
+  border-color: #56616a;
+}
+
+.quarto-dark .nn-activation-item {
+  background: #382b42;
+  color: #e4c9ef;
+}
+
+.quarto-dark .nn-matrix-symbol {
+  color: #e4c9ef;
+}
+
+.quarto-dark .nn-matrix-equals,
+.quarto-dark .nn-matrix-shape {
+  color: #c8d1d6;
+}
+
+.quarto-dark .nn-matrix-brackets::before,
+.quarto-dark .nn-matrix-brackets::after {
+  border-color: #be8ad1;
+}
+
+.quarto-dark .nn-matrix-value {
+  border-color: #7d5a8e;
+  background: #382b42;
+  color: #e4c9ef;
+}
+
+.quarto-dark .nn-matrix-value-display .nn-matrix-shape {
+  color: #e4c9ef;
+}
+
+.quarto-dark .nn-parameter-row-1 {
+  border-color: #6ba8c9;
+  background: #263b47;
+  color: #e6f4fb;
+}
+
+.quarto-dark .nn-parameter-row-2 {
+  border-color: #f0aa69;
+  background: #3e2d20;
+  color: #fff0e2;
+}
+
+.quarto-dark .nn-parameter-row-3 {
+  border-color: #eb91a3;
+  background: #4c2a31;
+  color: #fee9ee;
+}
+
+.quarto-dark .nn-parameter-row-output {
+  border-color: #72bd8c;
+  background: #294333;
+  color: #e3f7e9;
+}
+
+.quarto-dark .nn-network-edge-hidden-1 {
+  stroke: #6ba8c9;
+}
+
+.quarto-dark .nn-network-edge-hidden-2 {
+  stroke: #f0aa69;
+}
+
+.quarto-dark .nn-network-edge-hidden-3 {
+  stroke: #eb91a3;
+}
+
+.quarto-dark .nn-network-edge-output {
+  stroke: #72bd8c;
+}
+
+.quarto-dark .nn-calculation-details summary {
+  color: #a9d6f1;
+}
+
+@media (max-width: 900px) {
+  .nn-network-stage {
+    grid-template-columns: minmax(0, 1fr) minmax(12.5rem, 14rem);
+  }
+}
+
+@media (max-width: 700px) {
+  .nn-network-stage,
+  .nn-parameter-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .nn-inline-data-panel {
+    max-width: none;
+    justify-self: stretch;
+  }
+
+  .nn-network-heading {
+    display: grid;
+  }
+
+  .nn-input-controls {
+    width: 100%;
+  }
+
+  .nn-forward-controls {
+    grid-template-columns: minmax(0, 1fr) 6.25rem;
+    align-items: stretch;
+  }
+
+  .nn-forward-controls .nn-dataset-controls {
+    flex-flow: column nowrap;
+    gap: 0.25rem;
+  }
+
+  .nn-forward-controls .nn-dataset-button {
+    width: 100%;
+    padding: 0.24rem 0.3rem;
+    font-size: 0.63rem;
+    white-space: nowrap;
+  }
+
+  .nn-probability-figure {
+    justify-self: center;
+  }
+
+  .nn-parameter-panel .nn-parameter-controls,
+  .nn-parameter-panel .nn-forward-calculation {
+    grid-template-columns: 1fr;
+  }
+}
