@@ -21,3 +21,11 @@ every weight, and every bias. See how these choices define a probability field
 and produce a forward-pass prediction.
 
 [Explore forward propagation](02-forward-propagation-explorer.qmd)
+
+## 2. Backpropagation
+
+Trace how a prediction error produces gradients for every parameter in the
+same small network. Follow one selected observation through the chain rule,
+then watch the full-dataset gradient update the model.
+
+[Explore backpropagation](03-backpropagation-explorer.qmd)

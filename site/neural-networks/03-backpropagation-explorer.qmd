@@ -1,0 +1,159 @@
+---
+title: "Explore backpropagation"
+toc: false
+page-layout: full
+---
+
+Backpropagation computes how the loss changes with every trainable parameter.
+This explorer traces that calculation for one labeled observation, then applies
+the mean gradient from the entire toy dataset to update the network.
+
+::: {.callout-tip}
+## What to watch
+
+Click a data point to choose the observation used in the visible trace. The
+network first makes a prediction, then carries the error signal backward to
+compute parameter gradients. A training update, however, uses the average
+gradient across all labeled observations.
+:::
+
+```{=html}
+<div id="nn-backprop-explorer" class="nn-backprop-explorer" aria-label="Interactive neural-network backpropagation explorer">
+  <div class="nn-backprop-toolbar clt-buttons">
+    <button id="nn-backprop-step" type="button" class="regression-sampling-primary">Step through update</button>
+    <button id="nn-backprop-run" type="button">Run 50 updates</button>
+    <button id="nn-backprop-reset" type="button">Reset example</button>
+    <output id="nn-backprop-status" class="nn-forward-status" aria-live="polite">Ready to trace one training update</output>
+  </div>
+
+  <div class="nn-backprop-workbench">
+    <section class="nn-workbench-panel nn-backprop-process-panel" aria-labelledby="nn-backprop-process-heading">
+      <div class="nn-workbench-heading">
+        <h2 id="nn-backprop-process-heading">One training update</h2>
+        <p>Follow one selected observation, then use the full dataset for the update.</p>
+      </div>
+      <ol id="nn-backprop-timeline" class="nn-backprop-timeline" aria-label="Backpropagation update stages"></ol>
+    </section>
+
+    <section class="nn-workbench-panel nn-backprop-network-panel" aria-labelledby="nn-backprop-network-heading">
+      <div class="nn-workbench-heading">
+        <h2 id="nn-backprop-network-heading">Forward and backward pass</h2>
+        <p>Colored connections correspond to rows of <i>W</i><sup>[1]</sup>; the blue overlay shows an error signal moving backward.</p>
+      </div>
+      <div class="nn-backprop-controls">
+        <label for="nn-backprop-rate">Learning rate &eta;</label>
+        <input id="nn-backprop-rate" type="range" min="0.02" max="0.5" step="0.01" value="0.20" aria-label="Learning rate">
+        <output id="nn-backprop-rate-value">0.20</output>
+        <div id="nn-backprop-dataset-controls" class="nn-dataset-controls" aria-label="Toy dataset controls"></div>
+      </div>
+      <div class="nn-backprop-stage">
+        <figure class="nn-forward-figure nn-backprop-architecture-figure">
+          <svg id="nn-backprop-network" role="img" aria-label="Two-input, three-hidden-unit, one-output neural network with backpropagation trace"></svg>
+        </figure>
+        <figure class="nn-forward-figure nn-backprop-plane-figure">
+          <svg id="nn-backprop-plane" role="img" aria-label="Toy binary-classification observations and current predicted positive-label probability"></svg>
+          <figcaption>Click a labeled point to select the trace observation.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <div class="nn-backprop-lower-grid">
+      <section class="nn-workbench-panel nn-backprop-trace-panel" aria-labelledby="nn-backprop-trace-heading">
+        <div class="nn-workbench-heading">
+          <h2 id="nn-backprop-trace-heading">Selected-observation trace</h2>
+          <p id="nn-backprop-trace-description">A local calculation for one labeled observation.</p>
+        </div>
+        <div id="nn-backprop-trace" class="nn-backprop-trace"></div>
+      </section>
+
+      <section class="nn-workbench-panel nn-backprop-parameter-panel" aria-labelledby="nn-backprop-parameter-heading">
+        <div class="nn-workbench-heading">
+          <h2 id="nn-backprop-parameter-heading">Parameters and full-dataset gradient</h2>
+          <p>The update uses the mean gradient over every toy observation.</p>
+        </div>
+        <div id="nn-backprop-parameters" class="nn-backprop-parameters"></div>
+      </section>
+    </div>
+
+    <section class="nn-backprop-gradient-equations" aria-label="Layerwise backpropagation gradients">
+      <div class="nn-backprop-equation-copy">
+        <strong>Layerwise gradients</strong>
+        <span>First compute an error signal for each layer, then use those signals to form the gradients for every parameter.</span>
+      </div>
+      <div class="nn-backprop-gradient-formulas">
+        <div class="nn-backprop-formula-row">
+          <span class="nn-backprop-formula-label">Network shapes</span>
+          <span class="nn-backprop-formula nn-backprop-shape-formula">
+            <i>X</i> &isin; &#8477;<sup><i>n</i>&times;2</sup>,
+            <i>Y</i> &isin; &#8477;<sup><i>n</i>&times;1</sup>,
+            <i>W</i><sup>[1]</sup> &isin; &#8477;<sup>3&times;2</sup>,
+            <i>b</i><sup>[1]</sup> &isin; &#8477;<sup>1&times;3</sup> &rarr; <i>B</i><sup>[1]</sup> &isin; &#8477;<sup><i>n</i>&times;3</sup>,
+            <i>Z</i><sup>[1]</sup>, <i>A</i><sup>[1]</sup> &isin; &#8477;<sup><i>n</i>&times;3</sup>,
+            <i>W</i><sup>[2]</sup> &isin; &#8477;<sup>1&times;3</sup>,
+            <i>b</i><sup>[2]</sup> &isin; &#8477;<sup>1&times;1</sup> &rarr; <i>B</i><sup>[2]</sup> &isin; &#8477;<sup><i>n</i>&times;1</sup>,
+            <i>Z</i><sup>[2]</sup>, <i>A</i><sup>[2]</sup> &isin; &#8477;<sup><i>n</i>&times;1</sup>
+          </span>
+        </div>
+        <div class="nn-backprop-formula-row">
+          <span class="nn-backprop-formula-label">Hidden activation</span>
+          <span class="nn-backprop-formula">
+            <i>g</i>(<i>z</i>) = max(0, <i>z</i>) &nbsp; (ReLU),
+            &nbsp;&nbsp;
+            <i>g</i>&prime;(<i>z</i>) =
+            <span class="nn-backprop-piecewise">1 if <i>z</i> &gt; 0; 0 otherwise</span>
+            <span class="nn-backprop-annotation">elementwise</span>
+          </span>
+        </div>
+        <div class="nn-backprop-formula-row">
+          <span class="nn-backprop-formula-label">Error signals</span>
+          <span class="nn-backprop-formula">
+            <i>&delta;</i><sup>[2]</sup> = <i>A</i><sup>[2]</sup> &minus; <i>Y</i>,
+            &nbsp;&nbsp;
+            <i>&delta;</i><sup>[1]</sup> =
+            (<i>&delta;</i><sup>[2]</sup><i>W</i><sup>[2]</sup>)
+            &odot; <i>g</i>&prime;(<i>Z</i><sup>[1]</sup>)
+          </span>
+        </div>
+        <div class="nn-backprop-formula-row">
+          <span class="nn-backprop-formula-label">Output layer</span>
+          <span class="nn-backprop-formula">
+            &part;<i>L</i>/&part;<i>W</i><sup>[2]</sup> =
+            <span class="nn-backprop-fraction"><span>1</span><span><i>n</i></span></span>
+            (<i>&delta;</i><sup>[2]</sup>)<sup>T</sup><i>A</i><sup>[1]</sup>,
+            &nbsp;&nbsp;
+            &part;<i>L</i>/&part;<i>b</i><sup>[2]</sup> = <code>mean</code>(<i>&delta;</i><sup>[2]</sup>)
+          </span>
+        </div>
+        <div class="nn-backprop-formula-row">
+          <span class="nn-backprop-formula-label">Hidden layer</span>
+          <span class="nn-backprop-formula">
+            &part;<i>L</i>/&part;<i>W</i><sup>[1]</sup> =
+            <span class="nn-backprop-fraction"><span>1</span><span><i>n</i></span></span>
+            (<i>&delta;</i><sup>[1]</sup>)<sup>T</sup><i>X</i>,
+            &nbsp;&nbsp;
+            &part;<i>L</i>/&part;<i>b</i><sup>[1]</sup> = <code>mean</code>(<i>&delta;</i><sup>[1]</sup>)
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section class="nn-workbench-panel nn-backprop-metrics-panel" aria-labelledby="nn-backprop-metrics-heading">
+      <div class="nn-workbench-heading">
+        <h2 id="nn-backprop-metrics-heading">Training progress</h2>
+        <p>Full-dataset binary cross-entropy and classification accuracy.</p>
+      </div>
+      <div class="nn-backprop-progress-grid">
+        <div id="nn-backprop-metrics" class="nn-backprop-metrics nn-backprop-progress-summary"></div>
+        <figure class="nn-backprop-loss-figure">
+          <figcaption>Training loss vs. update</figcaption>
+          <svg id="nn-backprop-loss-chart" viewBox="0 0 520 190" role="img" aria-label="Training loss as a function of the number of gradient updates"></svg>
+        </figure>
+      </div>
+    </section>
+  </div>
+</div>
+```
+
+<p style="margin-top: 1.5rem;"><a href="index.html">← Return to Neural networks</a></p>
+
+<script src="../assets/nn-backpropagation-explorer.js"></script>
