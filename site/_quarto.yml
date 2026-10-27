@@ -9,6 +9,7 @@ project:
     - assets/adaboost-explorer.js
     - assets/gradient-boosting-explorer.js
     - assets/nn-forward-explorer.js
+    - assets/nn-backpropagation-explorer.js
     - assets/b7e2a9c4.html
 
 website:

@@ -1341,6 +1341,694 @@
   }
 }
 
+/* Neural-network backpropagation explorer. */
+.nn-backprop-explorer {
+  margin: 1.5rem 0 2rem;
+}
+
+.nn-backprop-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem;
+  position: sticky;
+  top: 2.8rem;
+  z-index: 5;
+  max-width: 68rem;
+  margin: 0 auto 0.85rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #d9e1e5;
+  background: #fff;
+}
+
+.nn-backprop-workbench {
+  display: grid;
+  max-width: 68rem;
+  margin: 0 auto;
+  gap: 0.85rem;
+}
+
+.nn-backprop-process-panel {
+  border-color: #c8d9e6;
+  background: #f7fbfe;
+}
+
+.nn-backprop-network-panel {
+  border-color: #c7dfd1;
+  background: #f5fbf7;
+}
+
+.nn-backprop-trace-panel {
+  border-color: #decce8;
+  background: #fcf8fd;
+}
+
+.nn-backprop-parameter-panel {
+  border-color: #e6d7c5;
+  background: #fffaf4;
+}
+
+.nn-backprop-metrics-panel {
+  border-color: #d5dfe3;
+  background: #fff;
+}
+
+.nn-backprop-timeline {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.38rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.nn-backprop-timeline-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem;
+  align-items: start;
+  min-width: 0;
+  padding: 0.46rem;
+  border: 1px solid #d8e1e5;
+  border-radius: 0.3rem;
+  background: #fff;
+  color: #607078;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.nn-backprop-stage-number {
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  border-radius: 999px;
+  background: #e5ebee;
+  color: #64737b;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.nn-backprop-stage-copy {
+  display: grid;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.nn-backprop-stage-copy strong {
+  color: #40525a;
+  font-size: 0.75rem;
+  line-height: 1.15;
+}
+
+.nn-backprop-stage-copy span {
+  font-size: 0.65rem;
+  line-height: 1.25;
+}
+
+.nn-backprop-timeline-active {
+  border-color: #2f7395;
+  background: #eaf4fb;
+  color: #284d60;
+}
+
+.nn-backprop-timeline-active .nn-backprop-stage-number {
+  background: #2f7395;
+  color: #fff;
+}
+
+.nn-backprop-timeline-complete {
+  border-color: #9ac8ab;
+  background: #eff8f1;
+  color: #4e6858;
+}
+
+.nn-backprop-timeline-complete .nn-backprop-stage-number {
+  background: #4d966c;
+  color: #fff;
+}
+
+.nn-backprop-controls {
+  display: grid;
+  grid-template-columns: auto minmax(8rem, 13rem) 3rem 1fr;
+  gap: 0.55rem;
+  align-items: center;
+  margin: 0 0 0.75rem;
+}
+
+.nn-backprop-controls > label {
+  color: #294d60;
+  font-size: 0.79rem;
+  font-weight: 700;
+}
+
+.nn-backprop-controls input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: #2f7395;
+}
+
+.nn-backprop-controls output {
+  color: #23495f;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.nn-backprop-controls .nn-dataset-controls {
+  justify-content: end;
+  margin: 0;
+}
+
+.nn-backprop-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 17rem);
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.nn-backprop-network-panel .nn-forward-figure {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.nn-backprop-network-panel .nn-forward-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #d6e0e4;
+  border-radius: 0.28rem;
+  background: #fff;
+}
+
+.nn-backprop-architecture-figure {
+  min-width: 0;
+  width: min(100%, 47rem);
+  justify-self: center;
+}
+
+.nn-backprop-plane-figure {
+  min-width: 0;
+  width: min(100%, 17rem);
+  justify-self: end;
+}
+
+.nn-backprop-plane-figure figcaption {
+  margin-top: 0.32rem;
+  color: #5d6a72;
+  font-size: 0.71rem;
+  line-height: 1.3;
+}
+
+#nn-backprop-plane {
+  cursor: pointer;
+}
+
+.nn-backprop-selected-point {
+  stroke: #17242b;
+  stroke-width: 2.2;
+}
+
+.nn-selected-point-arrow {
+  stroke: #1f5f8b;
+  stroke-width: 2.1;
+}
+
+.nn-selected-point-arrowhead {
+  fill: #1f5f8b;
+}
+
+.nn-backprop-signal {
+  stroke: #306d9b;
+  stroke-width: 3.4;
+  stroke-dasharray: 7 5;
+  opacity: 0.92;
+  animation: nn-backprop-flow 1.1s linear infinite;
+}
+
+.nn-backprop-arrowhead {
+  fill: #306d9b;
+}
+
+@keyframes nn-backprop-flow {
+  to { stroke-dashoffset: -24; }
+}
+
+.nn-backprop-lower-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.85rem;
+}
+
+.nn-backprop-gradient-equations {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.72rem 0.85rem;
+  border: 1px solid #c8d9e6;
+  border-left: 4px solid #2f7395;
+  border-radius: 0.35rem;
+  background: #f5faff;
+}
+
+.nn-backprop-equation-copy {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.nn-backprop-equation-copy strong {
+  color: #294d60;
+  font-size: 0.86rem;
+}
+
+.nn-backprop-equation-copy span {
+  color: #5d6a72;
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.nn-backprop-gradient-formulas {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.nn-backprop-formula-row {
+  display: grid;
+  grid-template-columns: 7.25rem minmax(0, 1fr);
+  gap: 0.55rem;
+  align-items: baseline;
+  padding: 0.34rem 0.48rem;
+  border: 1px solid #dce8ef;
+  border-radius: 0.26rem;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.nn-backprop-formula-label {
+  color: #477084;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.nn-backprop-formula {
+  color: #263d4a;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.nn-backprop-formula i {
+  font-family: inherit;
+}
+
+.nn-backprop-shape-formula {
+  font-size: 0.87rem;
+}
+
+.nn-backprop-piecewise {
+  white-space: nowrap;
+}
+
+.nn-backprop-annotation {
+  display: inline-block;
+  margin-left: 0.35rem;
+  color: #587a88;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.67rem;
+  font-style: normal;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.nn-backprop-formula code {
+  padding: 0.02rem 0.18rem;
+  border-radius: 0.16rem;
+  background: #e5eef2;
+  color: #1f536c;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.84em;
+}
+
+.nn-backprop-formula sup,
+.nn-backprop-formula sub {
+  position: relative;
+  font-size: 0.62em;
+  line-height: 0;
+}
+
+.nn-backprop-formula sup { top: -0.5em; }
+.nn-backprop-formula sub { bottom: -0.15em; }
+
+.nn-backprop-fraction {
+  display: inline-grid;
+  grid-template-rows: auto auto;
+  margin: 0 0.04rem;
+  font-size: 0.76em;
+  line-height: 1;
+  position: relative;
+  top: -0.28em;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.nn-backprop-fraction span:first-child {
+  padding: 0 0.14rem 0.06rem;
+  border-bottom: 1px solid currentColor;
+}
+
+.nn-backprop-fraction span:last-child {
+  padding-top: 0.06rem;
+}
+
+.nn-backprop-trace {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.nn-backprop-metric {
+  display: grid;
+  align-content: start;
+  gap: 0.1rem;
+  min-width: 0;
+  padding: 0.52rem;
+  border: 1px solid #dce4e7;
+  border-radius: 0.28rem;
+  background: #fff;
+}
+
+.nn-backprop-metric-label {
+  color: #5d6a72;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.nn-backprop-metric strong {
+  overflow: hidden;
+  color: #304149;
+  font-size: 0.98rem;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nn-backprop-metric-detail {
+  color: #68767d;
+  font-size: 0.65rem;
+  line-height: 1.28;
+}
+
+.nn-backprop-metric-label i,
+.nn-backprop-metric-detail i {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.nn-backprop-metric-label sup,
+.nn-backprop-metric-detail sup {
+  position: relative;
+  top: -0.38em;
+  font-size: 0.72em;
+  line-height: 0;
+}
+
+.nn-backprop-metric-positive {
+  border-left: 4px solid #4d966c;
+  background: #eff8f1;
+}
+
+.nn-backprop-metric-negative {
+  border-left: 4px solid #bc5d55;
+  background: #fcf0ee;
+}
+
+.nn-backprop-metric-loss {
+  border-left: 4px solid #c1793f;
+  background: #fff7eb;
+}
+
+.nn-backprop-parameters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.nn-backprop-matrix-block {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.42rem;
+  align-items: center;
+  min-width: 0;
+  padding: 0.48rem;
+  border: 1px solid #e5ded4;
+  border-radius: 0.28rem;
+  background: #fff;
+}
+
+.nn-backprop-matrix-header {
+  min-width: 2.4rem;
+  color: #60452e;
+  font-size: 0.93rem;
+  font-weight: 750;
+  text-align: right;
+}
+
+.nn-backprop-matrix-symbol i {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.nn-backprop-matrix-symbol sup {
+  margin-left: 0.04rem;
+  font-family: inherit;
+  font-size: 0.66em;
+}
+
+.nn-backprop-matrix-grid {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.nn-backprop-parameter-cell {
+  display: grid;
+  min-width: 0;
+  padding: 0.25rem 0.2rem;
+  border: 1px solid #d4dee1;
+  border-radius: 0.19rem;
+  background: #f7f9f9;
+  text-align: center;
+}
+
+.nn-backprop-parameter-cell strong {
+  color: #34464e;
+  font-size: 0.71rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.nn-backprop-parameter-cell small {
+  color: #738087;
+  font-size: 0.57rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+  text-align: center;
+  white-space: normal;
+}
+
+.nn-backprop-row-1 { border-color: #83b2cd; background: #edf6fb; }
+.nn-backprop-row-2 { border-color: #e5a16f; background: #fff3e8; }
+.nn-backprop-row-3 { border-color: #d88c9c; background: #fcedf0; }
+.nn-backprop-row-output { border-color: #8ab9a0; background: #edf7f0; }
+
+.nn-backprop-update-up { box-shadow: inset 0 -3px 0 #4d966c; }
+.nn-backprop-update-down { box-shadow: inset 0 -3px 0 #bc5d55; }
+
+.nn-backprop-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.nn-backprop-progress-grid {
+  display: grid;
+  grid-template-columns: minmax(16rem, 0.88fr) minmax(22rem, 1.35fr);
+  gap: 0.8rem;
+  align-items: stretch;
+}
+
+.nn-backprop-progress-summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  padding: 0.55rem;
+  border: 1px solid #dce4e7;
+  border-radius: 0.32rem;
+  background: #fbfcfc;
+}
+
+.nn-backprop-loss-figure {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  margin: 0;
+  padding: 0.5rem 0.65rem 0.4rem;
+  border: 1px solid #dce4e7;
+  border-radius: 0.32rem;
+  background: #fbfcfc;
+}
+
+.nn-backprop-loss-figure figcaption {
+  color: #4f636c;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+#nn-backprop-loss-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 10rem;
+}
+
+.nn-backprop-chart-axis {
+  stroke: #70828a;
+  stroke-width: 1.2;
+}
+
+.nn-backprop-chart-gridline {
+  stroke: #dbe5e8;
+  stroke-dasharray: 3 4;
+}
+
+.nn-backprop-chart-tick,
+.nn-backprop-chart-axis-label {
+  fill: #607078;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.nn-backprop-chart-tick { font-size: 11px; }
+.nn-backprop-chart-axis-label { font-size: 11px; font-weight: 700; }
+
+.nn-backprop-loss-line {
+  fill: none;
+  stroke: #c1793f;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.7;
+}
+
+.nn-backprop-loss-point { fill: #d7a06f; }
+.nn-backprop-loss-point-current { fill: #c1793f; stroke: #fff; stroke-width: 1.4; }
+
+.quarto-dark .nn-backprop-process-panel { border-color: #47718a; background: #24323b; }
+.quarto-dark .nn-backprop-network-panel { border-color: #47765b; background: #26372d; }
+.quarto-dark .nn-backprop-trace-panel { border-color: #765886; background: #312937; }
+.quarto-dark .nn-backprop-parameter-panel { border-color: #846741; background: #382f25; }
+.quarto-dark .nn-backprop-metrics-panel { border-color: #56616a; background: #1f2529; }
+
+.quarto-dark .nn-backprop-timeline-item,
+.quarto-dark .nn-backprop-metric,
+.quarto-dark .nn-backprop-matrix-block,
+.quarto-dark .nn-backprop-network-panel .nn-forward-figure svg {
+  border-color: #56616a;
+  background: #1f2529;
+}
+
+.quarto-dark .nn-backprop-stage-copy strong,
+.quarto-dark .nn-backprop-metric strong,
+.quarto-dark .nn-backprop-matrix-header,
+.quarto-dark .nn-backprop-parameter-cell strong {
+  color: #e2eaee;
+}
+
+.quarto-dark .nn-backprop-stage-copy span,
+.quarto-dark .nn-backprop-metric-label,
+.quarto-dark .nn-backprop-metric-detail,
+.quarto-dark .nn-backprop-plane-figure figcaption,
+.quarto-dark .nn-backprop-controls > label,
+.quarto-dark .nn-backprop-controls output,
+.quarto-dark .nn-backprop-parameter-cell small {
+  color: #c8d1d6;
+}
+
+.quarto-dark .nn-backprop-timeline-active { border-color: #6ba8c9; background: #263b47; }
+.quarto-dark .nn-backprop-timeline-complete { border-color: #72bd8c; background: #294333; }
+.quarto-dark .nn-backprop-metric-positive { background: #294333; }
+.quarto-dark .nn-backprop-metric-negative { background: #492e2b; }
+.quarto-dark .nn-backprop-metric-loss { background: #3e2d20; }
+.quarto-dark .nn-backprop-matrix-block { background: #2b2926; border-color: #665947; }
+.quarto-dark .nn-backprop-parameter-cell { border-color: #657076; background: #263034; }
+.quarto-dark .nn-backprop-progress-summary,
+.quarto-dark .nn-backprop-loss-figure { border-color: #56616a; background: #1f2529; }
+.quarto-dark .nn-backprop-loss-figure figcaption { color: #d9e2e6; }
+.quarto-dark .nn-backprop-chart-axis { stroke: #93a4ab; }
+.quarto-dark .nn-backprop-chart-gridline { stroke: #40515a; }
+.quarto-dark .nn-backprop-chart-tick,
+.quarto-dark .nn-backprop-chart-axis-label { fill: #c8d1d6; }
+.quarto-dark .nn-backprop-loss-point-current { stroke: #1f2529; }
+.quarto-dark .nn-backprop-gradient-equations { border-color: #47718a; border-left-color: #6ba8c9; background: #24323b; }
+.quarto-dark .nn-backprop-equation-copy strong,
+.quarto-dark .nn-backprop-formula { color: #e3f1f7; }
+.quarto-dark .nn-backprop-equation-copy span { color: #c8d1d6; }
+.quarto-dark .nn-backprop-formula-row { border-color: #476272; background: rgba(24, 37, 45, 0.65); }
+.quarto-dark .nn-backprop-formula-label { color: #9bc9e1; }
+.quarto-dark .nn-backprop-annotation { color: #a8c8d5; }
+.quarto-dark .nn-backprop-formula code { background: #314754; color: #b9e2f4; }
+.quarto-dark .nn-backprop-row-1 { border-color: #6ba8c9; background: #263b47; }
+.quarto-dark .nn-backprop-row-2 { border-color: #f0aa69; background: #3e2d20; }
+.quarto-dark .nn-backprop-row-3 { border-color: #eb91a3; background: #4c2a31; }
+.quarto-dark .nn-backprop-row-output { border-color: #72bd8c; background: #294333; }
+.quarto-dark .nn-backprop-signal { stroke: #8bc6ec; }
+.quarto-dark .nn-backprop-arrowhead { fill: #8bc6ec; }
+.quarto-dark .nn-backprop-toolbar { border-color: #56616a; background: #1f2529; }
+.quarto-dark .nn-selected-point-arrow { stroke: #8bc6ec; }
+.quarto-dark .nn-selected-point-arrowhead { fill: #8bc6ec; }
+
+@media (max-width: 850px) {
+  .nn-backprop-timeline { grid-template-columns: 1fr; }
+  .nn-backprop-stage-copy span { display: none; }
+  .nn-backprop-lower-grid { grid-template-columns: 1fr; }
+  .nn-backprop-progress-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 700px) {
+  .nn-backprop-stage { grid-template-columns: 1fr; }
+  .nn-backprop-plane-figure { justify-self: center; }
+  .nn-backprop-formula-row { grid-template-columns: 1fr; gap: 0.12rem; }
+  .nn-backprop-controls {
+    grid-template-columns: auto minmax(0, 1fr) 3rem;
+  }
+  .nn-backprop-controls .nn-dataset-controls {
+    grid-column: 1 / -1;
+    justify-content: start;
+  }
+}
+
+@media (max-width: 460px) {
+  .nn-backprop-toolbar {
+    flex-wrap: nowrap;
+    gap: 0.45rem;
+    overflow-x: auto;
+    padding: 0.35rem 0;
+    scrollbar-width: thin;
+  }
+
+  .nn-backprop-toolbar button,
+  .nn-backprop-toolbar .nn-forward-status {
+    flex: 0 0 auto;
+  }
+
+  .nn-backprop-toolbar .nn-forward-status {
+    min-height: 0;
+    padding: 0.34rem 0.55rem;
+    font-size: 0.78rem;
+  }
+
+  .nn-backprop-trace,
+  .nn-backprop-parameters,
+  .nn-backprop-metrics { grid-template-columns: 1fr; }
+}
+
 /* Confidence-interval coverage interactive. */
 .ci-explorer {
   margin: 1.5rem 0 2rem;
