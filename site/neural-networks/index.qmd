@@ -28,4 +28,6 @@ Trace how a prediction error produces gradients for every parameter in the
 same small network. Follow one selected observation through the chain rule,
 then watch the full-dataset gradient update the model.
 
+[Work through the notebook](02-backpropagation.ipynb)
+
 [Explore backpropagation](03-backpropagation-explorer.qmd)
