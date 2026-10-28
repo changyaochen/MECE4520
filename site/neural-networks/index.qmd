@@ -34,12 +34,12 @@ then watch the full-dataset gradient update the model.
 
 ### 3.1 Convolution fundamentals
 
-Build intuition for convolution before introducing a trainable neural network.
-Start with a sliding filter on a one-dimensional signal, then apply
-hand-designed filters to a two-dimensional image to see feature maps and
-weight sharing.
+Build intuition with interactive one- and two-dimensional examples, then work
+through the two-dimensional image calculation behind a CNN.
 
-[Work through the notebook](03-convolution-basics.ipynb)
+- [Explore 1D convolution](convolution-explorer.qmd)
+- [Explore 2D convolution](convolution-2d-explorer.qmd)
+- [Work through the 2D convolution notebook](03-convolution-basics.ipynb)
 
 ### 3.2 CNN on MNIST
 

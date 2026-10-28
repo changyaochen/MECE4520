@@ -1,0 +1,81 @@
+---
+title: "Explore a 1D convolution"
+toc: false
+page-layout: full
+---
+
+A convolution applies the same short filter at every location in a signal. This
+explorer uses a simple sensor trace: select a filter, move its five-sample
+window, and watch the corresponding response signal grow one local dot product
+at a time.
+
+::: {.callout-tip}
+## What to watch
+
+The upper plot overlays the original sensor trace with the selected five-point
+kernel. The kernel slides with the active window. At every sample time, its
+weights multiply the five values under the window, and their sum becomes one
+point in the lower response trace.
+:::
+
+```{=html}
+<div id="convolution-explorer" class="convolution-explorer" aria-label="Interactive one-dimensional convolution explorer">
+  <div class="convolution-control-panel">
+    <div class="convolution-kernel-copy">
+      <span class="convolution-eyebrow">Choose a five-tap kernel</span>
+      <p id="convolution-kernel-description">A change detector compares the samples immediately after and before the center.</p>
+    </div>
+    <div id="convolution-kernel-controls" class="convolution-kernel-controls" role="group" aria-label="Choose a convolution kernel">
+      <button type="button" class="convolution-kernel-card" data-kernel="average">
+        <span class="convolution-kernel-label">Smooth</span>
+        <svg class="convolution-kernel-thumbnail" data-kernel-thumbnail="average" aria-hidden="true"></svg>
+      </button>
+      <button type="button" class="convolution-kernel-card is-active" data-kernel="change" aria-pressed="true">
+        <span class="convolution-kernel-label">Changes</span>
+        <svg class="convolution-kernel-thumbnail" data-kernel-thumbnail="change" aria-hidden="true"></svg>
+      </button>
+      <button type="button" class="convolution-kernel-card" data-kernel="peak">
+        <span class="convolution-kernel-label">Peaks / dips</span>
+        <svg class="convolution-kernel-thumbnail" data-kernel-thumbnail="peak" aria-hidden="true"></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="convolution-toolbar clt-buttons">
+    <button id="convolution-previous" type="button">Previous window</button>
+    <button id="convolution-next" type="button" class="regression-sampling-primary">Next window</button>
+    <button id="convolution-play" type="button">Play all</button>
+    <button id="convolution-reset" type="button">Reset</button>
+    <output id="convolution-status" class="convolution-status" aria-live="polite"></output>
+  </div>
+
+  <div class="convolution-workbench">
+    <section class="convolution-panel convolution-visual-panel" aria-labelledby="convolution-visual-heading">
+      <div class="convolution-panel-heading">
+        <h2 id="convolution-visual-heading">Input with a moving kernel</h2>
+        <p>The shaded window identifies the five values being multiplied. The kernel curve slides over the input trace; the response grows from left to right below it.</p>
+      </div>
+      <figure class="convolution-figure">
+        <svg id="convolution-main-chart" role="img" aria-label="Original sensor trace overlaid with a moving five-point kernel and a convolution response"></svg>
+      </figure>
+      <p id="convolution-response-insight" class="convolution-response-insight"></p>
+    </section>
+
+    <section class="convolution-panel convolution-calculation-panel" aria-labelledby="convolution-calculation-heading">
+      <div class="convolution-panel-heading">
+        <h2 id="convolution-calculation-heading">One local weighted sum</h2>
+        <p>Each filter value is reused at every valid sample time.</p>
+      </div>
+      <div id="convolution-calculation" class="convolution-calculation" aria-live="polite"></div>
+    </section>
+  </div>
+</div>
+```
+
+The output is shown only where the full five-sample window lies inside the
+measured trace. In a CNN, the filter values are learned from training data
+rather than chosen by hand—but the local calculation is the same.
+
+<p style="margin-top: 1.5rem;"><a href="index.html">← Return to Neural networks</a></p>
+
+<script src="../assets/convolution-explorer.js?v=20261028h"></script>
