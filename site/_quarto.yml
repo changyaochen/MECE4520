@@ -12,7 +12,6 @@ project:
     - assets/nn-backpropagation-explorer.js
     - assets/convolution-explorer.js
     - assets/convolution-2d-explorer.js
-    - assets/convolution-1d-sliding-window.gif
     - assets/columbia-engineering-logo.png
     - assets/b7e2a9c4.html
 
