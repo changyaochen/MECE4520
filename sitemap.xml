@@ -2,214 +2,214 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://changyaochen.github.io/MECE4520/regression/03-confidence-and-prediction-intervals.html</loc>
-    <lastmod>2026-10-29T04:06:47.600Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.254Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/regression/05-one-hot-encoding.html</loc>
-    <lastmod>2026-10-29T04:06:47.603Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.257Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/regression/02-testing-a-regression-slope.html</loc>
-    <lastmod>2026-10-29T04:06:47.599Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.253Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/regression/04-multiple-linear-regression.html</loc>
-    <lastmod>2026-10-29T04:06:47.603Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.256Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/neural-networks/03-convolution-basics.html</loc>
-    <lastmod>2026-10-29T04:06:47.588Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.245Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/neural-networks/convolution-explorer.html</loc>
-    <lastmod>2026-10-29T04:06:47.593Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.249Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/neural-networks/index.html</loc>
-    <lastmod>2026-10-29T04:06:47.593Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.249Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/neural-networks/02-forward-propagation-explorer.html</loc>
-    <lastmod>2026-10-29T04:06:47.587Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.244Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/neural-networks/04-mnist-cnn.html</loc>
-    <lastmod>2026-10-29T04:06:47.589Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.246Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/classification/01-likelihood-and-mle.html</loc>
-    <lastmod>2026-10-29T04:06:47.560Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.223Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/classification/logistic-gradient-descent.html</loc>
-    <lastmod>2026-10-29T04:06:47.564Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.227Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/classification/03-classification-metrics.html</loc>
-    <lastmod>2026-10-29T04:06:47.563Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.226Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/classification/04-ranking-and-calibration.html</loc>
-    <lastmod>2026-10-29T04:06:47.564Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.227Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/03-variability-and-inference.html</loc>
-    <lastmod>2026-10-29T04:06:47.583Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.241Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/06-null-hypothesis-testing.html</loc>
-    <lastmod>2026-10-29T04:06:47.585Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.243Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/04-central-limit-theorem-notebook.html</loc>
-    <lastmod>2026-10-29T04:06:47.584Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.242Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/02-gas-turbine-data.html</loc>
-    <lastmod>2026-10-29T04:06:47.583Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.241Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/01-course-tools.html</loc>
-    <lastmod>2026-10-29T04:06:47.581Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.240Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/02-tree-growth-animation.html</loc>
-    <lastmod>2026-10-29T04:06:47.605Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.258Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/04-tree-overfitting-animation.html</loc>
-    <lastmod>2026-10-29T04:06:47.605Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.258Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/08-gradient-boosting.html</loc>
-    <lastmod>2026-10-29T04:06:47.610Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.261Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/05-random-forests.html</loc>
-    <lastmod>2026-10-29T04:06:47.608Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.260Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/03-gini-split-explorer.html</loc>
-    <lastmod>2026-10-29T04:06:47.605Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.258Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/index.html</loc>
-    <lastmod>2026-10-29T04:06:47.610Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.261Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/evaluation/02-ridge-regularization.html</loc>
-    <lastmod>2026-10-29T04:06:47.580Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.239Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/evaluation/index.html</loc>
-    <lastmod>2026-10-29T04:06:47.580Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.239Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/index.html</loc>
-    <lastmod>2026-10-29T04:06:47.585Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.243Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/evaluation/03-decision-tree-hyperparameter-tuning.html</loc>
-    <lastmod>2026-10-29T04:06:47.580Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.239Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/evaluation/01-polynomial-model-validation.html</loc>
-    <lastmod>2026-10-29T04:06:47.578Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.237Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/06-random-forest-explorer.html</loc>
-    <lastmod>2026-10-29T04:06:47.608Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.260Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/07-adaboost-explorer.html</loc>
-    <lastmod>2026-10-29T04:06:47.608Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.260Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/08-gradient-boosting-explorer.html</loc>
-    <lastmod>2026-10-29T04:06:47.609Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.261Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/01-decision-trees-from-scratch.html</loc>
-    <lastmod>2026-10-29T04:06:47.605Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.258Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/07-adaboost.html</loc>
-    <lastmod>2026-10-29T04:06:47.608Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.260Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/05-bagging-explorer.html</loc>
-    <lastmod>2026-10-29T04:06:47.605Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.258Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/tree-based/05-bagging.html</loc>
-    <lastmod>2026-10-29T04:06:47.605Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.258Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/index.html</loc>
-    <lastmod>2026-10-29T04:06:47.585Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.243Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/06-null-distribution-simulation.html</loc>
-    <lastmod>2026-10-29T04:06:47.584Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.242Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/07-type-i-and-ii-errors.html</loc>
-    <lastmod>2026-10-29T04:06:47.585Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.243Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/04-central-limit-theorem.html</loc>
-    <lastmod>2026-10-29T04:06:47.584Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.242Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/foundations/05-confidence-interval-coverage.html</loc>
-    <lastmod>2026-10-29T04:06:47.584Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.242Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/classification/likelihood-playground.html</loc>
-    <lastmod>2026-10-29T04:06:47.564Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.227Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/classification/index.html</loc>
-    <lastmod>2026-10-29T04:06:47.564Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.227Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/classification/threshold-explorer.html</loc>
-    <lastmod>2026-10-29T04:06:47.564Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.227Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/classification/02-logistic-regression-gradient-descent.html</loc>
-    <lastmod>2026-10-29T04:06:47.561Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.225Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/neural-networks/01-forward-propagation.html</loc>
-    <lastmod>2026-10-29T04:06:47.585Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.243Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/neural-networks/03-backpropagation-explorer.html</loc>
-    <lastmod>2026-10-29T04:06:47.587Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.245Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/neural-networks/02-backpropagation.html</loc>
-    <lastmod>2026-10-29T04:06:47.587Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.244Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/neural-networks/05-neu-cls-cnn.html</loc>
-    <lastmod>2026-10-29T04:06:47.593Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.249Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/neural-networks/convolution-2d-explorer.html</loc>
-    <lastmod>2026-10-29T04:06:47.593Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.249Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/regression/index.html</loc>
-    <lastmod>2026-10-29T04:06:47.603Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.257Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/regression/sampling-variability.html</loc>
-    <lastmod>2026-10-29T04:06:47.603Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.257Z</lastmod>
   </url>
   <url>
     <loc>https://changyaochen.github.io/MECE4520/regression/01-simple-linear-regression.html</loc>
-    <lastmod>2026-10-29T04:06:47.598Z</lastmod>
+    <lastmod>2026-10-29T18:00:58.252Z</lastmod>
   </url>
 </urlset>
