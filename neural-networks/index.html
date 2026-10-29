@@ -47,9 +47,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-33caa61be3504c6f535dff16892c3f5d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-a641a5c3cabf67377571dedadff2d895.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-33caa61be3504c6f535dff16892c3f5d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-2e783a83be0ab193e8de4d6bed4ef247.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-a3da2e641472fc8f3514a534a633a6c3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-2e783a83be0ab193e8de4d6bed4ef247.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -370,6 +370,7 @@ window.Quarto = {
   <ul>
   <li><a href="#forward-propagation" id="toc-forward-propagation">1. Forward propagation</a></li>
   <li><a href="#backpropagation" id="toc-backpropagation">2. Backpropagation</a></li>
+  <li><a href="#convolutional-neural-networks" id="toc-convolutional-neural-networks">3. Convolutional neural networks</a></li>
   </ul>
 </nav>
 <p>Neural networks make predictions by passing inputs through a sequence of linear transformations and activation functions. The first notebook traces that calculation with a small gas-turbine example before introducing how a network learns its weights.</p>
@@ -385,8 +386,30 @@ window.Quarto = {
 <p>Trace how a prediction error produces gradients for every parameter in the same small network. Follow one selected observation through the chain rule, then watch the full-dataset gradient update the model.</p>
 <p><a href="../neural-networks/02-backpropagation.html">Work through the notebook</a></p>
 <p><a href="../neural-networks/03-backpropagation-explorer.html">Explore backpropagation</a></p>
+</section>
+<section id="convolutional-neural-networks" class="level2">
+<h2 class="anchored" data-anchor-id="convolutional-neural-networks">3. Convolutional neural networks</h2>
+<section id="convolution-fundamentals" class="level3">
+<h3 class="anchored" data-anchor-id="convolution-fundamentals">3.1 Convolution fundamentals</h3>
+<p>Build intuition with interactive one- and two-dimensional examples, then work through the two-dimensional image calculation behind a CNN.</p>
+<ul>
+<li><a href="../neural-networks/convolution-explorer.html">Explore 1D convolution</a></li>
+<li><a href="../neural-networks/convolution-2d-explorer.html">Explore 2D convolution</a></li>
+<li><a href="../neural-networks/03-convolution-basics.html">Work through the 2D convolution notebook</a></li>
+</ul>
+</section>
+<section id="cnn-on-mnist" class="level3">
+<h3 class="anchored" data-anchor-id="cnn-on-mnist">3.2 CNN on MNIST</h3>
+<p>Use MNIST to build a first end-to-end PyTorch CNN: image tensors, mini-batches, convolutional layers, training, and error analysis.</p>
+<p><a href="../neural-networks/04-mnist-cnn.html">Work through the notebook</a></p>
+</section>
+<section id="cnn-for-steel-surface-inspection" class="level3">
+<h3 class="anchored" data-anchor-id="cnn-for-steel-surface-inspection">3.3 CNN for steel-surface inspection</h3>
+<p>Reuse the same workflow for the six-class NEU-CLS steel-surface defect task. Build a custom dataset, train a compact CNN, and inspect held-out errors.</p>
+<p><a href="../neural-networks/05-neu-cls-cnn.html">Work through the notebook</a></p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
