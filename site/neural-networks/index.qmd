@@ -31,3 +31,28 @@ then watch the full-dataset gradient update the model.
 [Work through the notebook](02-backpropagation.ipynb)
 
 [Explore backpropagation](03-backpropagation-explorer.qmd)
+
+## 3. Convolutional neural networks
+
+### 3.1 Convolution fundamentals
+
+Build intuition with interactive one- and two-dimensional examples, then work
+through the two-dimensional image calculation behind a CNN.
+
+- [Explore 1D convolution](convolution-explorer.qmd)
+- [Explore 2D convolution](convolution-2d-explorer.qmd)
+- [Work through the 2D convolution notebook](03-convolution-basics.ipynb)
+
+### 3.2 CNN on MNIST
+
+Use MNIST to build a first end-to-end PyTorch CNN: image tensors,
+mini-batches, convolutional layers, training, and error analysis.
+
+[Work through the notebook](04-mnist-cnn.ipynb)
+
+### 3.3 CNN for steel-surface inspection
+
+Reuse the same workflow for the six-class NEU-CLS steel-surface defect task.
+Build a custom dataset, train a compact CNN, and inspect held-out errors.
+
+[Work through the notebook](05-neu-cls-cnn.ipynb)

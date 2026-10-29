@@ -10,6 +10,9 @@ project:
     - assets/gradient-boosting-explorer.js
     - assets/nn-forward-explorer.js
     - assets/nn-backpropagation-explorer.js
+    - assets/convolution-explorer.js
+    - assets/convolution-2d-explorer.js
+    - assets/columbia-engineering-logo.png
     - assets/b7e2a9c4.html
 
 website:

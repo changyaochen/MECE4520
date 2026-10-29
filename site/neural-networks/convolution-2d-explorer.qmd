@@ -1,0 +1,77 @@
+---
+title: "Explore a 2D convolution"
+toc: false
+page-layout: full
+---
+
+A two-dimensional convolution applies one small matrix of weights at every
+valid image location. This explorer uses a grayscale Columbia Engineering logo:
+choose a 3 × 3 kernel, then watch its output image appear as the
+kernel scans across the original.
+
+::: {.callout-tip}
+## What to watch
+
+The red square marks the current 3 × 3 image patch. Its nine pixel
+values are multiplied by the nine kernel weights, summed, and written to the
+highlighted location in the filtered image.
+:::
+
+```{=html}
+<div id="convolution-2d-explorer" class="convolution-2d-explorer" aria-label="Interactive two-dimensional convolution explorer">
+  <div class="convolution-2d-controls">
+    <div>
+      <span class="convolution-eyebrow">Choose a 3 × 3 kernel</span>
+      <p id="convolution-2d-description">A local mean filter smooths small visual variations.</p>
+    </div>
+    <div class="convolution-2d-filter-buttons" role="group" aria-label="Choose a two-dimensional convolution kernel">
+      <button type="button" class="convolution-2d-filter is-active" data-filter="blur">Blur</button>
+      <button type="button" class="convolution-2d-filter" data-filter="vertical">Vertical edges</button>
+      <button type="button" class="convolution-2d-filter" data-filter="horizontal">Horizontal edges</button>
+      <button type="button" class="convolution-2d-filter" data-filter="sharpen">Sharpen</button>
+    </div>
+  </div>
+
+  <div class="convolution-2d-toolbar clt-buttons">
+    <button id="convolution-2d-play" type="button" class="regression-sampling-primary">Play all</button>
+    <button id="convolution-2d-reset" type="button">Reset</button>
+    <output id="convolution-2d-status" class="convolution-status" aria-live="polite"></output>
+  </div>
+
+  <div class="convolution-2d-workbench">
+    <section class="convolution-2d-panel convolution-2d-images" aria-labelledby="convolution-2d-images-heading">
+      <div class="convolution-panel-heading">
+        <h2 id="convolution-2d-images-heading">A kernel slides over the image</h2>
+        <p>The filtered image starts blank, then receives one output pixel for each valid 3 × 3 window.</p>
+      </div>
+      <div class="convolution-2d-image-grid">
+        <figure>
+          <figcaption>Original grayscale image</figcaption>
+          <canvas id="convolution-2d-source" width="336" height="336" aria-label="Original grayscale Columbia Engineering logo with an active three-by-three patch"></canvas>
+        </figure>
+        <figure>
+          <figcaption>Filtered image</figcaption>
+          <canvas id="convolution-2d-output" width="336" height="336" aria-label="Filtered output image with the current output pixel highlighted"></canvas>
+        </figure>
+      </div>
+    </section>
+
+    <aside class="convolution-2d-panel convolution-2d-kernel-panel" aria-labelledby="convolution-2d-kernel-heading">
+      <div class="convolution-panel-heading">
+        <h2 id="convolution-2d-kernel-heading">Current kernel</h2>
+        <p>The same nine weights are reused at every image location.</p>
+      </div>
+      <div id="convolution-2d-kernel-grid" class="convolution-2d-kernel-grid" aria-live="polite"></div>
+      <p id="convolution-2d-formula" class="convolution-2d-formula"></p>
+    </aside>
+  </div>
+</div>
+```
+
+For the two edge filters, the displayed image shows the *magnitude* of the
+signed convolution response, so both dark-to-light and light-to-dark edges are
+visible. The image is the [Columbia Engineering logo](https://en.wikipedia.org/wiki/File:Columbia_Engineering_logo.svg), rendered here in grayscale.
+
+<p style="margin-top: 1.5rem;"><a href="index.html">← Return to Neural networks</a></p>
+
+<script src="../assets/convolution-2d-explorer.js?v=20261028a"></script>
