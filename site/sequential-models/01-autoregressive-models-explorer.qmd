@@ -1,0 +1,82 @@
+---
+title: "Explore autoregressive model order"
+toc: false
+page-layout: full
+---
+
+An autoregressive model of order $p$, written AR($p$), predicts the next value
+$X_t$ of a series from its preceding $p$ values:
+
+$$
+\widehat{X}_t
+= \beta_0 + \beta_1X_{t-1}
++ \cdots + \beta_pX_{t-p}.
+$$
+
+Here, $X_t$ is the hourly oil temperature (`OT`) in the ETT-small transformer
+data. This explorer deliberately uses only `OT`: the six load measurements are
+not inputs to these plain AR($p$) models.
+
+::: {.callout-tip}
+## What to watch
+
+Increasing $p$ changes the length of the history window and the number of
+learned coefficients. More history is not automatically better: the models
+below are all fitted on an earlier portion of the same real series and compared
+on later, held-out hours.
+:::
+
+```{=html}
+<div id="ar-order-explorer" class="ar-order-explorer" aria-label="Autoregressive model-order comparison">
+  <div class="ar-order-toolbar clt-buttons">
+    <div class="ar-order-choice" role="group" aria-label="Choose autoregressive order">
+      <span class="ar-order-label">AR order</span>
+      <button type="button" data-ar-order="1" class="is-active" aria-pressed="true">p = 1</button>
+      <button type="button" data-ar-order="6" aria-pressed="false">p = 6</button>
+      <button type="button" data-ar-order="24" aria-pressed="false">p = 24</button>
+      <button type="button" data-ar-order="168" aria-pressed="false">p = 168</button>
+    </div>
+    <div class="ar-order-choice" role="group" aria-label="Choose forecasting scenario">
+      <span class="ar-order-label">Forecasting scenario</span>
+      <button type="button" data-ar-scenario="easy" class="is-active" aria-pressed="true">Easy: actual lags</button>
+      <button type="button" data-ar-scenario="difficult" aria-pressed="false">Difficult: recursive</button>
+    </div>
+    <div class="ar-order-step-controls" role="group" aria-label="Zoom controls">
+      <button id="ar-order-focus-test" type="button">Focus on test</button>
+      <button id="ar-order-zoom-in" type="button">Zoom in</button>
+      <button id="ar-order-zoom-out" type="button">Zoom out</button>
+      <button id="ar-order-zoom-reset" type="button">Reset</button>
+    </div>
+  </div>
+
+  <section class="ar-order-panel ar-order-chart-panel" aria-labelledby="ar-order-chart-heading">
+    <div class="ar-order-panel-heading">
+      <h2 id="ar-order-chart-heading">One chronological train/test split</h2>
+      <p id="ar-order-chart-copy"></p>
+    </div>
+    <figure class="ar-order-figure">
+      <svg id="ar-order-chart" role="img" aria-label="Chronological training and test split with a selected autoregressive forecast"></svg>
+    </figure>
+  </section>
+
+  <section class="ar-order-panel ar-order-detail-panel" aria-labelledby="ar-order-detail-heading">
+    <div class="ar-order-panel-heading">
+      <h2 id="ar-order-detail-heading">Selected forecast</h2>
+      <p>Choose an AR order and a forecasting scenario above.</p>
+    </div>
+    <div id="ar-order-detail" class="ar-order-detail" aria-live="polite"></div>
+  </section>
+</div>
+```
+
+The ETT-small data contain hourly transformer oil temperature and six
+load-related measurements. A later model can use all of those variables; this
+page first isolates the fixed, univariate history rule that neural sequential
+models generalize.
+
+Source: [Electricity Transformer Temperature data](https://github.com/zhouhaoyi/ETDataset).
+
+<p style="margin-top: 1.5rem;"><a href="index.html">← Return to Sequential models</a></p>
+
+<script src="../assets/ar-order-explorer-data.js?v=20261031c"></script>
+<script src="../assets/ar-order-explorer.js?v=20261031c"></script>

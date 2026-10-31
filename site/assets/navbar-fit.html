@@ -1,0 +1,67 @@
+<script>
+  (() => {
+    function enableFittedNavbar() {
+      const header = document.querySelector("#quarto-header");
+      const navbar = header?.querySelector(".navbar");
+      const container = header?.querySelector(".navbar-container");
+      const links = header?.querySelector(".navbar-nav");
+
+      if (!navbar || !container || !links) {
+        return;
+      }
+
+      let observedWidth = -1;
+
+      function outerWidth(element) {
+        const styles = window.getComputedStyle(element);
+        return element.getBoundingClientRect().width
+          + Number.parseFloat(styles.marginLeft)
+          + Number.parseFloat(styles.marginRight);
+      }
+
+      function updateNavbarMode() {
+        const availableWidth = container.getBoundingClientRect().width;
+        if (Math.abs(availableWidth - observedWidth) < 1) {
+          return;
+        }
+        observedWidth = availableWidth;
+
+        // Bootstrap handles genuinely narrow screens. Above its normal
+        // breakpoint, measure the actual labels and collapse only if needed.
+        navbar.classList.remove("navbar-auto-collapse");
+        if (!window.matchMedia("(min-width: 992px)").matches) {
+          return;
+        }
+
+        const linkWidth = Array.from(links.children)
+          .reduce((total, item) => total + outerWidth(item), 0);
+        const fixedWidth = Array.from(container.children)
+          .filter((child) => child.id !== "navbarCollapse")
+          .reduce((total, child) => total + outerWidth(child), 0);
+        const breathingRoom = 32;
+
+        if (linkWidth + fixedWidth + breathingRoom > availableWidth) {
+          navbar.classList.add("navbar-auto-collapse");
+        }
+      }
+
+      const resizeObserver = new ResizeObserver(() => {
+        window.requestAnimationFrame(updateNavbarMode);
+      });
+      resizeObserver.observe(container);
+      window.addEventListener("resize", updateNavbarMode);
+      window.addEventListener("load", updateNavbarMode, { once: true });
+      document.fonts?.ready.then(() => {
+        observedWidth = -1;
+        updateNavbarMode();
+      });
+      window.requestAnimationFrame(updateNavbarMode);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", enableFittedNavbar, { once: true });
+    } else {
+      enableFittedNavbar();
+    }
+  })();
+</script>
