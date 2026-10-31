@@ -1,6 +1,6 @@
 <script>
   (() => {
-    function enableFittedNavbar() {
+    function fitNavbar() {
       const header = document.querySelector("#quarto-header");
       const navbar = header?.querySelector(".navbar");
       const container = header?.querySelector(".navbar-container");
@@ -10,7 +10,7 @@
         return;
       }
 
-      let observedWidth = -1;
+      let lastWidth = -1;
 
       function outerWidth(element) {
         const styles = window.getComputedStyle(element);
@@ -19,17 +19,19 @@
           + Number.parseFloat(styles.marginRight);
       }
 
-      function updateNavbarMode() {
+      function update() {
         const availableWidth = container.getBoundingClientRect().width;
-        if (Math.abs(availableWidth - observedWidth) < 1) {
+        if (Math.abs(availableWidth - lastWidth) < 1) {
           return;
         }
-        observedWidth = availableWidth;
+        lastWidth = availableWidth;
 
-        // Bootstrap handles genuinely narrow screens. Above its normal
-        // breakpoint, measure the actual labels and collapse only if needed.
-        navbar.classList.remove("navbar-auto-collapse");
+        navbar.classList.remove("navbar-auto-collapse", "navbar-compact-layout");
+
+        // Let Bootstrap handle phone-sized viewports. For wider viewports,
+        // measure the actual label widths instead of assuming a fixed break.
         if (!window.matchMedia("(min-width: 992px)").matches) {
+          navbar.classList.add("navbar-compact-layout");
           return;
         }
 
@@ -38,30 +40,31 @@
         const fixedWidth = Array.from(container.children)
           .filter((child) => child.id !== "navbarCollapse")
           .reduce((total, child) => total + outerWidth(child), 0);
-        const breathingRoom = 32;
 
+        // Keep a little room for the hamburger that appears after collapse
+        // and for the natural gaps between header controls.
+        const breathingRoom = 76;
         if (linkWidth + fixedWidth + breathingRoom > availableWidth) {
-          navbar.classList.add("navbar-auto-collapse");
+          navbar.classList.add("navbar-auto-collapse", "navbar-compact-layout");
         }
       }
 
       const resizeObserver = new ResizeObserver(() => {
-        window.requestAnimationFrame(updateNavbarMode);
+        window.requestAnimationFrame(update);
       });
       resizeObserver.observe(container);
-      window.addEventListener("resize", updateNavbarMode);
-      window.addEventListener("load", updateNavbarMode, { once: true });
+      window.addEventListener("resize", update);
       document.fonts?.ready.then(() => {
-        observedWidth = -1;
-        updateNavbarMode();
+        lastWidth = -1;
+        update();
       });
-      window.requestAnimationFrame(updateNavbarMode);
+      window.requestAnimationFrame(update);
     }
 
     if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", enableFittedNavbar, { once: true });
+      document.addEventListener("DOMContentLoaded", fitNavbar, { once: true });
     } else {
-      enableFittedNavbar();
+      fitNavbar();
     }
   })();
 </script>

@@ -10,36 +10,70 @@
   padding-bottom: 0;
 }
 
-/* Collapse only when the real labels no longer fit.  Bootstrap handles the
-   usual mobile breakpoint; this class extends that behavior to narrower
-   desktop windows, where the navigation otherwise crowds or overflows. */
+/* The compact layout is applied on phones by Bootstrap and dynamically on
+   wider windows when the real navigation labels no longer fit. */
+#quarto-header .navbar.navbar-compact-layout .navbar-container {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-toggler {
+  order: 1;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-brand-container {
+  order: 2;
+  margin: 0 0 0 0.45rem !important;
+}
+
+#quarto-header .navbar.navbar-compact-layout .quarto-navbar-tools {
+  order: 3;
+  margin-left: auto;
+}
+
+#quarto-header .navbar.navbar-compact-layout #quarto-search {
+  order: 4;
+  margin-left: 0.45rem;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse {
+  order: 5;
+  flex-basis: 100%;
+  width: 100%;
+}
+
+/* Override the desktop flex-row rules once the dynamic compact mode is on. */
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show {
+  display: block !important;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show .navbar-nav {
+  align-items: stretch;
+  flex-direction: column !important;
+  margin: 0.35rem 0 0.55rem !important;
+  width: 100%;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show .nav-item,
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show .nav-link {
+  width: 100%;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show .nav-link {
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show .nav-item:last-child .nav-link {
+  border-bottom: 0;
+}
 @media (min-width: 992px) {
   #quarto-header .navbar.navbar-auto-collapse .navbar-toggler {
     display: block;
   }
 
-  #quarto-header .navbar.navbar-auto-collapse .navbar-collapse {
-    flex-basis: 100%;
-    flex-grow: 1;
-  }
-
   #quarto-header .navbar.navbar-auto-collapse .navbar-collapse.collapse:not(.show) {
     display: none !important;
-  }
-
-  #quarto-header .navbar.navbar-auto-collapse .navbar-collapse.show {
-    display: block !important;
-    width: 100%;
-  }
-
-  #quarto-header .navbar.navbar-auto-collapse .navbar-nav {
-    align-items: stretch;
-    padding: 0.35rem 0 0.5rem;
-  }
-
-  #quarto-header .navbar.navbar-auto-collapse .nav-link {
-    padding-left: 0;
-    padding-right: 0;
   }
 }
 
