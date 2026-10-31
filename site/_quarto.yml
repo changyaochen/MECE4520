@@ -47,6 +47,7 @@ format:
     syntax-highlighting: arrow
     respect-user-color-scheme: true
     css: styles.css
+    include-after-body: assets/navbar-fit.html
     toc: true
     toc-location: body
     toc-title: "On this page"
