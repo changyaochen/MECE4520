@@ -10,6 +10,73 @@
   padding-bottom: 0;
 }
 
+/* The compact layout is applied on phones by Bootstrap and dynamically on
+   wider windows when the real navigation labels no longer fit. */
+#quarto-header .navbar.navbar-compact-layout .navbar-container {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-toggler {
+  order: 1;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-brand-container {
+  order: 2;
+  margin: 0 0 0 0.45rem !important;
+}
+
+#quarto-header .navbar.navbar-compact-layout .quarto-navbar-tools {
+  order: 3;
+  margin-left: auto;
+}
+
+#quarto-header .navbar.navbar-compact-layout #quarto-search {
+  order: 4;
+  margin-left: 0.45rem;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse {
+  order: 5;
+  flex-basis: 100%;
+  width: 100%;
+}
+
+/* Override the desktop flex-row rules once the dynamic compact mode is on. */
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show {
+  display: block !important;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show .navbar-nav {
+  align-items: stretch;
+  flex-direction: column !important;
+  margin: 0.35rem 0 0.55rem !important;
+  width: 100%;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show .nav-item,
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show .nav-link {
+  width: 100%;
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show .nav-link {
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#quarto-header .navbar.navbar-compact-layout .navbar-collapse.show .nav-item:last-child .nav-link {
+  border-bottom: 0;
+}
+@media (min-width: 992px) {
+  #quarto-header .navbar.navbar-auto-collapse .navbar-toggler {
+    display: block;
+  }
+
+  #quarto-header .navbar.navbar-auto-collapse .navbar-collapse.collapse:not(.show) {
+    display: none !important;
+  }
+}
+
 /* Make Quarto's light/dark control self-explanatory. */
 #quarto-header .quarto-color-scheme-toggle {
   align-items: center;
@@ -5602,6 +5669,487 @@
 .quarto-dark #convolution-explorer .convolution-toolbar {
   border-color: #56616a;
   background: #1f2529;
+}
+
+/* Autoregressive model-order explorer. */
+#ar-order-explorer {
+  max-width: 68rem;
+  margin: 1.25rem auto 2rem;
+}
+
+.ar-order-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.68rem;
+  margin: 0.82rem 0;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #d9e1e5;
+  background: #fff;
+}
+
+.ar-order-choice,
+.ar-order-step-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.42rem;
+}
+
+.ar-order-step-controls {
+  margin-left: auto;
+}
+
+.ar-order-label {
+  margin-right: 0.08rem;
+  color: #42535b;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.ar-order-toolbar button {
+  min-height: 2.12rem;
+  padding: 0.34rem 0.65rem;
+  border: 1px solid #9bbbd0;
+  border-radius: 0.36rem;
+  background: #fff;
+  color: #2c5e7a;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.ar-order-toolbar button:hover:not(:disabled),
+.ar-order-toolbar button:focus-visible {
+  border-color: #2f7395;
+  background: #eaf4fb;
+}
+
+.ar-order-toolbar button.is-active {
+  border-color: #2f7395;
+  background: #2f7395;
+  color: #fff;
+}
+
+.ar-order-status {
+  color: #52616a;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ar-order-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.9fr);
+  gap: 0.85rem;
+  align-items: stretch;
+}
+
+.ar-order-panel {
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid #d5dfe3;
+  border-radius: 0.42rem;
+  background: #fff;
+}
+
+.ar-order-chart-panel {
+  border-top: 4px solid #3478a6;
+  background: #f7fbfe;
+}
+
+.ar-order-detail-panel {
+  border-top: 4px solid #dd6b20;
+  background: #fffaf5;
+}
+
+.ar-order-comparison-panel {
+  margin-top: 0.85rem;
+  border-top: 4px solid #287650;
+  background: #f6fbf7;
+}
+
+.ar-order-panel-heading {
+  margin-bottom: 0.62rem;
+}
+
+.ar-order-panel-heading h2,
+.ar-order-panel-heading p {
+  margin: 0;
+}
+
+.ar-order-panel-heading h2 {
+  color: #34454d;
+  font-size: 1rem;
+}
+
+.ar-order-panel-heading p {
+  margin-top: 0.16rem;
+  color: #5d6a72;
+  font-size: 0.79rem;
+  line-height: 1.36;
+}
+
+.ar-order-figure {
+  margin: 0;
+}
+
+.ar-order-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  border: 1px solid #d6e0e4;
+  border-radius: 0.3rem;
+  background: #fff;
+}
+
+.ar-order-detail {
+  display: grid;
+  gap: 0.68rem;
+}
+
+.ar-order-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.42rem;
+}
+
+.ar-order-stat {
+  min-width: 0;
+  padding: 0.45rem;
+  border: 1px solid #edd6bf;
+  border-radius: 0.3rem;
+  background: #fff;
+}
+
+.ar-order-stat span,
+.ar-order-stat small {
+  display: block;
+  color: #6c6259;
+  font-size: 0.67rem;
+  line-height: 1.2;
+}
+
+.ar-order-stat strong {
+  display: block;
+  margin: 0.16rem 0 0.1rem;
+  color: #9a4e1c;
+  font-size: 0.9rem;
+  line-height: 1.16;
+}
+
+.ar-order-formula {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.56rem 0.64rem;
+  border-left: 4px solid #dd6b20;
+  background: #fff;
+  color: #43535b;
+  line-height: 1.35;
+}
+
+.ar-order-formula span {
+  color: #6c6259;
+  font-size: 0.71rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ar-order-formula strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.ar-order-prediction > span {
+  color: #6c6259;
+  font-size: 0.71rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.ar-order-prediction dl {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.22rem;
+  margin: 0.3rem 0 0;
+}
+
+.ar-order-prediction dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid #ecdccf;
+}
+
+.ar-order-prediction dt,
+.ar-order-prediction dd {
+  margin: 0;
+  color: #4d5c64;
+  font-size: 0.76rem;
+}
+
+.ar-order-prediction dd {
+  color: #9a4e1c;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.ar-order-weight-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  color: #43535b;
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ar-order-weight-table caption {
+  margin-bottom: 0.28rem;
+  color: #6c6259;
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-align: left;
+}
+
+.ar-order-weight-table th,
+.ar-order-weight-table td {
+  padding: 0.26rem 0.34rem;
+  border-bottom: 1px solid #ecdccf;
+  text-align: left;
+}
+
+.ar-order-weight-table th {
+  color: #6c6259;
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+.ar-order-weight-table td:last-child,
+.ar-order-weight-table th:last-child {
+  text-align: right;
+}
+
+.ar-order-detail-note {
+  margin: 0;
+  color: #5d6a72;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.quarto-dark .ar-order-toolbar {
+  border-color: #56616a;
+  background: #1f2529;
+}
+
+.quarto-dark .ar-order-label,
+.quarto-dark .ar-order-status,
+.quarto-dark .ar-order-panel-heading p,
+.quarto-dark .ar-order-detail-note {
+  color: #c8d1d6;
+}
+
+.quarto-dark .ar-order-toolbar button {
+  border-color: #6ba8c9;
+  background: #263b47 !important;
+  color: #cce4f2 !important;
+}
+
+.quarto-dark .ar-order-toolbar button:hover:not(:disabled),
+.quarto-dark .ar-order-toolbar button:focus-visible {
+  background: #344d5d !important;
+}
+
+.quarto-dark .ar-order-toolbar button.is-active {
+  border-color: #8bc2df;
+  background: #347da9 !important;
+  color: #fff !important;
+}
+
+.quarto-dark .ar-order-panel {
+  border-color: #56616a;
+  background: #1f2529;
+}
+
+.quarto-dark .ar-order-chart-panel {
+  background: #24323b;
+}
+
+.quarto-dark .ar-order-detail-panel {
+  background: #362b22;
+}
+
+.quarto-dark .ar-order-comparison-panel {
+  background: #26372d;
+}
+
+.quarto-dark .ar-order-panel-heading h2 {
+  color: #e5ecef;
+}
+
+.quarto-dark .ar-order-figure svg,
+.quarto-dark .ar-order-formula,
+.quarto-dark .ar-order-stat {
+  border-color: #56616a;
+  background: #20272b;
+}
+
+.quarto-dark .ar-order-stat span,
+.quarto-dark .ar-order-stat small,
+.quarto-dark .ar-order-formula span,
+.quarto-dark .ar-order-prediction > span,
+.quarto-dark .ar-order-weight-table caption,
+.quarto-dark .ar-order-weight-table th {
+  color: #d7c7b5;
+}
+
+.quarto-dark .ar-order-stat strong,
+.quarto-dark .ar-order-prediction dd {
+  color: #f0b27c;
+}
+
+.quarto-dark .ar-order-formula,
+.quarto-dark .ar-order-prediction dt,
+.quarto-dark .ar-order-weight-table {
+  color: #e5ecef;
+}
+
+.quarto-dark .ar-order-prediction dl > div,
+.quarto-dark .ar-order-weight-table th,
+.quarto-dark .ar-order-weight-table td {
+  border-color: #5a4c41;
+}
+
+@media (max-width: 800px) {
+  .ar-order-workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .ar-order-step-controls {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .ar-order-toolbar button {
+    flex: 1 1 calc(50% - 0.3rem);
+  }
+
+  .ar-order-choice,
+  .ar-order-step-controls {
+    width: 100%;
+  }
+
+  .ar-order-status {
+    width: 100%;
+    text-align: center;
+  }
+
+  .ar-order-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Static AR(p) comparison layout. */
+.ar-order-forecast-panel {
+  margin-top: 0.85rem;
+  border-top: 4px solid #dd6b20;
+  background: #fffaf5;
+}
+
+.ar-order-forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.72rem;
+}
+
+.ar-order-forecast-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  border: 1px solid #e7d5c4;
+  border-radius: 0.3rem;
+  background: #fff;
+}
+
+.ar-order-summary {
+  margin-top: 0.85rem;
+  overflow-x: auto;
+}
+
+.ar-order-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #d5dfe3;
+  background: #fff;
+  color: #43535b;
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ar-order-summary-table caption {
+  padding: 0.52rem 0.7rem;
+  background: #f7fbfe;
+  color: #52616a;
+  font-size: 0.78rem;
+  text-align: left;
+}
+
+.ar-order-summary-table th,
+.ar-order-summary-table td {
+  padding: 0.48rem 0.7rem;
+  border-bottom: 1px solid #dfe7ea;
+  text-align: left;
+}
+
+.ar-order-summary-table thead th {
+  background: #eaf4fb;
+  color: #355766;
+  font-size: 0.75rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.ar-order-summary-table tbody tr:last-child th,
+.ar-order-summary-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.quarto-dark .ar-order-forecast-panel {
+  background: #362b22;
+}
+
+.quarto-dark .ar-order-forecast-chart,
+.quarto-dark .ar-order-summary-table {
+  border-color: #56616a;
+  background: #20272b;
+}
+
+.quarto-dark .ar-order-summary-table {
+  color: #e5ecef;
+}
+
+.quarto-dark .ar-order-summary-table caption {
+  background: #24323b;
+  color: #c8d1d6;
+}
+
+.quarto-dark .ar-order-summary-table thead th {
+  background: #263b47;
+  color: #cce4f2;
+}
+
+.quarto-dark .ar-order-summary-table th,
+.quarto-dark .ar-order-summary-table td {
+  border-color: #56616a;
+}
+
+@media (max-width: 700px) {
+  .ar-order-forecast-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Two-dimensional convolution explorer. */

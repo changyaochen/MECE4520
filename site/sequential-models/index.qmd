@@ -1,0 +1,15 @@
+---
+title: "Sequential models"
+---
+
+Sequential models make predictions from ordered observations. The first
+explorer starts from the simplest case: predicting one future value from a
+fixed window of its own past values.
+
+## 1. Autoregressive models
+
+Use real hourly transformer oil-temperature measurements to see what changes
+when an autoregressive model is allowed to look back one hour, several hours,
+one day, or one week.
+
+[Explore autoregressive model order](01-autoregressive-models-explorer.qmd)

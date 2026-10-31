@@ -1,0 +1,70 @@
+<script>
+  (() => {
+    function fitNavbar() {
+      const header = document.querySelector("#quarto-header");
+      const navbar = header?.querySelector(".navbar");
+      const container = header?.querySelector(".navbar-container");
+      const links = header?.querySelector(".navbar-nav");
+
+      if (!navbar || !container || !links) {
+        return;
+      }
+
+      let lastWidth = -1;
+
+      function outerWidth(element) {
+        const styles = window.getComputedStyle(element);
+        return element.getBoundingClientRect().width
+          + Number.parseFloat(styles.marginLeft)
+          + Number.parseFloat(styles.marginRight);
+      }
+
+      function update() {
+        const availableWidth = container.getBoundingClientRect().width;
+        if (Math.abs(availableWidth - lastWidth) < 1) {
+          return;
+        }
+        lastWidth = availableWidth;
+
+        navbar.classList.remove("navbar-auto-collapse", "navbar-compact-layout");
+
+        // Let Bootstrap handle phone-sized viewports. For wider viewports,
+        // measure the actual label widths instead of assuming a fixed break.
+        if (!window.matchMedia("(min-width: 992px)").matches) {
+          navbar.classList.add("navbar-compact-layout");
+          return;
+        }
+
+        const linkWidth = Array.from(links.children)
+          .reduce((total, item) => total + outerWidth(item), 0);
+        const fixedWidth = Array.from(container.children)
+          .filter((child) => child.id !== "navbarCollapse")
+          .reduce((total, child) => total + outerWidth(child), 0);
+
+        // Keep a little room for the hamburger that appears after collapse
+        // and for the natural gaps between header controls.
+        const breathingRoom = 76;
+        if (linkWidth + fixedWidth + breathingRoom > availableWidth) {
+          navbar.classList.add("navbar-auto-collapse", "navbar-compact-layout");
+        }
+      }
+
+      const resizeObserver = new ResizeObserver(() => {
+        window.requestAnimationFrame(update);
+      });
+      resizeObserver.observe(container);
+      window.addEventListener("resize", update);
+      document.fonts?.ready.then(() => {
+        lastWidth = -1;
+        update();
+      });
+      window.requestAnimationFrame(update);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fitNavbar, { once: true });
+    } else {
+      fitNavbar();
+    }
+  })();
+</script>
