@@ -5802,6 +5802,17 @@
   background: #fff;
 }
 
+#ar-order-chart.is-pannable {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#ar-order-chart.is-panning {
+  cursor: grabbing;
+}
+
 .ar-order-detail {
   display: grid;
   gap: 0.68rem;
@@ -6406,5 +6417,579 @@
 
   #convolution-explorer .convolution-kernel-thumbnail {
     width: 4rem;
+  }
+}
+
+/* Silverbox AR, ARX, and recurrent-model explorer. */
+#silverbox-explorer {
+  max-width: 68rem;
+  margin: 1.35rem auto 2rem;
+}
+
+.silverbox-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.48rem;
+  margin: 0.78rem 0 0.9rem;
+  padding: 0.46rem 0;
+  border-bottom: 1px solid #d9e1e5;
+  background: #fff;
+}
+
+.silverbox-toolbar-label {
+  margin-right: 0.16rem;
+  color: #42535b;
+  font-size: 0.81rem;
+  font-weight: 750;
+}
+
+.silverbox-toolbar button {
+  min-height: 2.12rem;
+  padding: 0.34rem 0.7rem;
+  border: 1px solid #9bbbd0;
+  border-radius: 0.36rem;
+  background: #fff;
+  color: #2c5e7a;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.silverbox-toolbar button:hover,
+.silverbox-toolbar button:focus-visible {
+  border-color: #2f7395;
+  background: #eaf4fb;
+}
+
+.silverbox-toolbar button.is-active {
+  border-color: #2f7395;
+  background: #2f7395;
+  color: #fff;
+}
+
+.silverbox-model-toolbar {
+  margin: 0.08rem 0 0.62rem;
+  padding: 0.4rem 0 0;
+  border-top: 1px solid #d9e1e5;
+  border-bottom: 0;
+}
+
+.silverbox-chart-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.42rem;
+  margin: 0 0 0.62rem;
+}
+
+.silverbox-chart-controls-label {
+  margin-right: 0.12rem;
+  color: #42535b;
+  font-size: 0.77rem;
+  font-weight: 750;
+}
+
+.silverbox-chart-controls button {
+  min-height: 1.92rem;
+  padding: 0.28rem 0.58rem;
+  border: 1px solid #9bbbd0;
+  border-radius: 0.32rem;
+  background: #fff;
+  color: #2c5e7a;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.silverbox-chart-controls button:hover,
+.silverbox-chart-controls button:focus-visible {
+  border-color: #2f7395;
+  background: #eaf4fb;
+}
+
+.silverbox-chart-controls button.is-active {
+  border-color: #2f7395;
+  background: #2f7395;
+  color: #fff;
+}
+
+.silverbox-chart-controls button:disabled {
+  border-color: #ccd8df;
+  background: #f4f7f8;
+  color: #8a979e;
+  cursor: not-allowed;
+}
+
+#silverbox-response-chart.is-pannable {
+  cursor: grab;
+  touch-action: none;
+}
+
+#silverbox-response-chart.is-panning {
+  cursor: grabbing;
+}
+
+.silverbox-chart-controls-divider {
+  width: 1px;
+  height: 1.42rem;
+  margin: 0 0.04rem;
+  background: #cad6dc;
+}
+
+.silverbox-window-label {
+  color: #5d6a72;
+  font-size: 0.73rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.silverbox-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1.48fr) minmax(17rem, 0.82fr);
+  gap: 0.88rem;
+  align-items: start;
+}
+
+.silverbox-panel {
+  min-width: 0;
+  padding: 0.9rem;
+  border: 1px solid #d5dfe3;
+  border-radius: 0.42rem;
+  background: #fff;
+}
+
+.silverbox-charts-panel,
+.silverbox-chart-panel {
+  border-top: 4px solid #3478a6;
+  background: #f7fbfe;
+}
+
+.silverbox-details-panel,
+.silverbox-protocol-panel {
+  border-top: 4px solid #dd6b20;
+  background: #fffaf5;
+}
+
+.silverbox-metrics-panel,
+.silverbox-comparison-panel {
+  margin-top: 0.88rem;
+  border-top: 4px solid #287650;
+  background: #f6fbf7;
+}
+
+.silverbox-panel-heading {
+  margin: 0 0 0.65rem;
+}
+
+.silverbox-panel-heading h2,
+.silverbox-panel-heading p {
+  margin: 0;
+}
+
+.silverbox-system-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0.45rem;
+  margin: 0.9rem 0;
+}
+
+.silverbox-system-map-intro {
+  max-width: 54rem;
+}
+
+.silverbox-system-map-item {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+  padding: 0.62rem 0.7rem;
+  border: 1px solid #d5dfe3;
+  border-radius: 0.36rem;
+  background: #fff;
+}
+
+.silverbox-system-map-item span {
+  color: #5d6a72;
+  font-size: 0.68rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.silverbox-system-map-item strong {
+  color: #34454d;
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+.silverbox-system-map-input {
+  border-top: 3px solid #76529a;
+  background: #fbf8fd;
+}
+
+.silverbox-system-map-core {
+  border-top: 3px solid #dd6b20;
+  background: #fffaf5;
+}
+
+.silverbox-system-map-output {
+  border-top: 3px solid #2f7395;
+  background: #f7fbfe;
+}
+
+.silverbox-system-map-arrow {
+  align-self: center;
+  display: grid;
+  gap: 0.05rem;
+  justify-items: center;
+  color: #6d7980;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.silverbox-system-map-arrow span {
+  color: #6d7980;
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.silverbox-system-map-arrow b {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.silverbox-panel-heading h2 {
+  color: #34454d;
+  font-size: 1rem;
+}
+
+.silverbox-panel-heading p {
+  margin-top: 0.17rem;
+  color: #5d6a72;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.silverbox-chart-figure,
+.silverbox-figure {
+  margin: 0 0 0.78rem;
+}
+
+.silverbox-chart-figure:last-child,
+.silverbox-figure:last-child {
+  margin-bottom: 0;
+}
+
+.silverbox-chart-figure figcaption,
+.silverbox-figure figcaption {
+  margin: 0 0 0.35rem;
+  color: #42535b;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.silverbox-chart-figure svg,
+.silverbox-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  border: 1px solid #d6e0e4;
+  border-radius: 0.3rem;
+  background: #fff;
+}
+
+.silverbox-model-detail {
+  display: grid;
+  gap: 0.52rem;
+  margin-top: 0.82rem;
+}
+
+.silverbox-protocol-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.silverbox-protocol-grid > div {
+  min-width: 0;
+  padding: 0.58rem 0.66rem;
+  border: 1px solid #edd6bf;
+  border-radius: 0.3rem;
+  background: #fff;
+}
+
+.silverbox-protocol-grid span,
+.silverbox-protocol-grid strong {
+  display: block;
+}
+
+.silverbox-protocol-grid span {
+  color: #6c6259;
+  font-size: 0.68rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.silverbox-protocol-grid strong {
+  margin-top: 0.2rem;
+  color: #43535b;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.silverbox-detail-kicker {
+  margin: 0;
+  color: #6c6259;
+  font-size: 0.71rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.silverbox-detail-rmse {
+  display: block;
+  color: #9a4e1c;
+  font-size: 1.08rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+
+.silverbox-detail-copy {
+  margin: 0;
+  color: #43535b;
+  font-size: 0.83rem;
+  line-height: 1.45;
+}
+
+.silverbox-information-list {
+  display: grid;
+  gap: 0.36rem;
+  margin: 0;
+  padding: 0.62rem 0.7rem 0.62rem 1.6rem;
+  border-left: 4px solid #dd6b20;
+  background: #fff;
+  color: #43535b;
+  font-size: 0.79rem;
+  line-height: 1.35;
+}
+
+.silverbox-metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #43535b;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.silverbox-metrics-table caption {
+  margin-bottom: 0.35rem;
+  color: #52616a;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.silverbox-metrics-table th,
+.silverbox-metrics-table td {
+  padding: 0.44rem 0.5rem;
+  border-bottom: 1px solid #d8e6db;
+  text-align: left;
+}
+
+.silverbox-metrics-table thead th {
+  color: #476555;
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.silverbox-metrics-table th:last-child,
+.silverbox-metrics-table td:last-child {
+  text-align: right;
+}
+
+.silverbox-metrics-table tbody tr.is-selected {
+  background: #e7f3e9;
+}
+
+.silverbox-metrics-table tbody tr.is-selected th {
+  color: #1f6a42;
+}
+
+.quarto-dark .silverbox-toolbar {
+  border-color: #56616a;
+  background: #1f2529;
+}
+
+.quarto-dark .silverbox-toolbar-label,
+.quarto-dark .silverbox-panel-heading p {
+  color: #c8d1d6;
+}
+
+.quarto-dark .silverbox-toolbar button {
+  border-color: #6ba8c9;
+  background: #263b47;
+  color: #cce4f2;
+}
+
+.quarto-dark .silverbox-toolbar button:hover,
+.quarto-dark .silverbox-toolbar button:focus-visible {
+  background: #344d5d;
+}
+
+.quarto-dark .silverbox-toolbar button.is-active {
+  border-color: #8bc2df;
+  background: #347da9;
+  color: #fff;
+}
+
+.quarto-dark .silverbox-chart-controls-label {
+  color: #c8d1d6;
+}
+
+.quarto-dark .silverbox-chart-controls button {
+  border-color: #6ba8c9;
+  background: #263b47;
+  color: #cce4f2;
+}
+
+.quarto-dark .silverbox-chart-controls button:hover,
+.quarto-dark .silverbox-chart-controls button:focus-visible {
+  background: #344d5d;
+}
+
+.quarto-dark .silverbox-chart-controls button.is-active {
+  border-color: #8bc2df;
+  background: #347da9;
+  color: #fff;
+}
+
+.quarto-dark .silverbox-chart-controls button:disabled {
+  border-color: #485861;
+  background: #283035;
+  color: #89979e;
+}
+
+.quarto-dark .silverbox-chart-controls-divider {
+  background: #56616a;
+}
+
+.quarto-dark .silverbox-window-label {
+  color: #c8d1d6;
+}
+
+.quarto-dark .silverbox-panel,
+.quarto-dark .silverbox-chart-figure svg,
+.quarto-dark .silverbox-information-list,
+.quarto-dark .silverbox-system-map-item {
+  border-color: #56616a;
+  background: #20272b;
+}
+
+.quarto-dark .silverbox-charts-panel,
+.quarto-dark .silverbox-chart-panel {
+  background: #24323b;
+}
+
+.quarto-dark .silverbox-details-panel,
+.quarto-dark .silverbox-protocol-panel {
+  background: #362b22;
+}
+
+.quarto-dark .silverbox-metrics-panel,
+.quarto-dark .silverbox-comparison-panel {
+  background: #26372d;
+}
+
+.quarto-dark .silverbox-panel-heading h2,
+.quarto-dark .silverbox-chart-figure figcaption,
+.quarto-dark .silverbox-figure figcaption,
+.quarto-dark .silverbox-detail-copy,
+.quarto-dark .silverbox-information-list,
+.quarto-dark .silverbox-metrics-table,
+.quarto-dark .silverbox-protocol-grid strong {
+  color: #e5ecef;
+}
+
+.quarto-dark .silverbox-system-map-item span {
+  color: #c8d1d6;
+}
+
+.quarto-dark .silverbox-system-map-item strong {
+  color: #e5ecef;
+}
+
+.quarto-dark .silverbox-system-map-input {
+  background: #30273a;
+}
+
+.quarto-dark .silverbox-system-map-core {
+  background: #362b22;
+}
+
+.quarto-dark .silverbox-system-map-output {
+  background: #24323b;
+}
+
+.quarto-dark .silverbox-detail-kicker,
+.quarto-dark .silverbox-metrics-table caption,
+.quarto-dark .silverbox-metrics-table thead th,
+.quarto-dark .silverbox-protocol-grid span {
+  color: #d7c7b5;
+}
+
+.quarto-dark .silverbox-detail-rmse {
+  color: #f0b27c;
+}
+
+.quarto-dark .silverbox-metrics-table th,
+.quarto-dark .silverbox-metrics-table td {
+  border-color: #465a4c;
+}
+
+.quarto-dark .silverbox-metrics-table tbody tr.is-selected {
+  background: #294a36;
+}
+
+.quarto-dark .silverbox-metrics-table tbody tr.is-selected th {
+  color: #9ed6ae;
+}
+
+.quarto-dark .silverbox-protocol-grid > div {
+  border-color: #5a4c41;
+  background: #20272b;
+}
+
+@media (max-width: 800px) {
+  .silverbox-workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .silverbox-protocol-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .silverbox-system-map {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .silverbox-system-map-arrow {
+    justify-self: center;
+  }
+
+  .silverbox-system-map-arrow b {
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 560px) {
+  .silverbox-metrics-table {
+    font-size: 0.73rem;
+  }
+
+  .silverbox-metrics-table th,
+  .silverbox-metrics-table td {
+    padding: 0.36rem 0.3rem;
   }
 }

@@ -22,6 +22,7 @@
     start: 0,
     end: data.values.length - 1,
   };
+  let dragState = null;
 
   function palette() {
     const dark = document.documentElement.classList.contains("quarto-dark")
@@ -209,22 +210,26 @@
     text(chart, "hourly timestamp", (margin.left + right) / 2, height - 9, {
       "text-anchor": "middle", "font-size": 12, fill: colors.text, "font-weight": 700,
     });
+    const legendY = bottom - 18;
     chart.append(svgElement("line", {
-      x1: right - 230, x2: right - 207, y1: margin.top + 17, y2: margin.top + 17,
+      x1: right - 230, x2: right - 207, y1: legendY, y2: legendY,
       stroke: colors.observed, "stroke-width": 2.4,
     }));
-    text(chart, "observed OT", right - 200, margin.top + 21, { "font-size": 11, fill: colors.muted });
+    text(chart, "observed OT", right - 200, legendY + 4, { "font-size": 11, fill: colors.muted });
     chart.append(svgElement("line", {
-      x1: right - 112, x2: right - 89, y1: margin.top + 17, y2: margin.top + 17,
+      x1: right - 112, x2: right - 89, y1: legendY, y2: legendY,
       stroke: colors.prediction, "stroke-width": 2.4, "stroke-dasharray": "6 3",
     }));
-    text(chart, "AR forecast", right - 82, margin.top + 21, { "font-size": 11, fill: colors.muted });
+    text(chart, "AR forecast", right - 82, legendY + 4, { "font-size": 11, fill: colors.muted });
 
     const scenarioCopy = state.scenario === "easy"
       ? "Every test-hour forecast receives the actual preceding test values as its lags."
       : "After the split, each new forecast becomes a lagged input for later forecasts.";
+    const isZoomed = state.start !== 0 || state.end !== data.values.length - 1;
+    chart.classList.toggle("is-pannable", isZoomed);
     chartCopy.textContent = "Selected model: AR(" + state.order + ") with " + lookbackLabel(state.order)
-      + " of history. " + scenarioCopy;
+      + " of history. " + scenarioCopy
+      + (isZoomed ? " Drag the chart left or right to pan through the selected time window." : "");
   }
 
   function renderDetail() {
@@ -262,8 +267,10 @@
   }
 
   function setRange(start, end) {
-    state.start = Math.max(0, Math.round(start));
-    state.end = Math.min(data.values.length - 1, Math.round(end));
+    const finalIndex = data.values.length - 1;
+    const span = Math.min(finalIndex, Math.max(1, Math.round(end - start)));
+    state.start = Math.max(0, Math.min(finalIndex - span, Math.round(start)));
+    state.end = state.start + span;
     render();
   }
 
@@ -293,6 +300,33 @@
     state.scenario = button.dataset.arScenario;
     render();
   }));
+  chart.addEventListener("pointerdown", (event) => {
+    const isZoomed = state.start !== 0 || state.end !== data.values.length - 1;
+    if (!isZoomed || event.button !== 0) return;
+    dragState = {
+      clientX: event.clientX,
+      start: state.start,
+      span: state.end - state.start,
+      plotWidth: Math.max(1, chart.getBoundingClientRect().width * 0.9),
+    };
+    chart.setPointerCapture(event.pointerId);
+    chart.classList.add("is-panning");
+  });
+  chart.addEventListener("pointermove", (event) => {
+    if (!dragState) return;
+    const samplesMoved = Math.round((dragState.clientX - event.clientX) / dragState.plotWidth * dragState.span);
+    const nextStart = dragState.start + samplesMoved;
+    if (nextStart === state.start) return;
+    setRange(nextStart, nextStart + dragState.span);
+  });
+  function endDrag(event) {
+    if (!dragState) return;
+    dragState = null;
+    if (chart.hasPointerCapture(event.pointerId)) chart.releasePointerCapture(event.pointerId);
+    chart.classList.remove("is-panning");
+  }
+  chart.addEventListener("pointerup", endDrag);
+  chart.addEventListener("pointercancel", endDrag);
   window.addEventListener("theme-changed", render);
   render();
 })();

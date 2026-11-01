@@ -78,5 +78,5 @@ Source: [Electricity Transformer Temperature data](https://github.com/zhouhaoyi/
 
 <p style="margin-top: 1.5rem;"><a href="index.html">← Return to Sequential models</a></p>
 
-<script src="../assets/ar-order-explorer-data.js?v=20261031c"></script>
-<script src="../assets/ar-order-explorer.js?v=20261031c"></script>
+<script src="../assets/ar-order-explorer-data.js?v=20261031d"></script>
+<script src="../assets/ar-order-explorer.js?v=20261031d"></script>
