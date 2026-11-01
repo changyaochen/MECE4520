@@ -71,7 +71,7 @@ history.
 <div id="silverbox-explorer" class="silverbox-explorer" aria-label="Silverbox AR, ARX, and RNN comparison">
   <section class="silverbox-panel silverbox-protocol-panel" aria-labelledby="silverbox-protocol-heading">
     <div class="silverbox-panel-heading">
-      <h2 id="silverbox-protocol-heading">A free-run held-out forecast</h2>
+      <h2 id="silverbox-protocol-heading">A recursive multi-step held-out forecast</h2>
       <p>The models are fitted on one earlier input--response experiment and evaluated on a later, separate experiment.</p>
     </div>
     <div class="silverbox-protocol-grid">

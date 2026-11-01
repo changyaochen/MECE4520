@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 
@@ -104,8 +104,8 @@ def fit_linear_model(
     output_signal: np.ndarray,
     order: int,
     include_input: bool,
-) -> tuple[StandardScaler, Ridge]:
-    """Fit a nearly unregularized linear AR or ARX predictor."""
+) -> tuple[StandardScaler, LinearRegression]:
+    """Fit an ordinary-least-squares linear AR or ARX predictor."""
     features, targets = make_linear_design(
         input_signal=input_signal,
         output_signal=output_signal,
@@ -113,7 +113,7 @@ def fit_linear_model(
         include_input=include_input,
     )
     scaler = StandardScaler().fit(features)
-    model = Ridge(alpha=1e-7).fit(scaler.transform(features), targets)
+    model = LinearRegression().fit(scaler.transform(features), targets)
     return scaler, model
 
 
@@ -124,7 +124,7 @@ def recursive_linear_forecast(
     order: int,
     include_input: bool,
     scaler: StandardScaler,
-    model: Ridge,
+    model: LinearRegression,
 ) -> np.ndarray:
     """Forecast a test record after using only its first ``order`` outputs.
 
@@ -238,7 +238,7 @@ def recursive_rnn_forecast(
 
 
 def rmse(*, actual: np.ndarray, predicted: np.ndarray, warmup: int) -> float:
-    """Compute a recursive test root-mean-square error after warmup."""
+    """Compute recursive multi-step test root-mean-square error after warmup."""
     return float(np.sqrt(np.mean((actual[warmup:] - predicted[warmup:]) ** 2)))
 
 
@@ -370,7 +370,7 @@ def main() -> None:
     )
     print(f"Wrote {arguments.output}")
     for key, details in payload["metrics"].items():
-        print(f"{details['label']}: recursive test RMSE = {details['rmse']:.6f}")
+        print(f"{details['label']}: recursive multi-step test RMSE = {details['rmse']:.6f}")
 
 
 if __name__ == "__main__":
