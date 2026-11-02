@@ -11,17 +11,18 @@
   const zoomReset = root.querySelector("#ar-order-zoom-reset");
   const focusTest = root.querySelector("#ar-order-focus-test");
   const orderButtons = [...root.querySelectorAll("[data-ar-order]")];
-  const scenarioButtons = [...root.querySelectorAll("[data-ar-scenario]")];
+  const modeButtons = [...root.querySelectorAll("[data-ar-mode]")];
   if (!chart || !chartCopy || !detail || !zoomIn || !zoomOut || !zoomReset || !focusTest) return;
 
   const SVG_NS = "http://www.w3.org/2000/svg";
   const orders = Object.keys(data.models).map(Number).sort((left, right) => left - right);
   const state = {
     order: 1,
-    scenario: "easy",
+    mode: "one-step",
     start: 0,
     end: data.values.length - 1,
   };
+  let dragState = null;
 
   function palette() {
     const dark = document.documentElement.classList.contains("quarto-dark")
@@ -64,8 +65,10 @@
     return order + " hours";
   }
 
-  function scenarioLabel() {
-    return state.scenario === "easy" ? "Easy: actual test lags" : "Difficult: recursive rollout";
+  function modeLabel() {
+    return state.mode === "one-step"
+      ? "One-step-ahead forecasting (observed lags)"
+      : "Recursive multi-step forecasting (predicted lags)";
   }
 
   function selectedModel() {
@@ -73,13 +76,13 @@
   }
 
   function selectedPredictions() {
-    return state.scenario === "easy"
+    return state.mode === "one-step"
       ? selectedModel().oneStepPredictions
       : selectedModel().recursivePredictions;
   }
 
   function selectedRmse() {
-    return state.scenario === "easy"
+    return state.mode === "one-step"
       ? selectedModel().oneStepRmse
       : selectedModel().recursiveRmse;
   }
@@ -148,7 +151,7 @@
       chart,
       width,
       height,
-      "AR " + state.order + " " + scenarioLabel() + " forecast",
+      "AR " + state.order + ": " + modeLabel(),
       "Observed oil temperature with a chronological train-test split. The orange line is the selected autoregressive forecast over the test period.",
     );
     chart.append(svgElement("rect", {
@@ -209,34 +212,38 @@
     text(chart, "hourly timestamp", (margin.left + right) / 2, height - 9, {
       "text-anchor": "middle", "font-size": 12, fill: colors.text, "font-weight": 700,
     });
+    const legendY = bottom - 18;
     chart.append(svgElement("line", {
-      x1: right - 230, x2: right - 207, y1: margin.top + 17, y2: margin.top + 17,
+      x1: right - 230, x2: right - 207, y1: legendY, y2: legendY,
       stroke: colors.observed, "stroke-width": 2.4,
     }));
-    text(chart, "observed OT", right - 200, margin.top + 21, { "font-size": 11, fill: colors.muted });
+    text(chart, "observed OT", right - 200, legendY + 4, { "font-size": 11, fill: colors.muted });
     chart.append(svgElement("line", {
-      x1: right - 112, x2: right - 89, y1: margin.top + 17, y2: margin.top + 17,
+      x1: right - 112, x2: right - 89, y1: legendY, y2: legendY,
       stroke: colors.prediction, "stroke-width": 2.4, "stroke-dasharray": "6 3",
     }));
-    text(chart, "AR forecast", right - 82, margin.top + 21, { "font-size": 11, fill: colors.muted });
+    text(chart, "AR forecast", right - 82, legendY + 4, { "font-size": 11, fill: colors.muted });
 
-    const scenarioCopy = state.scenario === "easy"
-      ? "Every test-hour forecast receives the actual preceding test values as its lags."
+    const modeCopy = state.mode === "one-step"
+      ? "Each prediction uses the actual preceding test values as its lags."
       : "After the split, each new forecast becomes a lagged input for later forecasts.";
+    const isZoomed = state.start !== 0 || state.end !== data.values.length - 1;
+    chart.classList.toggle("is-pannable", isZoomed);
     chartCopy.textContent = "Selected model: AR(" + state.order + ") with " + lookbackLabel(state.order)
-      + " of history. " + scenarioCopy;
+      + " of history. " + modeCopy
+      + (isZoomed ? " Drag the chart left or right to pan through the selected time window." : "");
   }
 
   function renderDetail() {
-    const scenarioExplanation = state.scenario === "easy"
-      ? "At test hour k, the model uses the actual Xₖ₋₁, Xₖ₋₂, …, Xₖ₋ₚ."
+    const modeExplanation = state.mode === "one-step"
+      ? "At test hour k, the model uses the observed Xₖ₋₁, Xₖ₋₂, …, Xₖ₋ₚ."
       : "At test hour k, the model uses its own earlier forecasts once it has crossed the split.";
     detail.innerHTML = "<div class=\"ar-order-stat-grid\">"
       + "<div class=\"ar-order-stat\"><span>Selected model</span><strong>AR(" + state.order + ")</strong></div>"
       + "<div class=\"ar-order-stat\"><span>History used</span><strong>" + lookbackLabel(state.order) + "</strong></div>"
       + "<div class=\"ar-order-stat\"><span>Test RMSE</span><strong>" + format(selectedRmse()) + " °C</strong></div>"
-      + "</div><div class=\"ar-order-formula\"><span>" + scenarioLabel() + "</span><strong>"
-      + scenarioExplanation + "</strong></div>";
+      + "</div><div class=\"ar-order-formula\"><span>" + modeLabel() + "</span><strong>"
+      + modeExplanation + "</strong></div>";
   }
 
   function renderControls() {
@@ -245,8 +252,8 @@
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-pressed", String(active));
     });
-    scenarioButtons.forEach((button) => {
-      const active = button.dataset.arScenario === state.scenario;
+    modeButtons.forEach((button) => {
+      const active = button.dataset.arMode === state.mode;
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-pressed", String(active));
     });
@@ -262,8 +269,10 @@
   }
 
   function setRange(start, end) {
-    state.start = Math.max(0, Math.round(start));
-    state.end = Math.min(data.values.length - 1, Math.round(end));
+    const finalIndex = data.values.length - 1;
+    const span = Math.min(finalIndex, Math.max(1, Math.round(end - start)));
+    state.start = Math.max(0, Math.min(finalIndex - span, Math.round(start)));
+    state.end = state.start + span;
     render();
   }
 
@@ -289,10 +298,37 @@
     state.order = Number(button.dataset.arOrder);
     render();
   }));
-  scenarioButtons.forEach((button) => button.addEventListener("click", () => {
-    state.scenario = button.dataset.arScenario;
+  modeButtons.forEach((button) => button.addEventListener("click", () => {
+    state.mode = button.dataset.arMode;
     render();
   }));
+  chart.addEventListener("pointerdown", (event) => {
+    const isZoomed = state.start !== 0 || state.end !== data.values.length - 1;
+    if (!isZoomed || event.button !== 0) return;
+    dragState = {
+      clientX: event.clientX,
+      start: state.start,
+      span: state.end - state.start,
+      plotWidth: Math.max(1, chart.getBoundingClientRect().width * 0.9),
+    };
+    chart.setPointerCapture(event.pointerId);
+    chart.classList.add("is-panning");
+  });
+  chart.addEventListener("pointermove", (event) => {
+    if (!dragState) return;
+    const samplesMoved = Math.round((dragState.clientX - event.clientX) / dragState.plotWidth * dragState.span);
+    const nextStart = dragState.start + samplesMoved;
+    if (nextStart === state.start) return;
+    setRange(nextStart, nextStart + dragState.span);
+  });
+  function endDrag(event) {
+    if (!dragState) return;
+    dragState = null;
+    if (chart.hasPointerCapture(event.pointerId)) chart.releasePointerCapture(event.pointerId);
+    chart.classList.remove("is-panning");
+  }
+  chart.addEventListener("pointerup", endDrag);
+  chart.addEventListener("pointercancel", endDrag);
   window.addEventListener("theme-changed", render);
   render();
 })();

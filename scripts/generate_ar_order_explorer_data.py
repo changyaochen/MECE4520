@@ -8,10 +8,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import LinearRegression
 
 
 ORDERS = (1, 6, 24, 168)
-TRAIN_END = 700
+TRAIN_END = 500
 SOURCE_URL = "https://raw.githubusercontent.com/zhouhaoyi/ETDataset/main/ETT-small/ETTh1.csv"
 
 
@@ -19,16 +20,17 @@ def fit_ar_model(*, values: np.ndarray, order: int) -> tuple[float, np.ndarray]:
     """Fit an ordinary least-squares AR(order) model on the training values."""
     design = np.array([values[index - order:index][::-1] for index in range(order, len(values))])
     target = values[order:]
-    design_with_intercept = np.column_stack([np.ones(len(design)), design])
-    solution, *_ = np.linalg.lstsq(design_with_intercept, target, rcond=None)
-    return float(solution[0]), solution[1:]
+    model = LinearRegression()
+    model.fit(design, target)
+    return float(model.intercept_), model.coef_
 
 
-def remove_repeated_value_artifact(*, frame: pd.DataFrame) -> pd.DataFrame:
-    """Remove the 24-hour repeated OT value from the displayed time window."""
+def truncate_before_repeated_value_artifact(*, frame: pd.DataFrame) -> pd.DataFrame:
+    """Keep the contiguous observations before the 24-hour repeated OT run."""
     run_id = frame["OT"].ne(frame["OT"].shift()).cumsum()
     run_length = frame.groupby(run_id)["OT"].transform("size")
-    return frame.loc[run_length < 24].copy()
+    artifact_start = run_length.ge(24).idxmax()
+    return frame.iloc[:artifact_start].copy()
 
 
 def main() -> None:
@@ -48,7 +50,7 @@ def main() -> None:
     arguments = parser.parse_args()
     source = arguments.input if arguments.input is not None else SOURCE_URL
     frame = pd.read_csv(source, on_bad_lines="skip").dropna(subset=["OT"]).iloc[:1000]
-    frame = remove_repeated_value_artifact(frame=frame)
+    frame = truncate_before_repeated_value_artifact(frame=frame)
     values = frame["OT"].to_numpy(dtype=float)
     dates = pd.to_datetime(frame["date"]).dt.strftime("%b %-d, %H:%M").tolist()
 

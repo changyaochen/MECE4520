@@ -14,6 +14,8 @@ project:
     - assets/convolution-2d-explorer.js
     - assets/ar-order-explorer-data.js
     - assets/ar-order-explorer.js
+    - assets/silverbox-explorer-data.js
+    - assets/silverbox-explorer.js
     - assets/columbia-engineering-logo.png
     - assets/b7e2a9c4.html
 

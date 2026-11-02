@@ -1,0 +1,138 @@
+---
+title: "Explore AR, ARX, and recurrent models"
+toc: false
+page-layout: full
+---
+
+The [Silverbox benchmark](https://www.nonlinearbenchmark.org/benchmarks/silverbox)
+is a measured electronic system designed to behave like a Duffing oscillator:
+a system with dynamics and a nonlinear restoring effect. It has one applied
+input, `V1`, and one measured response, `V2`. For a mechanical analogy, think
+of `V1` as a force-like excitation and `V2` as a displacement-like response.
+
+Because `V1` is deliberately applied to the physical system, its relation to
+`V2` is causal rather than a generic feature--target association:
+
+```{=html}
+<div class="silverbox-system-map silverbox-system-map-intro" aria-label="Causal relationship from applied input V1 to measured response V2">
+  <div class="silverbox-system-map-item silverbox-system-map-input">
+    <span>Applied causal input</span>
+    <strong><code>V1</code> = <em>u</em><sub>t</sub></strong>
+  </div>
+  <span class="silverbox-system-map-arrow" aria-hidden="true"><span>drives</span><b>→</b></span>
+  <div class="silverbox-system-map-item silverbox-system-map-core">
+    <span>Silverbox</span>
+    <strong>nonlinear dynamics</strong>
+  </div>
+  <span class="silverbox-system-map-arrow" aria-hidden="true"><span>produces</span><b>→</b></span>
+  <div class="silverbox-system-map-item silverbox-system-map-output">
+    <span>Measured response</span>
+    <strong><code>V2</code> = <em>y</em><sub>t</sub></strong>
+  </div>
+</div>
+```
+
+Our task is to predict the next response from information available at that
+time. The models below make different assumptions about how the recent input
+and response determine that prediction.
+
+$$
+\begin{aligned}
+\text{AR:}\qquad
+\widehat{y}_t
+&= \beta_0 + \sum_{j=1}^{p}\beta_j y_{t-j}, \\
+\text{ARX:}\qquad
+\widehat{y}_t
+&= \beta_0 + \sum_{j=1}^{p}\beta_j y_{t-j}
+   + \sum_{j=0}^{p}\gamma_j u_{t-j}, \\
+\text{RNN:}\qquad
+h_t
+&= \tanh\!\left(W_h h_{t-1} + W_y y_{t-1} + W_u u_t + b_h\right),
+\qquad \widehat{y}_t = W_o h_t + b_o.
+\end{aligned}
+$$
+
+All three models use 20 preceding response values. ARX also uses the current
+known input and its recent history; the RNN processes a recent sequence of
+input--response pairs ending at the current input.
+
+::: {.callout-tip}
+## What to watch
+
+The AR model cannot react directly to a changing excitation because it never
+sees `V1`. ARX fixes that omission, but it still assumes a linear input--output
+relationship. The RNN has access to the same type of observed information as
+ARX while learning a nonlinear state representation. In this comparison, its
+state is rebuilt from a bounded recent sequence rather than given unlimited
+history.
+:::
+
+```{=html}
+<div id="silverbox-explorer" class="silverbox-explorer" aria-label="Silverbox AR, ARX, and RNN comparison">
+  <section class="silverbox-panel silverbox-protocol-panel" aria-labelledby="silverbox-protocol-heading">
+    <div class="silverbox-panel-heading">
+      <h2 id="silverbox-protocol-heading">A recursive multi-step held-out forecast</h2>
+      <p>The models are fitted on one earlier input--response experiment and evaluated on a later, separate experiment.</p>
+    </div>
+    <div class="silverbox-protocol-grid">
+      <div>
+        <span>Initialization</span>
+        <strong>The first 20 measured <code>V2</code> values initialize the model state.</strong>
+      </div>
+      <div>
+        <span>Known during the test</span>
+        <strong>The applied input <code>V1</code> remains available at every later sample.</strong>
+      </div>
+      <div>
+        <span>Not revealed during the test</span>
+        <strong>Each later <code>V2</code> forecast feeds the next prediction instead of the actual response.</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="silverbox-panel silverbox-chart-panel" aria-labelledby="silverbox-response-heading">
+    <div class="silverbox-panel-heading">
+      <h2 id="silverbox-response-heading">Held-out response and selected recursive forecast</h2>
+      <p id="silverbox-response-copy"></p>
+    </div>
+    <div class="silverbox-chart-controls clt-buttons" role="group" aria-label="Choose the response-chart zoom level">
+      <span class="silverbox-chart-controls-label">Zoom</span>
+      <button type="button" data-silverbox-zoom="1" class="is-active" aria-pressed="true">Full record</button>
+      <button type="button" data-silverbox-zoom="4" aria-pressed="false">4×</button>
+      <button type="button" data-silverbox-zoom="8" aria-pressed="false">8×</button>
+      <button type="button" data-silverbox-zoom="15" aria-pressed="false">15×</button>
+      <span class="silverbox-chart-controls-divider" aria-hidden="true"></span>
+      <button type="button" data-silverbox-pan="earlier" disabled>← Earlier</button>
+      <button type="button" data-silverbox-pan="later" disabled>Later →</button>
+      <span id="silverbox-window-label" class="silverbox-window-label" aria-live="polite"></span>
+    </div>
+    <div class="silverbox-toolbar silverbox-model-toolbar clt-buttons" role="group" aria-label="Choose a forecasting model">
+      <span class="silverbox-toolbar-label">Forecasting model</span>
+      <button type="button" data-silverbox-model="ar" class="is-active" aria-pressed="true">AR</button>
+      <button type="button" data-silverbox-model="arx" aria-pressed="false">ARX</button>
+      <button type="button" data-silverbox-model="rnn" aria-pressed="false">RNN</button>
+    </div>
+    <figure class="silverbox-figure">
+      <svg id="silverbox-response-chart" role="img" aria-label="Held-out Silverbox response with selected recursive forecast"></svg>
+    </figure>
+  </section>
+
+  <section class="silverbox-panel silverbox-comparison-panel" aria-labelledby="silverbox-comparison-heading">
+    <div class="silverbox-panel-heading">
+      <h2 id="silverbox-comparison-heading">What each model can use</h2>
+      <p>All error values summarize the full held-out recursive rollout, not merely the displayed window.</p>
+    </div>
+    <div id="silverbox-metrics" class="silverbox-metrics" aria-live="polite"></div>
+    <div id="silverbox-model-detail" class="silverbox-model-detail" aria-live="polite"></div>
+  </section>
+</div>
+```
+
+For this held-out record, the small RNN makes a more stable recursive forecast.
+That does **not** establish that recurrence is the only helpful idea: a
+nonlinear fixed-window model would be a useful additional comparison.
+
+<p style="margin-top: 1.5rem;"><a href="index.html">← Return to Sequential models</a></p>
+
+<script src="../assets/silverbox-explorer-data.js?v=20261031a"></script>
+<script src="../assets/silverbox-explorer.js?v=20261031d"></script>
