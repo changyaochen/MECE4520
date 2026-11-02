@@ -1,5 +1,12 @@
 [
   {
+    "objectID": "sequential-models/01-autoregressive-models-explorer.html",
+    "href": "sequential-models/01-autoregressive-models-explorer.html",
+    "title": "Explore autoregressive model order",
+    "section": "",
+    "text": "An autoregressive model of order \\(p\\), written AR(\\(p\\)), predicts the next value \\(X_t\\) of a series from its preceding \\(p\\) values:\n\\[\n\\widehat{X}_t\n= \\beta_0 + \\beta_1X_{t-1}\n+ \\cdots + \\beta_pX_{t-p}.\n\\]\nHere, \\(X_t\\) is the hourly oil temperature (OT) in the ETT-small transformer data. This explorer deliberately uses only OT: the six load measurements are not inputs to these plain AR(\\(p\\)) models.\n\n\n\n\n\n\nTipWhat to watch\n\n\n\nIncreasing \\(p\\) changes the length of the history window and the number of learned coefficients. More history is not automatically better: the models below are all fitted on an earlier portion of the same real series and compared on later, held-out hours.\n\n\n\n  \n    \n      AR order\n      p = 1\n      p = 6\n      p = 24\n      p = 168\n    \n    \n      Forecasting scenario\n      Easy: actual lags\n      Difficult: recursive\n    \n    \n      Focus on test\n      Zoom in\n      Zoom out\n      Reset\n    \n  \n\n  \n    \n      One chronological train/test split\n      \n    \n    \n      \n    \n  \n\n  \n    \n      Selected forecast\n      Choose an AR order and a forecasting scenario above.\n    \n    \n  \n\nThe ETT-small data contain hourly transformer oil temperature and six load-related measurements. A later model can use all of those variables; this page first isolates the fixed, univariate history rule that neural sequential models generalize.\nSource: Electricity Transformer Temperature data.\n\n← Return to Sequential models"
+  },
+  {
     "objectID": "regression/03-confidence-and-prediction-intervals.html",
     "href": "regression/03-confidence-and-prediction-intervals.html",
     "title": "Confidence and prediction intervals",
@@ -1972,5 +1979,19 @@
     "title": "A first linear regression: weather and NOx",
     "section": "Check-in",
     "text": "Check-in\n\nWhy can the raw mean residual be misleading as a loss function?\nWhat would a residual-versus-AT plot look like if a straight-line conditional mean were adequate?\nIf \\(R^2 \\approx 0.31\\), what does that say about the regression line relative to the mean-only baseline?\n\nKeep your answers in your own notes. Later regression materials will introduce confidence intervals, hypothesis tests, additional predictors, and out-of-sample validation.\nReturn to the Regression page"
+  },
+  {
+    "objectID": "sequential-models/index.html",
+    "href": "sequential-models/index.html",
+    "title": "Sequential models",
+    "section": "",
+    "text": "Sequential models make predictions from ordered observations. The first explorer starts from the simplest case: predicting one future value from a fixed window of its own past values."
+  },
+  {
+    "objectID": "sequential-models/index.html#autoregressive-models",
+    "href": "sequential-models/index.html#autoregressive-models",
+    "title": "Sequential models",
+    "section": "1. Autoregressive models",
+    "text": "1. Autoregressive models\nUse real hourly transformer oil-temperature measurements to see what changes when an autoregressive model is allowed to look back one hour, several hours, one day, or one week.\nExplore autoregressive model order"
   }
 ]
