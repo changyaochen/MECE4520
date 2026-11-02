@@ -397,10 +397,10 @@ window.Quarto = {
       <button type="button" data-ar-order="24" aria-pressed="false">p = 24</button>
       <button type="button" data-ar-order="168" aria-pressed="false">p = 168</button>
     </div>
-    <div class="ar-order-choice" role="group" aria-label="Choose forecasting scenario">
-      <span class="ar-order-label">Forecasting scenario</span>
-      <button type="button" data-ar-scenario="easy" class="is-active" aria-pressed="true">Easy: actual lags</button>
-      <button type="button" data-ar-scenario="difficult" aria-pressed="false">Difficult: recursive</button>
+    <div class="ar-order-choice" role="group" aria-label="Choose forecasting mode">
+      <span class="ar-order-label">Forecasting mode</span>
+      <button type="button" data-ar-mode="one-step" class="is-active" aria-pressed="true">One-step ahead</button>
+      <button type="button" data-ar-mode="recursive" aria-pressed="false">Recursive multi-step</button>
     </div>
     <div class="ar-order-step-controls" role="group" aria-label="Zoom controls">
       <button id="ar-order-focus-test" type="button">Focus on test</button>
@@ -423,7 +423,7 @@ window.Quarto = {
   <section class="ar-order-panel ar-order-detail-panel" aria-labelledby="ar-order-detail-heading">
     <div class="ar-order-panel-heading">
       <h2 id="ar-order-detail-heading" class="anchored">Selected forecast</h2>
-      <p>Choose an AR order and a forecasting scenario above.</p>
+      <p>Choose an AR order and a forecasting mode above.</p>
     </div>
     <div id="ar-order-detail" class="ar-order-detail" aria-live="polite"></div>
   </section>
@@ -433,8 +433,8 @@ window.Quarto = {
 <p style="margin-top: 1.5rem;">
 <a href="index.html">← Return to Sequential models</a>
 </p>
-<script src="../assets/ar-order-explorer-data.js?v=20261031c"></script>
-<script src="../assets/ar-order-explorer.js?v=20261031c"></script>
+<script src="../assets/ar-order-explorer-data.js?v=20261101a"></script>
+<script src="../assets/ar-order-explorer.js?v=20261101a"></script>
 
 
 
