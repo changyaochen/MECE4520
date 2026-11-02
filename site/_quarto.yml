@@ -12,6 +12,8 @@ project:
     - assets/nn-backpropagation-explorer.js
     - assets/convolution-explorer.js
     - assets/convolution-2d-explorer.js
+    - assets/ar-order-explorer-data.js
+    - assets/ar-order-explorer.js
     - assets/columbia-engineering-logo.png
     - assets/b7e2a9c4.html
 
@@ -35,6 +37,8 @@ website:
         text: Tree-based
       - href: neural-networks/index.qmd
         text: Neural networks
+      - href: sequential-models/index.qmd
+        text: Sequential models
   page-footer:
     left: "MECE 4520 · Data Science for Mechanical Systems"
     right: "Fall 2026"
@@ -47,6 +51,7 @@ format:
     syntax-highlighting: arrow
     respect-user-color-scheme: true
     css: styles.css
+    include-after-body: assets/navbar-fit.html
     toc: true
     toc-location: body
     toc-title: "On this page"
