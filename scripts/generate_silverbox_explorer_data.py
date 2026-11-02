@@ -343,7 +343,7 @@ def main() -> None:
                 "uses": "20 earlier response values + known forcing input",
             },
             "rnn": {
-                "label": "Vanilla RNN", 
+                "label": "Vanilla RNN",
                 "rmse": round(rmse(actual=output_test, predicted=rnn_predictions, warmup=ORDER), 6),
                 "uses": "same input-response sequence, summarized by a learned nonlinear state",
             },
