@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.20">
+<meta name="generator" content="quarto-1.11.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Sequential models: from AR to ARX to an RNN – MECE 4520</title>
+<title>Sequential models: from AR to ARX to recurrent models – MECE 4520</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -73,18 +73,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/scrollable-regions/scrollable-regions.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-17888a1159294d3eb470f19f6f52f5a5.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0ae969d3293726db143f6e9eb89af930.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-17888a1159294d3eb470f19f6f52f5a5.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-447e42e69aaa9833c0ba1b986f430b20.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-2e783a83be0ab193e8de4d6bed4ef247.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-a3da2e641472fc8f3514a534a633a6c3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-2e783a83be0ab193e8de4d6bed4ef247.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-e9607c77ebd22faeb014cc2f2e95de1f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-e1f7b594c1cf0f7ca9c37b0ad165d25b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-e9607c77ebd22faeb014cc2f2e95de1f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -150,7 +151,7 @@ window.Quarto = {
 <link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-fixed quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -173,6 +174,7 @@ window.Quarto = {
       for (let i=0; i < toggles.length; i++) {
         const toggle = toggles[i];
         if (toggle) {
+          toggle.setAttribute("aria-checked", alternate ? "true" : "false");
           if (alternate) {
             toggle.classList.add("alternate");
           } else {
@@ -202,13 +204,19 @@ window.Quarto = {
       manageTransitions('#quarto-margin-sidebar .nav-link', true);
       // Switch the toggles
       setColorSchemeToggle(alternate)
-      // Hack to workaround the fact that safari doesn't
-      // properly recolor the scrollbar when toggling (#1455)
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455).
+    // Not run on load: stylesheets are set before first paint there, and
+    // scrolling would undo the scroll to a URL fragment (#14973).
+    // The one pixel nudge keeps the reader where they were.
+    const refreshSafariScrollbar = () => {
       if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
         manageTransitions("body", false);
-        window.scrollTo(0, 1);
+        const scrollY = window.scrollY;
+        window.scrollTo(0, scrollY > 0 ? scrollY - 1 : 1);
         setTimeout(() => {
-          window.scrollTo(0, 0);
+          window.scrollTo(0, scrollY);
           manageTransitions("body", true);
         }, 40);
       }
@@ -303,6 +311,7 @@ window.Quarto = {
       // Read the current dark / light value
       let toAlternate = !hasAlternateSentinel();
       toggleColorMode(toAlternate);
+      refreshSafariScrollbar();
       setStyleSentinel(toAlternate);
       toggleGiscusIfUsed(toAlternate, darkModeDefault);
       window.dispatchEvent(new Event('resize'));
@@ -312,6 +321,7 @@ window.Quarto = {
         return;
       const alternate = e.matches
       toggleColorMode(alternate);
+      refreshSafariScrollbar();
       localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
       toggleGiscusIfUsed(alternate, darkModeDefault);
     });
@@ -325,15 +335,14 @@ window.Quarto = {
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark" aria-label="Site">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">⚙️</span>
     </a>
   </div>
-            <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -373,8 +382,9 @@ window.Quarto = {
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <button type="button" role="switch" aria-checked="false" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode" aria-label="Toggle dark mode"><i class="bi"></i></button>
 </div>
+            <div id="quarto-search" class="" title="Search"></div>
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -385,12 +395,12 @@ window.Quarto = {
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content" id="quarto-document-content" tabindex="-1">
 
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Sequential models: from AR to ARX to an RNN</h1>
+<h1 class="title">Sequential models: from AR to ARX to recurrent models</h1>
 </div>
 
 
@@ -406,7 +416,7 @@ window.Quarto = {
 
 </header>
 
-<nav id="TOC" role="doc-toc">
+<nav id="TOC" role="doc-toc" aria-labelledby="toc-title">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
@@ -415,15 +425,16 @@ window.Quarto = {
   <li><a href="#set-up-one-forecasting-protocol" id="toc-set-up-one-forecasting-protocol">2. Set up one forecasting protocol</a></li>
   <li><a href="#start-with-a-response-only-ar20-model" id="toc-start-with-a-response-only-ar20-model">3. Start with a response-only AR(20) model</a></li>
   <li><a href="#add-the-causal-forcing-signal-arx20" id="toc-add-the-causal-forcing-signal-arx20">4. Add the causal forcing signal: ARX(20)</a></li>
-  <li><a href="#learn-a-nonlinear-state-with-a-small-rnn" id="toc-learn-a-nonlinear-state-with-a-small-rnn">5. Learn a nonlinear state with a small RNN</a></li>
-  <li><a href="#optional-compare-the-small-rnn-with-an-lstm" id="toc-optional-compare-the-small-rnn-with-an-lstm">6. (Optional) Compare the small RNN with an LSTM</a></li>
-  <li><a href="#what-this-comparison-doesand-does-notshow" id="toc-what-this-comparison-doesand-does-notshow">7. What this comparison does—and does not—show</a></li>
+  <li><a href="#learn-a-nonlinear-state-from-the-response-alone" id="toc-learn-a-nonlinear-state-from-the-response-alone">5. Learn a nonlinear state from the response alone</a></li>
+  <li><a href="#give-the-rnn-the-known-forcing-input" id="toc-give-the-rnn-the-known-forcing-input">6. Give the RNN the known forcing input</a></li>
+  <li><a href="#optional-compare-the-input-aware-rnn-with-an-lstm" id="toc-optional-compare-the-input-aware-rnn-with-an-lstm">7. (Optional) Compare the input-aware RNN with an LSTM</a></li>
+  <li><a href="#what-this-comparison-doesand-does-notshow" id="toc-what-this-comparison-doesand-does-notshow">8. What this comparison does—and does not—show</a></li>
   </ul>
 </nav>
 <p><a target="_blank" href="https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/sequential-models/02-silverbox-arx-rnn.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a></p>
 <p>The <a href="https://www.nonlinearbenchmark.org/benchmarks/silverbox">Silverbox benchmark</a> records the response of an electronic system designed to behave like a Duffing oscillator. It provides one deliberately applied input, <code>V1</code>, and one measured response, <code>V2</code>. A useful mechanical analogy is a force-like excitation <span class="math inline">\(u_t\)</span> and a displacement-like response <span class="math inline">\(y_t\)</span>.</p>
 <p>The samples are synchronized. In the discrete-time models below, the response at time <span class="math inline">\(t\)</span> may depend on the imposed input <span class="math inline">\(u_t\)</span>, earlier input values, and the system’s earlier responses. This expresses a physically plausible causal direction—input to response—without assuming that every effect is instantaneous.</p>
-<p>We will predict the next response using information available at that time. The main comparison uses past responses only, past responses plus the known input, or a learned nonlinear recurrent state representation.</p>
+<p>We will predict the next response using information available at that time. The comparison moves from models that only see the response history to models that can also use the known applied input, with linear and nonlinear recurrent representations along the way.</p>
 <section id="what-you-will-do" class="level2">
 <h2 class="anchored" data-anchor-id="what-you-will-do">What you will do</h2>
 <ol type="1">
@@ -431,15 +442,16 @@ window.Quarto = {
 <li>Preserve its chronological training/test experiment split.</li>
 <li>Fit an AR(20) model using only past response values.</li>
 <li>Add the known forcing signal to create an ARX(20) model.</li>
-<li>Fit a small RNN that can learn a nonlinear representation of a recent input–response sequence.</li>
-<li>Compare the AR, ARX, and RNN models using a recursive multi-step held-out forecast.</li>
-<li><em>(Optional)</em> Swap the RNN cell for an LSTM while keeping the sequence and scoring protocol fixed.</li>
+<li>Fit a response-only RNN: the nonlinear recurrent counterpart to AR.</li>
+<li>Give the RNN the known forcing signal, making it the nonlinear recurrent counterpart to ARX.</li>
+<li>Compare all models using a recursive multi-step held-out forecast.</li>
+<li><em>(Optional)</em> Swap the input-aware RNN cell for an LSTM while keeping the warmup and scoring protocol fixed.</li>
 </ol>
 </section>
 <section id="load-the-measured-inputresponse-experiments" class="level2">
 <h2 class="anchored" data-anchor-id="load-the-measured-inputresponse-experiments">1. Load the measured input–response experiments</h2>
 <p>The <code>nonlinear-benchmarks</code> package downloads the official Silverbox record to the notebook runtime. Nothing is fitted to the held-out experiment.</p>
-<div id="eaf37f56" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-02T04:24:31.542817Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-02T04:24:31.542266Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-02T04:24:35.345549Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-02T04:24:35.345268Z&quot;}}" data-execution_count="1">
+<div id="eaf37f56" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T03:52:45.954102Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T03:52:45.953983Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T03:53:24.856493Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T03:53:24.853652Z&quot;}}" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This package downloads the official Silverbox benchmark when it is first used.</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nonlinear_benchmarks <span class="im">import</span> Silverbox</span>
@@ -474,7 +486,7 @@ window.Quarto = {
 <pre><code>PyTorch device: mps</code></pre>
 </div>
 </div>
-<div id="55f27ae4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-02T04:24:35.350761Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-02T04:24:35.350560Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-02T04:24:39.344670Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-02T04:24:39.344324Z&quot;}}" data-execution_count="2">
+<div id="55f27ae4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T03:53:24.866874Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T03:53:24.866388Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T03:53:28.988693Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T03:53:28.988019Z&quot;}}" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Store the official download in the notebook's local working directory.</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># In Colab, this directory is temporary and disappears when the runtime ends.</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>benchmark_directory <span class="op">=</span> Path(<span class="st">"silverbox-data"</span>)</span>
@@ -501,7 +513,7 @@ Held-out samples: 21,688
 Sampling interval: 1.6384 ms</code></pre>
 </div>
 </div>
-<div id="8918319d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-02T04:24:39.346093Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-02T04:24:39.345981Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-02T04:24:39.545203Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-02T04:24:39.544909Z&quot;}}" data-execution_count="3">
+<div id="8918319d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T03:53:28.990110Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T03:53:28.989992Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T03:53:29.570339Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T03:53:29.569765Z&quot;}}" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>display_samples <span class="op">=</span> <span class="dv">1_500</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>time_ms <span class="op">=</span> np.arange(display_samples) <span class="op">*</span> sampling_time <span class="op">*</span> <span class="dv">1_000</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -524,22 +536,22 @@ Sampling interval: 1.6384 ms</code></pre>
 <section id="set-up-one-forecasting-protocol" class="level2">
 <h2 class="anchored" data-anchor-id="set-up-one-forecasting-protocol">2. Set up one forecasting protocol</h2>
 <p>An <strong>autoregressive (AR)</strong> model forecasts a response from its own past values. An <strong>autoregressive model with exogenous input (ARX)</strong> extends that idea by adding one or more external signals that are available at prediction time. Such an input might be a commanded actuator signal, an ambient measurement, or a known operating schedule; it is <em>exogenous</em> because it is supplied from outside the response’s own history.</p>
-<p>Here, <code>V1</code> is the exogenous input and <code>V2</code> is the response. We will first apply the AR technique to forecast <code>V2</code> purely from its past <code>V2</code> values. Next, we will add the known applied input <code>V1</code>. Finally, we will fit a small RNN that can learn a nonlinear relationship from a recent input–response history.</p>
+<p>Here, <code>V1</code> is the exogenous input and <code>V2</code> is the response. We will first apply AR to forecast <code>V2</code> purely from its past values. Next, we add the known applied input <code>V1</code> to form ARX. We then build two recurrent models: first a response-only RNN, and then an RNN that also receives the known input.</p>
 <p>There are two useful forecasting protocols:</p>
 <ul>
 <li><strong>One-step-ahead forecasting (observed lags):</strong> use the actual preceding <code>V2</code> measurements at every time step.</li>
 <li><strong>Recursive multi-step forecasting (predicted lags):</strong> after an initial window, reuse each prediction as a lagged <code>V2</code> input for later predictions.</li>
 </ul>
-<p>We use recursive multi-step forecasting throughout this notebook. Every model uses the first <span class="math inline">\(p=20\)</span> measured responses in the held-out experiment only to initialize its state. Afterwards, later true <code>V2</code> responses are <strong>not</strong> fed back to the model.</p>
+<p>We use recursive multi-step forecasting throughout this notebook. Every model uses the first <span class="math inline">\(p=20\)</span> measured responses in the held-out experiment only to initialize its lag history or recurrent state. Afterwards, later true <code>V2</code> responses are <strong>not</strong> fed back to the model.</p>
 <p>The applied input <span class="math inline">\(u_t\)</span> remains known throughout the held-out experiment. That is natural in system identification: it is an externally imposed forcing signal, not an unknown future response measurement.</p>
 <p>For this example, the two linear models are</p>
 <p><span class="math display">\[
-\begin{aligned}
-\text{AR}(p):\quad \widehat{y}_t &amp;= \beta_0 + \sum_{j=1}^{p}\beta_j y_{t-j},\\
-\text{ARX}(p):\quad \widehat{y}_t &amp;= \beta_0 + \sum_{j=1}^{p}\beta_j y_{t-j} + \sum_{j=0}^{p}\gamma_j u_{t-j}.
+egin{aligned}
+    ext{AR}(p):\quad \widehat{y}_t &amp;= eta_0 + \sum_{j=1}^{p}eta_j y_{t-j},\
+    ext{ARX}(p):\quad \widehat{y}_t &amp;= eta_0 + \sum_{j=1}^{p}eta_j y_{t-j} + \sum_{j=0}^{p}\gamma_j u_{t-j}.
 \end{aligned}
 \]</span></p>
-<div id="1e4a36c9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-02T04:24:39.546563Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-02T04:24:39.546488Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-02T04:24:39.551742Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-02T04:24:39.551514Z&quot;}}" data-execution_count="4">
+<div id="1e4a36c9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T03:53:29.572262Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T03:53:29.572166Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T03:53:29.577874Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T03:53:29.577427Z&quot;}}" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ORDER <span class="op">=</span> <span class="dv">20</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -658,7 +670,7 @@ Sampling interval: 1.6384 ms</code></pre>
 <section id="start-with-a-response-only-ar20-model" class="level2">
 <h2 class="anchored" data-anchor-id="start-with-a-response-only-ar20-model">3. Start with a response-only AR(20) model</h2>
 <p>The AR model has 20 lagged <code>V2</code> values but no access to <code>V1</code>. During the recursive multi-step held-out forecast, it must infer future responses solely from its own earlier response forecasts.</p>
-<div id="fa20f614" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-02T04:24:39.552928Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-02T04:24:39.552843Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-02T04:24:40.547956Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-02T04:24:40.547631Z&quot;}}" data-execution_count="5">
+<div id="fa20f614" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T03:53:29.579175Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T03:53:29.579094Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T03:53:32.029052Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T03:53:32.028520Z&quot;}}" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ar_scaler, ar_model <span class="op">=</span> fit_linear_forecaster(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_train,</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    output_signal<span class="op">=</span>y_train,</span>
@@ -683,7 +695,7 @@ Sampling interval: 1.6384 ms</code></pre>
 <section id="add-the-causal-forcing-signal-arx20" class="level2">
 <h2 class="anchored" data-anchor-id="add-the-causal-forcing-signal-arx20">4. Add the causal forcing signal: ARX(20)</h2>
 <p>In this Silverbox system, <code>V1</code> is the ARX model’s exogenous input. The model receives the same response history plus the current and 20 previous <code>V1</code> values. Because <code>V1</code> is deliberately imposed on the physical system, it is reasonable to treat it as known at prediction time. This is different from leaking later <code>V2</code> labels into the model.</p>
-<div id="426ee452" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-02T04:24:40.549477Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-02T04:24:40.549385Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-02T04:24:41.913772Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-02T04:24:41.913477Z&quot;}}" data-execution_count="6">
+<div id="426ee452" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T03:53:32.030543Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T03:53:32.030444Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T03:53:34.785541Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T03:53:34.785006Z&quot;}}" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>arx_scaler, arx_model <span class="op">=</span> fit_linear_forecaster(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_train,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    output_signal<span class="op">=</span>y_train,</span>
@@ -750,236 +762,294 @@ Sampling interval: 1.6384 ms</code></pre>
 </div>
 </div>
 </section>
-<section id="learn-a-nonlinear-state-with-a-small-rnn" class="level2">
-<h2 class="anchored" data-anchor-id="learn-a-nonlinear-state-with-a-small-rnn">5. Learn a nonlinear state with a small RNN</h2>
+<section id="learn-a-nonlinear-state-from-the-response-alone" class="level2">
+<h2 class="anchored" data-anchor-id="learn-a-nonlinear-state-from-the-response-alone">5. Learn a nonlinear state from the response alone</h2>
 <p>A <strong>recurrent neural network (RNN)</strong> extends the MLP idea to sequential data. An MLP applies a learned transformation once to one fixed input vector. An RNN instead applies the <strong>same small learned transformation</strong> repeatedly as it moves through a sequence.</p>
-<p>At time <span class="math inline">\(t\)</span>, the RNN combines the current known input <span class="math inline">\(u_t\)</span>, the preceding response <span class="math inline">\(y_{t-1}\)</span>, and its previous hidden state <span class="math inline">\(\mathbf{h}_{t-1}\)</span>. The hidden state is a learned vector of internal memory: it is not a measured physical state, but it can summarize useful information from earlier positions in the sequence. A separate readout function <span class="math inline">\(f\)</span> maps the resulting state to the next-response prediction.</p>
-<p>We use <span class="math inline">\(\tanh\)</span> as the hidden-state activation. It is smooth, keeps each hidden-state value between <span class="math inline">\(-1\)</span> and <span class="math inline">\(1\)</span>, and preserves positive and negative values. Those bounded values are useful when the update is repeated through a sequence. <code>tanh</code> is a modeling choice, not the only possible activation.</p>
+<p>This first RNN is response-only: at time <span class="math inline">\(t\)</span>, it receives <span class="math inline">\(y_{t-1}\)</span> and its previous hidden state <span class="math inline">\(\mathbf{h}_{t-1}\)</span>, but it does <strong>not</strong> see <code>V1</code>. It therefore has the same type of observed response information as AR. The difference is how it represents history: AR retains 20 explicit lags and combines them linearly, whereas the RNN compresses earlier information into a learned nonlinear state.</p>
 <p><span class="math display">\[
-\mathbf{h}_t = \tanh(W_h \mathbf{h}_{t-1} + W_y y_{t-1} + W_u u_t + b_h),
+\mathbf{h}_t =  anh(W_h \mathbf{h}_{t-1} + W_y y_{t-1} + b_h),
 \qquad \widehat{y}_t = f(\mathbf{h}_t).
 \]</span></p>
-<p>For a transparent comparison with ARX(20), each prediction below rebuilds the RNN’s hidden state from a recent 20-sample window. During the recursive multi-step test forecast, those windows contain past <strong>predicted</strong> responses after initialization.</p>
-<div id="4ce4f84a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-02T04:24:41.915241Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-02T04:24:41.915132Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-02T04:24:41.922576Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-02T04:24:41.922314Z&quot;}}" data-execution_count="7">
+<p>The hidden state is a learned vector of internal memory: it is not a measured physical state, but it can summarize useful information from earlier positions in the sequence. We use $ anh$ as its activation because it is smooth, keeps each hidden-state value between <span class="math inline">\(-1\)</span> and <span class="math inline">\(1\)</span>, and preserves positive and negative values.</p>
+<p>For the held-out recursive forecast, the first 20 observed responses <strong>prime</strong> the hidden state. The model then advances one time step at a time, using its prior <strong>predicted</strong> response to obtain both the next prediction and the next hidden state. During training, it uses the observed prior response—called <em>teacher forcing</em>—and carries its state forward through the training record. We detach the state every 256 positions, so gradients travel through one chunk rather than the entire record; this is truncated backpropagation through time.</p>
+<div id="4ce4f84a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T03:53:34.787099Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T03:53:34.787000Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T03:53:34.795604Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T03:53:34.795185Z&quot;}}" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RecurrentPredictor(torch.nn.Module):</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Map a recent input--response sequence to the next response.</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Process a sequence while carrying a recurrent state.</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">        hidden_size: Number of values carried by the learned recurrent state.</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, <span class="op">*</span>, hidden_size: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.rnn <span class="op">=</span> torch.nn.RNN(</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>            input_size<span class="op">=</span><span class="dv">2</span>,  <span class="co"># [known input, previous response]</span></span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>            hidden_size<span class="op">=</span>hidden_size,</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>            batch_first<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>            nonlinearity<span class="op">=</span><span class="st">"tanh"</span>,</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.readout <span class="op">=</span> torch.nn.Sequential(</span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>            torch.nn.Linear(hidden_size, hidden_size),</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>            torch.nn.Tanh(),</span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>            torch.nn.Linear(hidden_size, <span class="dv">1</span>),</span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, sequence: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Predict one next standardized response for each sequence.</span></span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="co">            sequence: Tensor of shape `(batch, time, 2)`.</span></span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns:</span></span>
-<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="co">            A length-`batch` vector of standardized next-response predictions.</span></span>
-<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
-<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>        hidden_values, _ <span class="op">=</span> <span class="va">self</span>.rnn(sequence)</span>
-<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.readout(hidden_values[:, <span class="op">-</span><span class="dv">1</span>, :]).squeeze(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">        input_size: Number of values supplied at each time step.</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">        hidden_size: Number of values carried by the learned recurrent state.</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, <span class="op">*</span>, input_size: <span class="bu">int</span>, hidden_size: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.rnn <span class="op">=</span> torch.nn.RNN(</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>            input_size<span class="op">=</span>input_size,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>            hidden_size<span class="op">=</span>hidden_size,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>            batch_first<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>            nonlinearity<span class="op">=</span><span class="st">"tanh"</span>,</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.readout <span class="op">=</span> torch.nn.Sequential(</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>            torch.nn.Linear(hidden_size, hidden_size),</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>            torch.nn.Tanh(),</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>            torch.nn.Linear(hidden_size, <span class="dv">1</span>),</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>        sequence: torch.Tensor,</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>        hidden_state: torch.Tensor <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">tuple</span>[torch.Tensor, torch.Tensor]:</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Predict standardized responses and return the state for the next step.</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="co">        Args:</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="co">            sequence: Tensor of shape `(batch, time, input_size)`.</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a><span class="co">            hidden_state: State from the preceding sequence, or `None` to start at zero.</span></span>
 <span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_sequence_windows(</span>
-<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
-<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    input_signal: np.ndarray,</span>
-<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>    output_signal: np.ndarray,</span>
-<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>    order: <span class="bu">int</span>,</span>
-<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[np.ndarray, np.ndarray]:</span>
-<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Create `[input, previous response]` sequence windows and next targets.</span></span>
-<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
-<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a><span class="co">        input_signal: Standardized known forcing signal.</span></span>
-<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a><span class="co">        output_signal: Standardized response signal.</span></span>
-<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a><span class="co">        order: Number of sequence positions in every input window.</span></span>
-<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
-<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a><span class="co">        A sequence tensor with shape `(samples, order, 2)` and a target vector.</span></span>
-<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>    sequences: <span class="bu">list</span>[np.ndarray] <span class="op">=</span> []</span>
-<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>    targets: <span class="bu">list</span>[<span class="bu">float</span>] <span class="op">=</span> []</span>
-<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(order, <span class="bu">len</span>(output_signal)):</span>
-<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>        positions <span class="op">=</span> np.arange(index <span class="op">-</span> order <span class="op">+</span> <span class="dv">1</span>, index <span class="op">+</span> <span class="dv">1</span>)</span>
-<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>        sequences.append(</span>
-<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>            np.column_stack((input_signal[positions], output_signal[positions <span class="op">-</span> <span class="dv">1</span>]))</span>
-<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a>        targets.append(output_signal[index])</span>
-<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.asarray(sequences, dtype<span class="op">=</span>np.float32), np.asarray(targets, dtype<span class="op">=</span>np.float32)</span>
-<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_sequence_model(</span>
-<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
-<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>    model: torch.nn.Module,</span>
-<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>    sequences: np.ndarray,</span>
-<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a>    targets: np.ndarray,</span>
-<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>    epochs: <span class="bu">int</span>,</span>
-<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>    batch_size: <span class="bu">int</span>,</span>
-<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>    batches_per_epoch: <span class="bu">int</span>,</span>
-<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">float</span>]:</span>
-<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Train an RNN or LSTM with the same sampled mini-batches.</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a><span class="co">        Returns:</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="co">            Standardized predictions with shape `(batch, time)` and the next hidden state.</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>        hidden_values, next_hidden_state <span class="op">=</span> <span class="va">self</span>.rnn(sequence, hidden_state)</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>        predictions <span class="op">=</span> <span class="va">self</span>.readout(hidden_values).squeeze(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> predictions, next_hidden_state</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_teacher_forced_sequence(</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    input_signal: np.ndarray <span class="op">|</span> <span class="va">None</span>,</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>    output_signal: np.ndarray,</span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[np.ndarray, np.ndarray]:</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Create chronological RNN inputs and next-response targets.</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a><span class="co">        input_signal: Standardized known forcing signal, or `None` for a response-only RNN.</span></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a><span class="co">        output_signal: Standardized response signal.</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a><span class="co">        Inputs containing either `[y_(t-1)]` or `[u_t, y_(t-1)]`, plus targets `y_t`.</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> input_signal <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>        inputs <span class="op">=</span> output_signal[:<span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>]</span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>        inputs <span class="op">=</span> np.column_stack((input_signal[<span class="dv">1</span>:], output_signal[:<span class="op">-</span><span class="dv">1</span>]))</span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>    targets <span class="op">=</span> output_signal[<span class="dv">1</span>:]</span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> inputs.astype(np.float32), targets.astype(np.float32)</span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> detach_recurrent_state(</span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>    hidden_state: torch.Tensor <span class="op">|</span> <span class="bu">tuple</span>[torch.Tensor, torch.Tensor],</span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> torch.Tensor <span class="op">|</span> <span class="bu">tuple</span>[torch.Tensor, torch.Tensor]:</span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Keep state values but remove their old gradient history."""</span></span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">isinstance</span>(hidden_state, <span class="bu">tuple</span>):</span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">tuple</span>(value.detach() <span class="cf">for</span> value <span class="kw">in</span> hidden_state)</span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> hidden_state.detach()</span>
+<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
-<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a><span class="co">        model: Sequence model whose output is one standardized response.</span></span>
-<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a><span class="co">        sequences: Training tensor with shape `(samples, time, 2)`.</span></span>
-<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a><span class="co">        targets: Standardized next-response targets.</span></span>
-<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a><span class="co">        epochs: Number of passes through sampled mini-batches.</span></span>
-<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a><span class="co">        batch_size: Number of sequences per mini-batch.</span></span>
-<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a><span class="co">        batches_per_epoch: Number of mini-batches sampled in each epoch.</span></span>
-<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
-<span id="cb11-82"><a href="#cb11-82" aria-hidden="true" tabindex="-1"></a><span class="co">        The mean mini-batch MSE after each epoch.</span></span>
-<span id="cb11-83"><a href="#cb11-83" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb11-84"><a href="#cb11-84" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">0.003</span>, weight_decay<span class="op">=</span><span class="fl">1e-5</span>)</span>
-<span id="cb11-85"><a href="#cb11-85" aria-hidden="true" tabindex="-1"></a>    loss_function <span class="op">=</span> torch.nn.MSELoss()</span>
-<span id="cb11-86"><a href="#cb11-86" aria-hidden="true" tabindex="-1"></a>    generator <span class="op">=</span> np.random.default_rng(RANDOM_SEED)</span>
-<span id="cb11-87"><a href="#cb11-87" aria-hidden="true" tabindex="-1"></a>    training_losses: <span class="bu">list</span>[<span class="bu">float</span>] <span class="op">=</span> []</span>
-<span id="cb11-88"><a href="#cb11-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-89"><a href="#cb11-89" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
-<span id="cb11-90"><a href="#cb11-90" aria-hidden="true" tabindex="-1"></a>        model.train()</span>
-<span id="cb11-91"><a href="#cb11-91" aria-hidden="true" tabindex="-1"></a>        batch_losses: <span class="bu">list</span>[<span class="bu">float</span>] <span class="op">=</span> []</span>
-<span id="cb11-92"><a href="#cb11-92" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(batches_per_epoch):</span>
-<span id="cb11-93"><a href="#cb11-93" aria-hidden="true" tabindex="-1"></a>            chosen_rows <span class="op">=</span> generator.integers(<span class="dv">0</span>, <span class="bu">len</span>(sequences), size<span class="op">=</span>batch_size)</span>
-<span id="cb11-94"><a href="#cb11-94" aria-hidden="true" tabindex="-1"></a>            sequence_batch <span class="op">=</span> torch.from_numpy(sequences[chosen_rows]).to(device)</span>
-<span id="cb11-95"><a href="#cb11-95" aria-hidden="true" tabindex="-1"></a>            target_batch <span class="op">=</span> torch.from_numpy(targets[chosen_rows]).to(device)</span>
+<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_stateful_sequence_model(</span>
+<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a>    model: torch.nn.Module,</span>
+<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a>    inputs: np.ndarray,</span>
+<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a>    targets: np.ndarray,</span>
+<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a>    epochs: <span class="bu">int</span>,</span>
+<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a>    chunk_size: <span class="bu">int</span>,</span>
+<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">float</span>]:</span>
+<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Train an RNN or LSTM chronologically with truncated backpropagation.</span></span>
+<span id="cb11-82"><a href="#cb11-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-83"><a href="#cb11-83" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb11-84"><a href="#cb11-84" aria-hidden="true" tabindex="-1"></a><span class="co">        model: Sequence model whose output is one standardized response per time step.</span></span>
+<span id="cb11-85"><a href="#cb11-85" aria-hidden="true" tabindex="-1"></a><span class="co">        inputs: Chronological tensor with shape `(time, features)`.</span></span>
+<span id="cb11-86"><a href="#cb11-86" aria-hidden="true" tabindex="-1"></a><span class="co">        targets: Standardized next-response targets with shape `(time,)`.</span></span>
+<span id="cb11-87"><a href="#cb11-87" aria-hidden="true" tabindex="-1"></a><span class="co">        epochs: Number of passes through the chronological training record.</span></span>
+<span id="cb11-88"><a href="#cb11-88" aria-hidden="true" tabindex="-1"></a><span class="co">        chunk_size: Number of time steps through which gradients are propagated.</span></span>
+<span id="cb11-89"><a href="#cb11-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-90"><a href="#cb11-90" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb11-91"><a href="#cb11-91" aria-hidden="true" tabindex="-1"></a><span class="co">        The mean chunk MSE after each epoch.</span></span>
+<span id="cb11-92"><a href="#cb11-92" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb11-93"><a href="#cb11-93" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">0.003</span>, weight_decay<span class="op">=</span><span class="fl">1e-5</span>)</span>
+<span id="cb11-94"><a href="#cb11-94" aria-hidden="true" tabindex="-1"></a>    loss_function <span class="op">=</span> torch.nn.MSELoss()</span>
+<span id="cb11-95"><a href="#cb11-95" aria-hidden="true" tabindex="-1"></a>    training_losses: <span class="bu">list</span>[<span class="bu">float</span>] <span class="op">=</span> []</span>
 <span id="cb11-96"><a href="#cb11-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-97"><a href="#cb11-97" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad()  <span class="co"># PyTorch otherwise accumulates gradients from earlier batches.</span></span>
-<span id="cb11-98"><a href="#cb11-98" aria-hidden="true" tabindex="-1"></a>            prediction_batch <span class="op">=</span> model(sequence_batch)</span>
-<span id="cb11-99"><a href="#cb11-99" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> loss_function(prediction_batch, target_batch)</span>
-<span id="cb11-100"><a href="#cb11-100" aria-hidden="true" tabindex="-1"></a>            loss.backward()</span>
-<span id="cb11-101"><a href="#cb11-101" aria-hidden="true" tabindex="-1"></a>            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm<span class="op">=</span><span class="fl">1.0</span>)</span>
-<span id="cb11-102"><a href="#cb11-102" aria-hidden="true" tabindex="-1"></a>            optimizer.step()</span>
-<span id="cb11-103"><a href="#cb11-103" aria-hidden="true" tabindex="-1"></a>            batch_losses.append(loss.item())</span>
-<span id="cb11-104"><a href="#cb11-104" aria-hidden="true" tabindex="-1"></a>        training_losses.append(<span class="bu">float</span>(np.mean(batch_losses)))</span>
-<span id="cb11-105"><a href="#cb11-105" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-106"><a href="#cb11-106" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> training_losses</span>
-<span id="cb11-107"><a href="#cb11-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-108"><a href="#cb11-108" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-109"><a href="#cb11-109" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> recursive_sequence_forecast(</span>
-<span id="cb11-110"><a href="#cb11-110" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
-<span id="cb11-111"><a href="#cb11-111" aria-hidden="true" tabindex="-1"></a>    model: torch.nn.Module,</span>
-<span id="cb11-112"><a href="#cb11-112" aria-hidden="true" tabindex="-1"></a>    input_signal: np.ndarray,</span>
-<span id="cb11-113"><a href="#cb11-113" aria-hidden="true" tabindex="-1"></a>    observed_output: np.ndarray,</span>
-<span id="cb11-114"><a href="#cb11-114" aria-hidden="true" tabindex="-1"></a>    order: <span class="bu">int</span>,</span>
-<span id="cb11-115"><a href="#cb11-115" aria-hidden="true" tabindex="-1"></a>    input_mean: <span class="bu">float</span>,</span>
-<span id="cb11-116"><a href="#cb11-116" aria-hidden="true" tabindex="-1"></a>    input_std: <span class="bu">float</span>,</span>
-<span id="cb11-117"><a href="#cb11-117" aria-hidden="true" tabindex="-1"></a>    output_mean: <span class="bu">float</span>,</span>
-<span id="cb11-118"><a href="#cb11-118" aria-hidden="true" tabindex="-1"></a>    output_std: <span class="bu">float</span>,</span>
-<span id="cb11-119"><a href="#cb11-119" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> np.ndarray:</span>
-<span id="cb11-120"><a href="#cb11-120" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Make a recursive multi-step forecast using only known forcing values.</span></span>
-<span id="cb11-121"><a href="#cb11-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-122"><a href="#cb11-122" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
-<span id="cb11-123"><a href="#cb11-123" aria-hidden="true" tabindex="-1"></a><span class="co">        model: Trained RNN or LSTM that predicts standardized responses.</span></span>
-<span id="cb11-124"><a href="#cb11-124" aria-hidden="true" tabindex="-1"></a><span class="co">        input_signal: Known held-out forcing signal.</span></span>
-<span id="cb11-125"><a href="#cb11-125" aria-hidden="true" tabindex="-1"></a><span class="co">        observed_output: Held-out response; only the first `order` values initialize history.</span></span>
-<span id="cb11-126"><a href="#cb11-126" aria-hidden="true" tabindex="-1"></a><span class="co">        order: Length of each sequence input window.</span></span>
-<span id="cb11-127"><a href="#cb11-127" aria-hidden="true" tabindex="-1"></a><span class="co">        input_mean: Training-input mean.</span></span>
-<span id="cb11-128"><a href="#cb11-128" aria-hidden="true" tabindex="-1"></a><span class="co">        input_std: Training-input standard deviation.</span></span>
-<span id="cb11-129"><a href="#cb11-129" aria-hidden="true" tabindex="-1"></a><span class="co">        output_mean: Training-output mean.</span></span>
-<span id="cb11-130"><a href="#cb11-130" aria-hidden="true" tabindex="-1"></a><span class="co">        output_std: Training-output standard deviation.</span></span>
+<span id="cb11-97"><a href="#cb11-97" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb11-98"><a href="#cb11-98" aria-hidden="true" tabindex="-1"></a>        model.train()</span>
+<span id="cb11-99"><a href="#cb11-99" aria-hidden="true" tabindex="-1"></a>        chunk_losses: <span class="bu">list</span>[<span class="bu">float</span>] <span class="op">=</span> []</span>
+<span id="cb11-100"><a href="#cb11-100" aria-hidden="true" tabindex="-1"></a>        hidden_state <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb11-101"><a href="#cb11-101" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> start <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(inputs), chunk_size):</span>
+<span id="cb11-102"><a href="#cb11-102" aria-hidden="true" tabindex="-1"></a>            stop <span class="op">=</span> <span class="bu">min</span>(start <span class="op">+</span> chunk_size, <span class="bu">len</span>(inputs))</span>
+<span id="cb11-103"><a href="#cb11-103" aria-hidden="true" tabindex="-1"></a>            sequence_chunk <span class="op">=</span> torch.from_numpy(inputs[start:stop][<span class="va">None</span>, ...]).to(device)</span>
+<span id="cb11-104"><a href="#cb11-104" aria-hidden="true" tabindex="-1"></a>            target_chunk <span class="op">=</span> torch.from_numpy(targets[start:stop][<span class="va">None</span>, ...]).to(device)</span>
+<span id="cb11-105"><a href="#cb11-105" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad()  <span class="co"># PyTorch otherwise accumulates gradients from earlier chunks.</span></span>
+<span id="cb11-106"><a href="#cb11-106" aria-hidden="true" tabindex="-1"></a>            prediction_chunk, hidden_state <span class="op">=</span> model(sequence_chunk, hidden_state)</span>
+<span id="cb11-107"><a href="#cb11-107" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> loss_function(prediction_chunk, target_chunk)</span>
+<span id="cb11-108"><a href="#cb11-108" aria-hidden="true" tabindex="-1"></a>            loss.backward()</span>
+<span id="cb11-109"><a href="#cb11-109" aria-hidden="true" tabindex="-1"></a>            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb11-110"><a href="#cb11-110" aria-hidden="true" tabindex="-1"></a>            optimizer.step()</span>
+<span id="cb11-111"><a href="#cb11-111" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Carry the numerical state onward, but stop gradients at this boundary.</span></span>
+<span id="cb11-112"><a href="#cb11-112" aria-hidden="true" tabindex="-1"></a>            hidden_state <span class="op">=</span> detach_recurrent_state(hidden_state)</span>
+<span id="cb11-113"><a href="#cb11-113" aria-hidden="true" tabindex="-1"></a>            chunk_losses.append(loss.item())</span>
+<span id="cb11-114"><a href="#cb11-114" aria-hidden="true" tabindex="-1"></a>        training_losses.append(<span class="bu">float</span>(np.mean(chunk_losses)))</span>
+<span id="cb11-115"><a href="#cb11-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-116"><a href="#cb11-116" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> training_losses</span>
+<span id="cb11-117"><a href="#cb11-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-118"><a href="#cb11-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-119"><a href="#cb11-119" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> recursive_stateful_forecast(</span>
+<span id="cb11-120"><a href="#cb11-120" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb11-121"><a href="#cb11-121" aria-hidden="true" tabindex="-1"></a>    model: torch.nn.Module,</span>
+<span id="cb11-122"><a href="#cb11-122" aria-hidden="true" tabindex="-1"></a>    input_signal: np.ndarray <span class="op">|</span> <span class="va">None</span>,</span>
+<span id="cb11-123"><a href="#cb11-123" aria-hidden="true" tabindex="-1"></a>    observed_output: np.ndarray,</span>
+<span id="cb11-124"><a href="#cb11-124" aria-hidden="true" tabindex="-1"></a>    warmup: <span class="bu">int</span>,</span>
+<span id="cb11-125"><a href="#cb11-125" aria-hidden="true" tabindex="-1"></a>    input_mean: <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>,</span>
+<span id="cb11-126"><a href="#cb11-126" aria-hidden="true" tabindex="-1"></a>    input_std: <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>,</span>
+<span id="cb11-127"><a href="#cb11-127" aria-hidden="true" tabindex="-1"></a>    output_mean: <span class="bu">float</span>,</span>
+<span id="cb11-128"><a href="#cb11-128" aria-hidden="true" tabindex="-1"></a>    output_std: <span class="bu">float</span>,</span>
+<span id="cb11-129"><a href="#cb11-129" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="cb11-130"><a href="#cb11-130" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Make a state-carrying recursive forecast.</span></span>
 <span id="cb11-131"><a href="#cb11-131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-132"><a href="#cb11-132" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
-<span id="cb11-133"><a href="#cb11-133" aria-hidden="true" tabindex="-1"></a><span class="co">        Recursive predictions aligned with the held-out response.</span></span>
-<span id="cb11-134"><a href="#cb11-134" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb11-135"><a href="#cb11-135" aria-hidden="true" tabindex="-1"></a>    history <span class="op">=</span> <span class="bu">list</span>(observed_output[:order])</span>
-<span id="cb11-136"><a href="#cb11-136" aria-hidden="true" tabindex="-1"></a>    predictions <span class="op">=</span> np.full(<span class="bu">len</span>(observed_output), np.nan)</span>
-<span id="cb11-137"><a href="#cb11-137" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
-<span id="cb11-138"><a href="#cb11-138" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
-<span id="cb11-139"><a href="#cb11-139" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(order, <span class="bu">len</span>(observed_output)):</span>
-<span id="cb11-140"><a href="#cb11-140" aria-hidden="true" tabindex="-1"></a>            positions <span class="op">=</span> np.arange(index <span class="op">-</span> order <span class="op">+</span> <span class="dv">1</span>, index <span class="op">+</span> <span class="dv">1</span>)</span>
-<span id="cb11-141"><a href="#cb11-141" aria-hidden="true" tabindex="-1"></a>            previous_responses <span class="op">=</span> np.asarray([history[position <span class="op">-</span> <span class="dv">1</span>] <span class="cf">for</span> position <span class="kw">in</span> positions])</span>
-<span id="cb11-142"><a href="#cb11-142" aria-hidden="true" tabindex="-1"></a>            sequence <span class="op">=</span> np.column_stack((</span>
-<span id="cb11-143"><a href="#cb11-143" aria-hidden="true" tabindex="-1"></a>                (input_signal[positions] <span class="op">-</span> input_mean) <span class="op">/</span> input_std,</span>
-<span id="cb11-144"><a href="#cb11-144" aria-hidden="true" tabindex="-1"></a>                (previous_responses <span class="op">-</span> output_mean) <span class="op">/</span> output_std,</span>
-<span id="cb11-145"><a href="#cb11-145" aria-hidden="true" tabindex="-1"></a>            )).astype(np.float32)</span>
-<span id="cb11-146"><a href="#cb11-146" aria-hidden="true" tabindex="-1"></a>            tensor <span class="op">=</span> torch.from_numpy(sequence[<span class="va">None</span>, ...]).to(device)</span>
-<span id="cb11-147"><a href="#cb11-147" aria-hidden="true" tabindex="-1"></a>            standardized_prediction <span class="op">=</span> model(tensor).item()</span>
-<span id="cb11-148"><a href="#cb11-148" aria-hidden="true" tabindex="-1"></a>            prediction <span class="op">=</span> standardized_prediction <span class="op">*</span> output_std <span class="op">+</span> output_mean</span>
-<span id="cb11-149"><a href="#cb11-149" aria-hidden="true" tabindex="-1"></a>            history.append(prediction)</span>
-<span id="cb11-150"><a href="#cb11-150" aria-hidden="true" tabindex="-1"></a>            predictions[index] <span class="op">=</span> prediction</span>
-<span id="cb11-151"><a href="#cb11-151" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> predictions</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-132"><a href="#cb11-132" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb11-133"><a href="#cb11-133" aria-hidden="true" tabindex="-1"></a><span class="co">        model: Trained RNN or LSTM that predicts standardized responses.</span></span>
+<span id="cb11-134"><a href="#cb11-134" aria-hidden="true" tabindex="-1"></a><span class="co">        input_signal: Known held-out forcing signal, or `None` for response-only recurrence.</span></span>
+<span id="cb11-135"><a href="#cb11-135" aria-hidden="true" tabindex="-1"></a><span class="co">        observed_output: Held-out response; only the first `warmup` values prime state.</span></span>
+<span id="cb11-136"><a href="#cb11-136" aria-hidden="true" tabindex="-1"></a><span class="co">        warmup: Number of observed held-out values used before recursive prediction.</span></span>
+<span id="cb11-137"><a href="#cb11-137" aria-hidden="true" tabindex="-1"></a><span class="co">        input_mean: Training-input mean when `input_signal` is supplied.</span></span>
+<span id="cb11-138"><a href="#cb11-138" aria-hidden="true" tabindex="-1"></a><span class="co">        input_std: Training-input standard deviation when `input_signal` is supplied.</span></span>
+<span id="cb11-139"><a href="#cb11-139" aria-hidden="true" tabindex="-1"></a><span class="co">        output_mean: Training-output mean.</span></span>
+<span id="cb11-140"><a href="#cb11-140" aria-hidden="true" tabindex="-1"></a><span class="co">        output_std: Training-output standard deviation.</span></span>
+<span id="cb11-141"><a href="#cb11-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-142"><a href="#cb11-142" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb11-143"><a href="#cb11-143" aria-hidden="true" tabindex="-1"></a><span class="co">        Recursive predictions aligned with the held-out response.</span></span>
+<span id="cb11-144"><a href="#cb11-144" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb11-145"><a href="#cb11-145" aria-hidden="true" tabindex="-1"></a>    predictions <span class="op">=</span> np.full(<span class="bu">len</span>(observed_output), np.nan)</span>
+<span id="cb11-146"><a href="#cb11-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-147"><a href="#cb11-147" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> step_input(<span class="op">*</span>, index: <span class="bu">int</span>, previous_response: <span class="bu">float</span>) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb11-148"><a href="#cb11-148" aria-hidden="true" tabindex="-1"></a>        standardized_response <span class="op">=</span> (previous_response <span class="op">-</span> output_mean) <span class="op">/</span> output_std</span>
+<span id="cb11-149"><a href="#cb11-149" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> input_signal <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb11-150"><a href="#cb11-150" aria-hidden="true" tabindex="-1"></a>            values <span class="op">=</span> [standardized_response]</span>
+<span id="cb11-151"><a href="#cb11-151" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb11-152"><a href="#cb11-152" aria-hidden="true" tabindex="-1"></a>            standardized_input <span class="op">=</span> (input_signal[index] <span class="op">-</span> input_mean) <span class="op">/</span> input_std</span>
+<span id="cb11-153"><a href="#cb11-153" aria-hidden="true" tabindex="-1"></a>            values <span class="op">=</span> [standardized_input, standardized_response]</span>
+<span id="cb11-154"><a href="#cb11-154" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch.tensor(values, dtype<span class="op">=</span>torch.float32, device<span class="op">=</span>device).reshape(<span class="dv">1</span>, <span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb11-155"><a href="#cb11-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-156"><a href="#cb11-156" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb11-157"><a href="#cb11-157" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb11-158"><a href="#cb11-158" aria-hidden="true" tabindex="-1"></a>        hidden_state <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb11-159"><a href="#cb11-159" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Prime the recurrent state with observed held-out responses.</span></span>
+<span id="cb11-160"><a href="#cb11-160" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, warmup):</span>
+<span id="cb11-161"><a href="#cb11-161" aria-hidden="true" tabindex="-1"></a>            _, hidden_state <span class="op">=</span> model(</span>
+<span id="cb11-162"><a href="#cb11-162" aria-hidden="true" tabindex="-1"></a>                step_input(index<span class="op">=</span>index, previous_response<span class="op">=</span><span class="bu">float</span>(observed_output[index <span class="op">-</span> <span class="dv">1</span>])),</span>
+<span id="cb11-163"><a href="#cb11-163" aria-hidden="true" tabindex="-1"></a>                hidden_state,</span>
+<span id="cb11-164"><a href="#cb11-164" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb11-165"><a href="#cb11-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-166"><a href="#cb11-166" aria-hidden="true" tabindex="-1"></a>        previous_response <span class="op">=</span> <span class="bu">float</span>(observed_output[warmup <span class="op">-</span> <span class="dv">1</span>])</span>
+<span id="cb11-167"><a href="#cb11-167" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(warmup, <span class="bu">len</span>(observed_output)):</span>
+<span id="cb11-168"><a href="#cb11-168" aria-hidden="true" tabindex="-1"></a>            standardized_prediction, hidden_state <span class="op">=</span> model(</span>
+<span id="cb11-169"><a href="#cb11-169" aria-hidden="true" tabindex="-1"></a>                step_input(index<span class="op">=</span>index, previous_response<span class="op">=</span>previous_response),</span>
+<span id="cb11-170"><a href="#cb11-170" aria-hidden="true" tabindex="-1"></a>                hidden_state,</span>
+<span id="cb11-171"><a href="#cb11-171" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb11-172"><a href="#cb11-172" aria-hidden="true" tabindex="-1"></a>            previous_response <span class="op">=</span> standardized_prediction.item() <span class="op">*</span> output_std <span class="op">+</span> output_mean</span>
+<span id="cb11-173"><a href="#cb11-173" aria-hidden="true" tabindex="-1"></a>            predictions[index] <span class="op">=</span> previous_response</span>
+<span id="cb11-174"><a href="#cb11-174" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> predictions</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="fc914f95" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-02T04:24:41.923751Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-02T04:24:41.923658Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-02T04:25:01.316185Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-02T04:25:01.315576Z&quot;}}" data-execution_count="8">
+<div id="fc914f95" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T03:53:34.796875Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T03:53:34.796797Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T03:57:15.703557Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T03:57:15.702358Z&quot;}}" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Standardization statistics are learned from the training experiment only.</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># We write the transform explicitly because V1 and V2 are each one-dimensional signals,</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># and these four scalars are reused inside the recursive forecast below. `StandardScaler`</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># would give the same result, but would require repeated two-dimensional reshaping here.</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>u_mean, u_std <span class="op">=</span> <span class="bu">float</span>(u_train.mean()), <span class="bu">float</span>(u_train.std())</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>y_mean, y_std <span class="op">=</span> <span class="bu">float</span>(y_train.mean()), <span class="bu">float</span>(y_train.std())</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>u_train_scaled <span class="op">=</span> (u_train <span class="op">-</span> u_mean) <span class="op">/</span> u_std</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>y_train_scaled <span class="op">=</span> (y_train <span class="op">-</span> y_mean) <span class="op">/</span> y_std</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>train_sequences, train_targets <span class="op">=</span> make_sequence_windows(</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_train_scaled,</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    output_signal<span class="op">=</span>y_train_scaled,</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>ORDER,</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># The response-only RNN has one feature at each step: the preceding response.</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>y_mean, y_std <span class="op">=</span> <span class="bu">float</span>(y_train.mean()), <span class="bu">float</span>(y_train.std())</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>y_train_scaled <span class="op">=</span> (y_train <span class="op">-</span> y_mean) <span class="op">/</span> y_std</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>response_rnn_inputs, response_rnn_targets <span class="op">=</span> make_teacher_forced_sequence(</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    output_signal<span class="op">=</span>y_train_scaled,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>HIDDEN_SIZE <span class="op">=</span> <span class="dv">16</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>EPOCHS <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>CHUNK_SIZE <span class="op">=</span> <span class="dv">256</span></span>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>HIDDEN_SIZE <span class="op">=</span> <span class="dv">16</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>EPOCHS <span class="op">=</span> <span class="dv">100</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>BATCH_SIZE <span class="op">=</span> <span class="dv">128</span></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>BATCHES_PER_EPOCH <span class="op">=</span> <span class="dv">32</span></span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="co"># The RNN and LSTM below use the same training budget and sampled mini-batches.</span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(RANDOM_SEED)</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>rnn_model <span class="op">=</span> RecurrentPredictor(hidden_size<span class="op">=</span>HIDDEN_SIZE).to(device)</span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>rnn_training_losses <span class="op">=</span> train_sequence_model(</span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>rnn_model,</span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    sequences<span class="op">=</span>train_sequences,</span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>train_targets,</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span>EPOCHS,</span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span>BATCH_SIZE,</span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    batches_per_epoch<span class="op">=</span>BATCHES_PER_EPOCH,</span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>, <span class="dv">20</span>):</span>
-<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"RNN epoch </span><span class="sc">{</span>epoch<span class="sc">:&gt;3}</span><span class="ss">: mean batch MSE = </span><span class="sc">{</span>rnn_training_losses[epoch <span class="op">-</span> <span class="dv">1</span>]<span class="sc">:.5f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(RANDOM_SEED)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>response_rnn_model <span class="op">=</span> RecurrentPredictor(input_size<span class="op">=</span><span class="dv">1</span>, hidden_size<span class="op">=</span>HIDDEN_SIZE).to(device)</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>response_rnn_training_losses <span class="op">=</span> train_stateful_sequence_model(</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>response_rnn_model,</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    inputs<span class="op">=</span>response_rnn_inputs,</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>response_rnn_targets,</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span>EPOCHS,</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    chunk_size<span class="op">=</span>CHUNK_SIZE,</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>, <span class="dv">10</span>):</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"Response-only RNN epoch </span><span class="sc">{</span>epoch<span class="sc">:&gt;3}</span><span class="ss">: "</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"mean chunk MSE = </span><span class="sc">{</span>response_rnn_training_losses[epoch <span class="op">-</span> <span class="dv">1</span>]<span class="sc">:.5f}</span><span class="ss">"</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>RNN epoch  20: mean batch MSE = 0.00046
-RNN epoch  40: mean batch MSE = 0.00029
-RNN epoch  60: mean batch MSE = 0.00019
-RNN epoch  80: mean batch MSE = 0.00014
-RNN epoch 100: mean batch MSE = 0.00006</code></pre>
+<pre><code>Response-only RNN epoch  10: mean chunk MSE = 0.00577
+Response-only RNN epoch  20: mean chunk MSE = 0.00437
+Response-only RNN epoch  30: mean chunk MSE = 0.00197
+Response-only RNN epoch  40: mean chunk MSE = 0.00217
+Response-only RNN epoch  50: mean chunk MSE = 0.00170</code></pre>
 </div>
 </div>
-<div id="fde21587" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-02T04:25:01.321076Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-02T04:25:01.320356Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-02T04:25:46.653067Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-02T04:25:46.652708Z&quot;}}" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>rnn_prediction <span class="op">=</span> recursive_sequence_forecast(</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>rnn_model,</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_test,</span>
+<div id="fde21587" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T03:57:15.713294Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T03:57:15.709528Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T03:57:25.320009Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T03:57:25.318914Z&quot;}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>response_rnn_prediction <span class="op">=</span> recursive_stateful_forecast(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>response_rnn_model,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span><span class="va">None</span>,</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    observed_output<span class="op">=</span>y_test,</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>ORDER,</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    input_mean<span class="op">=</span>u_mean,</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    input_std<span class="op">=</span>u_std,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    warmup<span class="op">=</span>ORDER,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    input_mean<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    input_std<span class="op">=</span><span class="va">None</span>,</span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    output_mean<span class="op">=</span>y_mean,</span>
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    output_std<span class="op">=</span>y_std,</span>
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>rnn_rmse <span class="op">=</span> rmse(actual<span class="op">=</span>y_test, predicted<span class="op">=</span>rnn_prediction, warmup<span class="op">=</span>ORDER)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>))</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(np.arange(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>), rnn_training_losses, color<span class="op">=</span><span class="st">"#7c4d9e"</span>)</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"epoch"</span>, ylabel<span class="op">=</span><span class="st">"mean training MSE"</span>, title<span class="op">=</span><span class="st">"RNN training progress"</span>)</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(zoom_time, y_test[zoom_window], color<span class="op">=</span><span class="st">"#2f7395"</span>, linewidth<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="st">"observed V2"</span>)</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(zoom_time, arx_prediction[zoom_window], color<span class="op">=</span><span class="st">"#4d9d75"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"ARX(20)"</span>)</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(zoom_time, rnn_prediction[zoom_window], color<span class="op">=</span><span class="st">"#7c4d9e"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"RNN"</span>)</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"held-out time (ms)"</span>, ylabel<span class="op">=</span><span class="st">"response V2"</span>, title<span class="op">=</span><span class="st">"Zoomed nonlinear recurrent forecast"</span>)</span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"RNN recursive multi-step held-out RMSE: </span><span class="sc">{</span>rnn_rmse<span class="sc">:.5f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>response_rnn_rmse <span class="op">=</span> rmse(</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    actual<span class="op">=</span>y_test,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    predicted<span class="op">=</span>response_rnn_prediction,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    warmup<span class="op">=</span>ORDER,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>))</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    np.arange(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>),</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    response_rnn_training_losses,</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#7c4d9e"</span>,</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].<span class="bu">set</span>(</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"epoch"</span>,</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"mean training MSE"</span>,</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Response-only RNN training progress"</span>,</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    zoom_time,</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    y_test[zoom_window],</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#2f7395"</span>,</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">1.6</span>,</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"observed V2"</span>,</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>    zoom_time,</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>    ar_prediction[zoom_window],</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#d97927"</span>,</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>    linestyle<span class="op">=</span><span class="st">"--"</span>,</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"AR(20)"</span>,</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>    zoom_time,</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>    response_rnn_prediction[zoom_window],</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#7c4d9e"</span>,</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>    linestyle<span class="op">=</span><span class="st">"--"</span>,</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"response-only RNN"</span>,</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].<span class="bu">set</span>(</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"held-out time (ms)"</span>,</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"response V2"</span>,</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Response-only nonlinear recurrent forecast"</span>,</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Response-only RNN recursive multi-step held-out RMSE: "</span></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>response_rnn_rmse<span class="sc">:.5f}</span><span class="ss">"</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -988,90 +1058,107 @@ RNN epoch 100: mean batch MSE = 0.00006</code></pre>
 </div>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>RNN recursive multi-step held-out RMSE: 0.00193</code></pre>
+<pre><code>Response-only RNN recursive multi-step held-out RMSE: 0.05514</code></pre>
 </div>
 </div>
 </section>
-<section id="optional-compare-the-small-rnn-with-an-lstm" class="level2">
-<h2 class="anchored" data-anchor-id="optional-compare-the-small-rnn-with-an-lstm">6. (Optional) Compare the small RNN with an LSTM</h2>
-<p>An <strong>LSTM (long short-term memory)</strong> network is another recurrent architecture. Like the RNN above, it reads the same input–response sequence and produces one next-response prediction. Its gates control what information is stored, forgotten, and exposed through a separate cell state.</p>
-<p>To isolate the architectural change, the comparison below keeps the 20-sample sequence, 16 hidden values, optimizer, learning rate, epochs, mini-batches, and recursive held-out protocol fixed. The LSTM has more learned values because its gates add parameters, so this is a controlled illustration—not a claim of equal model capacity or a guarantee that an LSTM will always win.</p>
-<div id="278fca3d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-02T04:25:46.658070Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-02T04:25:46.657951Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-02T04:25:46.661748Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-02T04:25:46.661529Z&quot;}}" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LSTMPredictor(torch.nn.Module):</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Map a recent input--response sequence to the next response with an LSTM.</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">        hidden_size: Number of values in the hidden and cell states.</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, <span class="op">*</span>, hidden_size: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lstm <span class="op">=</span> torch.nn.LSTM(</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>            input_size<span class="op">=</span><span class="dv">2</span>,  <span class="co"># [known input, previous response]</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>            hidden_size<span class="op">=</span>hidden_size,</span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>            batch_first<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.readout <span class="op">=</span> torch.nn.Sequential(</span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>            torch.nn.Linear(hidden_size, hidden_size),</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>            torch.nn.Tanh(),</span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>            torch.nn.Linear(hidden_size, <span class="dv">1</span>),</span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, sequence: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Predict one next standardized response for each sequence."""</span></span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        hidden_values, _ <span class="op">=</span> <span class="va">self</span>.lstm(sequence)</span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.readout(hidden_values[:, <span class="op">-</span><span class="dv">1</span>, :]).squeeze(<span class="op">-</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="give-the-rnn-the-known-forcing-input" class="level2">
+<h2 class="anchored" data-anchor-id="give-the-rnn-the-known-forcing-input">6. Give the RNN the known forcing input</h2>
+<p>The response-only RNN above is the recurrent analogue of AR: it only sees prior <code>V2</code> values. It cannot react directly when the applied excitation <code>V1</code> changes.</p>
+<p>We now add the known forcing signal. At time <span class="math inline">\(t\)</span>, the RNN receives the two-value input <span class="math inline">\([u_t, y_{t-1}]\)</span> together with its prior hidden state:</p>
+<p><span class="math display">\[
+\mathbf{h}_t =  anh(W_h \mathbf{h}_{t-1} + W_y y_{t-1} + W_u u_t + b_h),
+\qquad \widehat{y}_t = f(\mathbf{h}_t).
+\]</span></p>
+<p>This is an <strong>input-aware RNN</strong>: the nonlinear recurrent counterpart to ARX. It has the same causal information pattern as ARX—the known current forcing signal and response history—but represents that history with a learned nonlinear state rather than a fixed, linear list of lags. The same teacher-forced training and state-carrying recursive held-out protocol apply.</p>
+<div id="2ec3f871" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T03:57:25.327548Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T03:57:25.327428Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T04:01:33.599550Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T04:01:33.598202Z&quot;}}" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The input-aware RNN uses [current V1, previous V2] at every time step.</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Standardize V1 using the training experiment only.</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>u_mean, u_std <span class="op">=</span> <span class="bu">float</span>(u_train.mean()), <span class="bu">float</span>(u_train.std())</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>u_train_scaled <span class="op">=</span> (u_train <span class="op">-</span> u_mean) <span class="op">/</span> u_std</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>input_rnn_inputs, input_rnn_targets <span class="op">=</span> make_teacher_forced_sequence(</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_train_scaled,</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    output_signal<span class="op">=</span>y_train_scaled,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the same hidden size, chronological training record, and training budget.</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(RANDOM_SEED)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>rnn_model <span class="op">=</span> RecurrentPredictor(input_size<span class="op">=</span><span class="dv">2</span>, hidden_size<span class="op">=</span>HIDDEN_SIZE).to(device)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>rnn_training_losses <span class="op">=</span> train_stateful_sequence_model(</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>rnn_model,</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    inputs<span class="op">=</span>input_rnn_inputs,</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>input_rnn_targets,</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span>EPOCHS,</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    chunk_size<span class="op">=</span>CHUNK_SIZE,</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>, <span class="dv">10</span>):</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"Input-aware RNN epoch </span><span class="sc">{</span>epoch<span class="sc">:&gt;3}</span><span class="ss">: "</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"mean chunk MSE = </span><span class="sc">{</span>rnn_training_losses[epoch <span class="op">-</span> <span class="dv">1</span>]<span class="sc">:.5f}</span><span class="ss">"</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Input-aware RNN epoch  10: mean chunk MSE = 0.00014
+Input-aware RNN epoch  20: mean chunk MSE = 0.00010
+Input-aware RNN epoch  30: mean chunk MSE = 0.00006
+Input-aware RNN epoch  40: mean chunk MSE = 0.00013
+Input-aware RNN epoch  50: mean chunk MSE = 0.00008</code></pre>
 </div>
-<div id="43cd1053" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-02T04:25:46.662795Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-02T04:25:46.662727Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-02T04:26:18.721606Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-02T04:26:18.721283Z&quot;}}" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the same random seed, data windows, and sampled mini-batches as the RNN.</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(RANDOM_SEED)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>lstm_model <span class="op">=</span> LSTMPredictor(hidden_size<span class="op">=</span>HIDDEN_SIZE).to(device)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>lstm_training_losses <span class="op">=</span> train_sequence_model(</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>lstm_model,</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    sequences<span class="op">=</span>train_sequences,</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>train_targets,</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span>EPOCHS,</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span>BATCH_SIZE,</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    batches_per_epoch<span class="op">=</span>BATCHES_PER_EPOCH,</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>lstm_prediction <span class="op">=</span> recursive_sequence_forecast(</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>lstm_model,</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_test,</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    observed_output<span class="op">=</span>y_test,</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>ORDER,</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    input_mean<span class="op">=</span>u_mean,</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    input_std<span class="op">=</span>u_std,</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    output_mean<span class="op">=</span>y_mean,</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    output_std<span class="op">=</span>y_std,</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>lstm_rmse <span class="op">=</span> rmse(actual<span class="op">=</span>y_test, predicted<span class="op">=</span>lstm_prediction, warmup<span class="op">=</span>ORDER)</span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>))</span>
-<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(np.arange(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>), rnn_training_losses, color<span class="op">=</span><span class="st">"#7c4d9e"</span>, label<span class="op">=</span><span class="st">"RNN"</span>)</span>
-<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(np.arange(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>), lstm_training_losses, color<span class="op">=</span><span class="st">"#bd6b30"</span>, label<span class="op">=</span><span class="st">"LSTM"</span>)</span>
-<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"epoch"</span>, ylabel<span class="op">=</span><span class="st">"mean training MSE"</span>, title<span class="op">=</span><span class="st">"Matched training schedules"</span>)</span>
-<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(zoom_time, y_test[zoom_window], color<span class="op">=</span><span class="st">"#2f7395"</span>, linewidth<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="st">"observed V2"</span>)</span>
-<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(zoom_time, rnn_prediction[zoom_window], color<span class="op">=</span><span class="st">"#7c4d9e"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"RNN"</span>)</span>
-<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(zoom_time, lstm_prediction[zoom_window], color<span class="op">=</span><span class="st">"#bd6b30"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"LSTM"</span>)</span>
-<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"held-out time (ms)"</span>, ylabel<span class="op">=</span><span class="st">"response V2"</span>, title<span class="op">=</span><span class="st">"Same held-out window: RNN versus LSTM"</span>)</span>
-<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>comparison <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">"model"</span>: [<span class="ss">f"AR(</span><span class="sc">{</span>ORDER<span class="sc">}</span><span class="ss">)"</span>, <span class="ss">f"ARX(</span><span class="sc">{</span>ORDER<span class="sc">}</span><span class="ss">)"</span>, <span class="st">"small RNN"</span>, <span class="st">"small LSTM"</span>],</span>
-<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">"information available"</span>: [</span>
-<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>        <span class="st">"past response only"</span>,</span>
-<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>        <span class="st">"past response + known forcing input"</span>,</span>
-<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>        <span class="st">"recent input--response sequence + learned nonlinear state"</span>,</span>
-<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>        <span class="st">"same sequence + gated hidden and cell states"</span>,</span>
-<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>    <span class="st">"recursive multi-step held-out RMSE"</span>: [ar_rmse, arx_rmse, rnn_rmse, lstm_rmse],</span>
-<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>display(comparison.style.<span class="bu">format</span>({<span class="st">"recursive multi-step held-out RMSE"</span>: <span class="st">"</span><span class="sc">{:.5f}</span><span class="st">"</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="d4bf595a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T04:01:33.604544Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T04:01:33.604412Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T04:01:42.846931Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T04:01:42.846363Z&quot;}}" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>rnn_prediction <span class="op">=</span> recursive_stateful_forecast(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>rnn_model,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_test,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    observed_output<span class="op">=</span>y_test,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    warmup<span class="op">=</span>ORDER,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    input_mean<span class="op">=</span>u_mean,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    input_std<span class="op">=</span>u_std,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    output_mean<span class="op">=</span>y_mean,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    output_std<span class="op">=</span>y_std,</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>rnn_rmse <span class="op">=</span> rmse(actual<span class="op">=</span>y_test, predicted<span class="op">=</span>rnn_prediction, warmup<span class="op">=</span>ORDER)</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>))</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(np.arange(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>), rnn_training_losses, color<span class="op">=</span><span class="st">"#7c4d9e"</span>)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].<span class="bu">set</span>(</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"epoch"</span>,</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"mean training MSE"</span>,</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Input-aware RNN training progress"</span>,</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>    zoom_time,</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    y_test[zoom_window],</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#2f7395"</span>,</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">1.6</span>,</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"observed V2"</span>,</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    zoom_time,</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    arx_prediction[zoom_window],</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#4d9d75"</span>,</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>    linestyle<span class="op">=</span><span class="st">"--"</span>,</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"ARX(20)"</span>,</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>    zoom_time,</span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>    rnn_prediction[zoom_window],</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#7c4d9e"</span>,</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>    linestyle<span class="op">=</span><span class="st">"--"</span>,</span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"input-aware RNN"</span>,</span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].<span class="bu">set</span>(</span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"held-out time (ms)"</span>,</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"response V2"</span>,</span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Input-aware state-carrying recurrent forecast"</span>,</span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Input-aware RNN recursive multi-step held-out RMSE: </span><span class="sc">{</span>rnn_rmse<span class="sc">:.5f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -1079,43 +1166,159 @@ RNN epoch 100: mean batch MSE = 0.00006</code></pre>
 </figure>
 </div>
 </div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Input-aware RNN recursive multi-step held-out RMSE: 0.00379</code></pre>
+</div>
+</div>
+</section>
+<section id="optional-compare-the-input-aware-rnn-with-an-lstm" class="level2">
+<h2 class="anchored" data-anchor-id="optional-compare-the-input-aware-rnn-with-an-lstm">7. (Optional) Compare the input-aware RNN with an LSTM</h2>
+<p>An <strong>LSTM (long short-term memory)</strong> network is another recurrent architecture. Like the input-aware RNN above, it reads the same chronological input–response record and produces one next-response prediction at a time. Its gates control what information is stored, forgotten, and exposed through a separate cell state.</p>
+<p>To isolate the architectural change, the comparison below keeps the 20-response warmup, 16 hidden values, optimizer, learning rate, epochs, truncated-backpropagation chunk length, and recursive held-out protocol fixed. The LSTM has more learned values because its gates add parameters, so this is a controlled illustration—not a claim of equal model capacity or a guarantee that an LSTM will always win.</p>
+<div id="278fca3d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T04:01:42.848130Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T04:01:42.848031Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T04:01:42.851629Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T04:01:42.851181Z&quot;}}" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LSTMPredictor(torch.nn.Module):</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Process an input--response sequence with an LSTM.</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co">        hidden_size: Number of values in the hidden and cell states.</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, <span class="op">*</span>, hidden_size: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lstm <span class="op">=</span> torch.nn.LSTM(</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>            input_size<span class="op">=</span><span class="dv">2</span>,  <span class="co"># [known input, previous response]</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>            hidden_size<span class="op">=</span>hidden_size,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>            batch_first<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.readout <span class="op">=</span> torch.nn.Sequential(</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>            torch.nn.Linear(hidden_size, hidden_size),</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>            torch.nn.Tanh(),</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>            torch.nn.Linear(hidden_size, <span class="dv">1</span>),</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>        sequence: torch.Tensor,</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>        hidden_state: <span class="bu">tuple</span>[torch.Tensor, torch.Tensor] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="bu">tuple</span>[torch.Tensor, <span class="bu">tuple</span>[torch.Tensor, torch.Tensor]]:</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Predict responses and return the hidden and cell states for the next step."""</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>        hidden_values, next_hidden_state <span class="op">=</span> <span class="va">self</span>.lstm(sequence, hidden_state)</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>        predictions <span class="op">=</span> <span class="va">self</span>.readout(hidden_values).squeeze(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> predictions, next_hidden_state</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="43cd1053" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T04:01:42.852668Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T04:01:42.852597Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T04:04:03.138557Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T04:04:03.137872Z&quot;}}" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the same random seed, chronological data, and truncated-BPTT chunks as the input-aware RNN.</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(RANDOM_SEED)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>lstm_model <span class="op">=</span> LSTMPredictor(hidden_size<span class="op">=</span>HIDDEN_SIZE).to(device)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>lstm_training_losses <span class="op">=</span> train_stateful_sequence_model(</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>lstm_model,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    inputs<span class="op">=</span>input_rnn_inputs,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    targets<span class="op">=</span>input_rnn_targets,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span>EPOCHS,</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    chunk_size<span class="op">=</span>CHUNK_SIZE,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>lstm_prediction <span class="op">=</span> recursive_stateful_forecast(</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>lstm_model,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_test,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    observed_output<span class="op">=</span>y_test,</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    warmup<span class="op">=</span>ORDER,</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    input_mean<span class="op">=</span>u_mean,</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    input_std<span class="op">=</span>u_std,</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    output_mean<span class="op">=</span>y_mean,</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    output_std<span class="op">=</span>y_std,</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>lstm_rmse <span class="op">=</span> rmse(actual<span class="op">=</span>y_test, predicted<span class="op">=</span>lstm_prediction, warmup<span class="op">=</span>ORDER)</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>))</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(np.arange(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>), rnn_training_losses, color<span class="op">=</span><span class="st">"#7c4d9e"</span>, label<span class="op">=</span><span class="st">"input-aware RNN"</span>)</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(np.arange(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>), lstm_training_losses, color<span class="op">=</span><span class="st">"#bd6b30"</span>, label<span class="op">=</span><span class="st">"LSTM"</span>)</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"epoch"</span>, ylabel<span class="op">=</span><span class="st">"mean training MSE"</span>, title<span class="op">=</span><span class="st">"Matched training schedules"</span>)</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(zoom_time, y_test[zoom_window], color<span class="op">=</span><span class="st">"#2f7395"</span>, linewidth<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="st">"observed V2"</span>)</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(zoom_time, rnn_prediction[zoom_window], color<span class="op">=</span><span class="st">"#7c4d9e"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"input-aware RNN"</span>)</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(zoom_time, lstm_prediction[zoom_window], color<span class="op">=</span><span class="st">"#bd6b30"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"LSTM"</span>)</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"held-out time (ms)"</span>, ylabel<span class="op">=</span><span class="st">"response V2"</span>, title<span class="op">=</span><span class="st">"Same held-out window: input-aware RNN versus LSTM"</span>)</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>comparison <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">"model"</span>: [</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"AR(</span><span class="sc">{</span>ORDER<span class="sc">}</span><span class="ss">)"</span>,</span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"ARX(</span><span class="sc">{</span>ORDER<span class="sc">}</span><span class="ss">)"</span>,</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>        <span class="st">"response-only RNN"</span>,</span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>        <span class="st">"input-aware RNN"</span>,</span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>        <span class="st">"small LSTM"</span>,</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>    <span class="st">"information available"</span>: [</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>        <span class="st">"past response only"</span>,</span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>        <span class="st">"past response + known forcing input"</span>,</span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>        <span class="st">"prior response + carried nonlinear state"</span>,</span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>        <span class="st">"known forcing input + prior response + carried nonlinear state"</span>,</span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>        <span class="st">"same inputs + carried, gated hidden and cell states"</span>,</span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>    <span class="st">"recursive multi-step held-out RMSE"</span>: [</span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a>        ar_rmse,</span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>        arx_rmse,</span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a>        response_rnn_rmse,</span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a>        rnn_rmse,</span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a>        lstm_rmse,</span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true" tabindex="-1"></a>display(comparison.style.<span class="bu">format</span>({<span class="st">"recursive multi-step held-out RMSE"</span>: <span class="st">"</span><span class="sc">{:.5f}</span><span class="st">"</span>}))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02-silverbox-arx-rnn_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
 <div class="cell-output cell-output-display">
 <style type="text/css">
 </style>
 
-<table id="T_afcbf" class="caption-top table table-sm table-striped small">
+<table id="T_359b1" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_afcbf_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">model</th>
-<th id="T_afcbf_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">information available</th>
-<th id="T_afcbf_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">recursive multi-step held-out RMSE</th>
+<th id="T_359b1_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">model</th>
+<th id="T_359b1_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">information available</th>
+<th id="T_359b1_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">recursive multi-step held-out RMSE</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_afcbf_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">0</th>
-<td id="T_afcbf_row0_col0" class="data row0 col0">AR(20)</td>
-<td id="T_afcbf_row0_col1" class="data row0 col1">past response only</td>
-<td id="T_afcbf_row0_col2" class="data row0 col2">0.05429</td>
+<th id="T_359b1_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">0</th>
+<td id="T_359b1_row0_col0" class="data row0 col0">AR(20)</td>
+<td id="T_359b1_row0_col1" class="data row0 col1">past response only</td>
+<td id="T_359b1_row0_col2" class="data row0 col2">0.05429</td>
 </tr>
 <tr class="even">
-<th id="T_afcbf_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">1</th>
-<td id="T_afcbf_row1_col0" class="data row1 col0">ARX(20)</td>
-<td id="T_afcbf_row1_col1" class="data row1 col1">past response + known forcing input</td>
-<td id="T_afcbf_row1_col2" class="data row1 col2">0.00694</td>
+<th id="T_359b1_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">1</th>
+<td id="T_359b1_row1_col0" class="data row1 col0">ARX(20)</td>
+<td id="T_359b1_row1_col1" class="data row1 col1">past response + known forcing input</td>
+<td id="T_359b1_row1_col2" class="data row1 col2">0.00694</td>
 </tr>
 <tr class="odd">
-<th id="T_afcbf_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">2</th>
-<td id="T_afcbf_row2_col0" class="data row2 col0">small RNN</td>
-<td id="T_afcbf_row2_col1" class="data row2 col1">recent input--response sequence + learned nonlinear state</td>
-<td id="T_afcbf_row2_col2" class="data row2 col2">0.00193</td>
+<th id="T_359b1_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">2</th>
+<td id="T_359b1_row2_col0" class="data row2 col0">response-only RNN</td>
+<td id="T_359b1_row2_col1" class="data row2 col1">prior response + carried nonlinear state</td>
+<td id="T_359b1_row2_col2" class="data row2 col2">0.05514</td>
 </tr>
 <tr class="even">
-<th id="T_afcbf_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">3</th>
-<td id="T_afcbf_row3_col0" class="data row3 col0">small LSTM</td>
-<td id="T_afcbf_row3_col1" class="data row3 col1">same sequence + gated hidden and cell states</td>
-<td id="T_afcbf_row3_col2" class="data row3 col2">0.00164</td>
+<th id="T_359b1_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">3</th>
+<td id="T_359b1_row3_col0" class="data row3 col0">input-aware RNN</td>
+<td id="T_359b1_row3_col1" class="data row3 col1">known forcing input + prior response + carried nonlinear state</td>
+<td id="T_359b1_row3_col2" class="data row3 col2">0.00379</td>
+</tr>
+<tr class="odd">
+<th id="T_359b1_level0_row4" class="row_heading level0 row4" data-quarto-table-cell-role="th">4</th>
+<td id="T_359b1_row4_col0" class="data row4 col0">small LSTM</td>
+<td id="T_359b1_row4_col1" class="data row4 col1">same inputs + carried, gated hidden and cell states</td>
+<td id="T_359b1_row4_col2" class="data row4 col2">0.00188</td>
 </tr>
 </tbody>
 </table>
@@ -1123,13 +1326,14 @@ RNN epoch 100: mean batch MSE = 0.00006</code></pre>
 </div>
 </section>
 <section id="what-this-comparison-doesand-does-notshow" class="level2">
-<h2 class="anchored" data-anchor-id="what-this-comparison-doesand-does-notshow">7. What this comparison does—and does not—show</h2>
+<h2 class="anchored" data-anchor-id="what-this-comparison-doesand-does-notshow">8. What this comparison does—and does not—show</h2>
 <ul>
-<li>Adding <code>V1</code> helps because it is a known causal input that drives the system; AR cannot react to it directly.</li>
-<li>The RNN can learn nonlinear effects in a recent history, which is useful for this Duffing-like system.</li>
-<li>The LSTM adds gates that can preserve useful information, but it does <strong>not</strong> guarantee lower held-out error; its result here depends on this data and training configuration. Both models rebuild from a 20-sample window at each forecasting time, so this does not test arbitrarily long-term memory.</li>
+<li>Adding <code>V1</code> helps because it is a known causal input that drives the system; neither AR nor the response-only RNN can react to it directly.</li>
+<li>The response-only RNN changes the representation of response history—from explicit linear lags to a learned nonlinear state—but it does not add new measured information.</li>
+<li>The input-aware RNN can learn nonlinear effects while using the known forcing signal, which is useful for this Duffing-like system.</li>
+<li>The LSTM adds gates that can preserve useful information, but it does <strong>not</strong> guarantee lower held-out error; its result here depends on this data and training configuration. Both input-aware recurrent models carry state forward after the same 20-response warmup. The 256-step training chunk limits gradient propagation, not how long state can persist during inference.</li>
 <li>The fair comparison is always on future or held-out experiments, with only information available at the forecasting time.</li>
-<li>A nonlinear fixed-window model, a different recurrent architecture, or a different input horizon could also improve this task.</li>
+<li>A different recurrent architecture, training horizon, or input representation could also improve this task.</li>
 </ul>
 <p style="margin-top: 1.5rem;">
 <a href="index.html">← Return to Sequential models</a>
@@ -1213,15 +1417,50 @@ RNN epoch 100: mean batch MSE = 0.00006</code></pre>
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
     if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
-      const a = window.document.createElement('a');
-      a.classList.add('top-right');
-      a.classList.add('quarto-color-scheme-toggle');
-      a.href = "";
-      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const toggle = window.document.createElement('button');
+      toggle.type = "button";
+      toggle.setAttribute("role", "switch");
+      toggle.setAttribute("aria-checked", "false");
+      toggle.classList.add('top-right');
+      toggle.classList.add('quarto-color-scheme-toggle');
+      toggle.setAttribute("aria-label", "Toggle dark mode");
+      toggle.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
       const i = window.document.createElement("i");
       i.classList.add('bi');
-      a.appendChild(i);
-      window.document.body.appendChild(a);
+      toggle.appendChild(i);
+      // Put the toggle in a landmark of its own, so that landmark navigation
+      // can reach it.
+      //
+      // The container is always a fresh direct child of body, and the toggle is
+      // never moved into page furniture that the theme or the author controls.
+      // The toggle is positioned against the page, so any ancestor that
+      // establishes a containing block captures it: a positioned element or a
+      // grid for position: absolute, and transform, filter, will-change or
+      // contain for position: fixed. A direct child of body has none of these
+      // to inherit, and the shift when one appears is silent and visual.
+      //
+      // ARIA says a document should have at most one banner, and axe reports a
+      // duplicate whether or not the banners carry distinct labels. So use a
+      // header when the page has no banner yet, and a named region otherwise.
+      //
+      // A header is a banner wherever it sits, unless it is inside sectioning
+      // content, so this cannot just look at the children of body: a custom
+      // page layout wraps the title block header in a plain div. An explicit
+      // role="banner" always counts.
+      const sectioning = 'article, aside, main, nav, section, [role="article"], [role="complementary"], [role="main"], [role="navigation"], [role="region"]';
+      const hasBanner = Array.from(
+        window.document.querySelectorAll('header:not([role]), [role="banner"]')
+      ).some(function(el) {
+        return el.hasAttribute("role") || el.closest(sectioning) === null;
+      });
+      const container = window.document.createElement(hasBanner ? "div" : "header");
+      if (hasBanner) {
+        container.setAttribute("role", "region");
+        container.setAttribute("aria-label", "Toggle dark mode");
+      }
+      container.classList.add('quarto-color-scheme-toggle-container');
+      container.appendChild(toggle);
+      window.document.body.appendChild(container);
     }
     setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
@@ -1300,7 +1539,8 @@ RNN epoch 100: mean batch MSE = 0.00006</code></pre>
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
       // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      window.quartoDecorateExternalLinks = function (root) {
+     var links = (root || window.document).querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
       for (var i=0; i<links.length; i++) {
         const link = links[i];
         if (!isInternal(link.href)) {
@@ -1309,8 +1549,69 @@ RNN epoch 100: mean batch MSE = 0.00006</code></pre>
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
+          if (!link.classList.contains('no-external-icon')) {
+          }
         }
       }
+      };
+      window.quartoDecorateExternalLinks(window.document);
+    // Esc closes the popup (WCAG 1.4.13) and focus leaving both trigger and
+    // popup closes it (WCAG 2.4.11); tippy handles neither for interactive popups.
+    const hideOnEscAndFocusOut = {
+      name: 'hideOnEscAndFocusOut',
+      defaultValue: true,
+      fn(instance) {
+        const dismiss = () => {
+          // A show scheduled by the trigger delay would otherwise reopen it
+          instance.clearDelayTimeouts();
+          instance.hide();
+        };
+        const onKeyDown = (event) => {
+          if (event.key !== 'Escape') {
+            return;
+          }
+          // Keep Esc from also reaching page handlers (e.g. reveal.js overview),
+          // except an open reveal.js slide menu, which Esc should close too.
+          // The menu handles keys only when its keyboard option is on.
+          const menuHandlesEsc = window.Reveal?.getPlugin?.('menu')?.isOpen() &&
+            window.Reveal.getConfig().menu?.keyboard !== false;
+          if (!menuHandlesEsc) {
+            event.stopPropagation();
+          }
+          if (instance.popper.contains(window.document.activeElement)) {
+            // Disabled while refocusing so the focus trigger does not reopen it
+            instance.disable();
+            instance.reference.focus();
+            instance.enable();
+          }
+          dismiss();
+        };
+        const onFocusOut = (event) => {
+          const target = event.relatedTarget;
+          if (target && !instance.reference.contains(target) &&
+              !instance.popper.contains(target)) {
+            dismiss();
+          }
+        };
+        // On the trigger too: a click trigger (code-annotations: select) has no
+        // blur handling. Attached for the instance's lifetime so leaving the
+        // trigger also cancels a show still pending on the trigger delay.
+        instance.reference.addEventListener('focusout', onFocusOut);
+        return {
+          onShow() {
+            window.document.addEventListener('keydown', onKeyDown, true);
+            instance.popper.addEventListener('focusout', onFocusOut);
+          },
+          onHide() {
+            window.document.removeEventListener('keydown', onKeyDown, true);
+            instance.popper.removeEventListener('focusout', onFocusOut);
+          },
+          onDestroy() {
+            instance.reference.removeEventListener('focusout', onFocusOut);
+          },
+        };
+      },
+    };
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
       const config = {
         allowHTML: true,
@@ -1324,6 +1625,7 @@ RNN epoch 100: mean batch MSE = 0.00006</code></pre>
         interactiveBorder: 10,
         theme: 'quarto',
         placement: 'bottom-start',
+        plugins: [hideOnEscAndFocusOut],
       };
       if (contentFn) {
         config.content = contentFn;
@@ -1486,44 +1788,54 @@ RNN epoch 100: mean batch MSE = 0.00006</code></pre>
           const lineIds = lines.map((line) => {
             return targetCell + "-" + line;
           })
-          let top = null;
-          let height = null;
-          let parent = null;
+          // Each band is positioned against its own containing block, which is
+          // not the offsetParent of the lines, so place it from client rects.
+          const placeBand = (band, firstEl, lastEl, codeBlock) => {
+            const container = band.offsetParent;
+            if (container === null) {
+              return;
+            }
+            const containerRect = container.getBoundingClientRect();
+            // Reveal.js scales slides with a transform, so convert client
+            // pixels back to the CSS pixels of the container.
+            const scale = containerRect.height / container.offsetHeight || 1;
+            const firstRect = firstEl.getBoundingClientRect();
+            const lastRect = lastEl.getBoundingClientRect();
+            const top = (firstRect.top - containerRect.top) / scale - container.clientTop + container.scrollTop;
+            const height = (lastRect.bottom - firstRect.top) / scale;
+            band.style.top = top - 2 + "px";
+            band.style.height = height + 4 + "px";
+            if (codeBlock) {
+              // Without the copy button wrapper, the containing block is wider
+              // than the code block, so span the code block explicitly.
+              const blockRect = codeBlock.getBoundingClientRect();
+              band.style.left = (blockRect.left - containerRect.left) / scale - container.clientLeft + container.scrollLeft + "px";
+              band.style.width = blockRect.width / scale + "px";
+            }
+          };
           if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
+            const el = window.document.getElementById(lineIds[0]);
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const parent = el.parentElement.parentElement;
+            // cook up a div (if necessary) and position it
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
             }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
+            placeBand(div, el, lastEl, parent.closest("div.sourceCode") || parent);
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
             }
+            placeBand(gutterDiv, el, lastEl);
             selectedAnnoteEl = annoteEl;
           }
         };
@@ -1621,6 +1933,9 @@ RNN epoch 100: mean batch MSE = 0.00006</code></pre>
       }
     }
   });
+  </script>
+  <script type="application/javascript">
+  window.quartoScrollableRegionsLabels = {"code":"Scrollable code","output":"Scrollable output"};
   </script>
 </div> <!-- /content -->
 <footer class="footer">

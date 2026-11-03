@@ -15,6 +15,7 @@
     || buttons.length === 0 || zoomButtons.length === 0 || panButtons.length === 0) return;
 
   const SVG_NS = "http://www.w3.org/2000/svg";
+  const MODEL_KEYS = ["ar", "arx", "responseRnn", "inputRnn"];
   const zoomLengths = {
     1: data.segment.observed.length,
     4: 375,
@@ -245,13 +246,17 @@
     if (key === "arx") {
       return "It receives the changing forcing signal as well as prior responses, but its input-output rule remains linear.";
     }
-    return "It receives the same forcing and response sequence as ARX, while its learned recurrent state provides a nonlinear dynamical rule.";
+    if (key === "responseRnn") {
+      return "It replaces AR's explicit linear lag rule with a carried nonlinear state, but it still never sees the known forcing input.";
+    }
+    return "After a 20-response warmup, it carries a learned nonlinear state from sample to sample. Each step uses the known forcing input and its previous response forecast.";
   }
 
   function shortUses(model, key) {
     if (model.shortUses) return Array.isArray(model.shortUses) ? model.shortUses.join(" + ") : model.shortUses;
     if (key === "ar") return "past response";
     if (key === "arx") return "past response + forcing";
+    if (key === "responseRnn") return "past response + state";
     return "past response + forcing + state";
   }
 
@@ -263,8 +268,8 @@
     const isZoomed = zoomed();
     responseChart.classList.toggle("is-pannable", isZoomed);
     responseCopy.textContent = isZoomed
-      ? `Zoom ${state.zoomLevel}×: ${duration.toFixed(2)} s (${time.start.toFixed(2)}–${time.end.toFixed(2)} s). Drag the chart left or right to pan, then switch between ARX and RNN to compare the same interval.`
-      : "Full held-out record. Choose a zoom level to inspect a short interval where the ARX and RNN forecasts visibly separate.";
+      ? `Zoom ${state.zoomLevel}×: ${duration.toFixed(2)} s (${time.start.toFixed(2)}–${time.end.toFixed(2)} s). Drag the chart left or right to pan, then switch models to compare the same interval.`
+      : "Full held-out record. Choose a zoom level to inspect a short interval and compare the forecasts.";
     drawSeries(responseChart, {
       title: `${model.label} recursive forecast on the held-out Silverbox signal`,
       description: `Observed output is blue. The dashed orange curve is the selected ${model.label} recursive forecast. ${isZoomed ? `This ${state.zoomLevel}× view covers ${duration.toFixed(2)} seconds of the held-out record and can be panned by dragging.` : ""}`,
@@ -329,7 +334,7 @@
     head.append(headerRow);
     table.append(head);
     const body = document.createElement("tbody");
-    ["ar", "arx", "rnn"].forEach((key) => {
+    MODEL_KEYS.forEach((key) => {
       const model = data.metrics[key];
       if (!model) return;
       const row = document.createElement("tr");
