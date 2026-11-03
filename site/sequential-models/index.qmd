@@ -16,23 +16,29 @@ one day, or one week.
 
 [Work through the notebook](01-autoregressive-models.html)
 
-## 2. Input--response forecasting with the Silverbox benchmark
+## 2. Input--response forecasting with AR and ARX
 
-Use the Silverbox nonlinear-system benchmark to compare three forecasting
-models on the same held-out input--response experiment: one that uses past
-responses, one that also uses a known input, and one that learns a nonlinear
-recurrent state.
+Use the Silverbox nonlinear-system benchmark to compare a response-only AR
+model with an ARX model that can use a known applied input.
+
+[Work through the AR/ARX notebook](02-silverbox-arx.html)
+
+## 3. Recurrent models for nonlinear input--response forecasting
+
+Replace the fixed, linear lag representation with a learned nonlinear state,
+then compare a response-only RNN, an input-aware RNN, and an LSTM on the same
+Silverbox benchmark.
 
 [Explore AR, ARX, and recurrent models](02-silverbox-arx-rnn-explorer.qmd)
 
-[Work through the notebook](02-silverbox-arx-rnn.html)
+[Work through the RNN/LSTM notebook](03-silverbox-rnn.html)
 
-## 3. Backpropagation through time
+## 4. Backpropagation through time
 
 Use a deliberately small delayed-cue task to unroll a scalar RNN, calculate
 the gradient through every recurrent transition, and see how repeated local
 gradient factors can vanish or explode.
 
-[Explore backpropagation through time](03-bptt-explorer.qmd)
+[Explore backpropagation through time](04-bptt-explorer.qmd)
 
-[Work through the notebook](03-backpropagation-through-time.html)
+[Work through the notebook](04-backpropagation-through-time.html)
