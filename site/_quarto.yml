@@ -10,6 +10,7 @@ project:
     - assets/gradient-boosting-explorer.js
     - assets/nn-forward-explorer.js
     - assets/nn-backpropagation-explorer.js
+    - assets/bptt-explorer.js
     - assets/convolution-explorer.js
     - assets/convolution-2d-explorer.js
     - assets/ar-order-explorer-data.js

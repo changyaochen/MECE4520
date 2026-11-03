@@ -1,0 +1,166 @@
+---
+title: "Explore backpropagation through time"
+toc: false
+page-layout: full
+---
+
+Backpropagation through time (BPTT) is ordinary backpropagation applied to an
+RNN after it has been **unrolled through time**. This deliberately small
+example has a two-dimensional hidden state and a shared $2\times2$ recurrent
+matrix, so the vector--matrix structure is visible without overwhelming the
+calculation.
+
+The synthetic task is a delayed cue: a value arrives only at the first time
+step, then the model must retain enough information to match a target at the
+final step. Let $x_1 = 1$, $x_2 = \cdots = x_T = 0$, $h_0 = [0,0]^T$, and
+$y = 1$. The same recurrent matrix $W_h$ is used at every step:
+
+$$
+\begin{aligned}
+a_t &= W_hh_{t-1} + w_xx_t, \\
+h_t &= \phi(a_t), \qquad \widehat{y}=w_o^Th_T, \\
+L &= \tfrac{1}{2}(\widehat{y}-y)^2.
+\end{aligned}
+$$
+
+To retain one intuitive control, this explorer uses
+$W_h=\alpha R$, where $R$ is a fixed two-dimensional rotation and $\alpha$ is
+the slider. Since $R$ preserves vector length, $\alpha$ directly controls the
+repeated gradient scale in the linear version.
+
+::: {.callout-tip}
+## What to watch
+
+The backward signal crosses a matrix-valued recurrent connection many times.
+For the linear cell, the signal norm roughly scales by $|\alpha|$ at each
+step: values below one make it vanish; values above one make it grow. The
+`tanh` option adds an elementwise derivative factor, which can make vanishing
+even stronger when a state saturates.
+:::
+
+```{=html}
+<div id="bptt-explorer" class="bptt-explorer" aria-label="Interactive backpropagation-through-time explorer">
+  <div class="bptt-toolbar clt-buttons" aria-label="BPTT explorer controls">
+    <span class="bptt-toolbar-label">Preset</span>
+    <button type="button" data-bptt-preset="vanishing" class="is-active" aria-pressed="true">Vanishing</button>
+    <button type="button" data-bptt-preset="balanced" aria-pressed="false">Balanced</button>
+    <button type="button" data-bptt-preset="exploding" aria-pressed="false">Exploding</button>
+    <span class="bptt-toolbar-divider" aria-hidden="true"></span>
+    <button type="button" id="bptt-step" class="regression-sampling-primary">Apply one gradient step to &alpha;</button>
+    <button type="button" id="bptt-reset">Reset preset</button>
+    <output id="bptt-status" class="bptt-status" aria-live="polite">Vanishing-gradient setup</output>
+  </div>
+
+  <div class="bptt-layout">
+    <section class="bptt-panel bptt-control-panel" aria-labelledby="bptt-controls-heading">
+      <div class="bptt-panel-heading">
+        <h2 id="bptt-controls-heading">Choose the recurrent cell</h2>
+        <p>All time steps share the same hidden-state matrix.</p>
+      </div>
+      <div class="bptt-controls">
+        <label for="bptt-activation">Activation
+          <select id="bptt-activation">
+            <option value="linear">Linear: &phi;(<i>a</i>) = <i>a</i></option>
+            <option value="tanh">Tanh: &phi;(<i>a</i>) = tanh(<i>a</i>)</option>
+          </select>
+        </label>
+        <label for="bptt-weight">Matrix scale &alpha;
+          <input id="bptt-weight" type="range" min="-1.50" max="1.50" step="0.01" value="0.70">
+          <output id="bptt-weight-value">0.70</output>
+        </label>
+        <label for="bptt-length">Sequence length <i>T</i>
+          <input id="bptt-length" type="range" min="4" max="20" step="1" value="16">
+          <output id="bptt-length-value">16</output>
+        </label>
+        <label for="bptt-rate">Learning rate &eta;
+          <input id="bptt-rate" type="range" min="0.001" max="0.05" step="0.001" value="0.01">
+          <output id="bptt-rate-value">0.010</output>
+        </label>
+      </div>
+      <div class="bptt-equation-card" aria-label="Current recurrent cell equation">
+        <span><i>a</i><sub>t</sub> = <i>W</i><sub>h</sub><i>h</i><sub>t-1</sub> + <i>w</i><sub>x</sub><i>x</i><sub>t</sub></span>
+        <span id="bptt-activation-equation"><i>h</i><sub>t</sub> = <i>a</i><sub>t</sub></span>
+        <span><i>w</i><sub>x</sub> = [0.35, 0.15]<sup>T</sup>, &nbsp; <i>w</i><sub>o</sub> = [1, 0]<sup>T</sup></span>
+      </div>
+      <div id="bptt-matrices" class="bptt-matrices" aria-label="Recurrent matrix and its gradient"></div>
+    </section>
+
+    <section class="bptt-panel bptt-unroll-panel" aria-labelledby="bptt-unroll-heading">
+      <div class="bptt-panel-heading">
+        <h2 id="bptt-unroll-heading">Unroll the recurrent cell</h2>
+        <p>Each state is a two-entry vector. The forward state moves left to right; BPTT sends a gradient vector back toward the cue.</p>
+      </div>
+      <div class="bptt-unroll-wrap">
+        <svg id="bptt-unroll" role="img" aria-label="Unrolled two-state recurrent network with forward states and backward gradients"></svg>
+      </div>
+      <div class="bptt-unroll-legend" aria-label="Diagram legend">
+        <span><i>x</i><sub>1</sub> = 1; all later inputs are zero</span>
+        <span class="bptt-forward-key">forward state vector</span>
+        <span class="bptt-backward-key">backward gradient norm</span>
+      </div>
+    </section>
+
+    <section class="bptt-panel bptt-summary-panel" aria-labelledby="bptt-summary-heading">
+      <div class="bptt-panel-heading">
+        <h2 id="bptt-summary-heading">What BPTT computes</h2>
+        <p id="bptt-summary-copy">The same matrix contributes at every recurrent transition.</p>
+      </div>
+      <div id="bptt-metrics" class="bptt-metrics"></div>
+      <div class="bptt-gradient-formula">
+        <strong>Shared-matrix gradient</strong>
+        <span>&part;<i>L</i>/&part;<i>W</i><sub>h</sub> = &Sigma;<sub>t=1</sub><sup><i>T</i></sup> &delta;<sub>t</sub><i>h</i><sub>t-1</sub><sup>T</sup>, &nbsp; where &delta;<sub>t</sub> = (&part;<i>L</i>/&part;<i>h</i><sub>t</sub>) &odot; &phi;&prime;(<i>a</i><sub>t</sub>)</span>
+      </div>
+    </section>
+
+    <section class="bptt-panel bptt-chart-panel" aria-labelledby="bptt-chart-heading">
+      <div class="bptt-panel-heading">
+        <h2 id="bptt-chart-heading">Forward state and backward signal</h2>
+        <p>The right-hand chart uses a logarithmic vertical scale so very small and very large gradient norms remain visible.</p>
+      </div>
+      <div class="bptt-chart-grid">
+        <figure class="bptt-chart-figure">
+          <figcaption>Two components of the hidden state <i>h</i><sub>t</sub></figcaption>
+          <svg id="bptt-state-chart" viewBox="0 0 500 230" role="img" aria-label="The two hidden-state components over time"></svg>
+        </figure>
+        <figure class="bptt-chart-figure">
+          <figcaption>Backward signal log<sub>10</sub>||&part;<i>L</i>/&part;<i>h</i><sub>t</sub>||<sub>2</sub></figcaption>
+          <svg id="bptt-gradient-chart" viewBox="0 0 500 230" role="img" aria-label="Backward gradient-vector norm over time on a logarithmic scale"></svg>
+        </figure>
+      </div>
+    </section>
+
+    <section class="bptt-panel bptt-table-panel" aria-labelledby="bptt-table-heading">
+      <div class="bptt-panel-heading">
+        <h2 id="bptt-table-heading">One matrix contribution from every time step</h2>
+        <p>Each row forms the outer product &delta;<sub>t</sub><i>h</i><sub>t-1</sub><sup>T</sup>. BPTT adds these 2-by-2 contributions before changing the one shared matrix.</p>
+      </div>
+      <div class="bptt-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th><i>x</i><sub>t</sub></th>
+              <th><i>h</i><sub>t-1</sub></th>
+              <th><i>h</i><sub>t</sub></th>
+              <th>||&delta;<sub>t</sub>||<sub>2</sub></th>
+              <th>||&delta;<sub>t</sub><i>h</i><sub>t-1</sub><sup>T</sup>||<sub>F</sub></th>
+            </tr>
+          </thead>
+          <tbody id="bptt-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+```
+
+The linear version deliberately isolates the repeated matrix multiplication
+that creates vanishing and exploding gradients. Real RNNs typically use a
+nonlinear activation such as `tanh`; that bounds the state, but its
+elementwise derivative can add further shrinkage. Gated architectures such as
+LSTMs were designed in part to provide more reliable long-range gradient
+paths.
+
+<p style="margin-top: 1.5rem;"><a href="index.html">← Return to Sequential models</a></p>
+
+<script src="../assets/bptt-explorer.js"></script>
