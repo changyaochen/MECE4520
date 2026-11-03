@@ -1,13 +1,15 @@
-"""Generate compact, precomputed data for the Silverbox AR--ARX--RNN explorer.
+"""Generate compact data for the Silverbox AR--ARX--RNN explorer.
 
 The script deliberately keeps the raw Silverbox benchmark outside this
 repository.  Install ``nonlinear-benchmarks`` first; its ``Silverbox`` loader
 downloads the official benchmark archive linked from nonlinearbenchmark.org.
 
-The explorer uses a fixed 20-sample state-initialization window.  After that
-window, all three models forecast the output recursively.  The applied input
-remains available at every held-out time step, which is the usual system-
-identification setting for a known forcing signal.
+The linear models use a fixed 20-sample response-lag initialization window.
+The response-only and input-aware RNNs use those same first 20 held-out
+responses to prime their carried hidden states. Afterwards, all four models
+forecast the output recursively. The applied input remains available at every
+held-out time step, which is the usual system-identification setting for a
+known forcing signal.
 """
 
 from __future__ import annotations
@@ -26,9 +28,8 @@ SOURCE_URL = "https://www.nonlinearbenchmark.org/benchmarks/silverbox"
 ORDER = 20
 RANDOM_SEED = 7
 HIDDEN_SIZE = 16
-EPOCHS = 150
-BATCH_SIZE = 128
-BATCHES_PER_EPOCH = 32
+EPOCHS = 50
+CHUNK_SIZE = 256
 SEGMENT_START = 6_000
 SEGMENT_LENGTH = 1_500
 
@@ -36,15 +37,16 @@ SEGMENT_LENGTH = 1_500
 class RecurrentPredictor(torch.nn.Module):
     """A small vanilla RNN followed by a nonlinear scalar readout."""
 
-    def __init__(self, *, hidden_size: int) -> None:
+    def __init__(self, *, input_size: int, hidden_size: int) -> None:
         """Initialize the recurrent state and output head.
 
         Args:
+            input_size: Number of values provided at each time step.
             hidden_size: Number of learned values in the recurrent state.
         """
         super().__init__()
         self.rnn = torch.nn.RNN(
-            input_size=2,
+            input_size=input_size,
             hidden_size=hidden_size,
             batch_first=True,
             nonlinearity="tanh",
@@ -55,10 +57,15 @@ class RecurrentPredictor(torch.nn.Module):
             torch.nn.Linear(hidden_size, 1),
         )
 
-    def forward(self, sequence: torch.Tensor) -> torch.Tensor:
-        """Predict the next standardized output from a sequence window."""
-        hidden_values, _ = self.rnn(sequence)
-        return self.readout(hidden_values[:, -1, :]).squeeze(-1)
+    def forward(
+        self,
+        sequence: torch.Tensor,
+        hidden_state: torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Predict responses and return the state for the next sequence."""
+        hidden_values, next_hidden_state = self.rnn(sequence, hidden_state)
+        predictions = self.readout(hidden_values).squeeze(-1)
+        return predictions, next_hidden_state
 
 
 def import_silverbox_loader():
@@ -147,60 +154,67 @@ def recursive_linear_forecast(
     return predictions
 
 
-def make_rnn_windows(
+def make_teacher_forced_sequence(
     *,
-    input_signal: np.ndarray,
+    input_signal: np.ndarray | None,
     output_signal: np.ndarray,
-    order: int,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Create windows of [forcing, previous response] pairs for RNN training."""
-    sequences: list[np.ndarray] = []
-    targets: list[float] = []
-    for index in range(order, len(output_signal)):
-        indices = np.arange(index - order + 1, index + 1)
-        sequences.append(
-            np.column_stack((input_signal[indices], output_signal[indices - 1]))
-        )
-        targets.append(output_signal[index])
-    return np.asarray(sequences, dtype=np.float32), np.asarray(targets, dtype=np.float32)
+    """Create chronological response-only or input-aware RNN inputs."""
+    if input_signal is None:
+        inputs = output_signal[:-1, None]
+    else:
+        inputs = np.column_stack((input_signal[1:], output_signal[:-1]))
+    targets = output_signal[1:].astype(np.float32)
+    return inputs.astype(np.float32), targets
+
+
+def detach_recurrent_state(hidden_state: torch.Tensor) -> torch.Tensor:
+    """Keep state values but remove their old gradient history."""
+    return hidden_state.detach()
 
 
 def fit_rnn(
     *,
-    input_signal: np.ndarray,
+    input_signal: np.ndarray | None,
     output_signal: np.ndarray,
-    order: int,
-) -> tuple[RecurrentPredictor, tuple[float, float, float, float]]:
-    """Fit the small recurrent model using scaling learned from training only."""
-    input_mean = float(input_signal.mean())
-    input_std = float(input_signal.std())
+) -> tuple[RecurrentPredictor, tuple[float | None, float | None, float, float]]:
+    """Fit a state-carrying RNN with chronological teacher-forced chunks."""
+    if input_signal is None:
+        input_mean, input_std = None, None
+        inputs_scaled = None
+        input_size = 1
+    else:
+        input_mean = float(input_signal.mean())
+        input_std = float(input_signal.std())
+        inputs_scaled = (input_signal - input_mean) / input_std
+        input_size = 2
     output_mean = float(output_signal.mean())
     output_std = float(output_signal.std())
-    inputs_scaled = (input_signal - input_mean) / input_std
     outputs_scaled = (output_signal - output_mean) / output_std
-    features, targets = make_rnn_windows(
+    inputs, targets = make_teacher_forced_sequence(
         input_signal=inputs_scaled,
         output_signal=outputs_scaled,
-        order=order,
     )
 
     torch.manual_seed(RANDOM_SEED)
-    generator = np.random.default_rng(RANDOM_SEED)
-    model = RecurrentPredictor(hidden_size=HIDDEN_SIZE)
+    model = RecurrentPredictor(input_size=input_size, hidden_size=HIDDEN_SIZE)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.003, weight_decay=1e-5)
     criterion = torch.nn.MSELoss()
 
     for _ in range(EPOCHS):
         model.train()
-        for _ in range(BATCHES_PER_EPOCH):
-            chosen = generator.integers(0, len(features), size=BATCH_SIZE)
-            feature_batch = torch.from_numpy(features[chosen])
-            target_batch = torch.from_numpy(targets[chosen])
+        hidden_state = None
+        for start in range(0, len(inputs), CHUNK_SIZE):
+            stop = min(start + CHUNK_SIZE, len(inputs))
+            sequence_chunk = torch.from_numpy(inputs[start:stop][None, ...])
+            target_chunk = torch.from_numpy(targets[start:stop][None, ...])
             optimizer.zero_grad()
-            loss = criterion(model(feature_batch), target_batch)
+            predictions, hidden_state = model(sequence_chunk, hidden_state)
+            loss = criterion(predictions, target_chunk)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
+            hidden_state = detach_recurrent_state(hidden_state)
 
     return model, (input_mean, input_std, output_mean, output_std)
 
@@ -208,32 +222,41 @@ def fit_rnn(
 def recursive_rnn_forecast(
     *,
     model: RecurrentPredictor,
-    input_signal: np.ndarray,
+    input_signal: np.ndarray | None,
     observed_output: np.ndarray,
-    order: int,
-    scales: tuple[float, float, float, float],
+    warmup: int,
+    scales: tuple[float | None, float | None, float, float],
 ) -> np.ndarray:
-    """Recursively predict the test response while retaining known input values."""
+    """Prime an RNN state, then recursively forecast the held-out response."""
     input_mean, input_std, output_mean, output_std = scales
-    history = list(observed_output[:order])
     predictions = np.full(len(observed_output), np.nan)
+
+    def step_input(*, index: int, previous_response: float) -> torch.Tensor:
+        standardized_response = (previous_response - output_mean) / output_std
+        if input_signal is None:
+            values = [standardized_response]
+        else:
+            standardized_input = (input_signal[index] - input_mean) / input_std
+            values = [standardized_input, standardized_response]
+        return torch.tensor(values, dtype=torch.float32).reshape(1, 1, -1)
+
     model.eval()
     with torch.no_grad():
-        for index in range(order, len(observed_output)):
-            indices = np.arange(index - order + 1, index + 1)
-            prior_outputs = np.asarray([history[item - 1] for item in indices])
-            sequence = np.column_stack(
-                (
-                    (input_signal[indices] - input_mean) / input_std,
-                    (prior_outputs - output_mean) / output_std,
-                )
-            ).astype(np.float32)
-            standardized_prediction = model(
-                torch.from_numpy(sequence[None, ...])
-            ).item()
+        hidden_state = None
+        for index in range(1, warmup):
+            _, hidden_state = model(
+                step_input(index=index, previous_response=float(observed_output[index - 1])),
+                hidden_state,
+            )
+
+        previous_response = float(observed_output[warmup - 1])
+        for index in range(warmup, len(observed_output)):
+            standardized_prediction, hidden_state = model(
+                step_input(index=index, previous_response=previous_response), hidden_state
+            )
             prediction = standardized_prediction * output_std + output_mean
-            history.append(prediction)
-            predictions[index] = prediction
+            previous_response = prediction.item()
+            predictions[index] = previous_response
     return predictions
 
 
@@ -260,7 +283,7 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def main() -> None:
-    """Load the benchmark, fit the three models, and write compact explorer data."""
+    """Load the benchmark, fit four models, and write compact explorer data."""
     arguments = parse_arguments()
     torch.set_num_threads(4)
     silverbox = import_silverbox_loader()
@@ -299,17 +322,27 @@ def main() -> None:
         scaler=arx_scaler,
         model=arx_model,
     )
-    rnn_model, scales = fit_rnn(
+    response_rnn_model, response_rnn_scales = fit_rnn(
+        input_signal=None,
+        output_signal=output_train,
+    )
+    response_rnn_predictions = recursive_rnn_forecast(
+        model=response_rnn_model,
+        input_signal=None,
+        observed_output=output_test,
+        warmup=ORDER,
+        scales=response_rnn_scales,
+    )
+    input_rnn_model, input_rnn_scales = fit_rnn(
         input_signal=input_train,
         output_signal=output_train,
-        order=ORDER,
     )
-    rnn_predictions = recursive_rnn_forecast(
-        model=rnn_model,
+    input_rnn_predictions = recursive_rnn_forecast(
+        model=input_rnn_model,
         input_signal=input_test,
         observed_output=output_test,
-        order=ORDER,
-        scales=scales,
+        warmup=ORDER,
+        scales=input_rnn_scales,
     )
 
     segment_start = min(SEGMENT_START, len(output_test) - SEGMENT_LENGTH)
@@ -324,11 +357,13 @@ def main() -> None:
         "warmup": ORDER,
         "forecastProtocol": {
             "initialization": (
-                "The first 20 held-out responses initialize every model."
+                "The first 20 held-out responses initialize the AR and ARX lags "
+                "and prime both RNN states."
             ),
             "afterInitialization": (
-                "Later response lags are each model's own earlier forecasts; "
-                "the forcing input remains known."
+                "AR and ARX reuse their own forecast lags; both RNNs carry their "
+                "hidden states and feed back their prior forecasts. The forcing input "
+                "remains known for ARX and the input-aware RNN."
             ),
         },
         "metrics": {
@@ -342,10 +377,27 @@ def main() -> None:
                 "rmse": round(rmse(actual=output_test, predicted=arx_predictions, warmup=ORDER), 6),
                 "uses": "20 earlier response values + known forcing input",
             },
-            "rnn": {
-                "label": "Vanilla RNN",
-                "rmse": round(rmse(actual=output_test, predicted=rnn_predictions, warmup=ORDER), 6),
-                "uses": "same input-response sequence, summarized by a learned nonlinear state",
+            "responseRnn": {
+                "label": "Response-only RNN",
+                "rmse": round(
+                    rmse(
+                        actual=output_test,
+                        predicted=response_rnn_predictions,
+                        warmup=ORDER,
+                    ),
+                    6,
+                ),
+                "uses": "prior response + carried nonlinear state",
+                "shortUses": "past response + carried state",
+            },
+            "inputRnn": {
+                "label": "Input-aware RNN",
+                "rmse": round(
+                    rmse(actual=output_test, predicted=input_rnn_predictions, warmup=ORDER),
+                    6,
+                ),
+                "uses": "known forcing input + prior response + carried nonlinear state",
+                "shortUses": "past response + forcing + carried state",
             },
         },
         "segment": {
@@ -357,7 +409,8 @@ def main() -> None:
             "predictions": {
                 "ar": rounded(ar_predictions[segment_start:segment_end]),
                 "arx": rounded(arx_predictions[segment_start:segment_end]),
-                "rnn": rounded(rnn_predictions[segment_start:segment_end]),
+                "responseRnn": rounded(response_rnn_predictions[segment_start:segment_end]),
+                "inputRnn": rounded(input_rnn_predictions[segment_start:segment_end]),
             },
         },
     }
