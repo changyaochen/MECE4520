@@ -52,9 +52,10 @@ h_t
 \end{aligned}
 $$
 
-All three models use 20 preceding response values. ARX also uses the current
-known input and its recent history; the RNN processes a recent sequence of
-input--response pairs ending at the current input.
+All three models begin the held-out forecast with 20 measured response values.
+AR and ARX retain those values explicitly as lag history. The RNN reads them
+in time order to prime a learned hidden state, then carries that state forward
+while receiving the current known input and its previous response forecast.
 
 ::: {.callout-tip}
 ## What to watch
@@ -62,9 +63,11 @@ input--response pairs ending at the current input.
 The AR model cannot react directly to a changing excitation because it never
 sees `V1`. ARX fixes that omission, but it still assumes a linear input--output
 relationship. The RNN has access to the same type of observed information as
-ARX while learning a nonlinear state representation. In this comparison, its
-state is rebuilt from a bounded recent sequence rather than given unlimited
-history.
+ARX while learning a nonlinear state representation. Unlike ARX's explicit
+list of 20 response lags, the RNN compresses earlier information into its
+state and carries that state from one forecast step to the next. During
+training, backpropagation is truncated to manageable chunks, so this does not
+mean that its gradients extend indefinitely into the past.
 :::
 
 ```{=html}
@@ -77,7 +80,7 @@ history.
     <div class="silverbox-protocol-grid">
       <div>
         <span>Initialization</span>
-        <strong>The first 20 measured <code>V2</code> values initialize the model state.</strong>
+        <strong>The first 20 measured <code>V2</code> values give AR and ARX lag history and prime the RNN state.</strong>
       </div>
       <div>
         <span>Known during the test</span>
@@ -85,7 +88,7 @@ history.
       </div>
       <div>
         <span>Not revealed during the test</span>
-        <strong>Each later <code>V2</code> forecast feeds the next prediction instead of the actual response.</strong>
+        <strong>After initialization, each model's <code>V2</code> forecast feeds its next prediction instead of the actual response.</strong>
       </div>
     </div>
   </section>
@@ -130,9 +133,10 @@ history.
 
 For this held-out record, the small RNN makes a more stable recursive forecast.
 That does **not** establish that recurrence is the only helpful idea: a
-nonlinear fixed-window model would be a useful additional comparison.
+nonlinear fixed-window model or a different recurrent architecture would be a
+useful additional comparison.
 
 <p style="margin-top: 1.5rem;"><a href="index.html">← Return to Sequential models</a></p>
 
-<script src="../assets/silverbox-explorer-data.js?v=20261031a"></script>
-<script src="../assets/silverbox-explorer.js?v=20261031d"></script>
+<script src="../assets/silverbox-explorer-data.js?v=20261102a"></script>
+<script src="../assets/silverbox-explorer.js?v=20261102a"></script>
