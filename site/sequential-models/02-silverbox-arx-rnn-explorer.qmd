@@ -45,29 +45,34 @@ $$
 \widehat{y}_t
 &= \beta_0 + \sum_{j=1}^{p}\beta_j y_{t-j}
    + \sum_{j=0}^{p}\gamma_j u_{t-j}, \\
-\text{RNN:}\qquad
+\text{Response-only RNN:}\qquad
+h_t
+&= \tanh\!\left(W_h h_{t-1} + W_y y_{t-1} + b_h\right),
+\qquad \widehat{y}_t = W_o h_t + b_o, \\
+\text{Input-aware RNN:}\qquad
 h_t
 &= \tanh\!\left(W_h h_{t-1} + W_y y_{t-1} + W_u u_t + b_h\right),
 \qquad \widehat{y}_t = W_o h_t + b_o.
 \end{aligned}
 $$
 
-All three models begin the held-out forecast with 20 measured response values.
-AR and ARX retain those values explicitly as lag history. The RNN reads them
-in time order to prime a learned hidden state, then carries that state forward
-while receiving the current known input and its previous response forecast.
+All four models begin the held-out forecast with 20 measured response values.
+AR and ARX retain those values explicitly as lag history. The two RNNs read
+them in time order to prime learned hidden states, then carry those states
+forward. Only the input-aware RNN receives the current known input alongside
+its previous response forecast.
 
 ::: {.callout-tip}
 ## What to watch
 
-The AR model cannot react directly to a changing excitation because it never
-sees `V1`. ARX fixes that omission, but it still assumes a linear input--output
-relationship. The RNN has access to the same type of observed information as
-ARX while learning a nonlinear state representation. Unlike ARX's explicit
-list of 20 response lags, the RNN compresses earlier information into its
-state and carries that state from one forecast step to the next. During
-training, backpropagation is truncated to manageable chunks, so this does not
-mean that its gradients extend indefinitely into the past.
+AR and the response-only RNN cannot react directly to a changing excitation
+because neither sees `V1`; moving from AR to a response-only RNN changes the
+representation of history, not the measured information. ARX and the
+input-aware RNN can use the applied input. ARX uses a fixed list of lags in a
+linear rule, whereas the input-aware RNN compresses earlier information into a
+nonlinear state and carries that state from one forecast step to the next.
+During training, backpropagation is truncated to manageable chunks, so this
+does not mean that its gradients extend indefinitely into the past.
 :::
 
 ```{=html}
@@ -80,11 +85,11 @@ mean that its gradients extend indefinitely into the past.
     <div class="silverbox-protocol-grid">
       <div>
         <span>Initialization</span>
-        <strong>The first 20 measured <code>V2</code> values give AR and ARX lag history and prime the RNN state.</strong>
+        <strong>The first 20 measured <code>V2</code> values give AR and ARX lag history and prime both RNN states.</strong>
       </div>
       <div>
         <span>Known during the test</span>
-        <strong>The applied input <code>V1</code> remains available at every later sample.</strong>
+        <strong>The applied input <code>V1</code> remains available to ARX and the input-aware RNN at every later sample.</strong>
       </div>
       <div>
         <span>Not revealed during the test</span>
@@ -113,7 +118,8 @@ mean that its gradients extend indefinitely into the past.
       <span class="silverbox-toolbar-label">Forecasting model</span>
       <button type="button" data-silverbox-model="ar" class="is-active" aria-pressed="true">AR</button>
       <button type="button" data-silverbox-model="arx" aria-pressed="false">ARX</button>
-      <button type="button" data-silverbox-model="rnn" aria-pressed="false">RNN</button>
+      <button type="button" data-silverbox-model="responseRnn" aria-pressed="false">Response-only RNN</button>
+      <button type="button" data-silverbox-model="inputRnn" aria-pressed="false">Input-aware RNN</button>
     </div>
     <figure class="silverbox-figure">
       <svg id="silverbox-response-chart" role="img" aria-label="Held-out Silverbox response with selected recursive forecast"></svg>
@@ -131,12 +137,12 @@ mean that its gradients extend indefinitely into the past.
 </div>
 ```
 
-For this held-out record, the small RNN makes a more stable recursive forecast.
-That does **not** establish that recurrence is the only helpful idea: a
-nonlinear fixed-window model or a different recurrent architecture would be a
-useful additional comparison.
+This comparison separates two ideas: a nonlinear recurrent representation and
+access to the known causal input. It does **not** establish that recurrence is
+the only helpful idea: a nonlinear fixed-window model or a different recurrent
+architecture would be useful additional comparisons.
 
 <p style="margin-top: 1.5rem;"><a href="index.html">← Return to Sequential models</a></p>
 
-<script src="../assets/silverbox-explorer-data.js?v=20261102a"></script>
-<script src="../assets/silverbox-explorer.js?v=20261102a"></script>
+<script src="../assets/silverbox-explorer-data.js?v=20261102b"></script>
+<script src="../assets/silverbox-explorer.js?v=20261102b"></script>
