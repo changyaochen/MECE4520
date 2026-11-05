@@ -5,7 +5,7 @@ repository.  Install ``nonlinear-benchmarks`` first; its ``Silverbox`` loader
 downloads the official benchmark archive linked from nonlinearbenchmark.org.
 
 The linear models use a fixed 20-sample response-lag initialization window.
-The response-only and input-aware RNNs use those same first 20 held-out
+The response-only and input-aware RNNs use those same last 20 training
 responses to prime their carried hidden states. Afterwards, all four models
 forecast the output recursively. The applied input remains available at every
 held-out time step, which is the usual system-identification setting for a
@@ -28,14 +28,14 @@ SOURCE_URL = "https://www.nonlinearbenchmark.org/benchmarks/silverbox"
 ORDER = 20
 RANDOM_SEED = 7
 HIDDEN_SIZE = 16
-EPOCHS = 50
+EPOCHS = 20
 CHUNK_SIZE = 256
 SEGMENT_START = 6_000
 SEGMENT_LENGTH = 1_500
 
 
 class RecurrentPredictor(torch.nn.Module):
-    """A small vanilla RNN followed by a nonlinear scalar readout."""
+    """A small vanilla RNN followed by a linear scalar readout."""
 
     def __init__(self, *, input_size: int, hidden_size: int) -> None:
         """Initialize the recurrent state and output head.
@@ -51,11 +51,7 @@ class RecurrentPredictor(torch.nn.Module):
             batch_first=True,
             nonlinearity="tanh",
         )
-        self.readout = torch.nn.Sequential(
-            torch.nn.Linear(hidden_size, hidden_size),
-            torch.nn.Tanh(),
-            torch.nn.Linear(hidden_size, 1),
-        )
+        self.readout = torch.nn.Linear(hidden_size, 1)
 
     def forward(
         self,
@@ -133,7 +129,7 @@ def recursive_linear_forecast(
     scaler: StandardScaler,
     model: LinearRegression,
 ) -> np.ndarray:
-    """Forecast a test record after using only its first ``order`` outputs.
+    """Forecast after using the first ``order`` outputs as history.
 
     The forcing signal is known throughout the test record.  After the warmup
     period, the output-lag portion of each input row contains prior forecasts,
@@ -288,62 +284,65 @@ def main() -> None:
     torch.set_num_threads(4)
     silverbox = import_silverbox_loader()
     training, tests = silverbox()
-    test = tests[0]  # Official held-out multisine record.
+    test = tests[0]  # Held-out record.
     input_train = np.asarray(training.u, dtype=float).reshape(-1)
     output_train = np.asarray(training.y, dtype=float).reshape(-1)
     input_test = np.asarray(test.u, dtype=float).reshape(-1)
     output_test = np.asarray(test.y, dtype=float).reshape(-1)
+    forecast_input = np.concatenate((input_train[-ORDER:], input_test))
+    forecast_history = np.concatenate((output_train[-ORDER:], np.full(len(output_test), np.nan)))
+    fit_input, fit_output = input_train[:25_000], output_train[:25_000]
 
     ar_scaler, ar_model = fit_linear_model(
-        input_signal=input_train,
-        output_signal=output_train,
+        input_signal=fit_input,
+        output_signal=fit_output,
         order=ORDER,
         include_input=False,
     )
     arx_scaler, arx_model = fit_linear_model(
-        input_signal=input_train,
-        output_signal=output_train,
+        input_signal=fit_input,
+        output_signal=fit_output,
         order=ORDER,
         include_input=True,
     )
     ar_predictions = recursive_linear_forecast(
-        input_signal=input_test,
-        observed_output=output_test,
+        input_signal=forecast_input,
+        observed_output=forecast_history,
         order=ORDER,
         include_input=False,
         scaler=ar_scaler,
         model=ar_model,
-    )
+    )[ORDER:]
     arx_predictions = recursive_linear_forecast(
-        input_signal=input_test,
-        observed_output=output_test,
+        input_signal=forecast_input,
+        observed_output=forecast_history,
         order=ORDER,
         include_input=True,
         scaler=arx_scaler,
         model=arx_model,
-    )
+    )[ORDER:]
     response_rnn_model, response_rnn_scales = fit_rnn(
         input_signal=None,
-        output_signal=output_train,
+        output_signal=fit_output,
     )
     response_rnn_predictions = recursive_rnn_forecast(
         model=response_rnn_model,
         input_signal=None,
-        observed_output=output_test,
+        observed_output=forecast_history,
         warmup=ORDER,
         scales=response_rnn_scales,
-    )
+    )[ORDER:]
     input_rnn_model, input_rnn_scales = fit_rnn(
-        input_signal=input_train,
-        output_signal=output_train,
+        input_signal=fit_input,
+        output_signal=fit_output,
     )
     input_rnn_predictions = recursive_rnn_forecast(
         model=input_rnn_model,
-        input_signal=input_test,
-        observed_output=output_test,
+        input_signal=forecast_input,
+        observed_output=forecast_history,
         warmup=ORDER,
         scales=input_rnn_scales,
-    )
+    )[ORDER:]
 
     segment_start = min(SEGMENT_START, len(output_test) - SEGMENT_LENGTH)
     segment_end = segment_start + SEGMENT_LENGTH
@@ -352,12 +351,13 @@ def main() -> None:
         "sourceUrl": SOURCE_URL,
         "samplingTime": round(float(training.sampling_time), 9),
         "order": ORDER,
-        "trainSamples": int(len(output_train)),
+        "trainSamples": int(len(fit_output)),
+        "availableTrainSamples": int(len(output_train)),
         "testSamples": int(len(output_test)),
         "warmup": ORDER,
         "forecastProtocol": {
             "initialization": (
-                "The first 20 held-out responses initialize the AR and ARX lags "
+                "The last 20 training responses initialize the AR and ARX lags "
                 "and prime both RNN states."
             ),
             "afterInitialization": (
@@ -369,12 +369,12 @@ def main() -> None:
         "metrics": {
             "ar": {
                 "label": "AR(20)",
-                "rmse": round(rmse(actual=output_test, predicted=ar_predictions, warmup=ORDER), 6),
+                "rmse": round(rmse(actual=output_test, predicted=ar_predictions, warmup=0), 6),
                 "uses": "20 earlier response values",
             },
             "arx": {
                 "label": "ARX(20)",
-                "rmse": round(rmse(actual=output_test, predicted=arx_predictions, warmup=ORDER), 6),
+                "rmse": round(rmse(actual=output_test, predicted=arx_predictions, warmup=0), 6),
                 "uses": "20 earlier response values + known forcing input",
             },
             "responseRnn": {
@@ -383,7 +383,7 @@ def main() -> None:
                     rmse(
                         actual=output_test,
                         predicted=response_rnn_predictions,
-                        warmup=ORDER,
+                        warmup=0,
                     ),
                     6,
                 ),
@@ -393,7 +393,7 @@ def main() -> None:
             "inputRnn": {
                 "label": "Input-aware RNN",
                 "rmse": round(
-                    rmse(actual=output_test, predicted=input_rnn_predictions, warmup=ORDER),
+                    rmse(actual=output_test, predicted=input_rnn_predictions, warmup=0),
                     6,
                 ),
                 "uses": "known forcing input + prior response + carried nonlinear state",
