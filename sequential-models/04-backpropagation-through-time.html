@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.11.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Backpropagation through time with NumPy – MECE 4520</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/scrollable-regions/scrollable-regions.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-447e42e69aaa9833c0ba1b986f430b20.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-e9607c77ebd22faeb014cc2f2e95de1f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-e1f7b594c1cf0f7ca9c37b0ad165d25b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-e9607c77ebd22faeb014cc2f2e95de1f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          toggle.setAttribute("aria-checked", alternate ? "true" : "false");
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455).
+    // Not run on load: stylesheets are set before first paint there, and
+    // scrolling would undo the scroll to a URL fragment (#14973).
+    // The one pixel nudge keeps the reader where they were.
+    const refreshSafariScrollbar = () => {
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        const scrollY = window.scrollY;
+        window.scrollTo(0, scrollY > 0 ? scrollY - 1 : 1);
+        setTimeout(() => {
+          window.scrollTo(0, scrollY);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      refreshSafariScrollbar();
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      refreshSafariScrollbar();
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark" aria-label="Site">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">⚙️</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../foundations/index.html"> 
+<span class="menu-text">Foundations</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../regression/index.html"> 
+<span class="menu-text">Regression</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../evaluation/index.html"> 
+<span class="menu-text">Evaluation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../classification/index.html"> 
+<span class="menu-text">Classification</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../tree-based/index.html"> 
+<span class="menu-text">Tree-based</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../neural-networks/index.html"> 
+<span class="menu-text">Neural networks</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../sequential-models/index.html"> 
+<span class="menu-text">Sequential models</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <button type="button" role="switch" aria-checked="false" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode" aria-label="Toggle dark mode"><i class="bi"></i></button>
+</div>
+            <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content" tabindex="-1">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Backpropagation through time with NumPy</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC" role="doc-toc" aria-labelledby="toc-title">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#what-you-will-do" id="toc-what-you-will-do">What you will do</a></li>
+  <li><a href="#a-delayed-cue-task" id="toc-a-delayed-cue-task">1. A delayed-cue task</a></li>
+  <li><a href="#a-two-state-rnn-and-its-forward-pass" id="toc-a-two-state-rnn-and-its-forward-pass">2. A two-state RNN and its forward pass</a></li>
+  <li><a href="#backpropagate-through-the-unrolled-sequence" id="toc-backpropagate-through-the-unrolled-sequence">3. Backpropagate through the unrolled sequence</a></li>
+  <li><a href="#why-gradients-vanish-or-explode" id="toc-why-gradients-vanish-or-explode">4. Why gradients vanish or explode</a></li>
+  <li><a href="#add-tanh-bounded-states-another-gradient-factor" id="toc-add-tanh-bounded-states-another-gradient-factor">5. Add <code>tanh</code>: bounded states, another gradient factor</a></li>
+  <li><a href="#optional-verify-the-matrix-result-with-pytorch-autograd" id="toc-optional-verify-the-matrix-result-with-pytorch-autograd">6. (Optional) Verify the matrix result with PyTorch autograd</a></li>
+  <li><a href="#takeaway" id="toc-takeaway">7. Takeaway</a></li>
+  </ul>
+</nav>
+<p><a target="_blank" href="https://colab.research.google.com/github/changyaochen/MECE4520/blob/master/site/sequential-models/04-backpropagation-through-time.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a></p>
+<p>This notebook uses a deliberately small recurrent neural network (RNN) to make <strong>backpropagation through time (BPTT)</strong> visible. It has a two-dimensional hidden state and a shared <span class="math inline">\(2\times2\)</span> recurrent matrix. Rather than using an engineering dataset, we construct a delayed-cue task: the input appears at the beginning of a sequence, but the model is evaluated only at the end.</p>
+<section id="what-you-will-do" class="level2">
+<h2 class="anchored" data-anchor-id="what-you-will-do">What you will do</h2>
+<ol type="1">
+<li>Build a synthetic delayed-cue sequence.</li>
+<li>Run a two-state RNN forward through that sequence.</li>
+<li>Implement the vector–matrix BPTT calculation with NumPy.</li>
+<li>Verify the shared-matrix gradient using a finite-difference check.</li>
+<li>Compare vanishing, balanced, and exploding-gradient settings.</li>
+<li>See how a <code>tanh</code> activation changes the gradient path.</li>
+<li>Optionally verify the same matrix gradient with PyTorch autograd.</li>
+</ol>
+</section>
+<section id="a-delayed-cue-task" class="level2">
+<h2 class="anchored" data-anchor-id="a-delayed-cue-task">1. A delayed-cue task</h2>
+<p>The sequence begins with a single cue, <span class="math inline">\(x_1=1\)</span>, followed by zeros. The RNN sees one scalar input at a time, carries a two-entry hidden-state vector, and makes one final scalar prediction:</p>
+<p><span class="math display">\[
+x_1 = 1,\qquad x_2=\cdots=x_T=0,\qquad
+h_0=\begin{bmatrix}0\\0\end{bmatrix},\qquad
+\widehat y=w_o^Th_T,\qquad y=1.
+\]</span></p>
+<p>The task is deliberately simple: useful information appears only at the first step, so the network must preserve it until the final time step.</p>
+<div id="e749be20" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T05:41:52.278041Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T05:41:52.277728Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T05:41:52.625228Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T05:41:52.624755Z&quot;}}" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"seaborn-v0_8-whitegrid"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>INPUT_VECTOR <span class="op">=</span> np.array([<span class="fl">0.35</span>, <span class="fl">0.15</span>])</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>OUTPUT_VECTOR <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.0</span>])</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>TARGET <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>ROTATION_ANGLE <span class="op">=</span> np.deg2rad(<span class="fl">10.0</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>BASE_ROTATION <span class="op">=</span> np.array([</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    [np.cos(ROTATION_ANGLE), <span class="op">-</span>np.sin(ROTATION_ANGLE)],</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    [np.sin(ROTATION_ANGLE), np.cos(ROTATION_ANGLE)],</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="e9d44b58" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T05:41:52.626871Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T05:41:52.626741Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T05:41:52.629949Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T05:41:52.629686Z&quot;}}" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_delayed_cue_sequence(<span class="op">*</span>, length: <span class="bu">int</span>) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Create a sequence with one early cue and later zero inputs.</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">        length: Number of time steps in the sequence.</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">        A one-dimensional array with a one at the first time step and zeros</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">        at all remaining time steps.</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> np.zeros(length, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    inputs[<span class="dv">0</span>] <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> inputs</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>sequence <span class="op">=</span> make_delayed_cue_sequence(length<span class="op">=</span><span class="dv">16</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(sequence)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]</code></pre>
+</div>
+</div>
+</section>
+<section id="a-two-state-rnn-and-its-forward-pass" class="level2">
+<h2 class="anchored" data-anchor-id="a-two-state-rnn-and-its-forward-pass">2. A two-state RNN and its forward pass</h2>
+<p>At every time step, the <strong>same</strong> matrix <span class="math inline">\(W_h\in\mathbb{R}^{2\times2}\)</span> is reused:</p>
+<p><span class="math display">\[
+\begin{aligned}
+a_t &amp;= W_hh_{t-1}+w_xx_t, &amp; a_t,h_t,w_x&amp;\in\mathbb{R}^2,\\
+h_t &amp;= \phi(a_t), &amp; W_h&amp;\in\mathbb{R}^{2\times2},\\
+\widehat y &amp;= w_o^Th_T, &amp; w_o&amp;\in\mathbb{R}^2,\\
+L &amp;= \tfrac12(\widehat y-y)^2.
+\end{aligned}
+\]</span></p>
+<p>To make one control enough for this example, define <span class="math inline">\(W_h=\alpha R\)</span>, where <span class="math inline">\(R\)</span> is a fixed <span class="math inline">\(10^\circ\)</span> rotation. Because <span class="math inline">\(R\)</span> preserves the length of a vector, <span class="math inline">\(|\alpha|\)</span> controls the repeated scale in the linear recurrence.</p>
+<div id="f70d1444" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T05:41:52.631258Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T05:41:52.631185Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T05:41:52.636934Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T05:41:52.636705Z&quot;}}" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Literal</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>ActivationName <span class="op">=</span> Literal[<span class="st">"linear"</span>, <span class="st">"tanh"</span>]</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> recurrent_matrix(<span class="op">*</span>, scale: <span class="bu">float</span>) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Create the shared recurrent matrix W_h = alpha R.</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">        scale: Scalar alpha multiplying the fixed rotation matrix R.</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">        A 2-by-2 recurrent matrix.</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> scale <span class="op">*</span> BASE_ROTATION</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> apply_activation(<span class="op">*</span>, values: np.ndarray, name: ActivationName) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Apply an RNN activation elementwise to a two-entry vector.</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">        values: Vector of pre-activation values.</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">        name: Either ``"linear"`` or ``"tanh"``.</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">        Activated vector with the same shape as ``values``.</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> name <span class="op">==</span> <span class="st">"linear"</span>:</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> values.copy()</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.tanh(values)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> activation_derivative(<span class="op">*</span>, hidden_state: np.ndarray, name: ActivationName) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Evaluate the elementwise activation derivative at one hidden state.</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="co">        hidden_state: Activated hidden-state vector.</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co">        name: Either ``"linear"`` or ``"tanh"``.</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="co">        A two-entry vector of activation derivatives.</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> name <span class="op">==</span> <span class="st">"linear"</span>:</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.ones_like(hidden_state)</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">1.0</span> <span class="op">-</span> hidden_state<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward_two_state_rnn(</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    inputs: np.ndarray,</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    scale: <span class="bu">float</span>,</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    activation: ActivationName,</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">dict</span>[<span class="bu">str</span>, np.ndarray <span class="op">|</span> <span class="bu">float</span>]:</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Run a two-state RNN forward through one sequence.</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="co">        inputs: One-dimensional scalar input sequence with shape ``(T,)``.</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a><span class="co">        scale: Alpha in the recurrent matrix ``W_h = alpha R``.</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a><span class="co">        activation: Hidden-state activation applied elementwise.</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="co">        A dictionary with the recurrent matrix, pre-activations, hidden states</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a><span class="co">        including ``h_0``, activation derivatives, prediction, and loss.</span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    length <span class="op">=</span> <span class="bu">len</span>(inputs)</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    matrix <span class="op">=</span> recurrent_matrix(scale<span class="op">=</span>scale)</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Store the two-entry pre-activation a_t and hidden state h_t at every</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>    <span class="co"># time step.  The leading zero row makes states[0] the specified h_0=[0, 0].</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> np.zeros((length, <span class="dv">2</span>), dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>    states <span class="op">=</span> np.zeros((length <span class="op">+</span> <span class="dv">1</span>, <span class="dv">2</span>), dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>    derivatives <span class="op">=</span> np.zeros((length, <span class="dv">2</span>), dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> time <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, length <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>        <span class="co"># The same 2-by-2 matrix is reused at every time step.</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>        scores[time <span class="op">-</span> <span class="dv">1</span>] <span class="op">=</span> matrix <span class="op">@</span> states[time <span class="op">-</span> <span class="dv">1</span>] <span class="op">+</span> INPUT_VECTOR <span class="op">*</span> inputs[time <span class="op">-</span> <span class="dv">1</span>]</span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Apply the activation separately to each of the two state entries.</span></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>        states[time] <span class="op">=</span> apply_activation(values<span class="op">=</span>scores[time <span class="op">-</span> <span class="dv">1</span>], name<span class="op">=</span>activation)</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>        derivatives[time <span class="op">-</span> <span class="dv">1</span>] <span class="op">=</span> activation_derivative(hidden_state<span class="op">=</span>states[time], name<span class="op">=</span>activation)</span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>    prediction <span class="op">=</span> <span class="bu">float</span>(OUTPUT_VECTOR <span class="op">@</span> states[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> (prediction <span class="op">-</span> TARGET) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>        <span class="st">"inputs"</span>: inputs,</span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>        <span class="st">"matrix"</span>: matrix,</span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>        <span class="st">"scores"</span>: scores,</span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>        <span class="st">"states"</span>: states,</span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>        <span class="st">"derivatives"</span>: derivatives,</span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>        <span class="st">"prediction"</span>: prediction,</span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>        <span class="st">"loss"</span>: loss,</span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>trace <span class="op">=</span> forward_two_state_rnn(inputs<span class="op">=</span>sequence, scale<span class="op">=</span><span class="fl">0.70</span>, activation<span class="op">=</span><span class="st">"linear"</span>)</span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Base rotation R:</span><span class="ch">\n</span><span class="st">"</span>, BASE_ROTATION)</span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Recurrent matrix W_h = 0.70 R:</span><span class="ch">\n</span><span class="st">"</span>, trace[<span class="st">"matrix"</span>])</span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Prediction: </span><span class="sc">{</span>trace[<span class="st">'prediction'</span>]<span class="sc">:.5f}</span><span class="ss">"</span>)</span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Loss:       </span><span class="sc">{</span>trace[<span class="st">'loss'</span>]<span class="sc">:.5f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Base rotation R:
+ [[ 0.98480775 -0.17364818]
+ [ 0.17364818  0.98480775]]
+
+Recurrent matrix W_h = 0.70 R:
+ [[ 0.68936543 -0.12155372]
+ [ 0.12155372  0.68936543]]
+
+Prediction: -0.00180
+Loss:       0.50180</code></pre>
+</div>
+</div>
+<div id="5a7ef6eb" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T05:41:52.638101Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T05:41:52.638028Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T05:41:52.808407Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T05:41:52.808179Z&quot;}}" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">8.5</span>, <span class="fl">3.6</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>time <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="bu">len</span>(sequence) <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ax.step(time, sequence, where<span class="op">=</span><span class="st">"mid"</span>, color<span class="op">=</span><span class="st">"#d77732"</span>, linewidth<span class="op">=</span><span class="fl">2.3</span>, label<span class="op">=</span><span class="vs">r"input </span><span class="dv">$</span><span class="vs">x_t</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>ax.plot(time, trace[<span class="st">"states"</span>][<span class="dv">1</span>:, <span class="dv">0</span>], <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#457eaa"</span>, linewidth<span class="op">=</span><span class="fl">2.3</span>, label<span class="op">=</span><span class="vs">r"first state component </span><span class="dv">$</span><span class="vs">h_{t,1}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>ax.plot(time, trace[<span class="st">"states"</span>][<span class="dv">1</span>:, <span class="dv">1</span>], <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#77a86d"</span>, linewidth<span class="op">=</span><span class="fl">2.3</span>, label<span class="op">=</span><span class="vs">r"second state component </span><span class="dv">$</span><span class="vs">h_{t,2}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Time step"</span>, title<span class="op">=</span><span class="st">"An early cue must persist in a two-component hidden state"</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(time)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>, ncol<span class="op">=</span><span class="dv">2</span>, loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-backpropagation-through-time_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="backpropagate-through-the-unrolled-sequence" class="level2">
+<h2 class="anchored" data-anchor-id="backpropagate-through-the-unrolled-sequence">3. Backpropagate through the unrolled sequence</h2>
+<p>When the RNN is unrolled, each time step becomes a copy of the recurrent cell. All copies share the same <span class="math inline">\(W_h\)</span>, so their separate <span class="math inline">\(2\times2\)</span> gradient contributions must be <strong>summed</strong>.</p>
+<p>Define the backward vectors</p>
+<p><span class="math display">\[
+g_t=\frac{\partial L}{\partial h_t}\in\mathbb{R}^2,
+\qquad
+\delta_t=\frac{\partial L}{\partial a_t}\in\mathbb{R}^2.
+\]</span></p>
+<p>Starting at the loss, BPTT is</p>
+<p><span class="math display">\[
+\begin{aligned}
+g_T &amp;= (\widehat y-y)w_o,\\
+\delta_t &amp;= g_t\odot\phi'(a_t),\\
+g_{t-1} &amp;= W_h^T\delta_t,\\
+\frac{\partial L}{\partial W_h}
+&amp;= \sum_{t=1}^{T}\delta_t h_{t-1}^T.
+\end{aligned}
+\]</span></p>
+<p>The last line is a sum of outer products. Each time step supplies one <span class="math inline">\(2\times2\)</span> contribution to the single shared matrix.</p>
+<div id="75e1244e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T05:41:52.810327Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T05:41:52.810222Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T05:41:52.815147Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T05:41:52.814701Z&quot;}}" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bptt_matrix_gradient(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    forward_trace: <span class="bu">dict</span>[<span class="bu">str</span>, np.ndarray <span class="op">|</span> <span class="bu">float</span>],</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">dict</span>[<span class="bu">str</span>, np.ndarray <span class="op">|</span> <span class="bu">float</span>]:</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compute the shared 2-by-2 recurrent-matrix gradient by BPTT.</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">        forward_trace: Dictionary returned by ``forward_two_state_rnn``.</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">        A dictionary containing hidden-state gradients, pre-activation</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">        gradients, each 2-by-2 outer-product contribution, the total matrix</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">        gradient, and the gradient with respect to alpha.</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    matrix <span class="op">=</span> np.asarray(forward_trace[<span class="st">"matrix"</span>])</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    states <span class="op">=</span> np.asarray(forward_trace[<span class="st">"states"</span>])</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    derivatives <span class="op">=</span> np.asarray(forward_trace[<span class="st">"derivatives"</span>])</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    prediction <span class="op">=</span> <span class="bu">float</span>(forward_trace[<span class="st">"prediction"</span>])</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    length <span class="op">=</span> <span class="bu">len</span>(derivatives)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># gradient_hidden[t] is dL/dh_t.  delta[t-1] is dL/da_t, after the</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># activation derivative has been applied.</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    gradient_hidden <span class="op">=</span> np.zeros((length <span class="op">+</span> <span class="dv">1</span>, <span class="dv">2</span>), dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    delta <span class="op">=</span> np.zeros((length, <span class="dv">2</span>), dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># W_h is shared over time, so each unrolled step contributes one 2-by-2</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># outer product; BPTT adds all of those contributions.</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    contributions <span class="op">=</span> np.zeros((length, <span class="dv">2</span>, <span class="dv">2</span>), dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    gradient_matrix <span class="op">=</span> np.zeros((<span class="dv">2</span>, <span class="dv">2</span>), dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Start at the final loss, then move backward through time.</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    gradient_hidden[<span class="op">-</span><span class="dv">1</span>] <span class="op">=</span> (prediction <span class="op">-</span> TARGET) <span class="op">*</span> OUTPUT_VECTOR</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> time <span class="kw">in</span> <span class="bu">range</span>(length, <span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>):</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>        index <span class="op">=</span> time <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        <span class="co"># This multiplication is elementwise because the activation acts</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># elementwise on the two state entries.</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>        delta[index] <span class="op">=</span> gradient_hidden[time] <span class="op">*</span> derivatives[index]</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>        <span class="co"># dL/dW_h from this one time step is an outer product.</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        contributions[index] <span class="op">=</span> np.outer(delta[index], states[time <span class="op">-</span> <span class="dv">1</span>])</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>        gradient_matrix <span class="op">+=</span> contributions[index]</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>        gradient_hidden[time <span class="op">-</span> <span class="dv">1</span>] <span class="op">+=</span> matrix.T <span class="op">@</span> delta[index]</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gradient_hidden"</span>: gradient_hidden,</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>        <span class="st">"delta"</span>: delta,</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>        <span class="st">"contributions"</span>: contributions,</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gradient_matrix"</span>: gradient_matrix,</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gradient_scale"</span>: <span class="bu">float</span>(np.<span class="bu">sum</span>(gradient_matrix <span class="op">*</span> BASE_ROTATION)),</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>backward_trace <span class="op">=</span> bptt_matrix_gradient(forward_trace<span class="op">=</span>trace)</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"dL/dW_h:</span><span class="ch">\n</span><span class="st">"</span>, backward_trace[<span class="st">"gradient_matrix"</span>])</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">dL/dalpha = </span><span class="sc">{</span>backward_trace[<span class="st">'gradient_scale'</span>]<span class="sc">:.8f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>dL/dW_h:
+ [[ 0.01515227 -0.00707618]
+ [ 0.00414162  0.02199957]]
+
+dL/dalpha = 0.03853538</code></pre>
+</div>
+</div>
+<div id="808408b4" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T05:41:52.816946Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T05:41:52.816776Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T05:41:52.820695Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T05:41:52.820434Z&quot;}}" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> loss_at_scale(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    inputs: np.ndarray,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    scale: <span class="bu">float</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    activation: ActivationName,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Evaluate the final RNN loss at one recurrent-matrix scale.</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">        inputs: Input sequence.</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">        scale: Alpha in ``W_h = alpha R``.</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">        activation: Hidden-state activation.</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">        The scalar final-time loss.</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    trace <span class="op">=</span> forward_two_state_rnn(inputs<span class="op">=</span>inputs, scale<span class="op">=</span>scale, activation<span class="op">=</span>activation)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(trace[<span class="st">"loss"</span>])</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> finite_difference_scale_gradient(</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    inputs: np.ndarray,</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    scale: <span class="bu">float</span>,</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    activation: ActivationName,</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    epsilon: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1e-6</span>,</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Approximate dL/dalpha with a symmetric finite difference.</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">        inputs: Input sequence.</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">        scale: Alpha about which the loss is perturbed.</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">        activation: Hidden-state activation.</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="co">        epsilon: Small perturbation size.</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="co">        A numerical approximation of the gradient with respect to alpha.</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    loss_plus <span class="op">=</span> loss_at_scale(inputs<span class="op">=</span>inputs, scale<span class="op">=</span>scale <span class="op">+</span> epsilon, activation<span class="op">=</span>activation)</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    loss_minus <span class="op">=</span> loss_at_scale(inputs<span class="op">=</span>inputs, scale<span class="op">=</span>scale <span class="op">-</span> epsilon, activation<span class="op">=</span>activation)</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (loss_plus <span class="op">-</span> loss_minus) <span class="op">/</span> (<span class="fl">2.0</span> <span class="op">*</span> epsilon)</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>analytic_gradient <span class="op">=</span> <span class="bu">float</span>(backward_trace[<span class="st">"gradient_scale"</span>])</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>numerical_gradient <span class="op">=</span> finite_difference_scale_gradient(</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>    inputs<span class="op">=</span>sequence,</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    scale<span class="op">=</span><span class="fl">0.70</span>,</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>    activation<span class="op">=</span><span class="st">"linear"</span>,</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"BPTT dL/dalpha:              </span><span class="sc">{</span>analytic_gradient<span class="sc">:.8f}</span><span class="ss">"</span>)</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Finite-difference dL/dalpha: </span><span class="sc">{</span>numerical_gradient<span class="sc">:.8f}</span><span class="ss">"</span>)</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Absolute difference:          </span><span class="sc">{</span><span class="bu">abs</span>(analytic_gradient <span class="op">-</span> numerical_gradient)<span class="sc">:.2e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>BPTT dL/dalpha:              0.03853538
+Finite-difference dL/dalpha: 0.03853538
+Absolute difference:          6.01e-12</code></pre>
+</div>
+</div>
+</section>
+<section id="why-gradients-vanish-or-explode" class="level2">
+<h2 class="anchored" data-anchor-id="why-gradients-vanish-or-explode">4. Why gradients vanish or explode</h2>
+<p>For the linear cell, BPTT propagates a vector backward as</p>
+<p><span class="math display">\[
+g_{t-1}=W_h^Tg_t=\alpha R^Tg_t.
+\]</span></p>
+<p>Because <span class="math inline">\(R\)</span> is a rotation, it does not change a vector’s length. Thus the gradient norm is multiplied by <span class="math inline">\(|\alpha|\)</span> at every step in this particular construction. The comparison below changes only <span class="math inline">\(\alpha\)</span>.</p>
+<div id="2ac50e96" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T05:41:52.821979Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T05:41:52.821903Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T05:41:52.976062Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T05:41:52.975706Z&quot;}}" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>settings <span class="op">=</span> {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"vanishing"</span>: <span class="fl">0.70</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"balanced"</span>: <span class="fl">1.00</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"exploding"</span>: <span class="fl">1.30</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="fl">4.2</span>))</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, scale <span class="kw">in</span> settings.items():</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    case_trace <span class="op">=</span> forward_two_state_rnn(inputs<span class="op">=</span>sequence, scale<span class="op">=</span>scale, activation<span class="op">=</span><span class="st">"linear"</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    case_backward <span class="op">=</span> bptt_matrix_gradient(forward_trace<span class="op">=</span>case_trace)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    time <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="bu">len</span>(sequence) <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].plot(time, np.linalg.norm(case_trace[<span class="st">"states"</span>][<span class="dv">1</span>:], axis<span class="op">=</span><span class="dv">1</span>), <span class="st">"o-"</span>, label<span class="op">=</span><span class="vs">fr"</span><span class="sc">{</span>label<span class="sc">}</span><span class="vs">: </span><span class="dv">$</span><span class="ch">\a</span><span class="vs">lpha=</span><span class="sc">{</span>scale<span class="sc">:.1f}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].plot(</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        time,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        np.log10(np.maximum(np.linalg.norm(case_backward[<span class="st">"gradient_hidden"</span>][<span class="dv">1</span>:], axis<span class="op">=</span><span class="dv">1</span>), <span class="fl">1e-12</span>)),</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"o-"</span>,</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="vs">fr"</span><span class="sc">{</span>label<span class="sc">}</span><span class="vs">: </span><span class="dv">$</span><span class="ch">\a</span><span class="vs">lpha=</span><span class="sc">{</span>scale<span class="sc">:.1f}</span><span class="dv">$</span><span class="vs">"</span>,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].<span class="bu">set</span>(title<span class="op">=</span><span class="st">"Forward hidden-state norm"</span>, xlabel<span class="op">=</span><span class="st">"Time step"</span>, ylabel<span class="op">=</span><span class="vs">r"</span><span class="dv">$</span><span class="ch">\|</span><span class="vs">h_t</span><span class="ch">\|</span><span class="vs">_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].<span class="bu">set</span>(title<span class="op">=</span><span class="st">"Backward gradient norm"</span>, xlabel<span class="op">=</span><span class="st">"Time step"</span>, ylabel<span class="op">=</span><span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">log_</span><span class="op">{10}</span><span class="ch">\|</span><span class="er">\</span><span class="vs">partial L/</span><span class="er">\</span><span class="vs">partial h_t</span><span class="ch">\|</span><span class="vs">_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> axis <span class="kw">in</span> axes:</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    axis.legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-backpropagation-through-time_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cfd0cb43" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T05:41:52.977702Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T05:41:52.977456Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T05:41:52.981181Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T05:41:52.980833Z&quot;}}" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, scale <span class="kw">in</span> settings.items():</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    case_trace <span class="op">=</span> forward_two_state_rnn(inputs<span class="op">=</span>sequence, scale<span class="op">=</span>scale, activation<span class="op">=</span><span class="st">"linear"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    case_backward <span class="op">=</span> bptt_matrix_gradient(forward_trace<span class="op">=</span>case_trace)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    terminal_norm <span class="op">=</span> np.linalg.norm(case_backward[<span class="st">"gradient_hidden"</span>][<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    early_norm <span class="op">=</span> np.linalg.norm(case_backward[<span class="st">"gradient_hidden"</span>][<span class="dv">1</span>])</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    rows.append((</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        label,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        scale,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">float</span>(case_trace[<span class="st">"loss"</span>]),</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">float</span>(np.linalg.norm(case_backward[<span class="st">"gradient_matrix"</span>])),</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        early_norm <span class="op">/</span> <span class="bu">max</span>(terminal_norm, <span class="fl">1e-12</span>),</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"setting      alpha     loss     ||dL/dW_h||_F   ||g_1||_2 / ||g_T||_2"</span>)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, scale, loss, gradient_norm, ratio <span class="kw">in</span> rows:</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>label<span class="sc">:&lt;10}</span><span class="ss"> </span><span class="sc">{</span>scale<span class="sc">:&gt;5.1f}</span><span class="ss">  </span><span class="sc">{</span>loss<span class="sc">:&gt;9.4f}</span><span class="ss">  </span><span class="sc">{</span>gradient_norm<span class="sc">:&gt;14.4f}</span><span class="ss">  </span><span class="sc">{</span>ratio<span class="sc">:&gt;21.4e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>setting      alpha     loss     ||dL/dW_h||_F   ||g_1||_2 / ||g_T||_2
+vanishing    0.7     0.5018          0.0279             4.7476e-03
+balanced     1.0     0.9496          5.6676             1.0000e+00
+exploding    1.3   207.1394       3295.8784             5.1186e+01</code></pre>
+</div>
+</div>
+<p>The balanced case is not magically optimal: it merely makes the repeated linear transformation norm-preserving in this toy construction. In a practical RNN, the recurrent matrix, activation derivatives, and individual input sequence together determine whether gradients grow or shrink.</p>
+</section>
+<section id="add-tanh-bounded-states-another-gradient-factor" class="level2">
+<h2 class="anchored" data-anchor-id="add-tanh-bounded-states-another-gradient-factor">5. Add <code>tanh</code>: bounded states, another gradient factor</h2>
+<p>A conventional simple RNN often uses an elementwise <code>tanh</code> activation:</p>
+<p><span class="math display">\[
+h_t=\tanh(a_t),\qquad \phi'(a_t)=1-h_t^2.
+\]</span></p>
+<p>The hidden-state vector is now bounded component by component between <span class="math inline">\(-1\)</span> and <span class="math inline">\(1\)</span>. That can prevent the forward state from becoming arbitrarily large, but saturation also introduces small entries into the elementwise derivative vector. The backward path therefore has additional opportunities to vanish.</p>
+<div id="46ac0250" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T05:41:52.982406Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T05:41:52.982333Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T05:41:53.133006Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T05:41:53.132636Z&quot;}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>linear_trace <span class="op">=</span> forward_two_state_rnn(inputs<span class="op">=</span>sequence, scale<span class="op">=</span><span class="fl">1.30</span>, activation<span class="op">=</span><span class="st">"linear"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>linear_backward <span class="op">=</span> bptt_matrix_gradient(forward_trace<span class="op">=</span>linear_trace)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>tanh_trace <span class="op">=</span> forward_two_state_rnn(inputs<span class="op">=</span>sequence, scale<span class="op">=</span><span class="fl">1.30</span>, activation<span class="op">=</span><span class="st">"tanh"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>tanh_backward <span class="op">=</span> bptt_matrix_gradient(forward_trace<span class="op">=</span>tanh_trace)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>time <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="bu">len</span>(sequence) <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="fl">4.2</span>))</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(time, np.linalg.norm(linear_trace[<span class="st">"states"</span>][<span class="dv">1</span>:], axis<span class="op">=</span><span class="dv">1</span>), <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#cf6c37"</span>, label<span class="op">=</span><span class="st">"linear"</span>)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(time, np.linalg.norm(tanh_trace[<span class="st">"states"</span>][<span class="dv">1</span>:], axis<span class="op">=</span><span class="dv">1</span>), <span class="st">"o-"</span>, color<span class="op">=</span><span class="st">"#457eaa"</span>, label<span class="op">=</span><span class="st">"tanh"</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].<span class="bu">set</span>(title<span class="op">=</span><span class="st">"Forward hidden-state norm"</span>, xlabel<span class="op">=</span><span class="st">"Time step"</span>, ylabel<span class="op">=</span><span class="vs">r"</span><span class="dv">$</span><span class="ch">\|</span><span class="vs">h_t</span><span class="ch">\|</span><span class="vs">_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    time,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    np.log10(np.maximum(np.linalg.norm(linear_backward[<span class="st">"gradient_hidden"</span>][<span class="dv">1</span>:], axis<span class="op">=</span><span class="dv">1</span>), <span class="fl">1e-12</span>)),</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"o-"</span>,</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#cf6c37"</span>,</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"linear"</span>,</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    time,</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    np.log10(np.maximum(np.linalg.norm(tanh_backward[<span class="st">"gradient_hidden"</span>][<span class="dv">1</span>:], axis<span class="op">=</span><span class="dv">1</span>), <span class="fl">1e-12</span>)),</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"o-"</span>,</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#457eaa"</span>,</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"tanh"</span>,</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].<span class="bu">set</span>(title<span class="op">=</span><span class="st">"Backward gradient norm"</span>, xlabel<span class="op">=</span><span class="st">"Time step"</span>, ylabel<span class="op">=</span><span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">log_</span><span class="op">{10}</span><span class="ch">\|</span><span class="er">\</span><span class="vs">partial L/</span><span class="er">\</span><span class="vs">partial h_t</span><span class="ch">\|</span><span class="vs">_2</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-backpropagation-through-time_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="optional-verify-the-matrix-result-with-pytorch-autograd" class="level2">
+<h2 class="anchored" data-anchor-id="optional-verify-the-matrix-result-with-pytorch-autograd">6. (Optional) Verify the matrix result with PyTorch autograd</h2>
+<p>In practice, frameworks build the unrolled computational graph and compute these derivatives automatically. The code below keeps the same <span class="math inline">\(W_h=\alpha R\)</span> structure and asks PyTorch for <span class="math inline">\(dL/d\alpha\)</span>. It should match the manual BPTT result to numerical precision.</p>
+<div id="635879b1" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T05:41:53.135016Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T05:41:53.134617Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T05:41:54.353892Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T05:41:54.353612Z&quot;}}" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># requires_grad=True tells PyTorch to retain the operations involving alpha</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># so that loss.backward() can later compute dL/dalpha.</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>scale <span class="op">=</span> torch.tensor(<span class="fl">0.70</span>, dtype<span class="op">=</span>torch.float64, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># These are fixed constants, so they do not require gradients.</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>rotation <span class="op">=</span> torch.tensor(BASE_ROTATION, dtype<span class="op">=</span>torch.float64)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>input_vector <span class="op">=</span> torch.tensor(INPUT_VECTOR, dtype<span class="op">=</span>torch.float64)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>output_vector <span class="op">=</span> torch.tensor(OUTPUT_VECTOR, dtype<span class="op">=</span>torch.float64)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>inputs_torch <span class="op">=</span> torch.tensor(sequence, dtype<span class="op">=</span>torch.float64)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Explicit h_0=[0, 0], matching the NumPy forward-pass example above.</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>hidden <span class="op">=</span> torch.zeros(<span class="dv">2</span>, dtype<span class="op">=</span>torch.float64)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> input_value <span class="kw">in</span> inputs_torch:</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reusing `scale` here creates one unrolled graph node per time step;</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># PyTorch will sum their gradient contributions during backward().</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    hidden <span class="op">=</span> (scale <span class="op">*</span> rotation) <span class="op">@</span> hidden <span class="op">+</span> input_vector <span class="op">*</span> input_value</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> (output_vector <span class="op">@</span> hidden <span class="op">-</span> TARGET) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Reverse-mode autodiff now traverses the entire unrolled graph backward.</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>loss.backward()</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"PyTorch autograd dL/dalpha: </span><span class="sc">{</span>scale<span class="sc">.</span>grad<span class="sc">.</span>item()<span class="sc">:.8f}</span><span class="ss">"</span>)</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Manual BPTT dL/dalpha:     </span><span class="sc">{</span>analytic_gradient<span class="sc">:.8f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>PyTorch autograd dL/dalpha: 0.03853538
+Manual BPTT dL/dalpha:     0.03853538</code></pre>
+</div>
+</div>
+</section>
+<section id="takeaway" class="level2">
+<h2 class="anchored" data-anchor-id="takeaway">7. Takeaway</h2>
+<p>BPTT is not a different calculus rule. It is the chain rule applied to an RNN after copying the recurrent cell across time. The key difference from an ordinary feed-forward network is that one recurrent matrix is reused at every time step, so its gradient is the sum of contributions from the unrolled copies. The backward path multiplies many local Jacobian matrices, which is the source of vanishing and exploding gradients. This motivates gated architectures such as LSTMs and GRUs.</p>
+<p><a href="http://localhost:4170/sequential-models/">← Return to Sequential models</a></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+  (() => {
+    function fitNavbar() {
+      const header = document.querySelector("#quarto-header");
+      const navbar = header?.querySelector(".navbar");
+      const container = header?.querySelector(".navbar-container");
+      const links = header?.querySelector(".navbar-nav");
+
+      if (!navbar || !container || !links) {
+        return;
+      }
+
+      let lastWidth = -1;
+
+      function outerWidth(element) {
+        const styles = window.getComputedStyle(element);
+        return element.getBoundingClientRect().width
+          + Number.parseFloat(styles.marginLeft)
+          + Number.parseFloat(styles.marginRight);
+      }
+
+      function update() {
+        const availableWidth = container.getBoundingClientRect().width;
+        if (Math.abs(availableWidth - lastWidth) < 1) {
+          return;
+        }
+        lastWidth = availableWidth;
+
+        navbar.classList.remove("navbar-auto-collapse", "navbar-compact-layout");
+
+        // Let Bootstrap handle phone-sized viewports. For wider viewports,
+        // measure the actual label widths instead of assuming a fixed break.
+        if (!window.matchMedia("(min-width: 992px)").matches) {
+          navbar.classList.add("navbar-compact-layout");
+          return;
+        }
+
+        const linkWidth = Array.from(links.children)
+          .reduce((total, item) => total + outerWidth(item), 0);
+        const fixedWidth = Array.from(container.children)
+          .filter((child) => child.id !== "navbarCollapse")
+          .reduce((total, child) => total + outerWidth(child), 0);
+
+        // Keep a little room for the hamburger that appears after collapse
+        // and for the natural gaps between header controls.
+        const breathingRoom = 76;
+        if (linkWidth + fixedWidth + breathingRoom > availableWidth) {
+          navbar.classList.add("navbar-auto-collapse", "navbar-compact-layout");
+        }
+      }
+
+      const resizeObserver = new ResizeObserver(() => {
+        window.requestAnimationFrame(update);
+      });
+      resizeObserver.observe(container);
+      window.addEventListener("resize", update);
+      document.fonts?.ready.then(() => {
+        lastWidth = -1;
+        update();
+      });
+      window.requestAnimationFrame(update);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fitNavbar, { once: true });
+    } else {
+      fitNavbar();
+    }
+  })();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const toggle = window.document.createElement('button');
+      toggle.type = "button";
+      toggle.setAttribute("role", "switch");
+      toggle.setAttribute("aria-checked", "false");
+      toggle.classList.add('top-right');
+      toggle.classList.add('quarto-color-scheme-toggle');
+      toggle.setAttribute("aria-label", "Toggle dark mode");
+      toggle.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      toggle.appendChild(i);
+      // Put the toggle in a landmark of its own, so that landmark navigation
+      // can reach it.
+      //
+      // The container is always a fresh direct child of body, and the toggle is
+      // never moved into page furniture that the theme or the author controls.
+      // The toggle is positioned against the page, so any ancestor that
+      // establishes a containing block captures it: a positioned element or a
+      // grid for position: absolute, and transform, filter, will-change or
+      // contain for position: fixed. A direct child of body has none of these
+      // to inherit, and the shift when one appears is silent and visual.
+      //
+      // ARIA says a document should have at most one banner, and axe reports a
+      // duplicate whether or not the banners carry distinct labels. So use a
+      // header when the page has no banner yet, and a named region otherwise.
+      //
+      // A header is a banner wherever it sits, unless it is inside sectioning
+      // content, so this cannot just look at the children of body: a custom
+      // page layout wraps the title block header in a plain div. An explicit
+      // role="banner" always counts.
+      const sectioning = 'article, aside, main, nav, section, [role="article"], [role="complementary"], [role="main"], [role="navigation"], [role="region"]';
+      const hasBanner = Array.from(
+        window.document.querySelectorAll('header:not([role]), [role="banner"]')
+      ).some(function(el) {
+        return el.hasAttribute("role") || el.closest(sectioning) === null;
+      });
+      const container = window.document.createElement(hasBanner ? "div" : "header");
+      if (hasBanner) {
+        container.setAttribute("role", "region");
+        container.setAttribute("aria-label", "Toggle dark mode");
+      }
+      container.classList.add('quarto-color-scheme-toggle-container');
+      container.appendChild(toggle);
+      window.document.body.appendChild(container);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/changyaochen\.github\.io\/MECE4520\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+      window.quartoDecorateExternalLinks = function (root) {
+     var links = (root || window.document).querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+          if (!link.classList.contains('no-external-icon')) {
+          }
+        }
+      }
+      };
+      window.quartoDecorateExternalLinks(window.document);
+    // Esc closes the popup (WCAG 1.4.13) and focus leaving both trigger and
+    // popup closes it (WCAG 2.4.11); tippy handles neither for interactive popups.
+    const hideOnEscAndFocusOut = {
+      name: 'hideOnEscAndFocusOut',
+      defaultValue: true,
+      fn(instance) {
+        const dismiss = () => {
+          // A show scheduled by the trigger delay would otherwise reopen it
+          instance.clearDelayTimeouts();
+          instance.hide();
+        };
+        const onKeyDown = (event) => {
+          if (event.key !== 'Escape') {
+            return;
+          }
+          // Keep Esc from also reaching page handlers (e.g. reveal.js overview),
+          // except an open reveal.js slide menu, which Esc should close too.
+          // The menu handles keys only when its keyboard option is on.
+          const menuHandlesEsc = window.Reveal?.getPlugin?.('menu')?.isOpen() &&
+            window.Reveal.getConfig().menu?.keyboard !== false;
+          if (!menuHandlesEsc) {
+            event.stopPropagation();
+          }
+          if (instance.popper.contains(window.document.activeElement)) {
+            // Disabled while refocusing so the focus trigger does not reopen it
+            instance.disable();
+            instance.reference.focus();
+            instance.enable();
+          }
+          dismiss();
+        };
+        const onFocusOut = (event) => {
+          const target = event.relatedTarget;
+          if (target && !instance.reference.contains(target) &&
+              !instance.popper.contains(target)) {
+            dismiss();
+          }
+        };
+        // On the trigger too: a click trigger (code-annotations: select) has no
+        // blur handling. Attached for the instance's lifetime so leaving the
+        // trigger also cancels a show still pending on the trigger delay.
+        instance.reference.addEventListener('focusout', onFocusOut);
+        return {
+          onShow() {
+            window.document.addEventListener('keydown', onKeyDown, true);
+            instance.popper.addEventListener('focusout', onFocusOut);
+          },
+          onHide() {
+            window.document.removeEventListener('keydown', onKeyDown, true);
+            instance.popper.removeEventListener('focusout', onFocusOut);
+          },
+          onDestroy() {
+            instance.reference.removeEventListener('focusout', onFocusOut);
+          },
+        };
+      },
+    };
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+        plugins: [hideOnEscAndFocusOut],
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          // Each band is positioned against its own containing block, which is
+          // not the offsetParent of the lines, so place it from client rects.
+          const placeBand = (band, firstEl, lastEl, codeBlock) => {
+            const container = band.offsetParent;
+            if (container === null) {
+              return;
+            }
+            const containerRect = container.getBoundingClientRect();
+            // Reveal.js scales slides with a transform, so convert client
+            // pixels back to the CSS pixels of the container.
+            const scale = containerRect.height / container.offsetHeight || 1;
+            const firstRect = firstEl.getBoundingClientRect();
+            const lastRect = lastEl.getBoundingClientRect();
+            const top = (firstRect.top - containerRect.top) / scale - container.clientTop + container.scrollTop;
+            const height = (lastRect.bottom - firstRect.top) / scale;
+            band.style.top = top - 2 + "px";
+            band.style.height = height + 4 + "px";
+            if (codeBlock) {
+              // Without the copy button wrapper, the containing block is wider
+              // than the code block, so span the code block explicitly.
+              const blockRect = codeBlock.getBoundingClientRect();
+              band.style.left = (blockRect.left - containerRect.left) / scale - container.clientLeft + container.scrollLeft + "px";
+              band.style.width = blockRect.width / scale + "px";
+            }
+          };
+          if (lineIds.length > 0) {
+            const el = window.document.getElementById(lineIds[0]);
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const parent = el.parentElement.parentElement;
+            // cook up a div (if necessary) and position it
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            placeBand(div, el, lastEl, parent.closest("div.sourceCode") || parent);
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            placeBand(gutterDiv, el, lastEl);
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+  <script type="application/javascript">
+  window.quartoScrollableRegionsLabels = {"code":"Scrollable code","output":"Scrollable output"};
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>MECE 4520 · Data Science for Mechanical Systems</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Fall 2026</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

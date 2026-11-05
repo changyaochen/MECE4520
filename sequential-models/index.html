@@ -354,7 +354,9 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#autoregressive-models" id="toc-autoregressive-models">1. Autoregressive models</a></li>
-  <li><a href="#inputresponse-forecasting-with-the-silverbox-benchmark" id="toc-inputresponse-forecasting-with-the-silverbox-benchmark">2. Input–response forecasting with the Silverbox benchmark</a></li>
+  <li><a href="#inputresponse-forecasting-with-ar-and-arx" id="toc-inputresponse-forecasting-with-ar-and-arx">2. Input–response forecasting with AR and ARX</a></li>
+  <li><a href="#recurrent-models-for-nonlinear-inputresponse-forecasting" id="toc-recurrent-models-for-nonlinear-inputresponse-forecasting">3. Recurrent models for nonlinear input–response forecasting</a></li>
+  <li><a href="#backpropagation-through-time" id="toc-backpropagation-through-time">4. Backpropagation through time</a></li>
   </ul>
 </nav>
 <p>Sequential models make predictions from ordered observations. We begin with a fixed window of the series’ own past, then ask what changes when the model can also use a known input and learn a nonlinear state.</p>
@@ -364,11 +366,22 @@ ul.task-list li input[type="checkbox"] {
 <p><a href="../sequential-models/01-autoregressive-models-explorer.html">Explore autoregressive model order</a></p>
 <p><a href="01-autoregressive-models.html">Work through the notebook</a></p>
 </section>
-<section id="inputresponse-forecasting-with-the-silverbox-benchmark" class="level2">
-<h2 class="anchored" data-anchor-id="inputresponse-forecasting-with-the-silverbox-benchmark">2. Input–response forecasting with the Silverbox benchmark</h2>
-<p>Use the Silverbox nonlinear-system benchmark to compare three forecasting models on the same held-out input–response experiment: one that uses past responses, one that also uses a known input, and one that learns a nonlinear recurrent state.</p>
+<section id="inputresponse-forecasting-with-ar-and-arx" class="level2">
+<h2 class="anchored" data-anchor-id="inputresponse-forecasting-with-ar-and-arx">2. Input–response forecasting with AR and ARX</h2>
+<p>Use the Silverbox nonlinear-system benchmark to compare a response-only AR model with an ARX model that can use a known applied input.</p>
+<p><a href="02-silverbox-arx.html">Work through the AR/ARX notebook</a></p>
+</section>
+<section id="recurrent-models-for-nonlinear-inputresponse-forecasting" class="level2">
+<h2 class="anchored" data-anchor-id="recurrent-models-for-nonlinear-inputresponse-forecasting">3. Recurrent models for nonlinear input–response forecasting</h2>
+<p>Replace the fixed, linear lag representation with a learned nonlinear state, then compare a response-only RNN, an input-aware RNN, and an LSTM on the same Silverbox benchmark.</p>
 <p><a href="../sequential-models/02-silverbox-arx-rnn-explorer.html">Explore AR, ARX, and recurrent models</a></p>
-<p><a href="02-silverbox-arx-rnn.html">Work through the notebook</a></p>
+<p><a href="03-silverbox-rnn.html">Work through the RNN/LSTM notebook</a></p>
+</section>
+<section id="backpropagation-through-time" class="level2">
+<h2 class="anchored" data-anchor-id="backpropagation-through-time">4. Backpropagation through time</h2>
+<p>Use a deliberately small delayed-cue task to unroll a scalar RNN, calculate the gradient through every recurrent transition, and see how repeated local gradient factors can vanish or explode.</p>
+<p><a href="../sequential-models/04-bptt-explorer.html">Explore backpropagation through time</a></p>
+<p><a href="04-backpropagation-through-time.html">Work through the notebook</a></p>
 
 
 </section>
