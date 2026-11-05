@@ -401,6 +401,12 @@ L &amp;= \tfrac{1}{2}(\widehat{y}-y)^2.
 <p>The backward signal crosses a matrix-valued recurrent connection many times. For the linear cell, the signal norm roughly scales by <span class="math inline">\(|\alpha|\)</span> at each step: values below one make it vanish; values above one make it grow. The <code>tanh</code> option adds an elementwise derivative factor, which can make vanishing even stronger when a state saturates.</p>
 </div>
 </div>
+<style>
+.bptt-layout { grid-template-columns: minmax(0, 1fr); }
+.bptt-panel { min-width: 0; }
+.bptt-unroll-wrap { max-width: 100%; }
+.bptt-gradient-formula { overflow-x: auto; }
+</style>
 <div id="bptt-explorer" class="bptt-explorer" aria-label="Interactive backpropagation-through-time explorer">
   <div class="bptt-toolbar clt-buttons" aria-label="BPTT explorer controls">
     <span class="bptt-toolbar-label">Preset</span>

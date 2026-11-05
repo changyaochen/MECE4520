@@ -441,7 +441,7 @@ window.Quarto = {
 <section id="load-the-measured-inputresponse-experiments" class="level2">
 <h2 class="anchored" data-anchor-id="load-the-measured-inputresponse-experiments">1. Load the measured input–response experiments</h2>
 <p>The <code>nonlinear-benchmarks</code> package downloads the official Silverbox record to the notebook runtime. Nothing is fitted to the held-out experiment.</p>
-<div id="da5051ee" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T07:38:36.919322Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T07:38:36.919072Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T07:38:38.676693Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T07:38:38.676428Z&quot;}}" data-execution_count="1">
+<div id="da5051ee" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-05T04:41:43.850120Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-05T04:41:43.849828Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-05T04:41:45.979273Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-05T04:41:45.978958Z&quot;}}" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This package downloads the official Silverbox benchmark when it is first used.</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> nonlinear_benchmarks <span class="im">import</span> Silverbox</span>
@@ -462,13 +462,13 @@ window.Quarto = {
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>RANDOM_SEED <span class="op">=</span> <span class="dv">7</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>np.random.seed(RANDOM_SEED)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="d5fb9997" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T07:38:38.678128Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T07:38:38.678001Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T07:38:42.885727Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T07:38:42.885435Z&quot;}}" data-execution_count="2">
+<div id="d5fb9997" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-05T04:41:45.982053Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-05T04:41:45.981894Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-05T04:41:47.184768Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-05T04:41:47.184474Z&quot;}}" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Store the official download in the notebook's local working directory.</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># In Colab, this directory is temporary and disappears when the runtime ends.</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>benchmark_directory <span class="op">=</span> Path(<span class="st">"silverbox-data"</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>benchmark_directory.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>training_record, test_records <span class="op">=</span> Silverbox(dir_placement<span class="op">=</span>benchmark_directory)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>test_record <span class="op">=</span> test_records[<span class="dv">0</span>]  <span class="co"># The official held-out multisine experiment.</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>test_record <span class="op">=</span> test_records[<span class="dv">0</span>]  <span class="co"># Select the held-out record.</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>u_train <span class="op">=</span> np.asarray(training_record.u, dtype<span class="op">=</span><span class="bu">float</span>).reshape(<span class="op">-</span><span class="dv">1</span>)</span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> np.asarray(training_record.y, dtype<span class="op">=</span><span class="bu">float</span>).reshape(<span class="op">-</span><span class="dv">1</span>)</span>
@@ -489,7 +489,7 @@ Held-out samples: 21,688
 Sampling interval: 1.6384 ms</code></pre>
 </div>
 </div>
-<div id="8918319d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T07:38:42.887358Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T07:38:42.887243Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T07:38:43.042955Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T07:38:43.042684Z&quot;}}" data-execution_count="3">
+<div id="8918319d" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-05T04:41:47.186039Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-05T04:41:47.185952Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-05T04:41:47.352267Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-05T04:41:47.351977Z&quot;}}" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>display_samples <span class="op">=</span> <span class="dv">1_500</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>time_ms <span class="op">=</span> np.arange(display_samples) <span class="op">*</span> sampling_time <span class="op">*</span> <span class="dv">1_000</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -518,7 +518,7 @@ Sampling interval: 1.6384 ms</code></pre>
 <li><strong>One-step-ahead forecasting (observed lags):</strong> use the actual preceding <code>V2</code> measurements at every time step.</li>
 <li><strong>Recursive multi-step forecasting (predicted lags):</strong> after an initial window, reuse each prediction as a lagged <code>V2</code> input for later predictions.</li>
 </ul>
-<p>We use recursive multi-step forecasting throughout this notebook. Every model uses the first <span class="math inline">\(p=20\)</span> measured responses in the held-out experiment only to initialize its lag history. Afterwards, later true <code>V2</code> responses are <strong>not</strong> fed back to the model.</p>
+<p>We use recursive multi-step forecasting throughout this notebook. Every model uses the last <span class="math inline">\(p\)</span> measured training responses to initialize its lag history. It predicts from the first held-out sample; held-out <code>V2</code> responses are <strong>not</strong> fed back to the model.</p>
 <p>The applied input <span class="math inline">\(u_t\)</span> remains known throughout the held-out experiment. That is natural in system identification: it is an externally imposed forcing signal, not an unknown future response measurement.</p>
 <p>For this example, the two linear models are</p>
 <p><span class="math display">\[
@@ -527,7 +527,7 @@ Sampling interval: 1.6384 ms</code></pre>
 \text{ARX}(p):\quad \widehat{y}_t &amp;= \beta_0 + \sum_{j=1}^{p}\beta_j y_{t-j} + \sum_{j=0}^{p}\gamma_j u_{t-j}.
 \end{aligned}
 \]</span></p>
-<div id="7d43a638" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T07:38:43.044218Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T07:38:43.044136Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T07:38:43.048921Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T07:38:43.048692Z&quot;}}" data-execution_count="4">
+<div id="7d43a638" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-05T04:41:47.353581Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-05T04:41:47.353488Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-05T04:41:47.359127Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-05T04:41:47.358885Z&quot;}}" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ORDER <span class="op">=</span> <span class="dv">20</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -598,103 +598,126 @@ Sampling interval: 1.6384 ms</code></pre>
 <span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rmse(<span class="op">*</span>, actual: np.ndarray, predicted: np.ndarray, warmup: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
 <span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Calculate root-mean-square error after the initialization window."""</span></span>
-<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(np.sqrt(np.mean((actual[warmup:] <span class="op">-</span> predicted[warmup:]) <span class="op">**</span> <span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(np.sqrt(np.mean((actual[warmup:] <span class="op">-</span> predicted[warmup:]) <span class="op">**</span> <span class="dv">2</span>)))</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a><span class="co"># Only the final ORDER training observations initialize the forecast.</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a><span class="co"># Placeholder values make it explicit that held-out responses are not inputs.</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>forecast_input <span class="op">=</span> np.concatenate((u_train[<span class="op">-</span>ORDER:], u_test))</span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>forecast_history <span class="op">=</span> np.concatenate((y_train[<span class="op">-</span>ORDER:], np.full(<span class="bu">len</span>(y_test), np.nan)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<div id="silverbox-train-test-plot" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-05T04:41:47.360307Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-05T04:41:47.360225Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-05T04:41:47.523949Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-05T04:41:47.523632Z&quot;}}" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The loader divides one contiguous record chronologically.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>train_time <span class="op">=</span> np.arange(<span class="bu">len</span>(y_train)) <span class="op">*</span> sampling_time</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>test_time <span class="op">=</span> np.arange(<span class="bu">len</span>(y_train), <span class="bu">len</span>(y_train) <span class="op">+</span> <span class="bu">len</span>(y_test)) <span class="op">*</span> sampling_time</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">4</span>))</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>ax.plot(train_time, y_train, color<span class="op">=</span><span class="st">"#55a868"</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>, label<span class="op">=</span><span class="st">"Training response"</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>ax.plot(test_time, y_test, color<span class="op">=</span><span class="st">"#c44e52"</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>, label<span class="op">=</span><span class="st">"Held-out response"</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>ax.axvline(test_time[<span class="dv">0</span>], color<span class="op">=</span><span class="st">"black"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">1</span>, label<span class="op">=</span><span class="st">"Train/test split"</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Time from start of record (s)"</span>, ylabel<span class="op">=</span><span class="st">"Response V2 (V)"</span>, title<span class="op">=</span><span class="st">"Silverbox training and held-out records"</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">True</span>, loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="02-silverbox-arx_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="how-much-of-the-held-out-record-do-we-evaluate" class="level3">
+<h3 class="anchored" data-anchor-id="how-much-of-the-held-out-record-do-we-evaluate">How much of the held-out record do we evaluate?</h3>
+<p>The benchmark loader splits one continuous record chronologically: the first <strong>65,062 samples</strong> are training data and the next <strong>21,688 samples</strong> are held out. The sampling interval is <strong>1.6384 ms</strong>, so the held-out portion spans about <strong>35.5 seconds</strong>. Both plots use time from the beginning of the complete record.</p>
+<ul>
+<li>The last <span class="math inline">\(p\)</span> training responses initialize the models’ lag history. They are not scored; the forecast and evaluation begin at the first held-out sample.</li>
+<li>The models then make a recursive forecast for the rest of the held-out record. The reported RMSE uses <strong>all held-out samples</strong>, not just those shown in a plot.</li>
+<li>To make individual predictions easier to see, the plots in section 4 show two <strong>120-sample windows</strong> within the held-out portion.</li>
+</ul>
+</section>
 </section>
 <section id="start-with-a-response-only-ar20-model" class="level2">
 <h2 class="anchored" data-anchor-id="start-with-a-response-only-ar20-model">3. Start with a response-only AR(20) model</h2>
 <p>The AR model has 20 lagged <code>V2</code> values but no access to <code>V1</code>. During the recursive multi-step held-out forecast, it must infer future responses solely from its own earlier response forecasts.</p>
-<div id="fa20f614" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T07:38:43.050069Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T07:38:43.049998Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T07:38:44.023481Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T07:38:44.023180Z&quot;}}" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ar_scaler, ar_model <span class="op">=</span> fit_linear_forecaster(</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_train,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    output_signal<span class="op">=</span>y_train,</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>ORDER,</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    include_input<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>ar_prediction <span class="op">=</span> recursive_linear_forecast(</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_test,</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    observed_output<span class="op">=</span>y_test,</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>ORDER,</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    include_input<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    scaler<span class="op">=</span>ar_scaler,</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>ar_model,</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>ar_rmse <span class="op">=</span> rmse(actual<span class="op">=</span>y_test, predicted<span class="op">=</span>ar_prediction, warmup<span class="op">=</span>ORDER)</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"AR(</span><span class="sc">{</span>ORDER<span class="sc">}</span><span class="ss">) recursive multi-step held-out RMSE: </span><span class="sc">{</span>ar_rmse<span class="sc">:.5f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="fa20f614" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-05T04:41:47.525292Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-05T04:41:47.525191Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-05T04:41:49.279970Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-05T04:41:49.279156Z&quot;}}" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ar_scaler, ar_model <span class="op">=</span> fit_linear_forecaster(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_train,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    output_signal<span class="op">=</span>y_train,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>ORDER,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    include_input<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>ar_prediction <span class="op">=</span> recursive_linear_forecast(</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>forecast_input,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    observed_output<span class="op">=</span>forecast_history,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>ORDER,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    include_input<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    scaler<span class="op">=</span>ar_scaler,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>ar_model,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>)[ORDER:]</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>ar_rmse <span class="op">=</span> rmse(actual<span class="op">=</span>y_test, predicted<span class="op">=</span>ar_prediction, warmup<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"AR(</span><span class="sc">{</span>ORDER<span class="sc">}</span><span class="ss">) recursive multi-step held-out RMSE: </span><span class="sc">{</span>ar_rmse<span class="sc">:.5f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>AR(20) recursive multi-step held-out RMSE: 0.05429</code></pre>
+<pre><code>AR(20) recursive multi-step held-out RMSE: 0.05427</code></pre>
 </div>
 </div>
 </section>
 <section id="add-the-causal-forcing-signal-arx20" class="level2">
 <h2 class="anchored" data-anchor-id="add-the-causal-forcing-signal-arx20">4. Add the causal forcing signal: ARX(20)</h2>
 <p>In this Silverbox system, <code>V1</code> is the ARX model’s exogenous input. The model receives the same response history plus the current and 20 previous <code>V1</code> values. Because <code>V1</code> is deliberately imposed on the physical system, it is reasonable to treat it as known at prediction time. This is different from leaking later <code>V2</code> labels into the model.</p>
-<div id="426ee452" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-03T07:38:44.024916Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-03T07:38:44.024817Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-03T07:38:45.365679Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-03T07:38:45.365396Z&quot;}}" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>arx_scaler, arx_model <span class="op">=</span> fit_linear_forecaster(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_train,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    output_signal<span class="op">=</span>y_train,</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>ORDER,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    include_input<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>arx_prediction <span class="op">=</span> recursive_linear_forecast(</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_test,</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    observed_output<span class="op">=</span>y_test,</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>ORDER,</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    include_input<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    scaler<span class="op">=</span>arx_scaler,</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>arx_model,</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>arx_rmse <span class="op">=</span> rmse(actual<span class="op">=</span>y_test, predicted<span class="op">=</span>arx_prediction, warmup<span class="op">=</span>ORDER)</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"ARX(</span><span class="sc">{</span>ORDER<span class="sc">}</span><span class="ss">) recursive multi-step held-out RMSE: </span><span class="sc">{</span>arx_rmse<span class="sc">:.5f}</span><span class="ss">"</span>)</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>window_start <span class="op">=</span> <span class="dv">6_000</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>window_length <span class="op">=</span> <span class="dv">900</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>window <span class="op">=</span> <span class="bu">slice</span>(window_start, window_start <span class="op">+</span> window_length)</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>window_time <span class="op">=</span> np.arange(window_start, window_start <span class="op">+</span> window_length) <span class="op">*</span> sampling_time <span class="op">*</span> <span class="dv">1_000</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="dv">4</span>))</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>ax.plot(window_time, y_test[window], color<span class="op">=</span><span class="st">"#2f7395"</span>, linewidth<span class="op">=</span><span class="fl">1.4</span>, label<span class="op">=</span><span class="st">"observed V2"</span>)</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>ax.plot(window_time, ar_prediction[window], color<span class="op">=</span><span class="st">"#d97927"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"AR(20)"</span>)</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>ax.plot(window_time, arx_prediction[window], color<span class="op">=</span><span class="st">"#4d9d75"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"ARX(20)"</span>)</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"held-out time (ms)"</span>, ylabel<span class="op">=</span><span class="st">"response V2"</span>, title<span class="op">=</span><span class="st">"Known forcing signal substantially improves the linear forecast"</span>)</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>, ncol<span class="op">=</span><span class="dv">3</span>)</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect the middle of the displayed interval on a tighter time scale.</span></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>zoom_window_start <span class="op">=</span> window_start <span class="op">+</span> window_length <span class="op">//</span> <span class="dv">2</span> <span class="op">-</span> <span class="dv">60</span></span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>zoom_window_length <span class="op">=</span> <span class="dv">120</span></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>zoom_window <span class="op">=</span> <span class="bu">slice</span>(zoom_window_start, zoom_window_start <span class="op">+</span> zoom_window_length)</span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>zoom_time <span class="op">=</span> np.arange(zoom_window_start, zoom_window_start <span class="op">+</span> zoom_window_length) <span class="op">*</span> sampling_time <span class="op">*</span> <span class="dv">1_000</span></span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="dv">4</span>))</span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>ax.plot(zoom_time, y_test[zoom_window], color<span class="op">=</span><span class="st">"#2f7395"</span>, linewidth<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="st">"observed V2"</span>)</span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>ax.plot(zoom_time, ar_prediction[zoom_window], color<span class="op">=</span><span class="st">"#d97927"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"AR(20)"</span>)</span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>ax.plot(zoom_time, arx_prediction[zoom_window], color<span class="op">=</span><span class="st">"#4d9d75"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"ARX(20)"</span>)</span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(</span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    xlabel<span class="op">=</span><span class="st">"held-out time (ms)"</span>,</span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    ylabel<span class="op">=</span><span class="st">"response V2"</span>,</span>
-<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Zoomed middle portion of the held-out interval"</span>,</span>
-<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>, ncol<span class="op">=</span><span class="dv">3</span>)</span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="426ee452" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-05T04:41:49.283993Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-05T04:41:49.283849Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-05T04:41:50.773647Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-05T04:41:50.773363Z&quot;}}" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>arx_scaler, arx_model <span class="op">=</span> fit_linear_forecaster(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>u_train,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    output_signal<span class="op">=</span>y_train,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>ORDER,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    include_input<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>arx_prediction <span class="op">=</span> recursive_linear_forecast(</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    input_signal<span class="op">=</span>forecast_input,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    observed_output<span class="op">=</span>forecast_history,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>ORDER,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    include_input<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    scaler<span class="op">=</span>arx_scaler,</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>arx_model,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>)[ORDER:]</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>arx_rmse <span class="op">=</span> rmse(actual<span class="op">=</span>y_test, predicted<span class="op">=</span>arx_prediction, warmup<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"ARX(</span><span class="sc">{</span>ORDER<span class="sc">}</span><span class="ss">) recursive multi-step held-out RMSE: </span><span class="sc">{</span>arx_rmse<span class="sc">:.5f}</span><span class="ss">"</span>)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect two short windows within the held-out portion.</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>zoom_window_length <span class="op">=</span> <span class="dv">120</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> zoom_window_start <span class="kw">in</span> (<span class="dv">6_390</span>, <span class="dv">14_000</span>):</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    zoom_window <span class="op">=</span> <span class="bu">slice</span>(zoom_window_start, zoom_window_start <span class="op">+</span> zoom_window_length)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    zoom_time <span class="op">=</span> (<span class="bu">len</span>(y_train) <span class="op">+</span> np.arange(zoom_window_start, zoom_window_start <span class="op">+</span> zoom_window_length)) <span class="op">*</span> sampling_time</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="dv">4</span>))</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    ax.plot(zoom_time, y_test[zoom_window], color<span class="op">=</span><span class="st">"#2f7395"</span>, linewidth<span class="op">=</span><span class="fl">1.6</span>, label<span class="op">=</span><span class="st">"observed V2"</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    ax.plot(zoom_time, ar_prediction[zoom_window], color<span class="op">=</span><span class="st">"#d97927"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"AR(20)"</span>)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    ax.plot(zoom_time, arx_prediction[zoom_window], color<span class="op">=</span><span class="st">"#4d9d75"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"ARX(20)"</span>)</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    ax.<span class="bu">set</span>(</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        xlabel<span class="op">=</span><span class="st">"Time from start of record (s)"</span>,</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        ylabel<span class="op">=</span><span class="st">"response V2"</span>,</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"A closer look at the held-out forecast"</span>,</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    ax.legend(frameon<span class="op">=</span><span class="va">False</span>, ncol<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>ARX(20) recursive multi-step held-out RMSE: 0.00694</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02-silverbox-arx_files/figure-html/cell-7-output-2.png" class="img-fluid figure-img"></p>
+<p><img src="02-silverbox-arx_files/figure-html/cell-8-output-2.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02-silverbox-arx_files/figure-html/cell-7-output-3.png" class="img-fluid figure-img"></p>
+<p><img src="02-silverbox-arx_files/figure-html/cell-8-output-3.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>The recursive AR(20) forecast is nearly flat in these windows: without access to <code>V1</code>, it cannot respond directly to changes in the applied input. ARX(20) uses the known input and follows the observed response more closely here.</p>
 </section>
 <section id="takeaway" class="level2">
 <h2 class="anchored" data-anchor-id="takeaway">5. Takeaway</h2>
