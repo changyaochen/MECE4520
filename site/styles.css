@@ -7611,7 +7611,6 @@
 .pca-legend-line { display: inline-block; width: 1.3rem; border-top: 2px solid; }
 .pca-legend-projection { border-color: #d7665e; }
 .pca-legend-direction { border-color: #22846b; }
-.pca-legend-pc1 { border-color: #8a5aad; border-top-style: dashed; }
 .pca-metrics, .pca-eigenvalues { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
 .pca-metric, .pca-eigenvalues > div { display: grid; gap: 0.15rem; padding: 0.65rem; background: #fff; border: 1px solid #e2dce8; border-radius: 0.35rem; }
 .pca-metric span, .pca-eigenvalues span { font-size: 0.8rem; color: #687784; }
@@ -7631,8 +7630,6 @@
 .pca-chart-axis-label, .pca-marginal-label { fill: #405863; font-size: 14px; font-weight: 600; }
 .pca-marginal-label { font-size: 12px; }
 .pca-marginal-bar { fill: #9eb9c7; }
-.pca-pc1-line { stroke: #8a5aad; stroke-width: 2.3; stroke-dasharray: 7 5; }
-.pca-pc1-label { fill: #82509c; font-size: 13px; font-weight: 700; }
 .pca-current-direction { stroke: #22846b; stroke-width: 2.8; }
 .pca-current-direction-pc1 { stroke: #a14e9f; stroke-width: 3.5; }
 .pca-projection-segment { stroke: #d7665e; stroke-width: 1; opacity: 0.32; }

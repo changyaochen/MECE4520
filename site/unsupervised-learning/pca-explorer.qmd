@@ -11,16 +11,15 @@ how the projected values spread out.
 ::: {.callout-tip}
 ## What to watch
 
-The purple dashed line marks **PC1**, the direction with the greatest projected
-variance. The rotating line passes through the data mean. As it turns, each
-point is projected onto it, and the histogram shows the resulting one-dimensional
-values. The spread is greatest at PC1 and smallest at the perpendicular PC2.
+The rotating line passes through the data mean. As it turns, each point is
+projected onto it, and the histogram shows the resulting one-dimensional values.
+The spread is greatest at **PC1** and smallest at the perpendicular PC2.
 :::
 
 The points were digitized approximately from a static scatter plot. Their
 coordinates are now a fixed dataset: every view and calculation on this page
-uses the same observations. The marginal histograms show the original `x` and
-`y` distributions; the large histogram updates with the current projection.
+uses the same observations. The marginal histograms show the original $x_1$ and
+$x_2$ distributions; the large histogram updates with the current projection.
 
 ```{=html}
 <div id="pca-explorer" class="pca-explorer" aria-label="Interactive PCA projection explorer">
@@ -43,20 +42,19 @@ uses the same observations. The marginal histograms show the original `x` and
       </div>
       <div class="pca-main-layout">
         <div class="pca-top-marginal">
-          <svg id="pca-x-histogram" viewBox="0 0 520 110" role="img" aria-label="Static marginal histogram of original x values"></svg>
+          <svg id="pca-x-histogram" viewBox="0 0 520 110" role="img" aria-label="Static marginal histogram of original x 1 values"></svg>
         </div>
         <div class="pca-scatter-wrap">
           <svg id="pca-scatter" viewBox="0 0 520 520" role="img" aria-label="Two-dimensional point cloud with a rotating PCA projection direction"></svg>
         </div>
         <div class="pca-side-marginal">
-          <svg id="pca-y-histogram" viewBox="0 0 155 520" role="img" aria-label="Static marginal histogram of original y values"></svg>
+          <svg id="pca-y-histogram" viewBox="0 0 155 520" role="img" aria-label="Static marginal histogram of original x 2 values"></svg>
         </div>
       </div>
       <div class="pca-legend" aria-label="Plot legend">
         <span><i class="pca-legend-dot"></i> Original observation</span>
         <span><i class="pca-legend-line pca-legend-projection"></i> Projection segment</span>
         <span><i class="pca-legend-line pca-legend-direction"></i> Current direction</span>
-        <span><i class="pca-legend-line pca-legend-pc1"></i> PC1 reference</span>
       </div>
     </section>
 
@@ -85,11 +83,11 @@ uses the same observations. The marginal histograms show the original `x` and
   </div>
 
   <div class="pca-explanation">
-    <p>For a unit direction <em>u</em><sub>θ</sub> = (cos θ, sin θ), each point is centered at the data mean and projected to <em>z</em><sub>i</sub> = (<em>x</em><sub>i</sub> − x̄) cos θ + (<em>y</em><sub>i</sub> − ȳ) sin θ. Its variance is <em>u</em><sub>θ</sub><sup>T</sup>Σ<em>u</em><sub>θ</sub>. PCA chooses the direction that maximizes this quantity; the maximum is the largest eigenvalue of the sample covariance matrix.</p>
+    <p>For a unit direction <em>u</em><sub>θ</sub> = (cos θ, sin θ), each point is centered at the data mean and projected to <em>z</em><sub>i</sub> = (<em>x</em><sub>i,1</sub> − x̄<sub>1</sub>) cos θ + (<em>x</em><sub>i,2</sub> − x̄<sub>2</sub>) sin θ. Its variance is <em>u</em><sub>θ</sub><sup>T</sup>Σ<em>u</em><sub>θ</sub>. PCA chooses the direction that maximizes this quantity; the maximum is the largest eigenvalue of the sample covariance matrix.</p>
   </div>
 </div>
 ```
 
 <p class="pca-return-link"><a href="../index.qmd">← Return to the course home</a></p>
 
-<script src="../assets/pca-explorer.js?v=20261107a"></script>
+<script src="../assets/pca-explorer.js?v=20261108d"></script>

@@ -157,7 +157,7 @@
   function drawScatter() {
     scatter.replaceChildren();
     const title = svgElement("title");
-    title.textContent = "The original point cloud, PC1 reference direction, and current orthogonal projections";
+    title.textContent = "The original point cloud and current orthogonal projections";
     scatter.append(title);
 
     const ticks = [-3, -2, -1, 0, 1, 2, 3];
@@ -202,26 +202,13 @@
       y2: PLOT.top + PLOT.size,
       class: "pca-axis-line",
     }));
-    addText(scatter, "x", PLOT.left + (PLOT.size / 2), 515, {
+    addText(scatter, "x₁", PLOT.left + (PLOT.size / 2), 515, {
       class: "pca-chart-axis-label", "text-anchor": "middle",
     });
-    addText(scatter, "y", 17, PLOT.top + (PLOT.size / 2), {
+    addText(scatter, "x₂", 17, PLOT.top + (PLOT.size / 2), {
       class: "pca-chart-axis-label",
       "text-anchor": "middle",
       transform: `rotate(-90 17 ${PLOT.top + (PLOT.size / 2)})`,
-    });
-
-    const pc1Endpoints = lineEndpoints(state.pca.pc1Angle);
-    scatter.append(svgElement("line", {
-      x1: xPixel(pc1Endpoints[0].x),
-      y1: yPixel(pc1Endpoints[0].y),
-      x2: xPixel(pc1Endpoints[1].x),
-      y2: yPixel(pc1Endpoints[1].y),
-      class: "pca-pc1-line",
-    }));
-    const pc1LabelPoint = pc1Endpoints[1];
-    addText(scatter, "PC1", xPixel(pc1LabelPoint.x) - 8, yPixel(pc1LabelPoint.y) + 18, {
-      class: "pca-pc1-label", "text-anchor": "end",
     });
 
     const angleRadians = state.angle * Math.PI / 180;
@@ -290,7 +277,7 @@
     const xBinPixels = PLOT.size / MARGINAL_BINS;
 
     xHistogram.replaceChildren();
-    addText(xHistogram, "Original x", PLOT.left, 12, { class: "pca-marginal-label" });
+    addText(xHistogram, "Original x₁", PLOT.left, 12, { class: "pca-marginal-label" });
     xHistogramData.counts.forEach((count, index) => {
       const height = (count / xMax) * (xBase - xTop);
       const value = DOMAIN.min + (index * xHistogramData.width);
@@ -320,9 +307,9 @@
       const width = (count / yMax) * 105;
       yHistogram.append(svgElement("rect", {
         x: 12,
-        y: yPixel(value) - (yBinPixels * 0.38),
+        y: yPixel(value) - (yBinPixels / 2) + 1,
         width,
-        height: yBinPixels * 0.76,
+        height: Math.max(1, yBinPixels - 2),
         class: "pca-marginal-bar",
       }));
     });
