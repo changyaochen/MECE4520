@@ -1,0 +1,57 @@
+---
+title: "Explore DBSCAN"
+toc: false
+page-layout: full
+---
+
+DBSCAN builds clusters by expanding through regions where points are sufficiently
+dense. Step through the algorithm on the half-moon data from last year's
+[DBSCAN notebook](https://github.com/changyaochen/MECE4520/blob/fall_2025/lectures/notebooks/19_dbscan.ipynb).
+
+::: {.callout-tip}
+## What to watch
+
+The circle shows the current point's ε-neighborhood. If it contains at least
+`min_samples` points **including the current point**, the point is a core point:
+its neighbors can continue expanding the cluster. A non-core point cannot
+expand a cluster; it may become a border point, or remain noise.
+:::
+
+The fixed dataset matches the notebook's animation: `make_moons(n_samples=150,
+noise=0.05, random_state=42)`. DBSCAN uses the coordinates, not the original
+moon labels. Changing a parameter restarts the algorithm.
+
+```{=html}
+<link rel="stylesheet" href="../assets/dbscan-explorer.css">
+<div id="dbscan-explorer" class="dbscan-explorer" aria-label="Interactive DBSCAN explorer">
+  <div class="dbscan-settings">
+    <label for="dbscan-epsilon"><span>Neighborhood radius, ε</span><input id="dbscan-epsilon" type="range" min="0.08" max="0.50" step="0.01" value="0.30"><output id="dbscan-epsilon-value">0.30</output></label>
+    <label for="dbscan-min-samples"><span>Minimum points, <code>min_samples</code></span><input id="dbscan-min-samples" type="range" min="2" max="12" step="1" value="5"><output id="dbscan-min-value">5</output></label>
+  </div>
+  <div class="dbscan-toolbar clt-buttons" aria-label="Animation controls">
+    <button id="dbscan-previous" type="button">Previous step</button>
+    <button id="dbscan-next" class="regression-sampling-primary" type="button">Next step</button>
+    <button id="dbscan-play" type="button">Play</button>
+    <button id="dbscan-reset" type="button">Reset</button>
+    <output id="dbscan-progress" class="dbscan-progress" aria-live="polite"></output>
+  </div>
+  <div class="dbscan-workbench">
+    <section class="dbscan-panel dbscan-plot-panel" aria-labelledby="dbscan-plot-title">
+      <div class="dbscan-panel-heading"><h2 id="dbscan-plot-title">Grow clusters through dense neighborhoods</h2><p>The active point is ringed; its neighbors have a red outline.</p></div>
+      <svg id="dbscan-plot" viewBox="0 0 860 520" role="img" aria-label="Half-moon data and current DBSCAN neighborhood"></svg>
+      <div class="dbscan-legend"><span><i class="dbscan-dot dbscan-unvisited"></i>Unvisited</span><span><i class="dbscan-dot dbscan-cluster"></i>Assigned to a cluster</span><span><i class="dbscan-dot dbscan-noise"></i>Currently noise</span><span><i class="dbscan-ring"></i>Active point</span><span><i class="dbscan-neighbor"></i>Neighbor</span></div>
+    </section>
+    <aside class="dbscan-panel dbscan-details" aria-labelledby="dbscan-details-title">
+      <div class="dbscan-panel-heading"><h2 id="dbscan-details-title">Current step</h2></div>
+      <div id="dbscan-action" class="dbscan-action" aria-live="polite">Press Next step or Play to begin.</div>
+      <div class="dbscan-metrics"><div><span>Neighbors<br>(including itself)</span><strong id="dbscan-neighbors">—</strong></div><div><span>Current point</span><strong id="dbscan-kind">—</strong></div><div><span>Clusters started</span><strong id="dbscan-clusters">0</strong></div><div><span>Noise so far</span><strong id="dbscan-noise-count">0</strong></div></div>
+      <p id="dbscan-explanation" class="dbscan-explanation">Start by choosing an unvisited point and counting the points within ε.</p>
+      <p class="dbscan-caveat">A point initially marked noise can later become a border point when reached from a core point. Cluster colors are arbitrary.</p>
+    </aside>
+  </div>
+</div>
+```
+
+[← Return to Unsupervised learning](index.qmd)
+
+<script src="../assets/dbscan-explorer.js?v=20261107a"></script>

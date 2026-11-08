@@ -1,0 +1,18 @@
+---
+title: "Unsupervised learning"
+---
+
+Explore patterns in data without using class labels to construct the representation or clusters.
+
+## Principal component analysis
+
+Principal component analysis (PCA) finds directions along which the data vary most. By projecting the data onto a few of these directions, we can explore a lower-dimensional view of its structure.
+
+- [Explore how PCA chooses a direction](pca-explorer.qmd)
+- [Work through the gas-sensor PCA notebook](01-pca-gas-sensor-array.ipynb)
+
+## Density-based clustering
+
+Density-based clustering groups observations that lie in dense regions of the data, while identifying isolated observations as noise. Explore how DBSCAN builds clusters without specifying their number in advance.
+
+- [Step through DBSCAN on half moons](dbscan-explorer.qmd)
