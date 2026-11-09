@@ -88,6 +88,6 @@ $x_2$ distributions; the large histogram updates with the current projection.
 </div>
 ```
 
-<p class="pca-return-link"><a href="../index.qmd">← Return to the course home</a></p>
+<p class="pca-return-link"><a href="index.qmd">← Return to Unsupervised learning</a></p>
 
 <script src="../assets/pca-explorer.js?v=20261108d"></script>
