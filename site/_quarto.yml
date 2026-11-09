@@ -17,6 +17,11 @@ project:
     - assets/ar-order-explorer.js
     - assets/silverbox-explorer-data.js
     - assets/silverbox-explorer.js
+    - assets/pca-explorer.js
+    - data/pca-demo-points.csv
+    - assets/dbscan-explorer.js
+    - assets/dbscan-explorer.css
+    - data/dbscan-half-moons.csv
     - assets/columbia-engineering-logo.png
     - assets/b7e2a9c4.html
 
@@ -42,6 +47,8 @@ website:
         text: Neural networks
       - href: sequential-models/index.qmd
         text: Sequential models
+      - href: unsupervised-learning/index.qmd
+        text: Unsupervised learning
   page-footer:
     left: "MECE 4520 · Data Science for Mechanical Systems"
     right: "Fall 2026"

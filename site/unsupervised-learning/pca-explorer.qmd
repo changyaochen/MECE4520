@@ -1,0 +1,93 @@
+---
+title: "What does PCA maximize?"
+toc: false
+page-layout: full
+---
+
+PCA searches for a direction that preserves as much variation as possible. Here,
+you can rotate a one-dimensional view of a two-dimensional point cloud and see
+how the projected values spread out.
+
+::: {.callout-tip}
+## What to watch
+
+The rotating line passes through the data mean. As it turns, each point is
+projected onto it, and the histogram shows the resulting one-dimensional values.
+The spread is greatest at **PC1** and smallest at the perpendicular PC2.
+:::
+
+The points were digitized approximately from a static scatter plot. Their
+coordinates are now a fixed dataset: every view and calculation on this page
+uses the same observations. The marginal histograms show the original $x_1$ and
+$x_2$ distributions; the large histogram updates with the current projection.
+
+```{=html}
+<div id="pca-explorer" class="pca-explorer" aria-label="Interactive PCA projection explorer">
+  <div class="pca-toolbar clt-buttons" role="group" aria-label="PCA projection controls">
+    <button id="pca-play" type="button" class="regression-sampling-primary">Play rotation</button>
+    <button id="pca-reset" type="button">Show PC1</button>
+    <label class="pca-angle-control" for="pca-angle">
+      <span>Projection angle, θ</span>
+      <input id="pca-angle" type="range" min="0" max="360" step="1" value="0" aria-describedby="pca-angle-value">
+      <output id="pca-angle-value" for="pca-angle">0°</output>
+    </label>
+    <output id="pca-status" class="pca-status" aria-live="polite">Loading the point cloud…</output>
+  </div>
+
+  <div class="pca-workbench">
+    <section class="pca-panel pca-scatter-panel" aria-labelledby="pca-scatter-heading">
+      <div class="pca-panel-heading">
+        <h2 id="pca-scatter-heading">Original points and their projections</h2>
+        <p>The thin red segments connect each observation to its perpendicular projection on the rotating direction.</p>
+      </div>
+      <div class="pca-main-layout">
+        <div class="pca-top-marginal">
+          <svg id="pca-x-histogram" viewBox="0 0 520 110" role="img" aria-label="Static marginal histogram of original x 1 values"></svg>
+        </div>
+        <div class="pca-scatter-wrap">
+          <svg id="pca-scatter" viewBox="0 0 520 520" role="img" aria-label="Two-dimensional point cloud with a rotating PCA projection direction"></svg>
+        </div>
+        <div class="pca-side-marginal">
+          <svg id="pca-y-histogram" viewBox="0 0 155 520" role="img" aria-label="Static marginal histogram of original x 2 values"></svg>
+        </div>
+      </div>
+      <div class="pca-legend" aria-label="Plot legend">
+        <span><i class="pca-legend-dot"></i> Original observation</span>
+        <span><i class="pca-legend-line pca-legend-projection"></i> Projection segment</span>
+        <span><i class="pca-legend-line pca-legend-direction"></i> Current direction</span>
+      </div>
+    </section>
+
+    <section class="pca-panel pca-projection-panel" aria-labelledby="pca-projection-heading">
+      <div class="pca-panel-heading">
+        <h2 id="pca-projection-heading">Distribution after projection</h2>
+        <p>Each point contributes one centered scalar value, <code>z</code>.</p>
+      </div>
+      <div class="pca-metrics" aria-live="polite">
+        <div class="pca-metric pca-current-metric">
+          <span>Projected variance</span>
+          <strong id="pca-variance">—</strong>
+        </div>
+        <div class="pca-metric">
+          <span>Variance retained</span>
+          <strong id="pca-variance-share">—</strong>
+        </div>
+      </div>
+      <svg id="pca-projection-histogram" viewBox="0 0 430 440" role="img" aria-label="Histogram of values projected onto the current direction"></svg>
+      <div class="pca-eigenvalues">
+        <div><span>PC1 · maximum</span><strong id="pca-lambda-one">—</strong></div>
+        <div><span>PC2 · minimum</span><strong id="pca-lambda-two">—</strong></div>
+      </div>
+      <p id="pca-orientation-note" class="pca-orientation-note" aria-live="polite"></p>
+    </section>
+  </div>
+
+  <div class="pca-explanation">
+    <p>For a unit direction <em>u</em><sub>θ</sub> = (cos θ, sin θ), each point is centered at the data mean and projected to <em>z</em><sub>i</sub> = (<em>x</em><sub>i,1</sub> − x̄<sub>1</sub>) cos θ + (<em>x</em><sub>i,2</sub> − x̄<sub>2</sub>) sin θ. Its variance is <em>u</em><sub>θ</sub><sup>T</sup>Σ<em>u</em><sub>θ</sub>. PCA chooses the direction that maximizes this quantity; the maximum is the largest eigenvalue of the sample covariance matrix.</p>
+  </div>
+</div>
+```
+
+<p class="pca-return-link"><a href="index.qmd">← Return to Unsupervised learning</a></p>
+
+<script src="../assets/pca-explorer.js?v=20261108d"></script>
