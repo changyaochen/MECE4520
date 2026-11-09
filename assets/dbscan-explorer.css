@@ -1,0 +1,43 @@
+.dbscan-explorer { margin: 1.2rem 0 2rem; color: #30434d; }
+.dbscan-settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; padding: 1rem; border: 1px solid #d7e2e7; border-radius: .5rem; background: #f3f7f9; }
+.dbscan-settings label { display: grid; grid-template-columns: 1fr auto; gap: .35rem .75rem; margin: 0; font-weight: 600; }
+.dbscan-settings label span { grid-column: 1 / -1; }
+.dbscan-settings input { width: 100%; accent-color: #397da5; }
+.dbscan-settings output { min-width: 2.8rem; text-align: right; font-variant-numeric: tabular-nums; }
+.dbscan-toolbar { align-items: center; }
+.dbscan-progress { margin-left: auto; color: #607580; font-size: .88rem; }
+.dbscan-workbench { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(260px, .8fr); gap: 1rem; margin-top: 1rem; }
+.dbscan-panel { min-width: 0; padding: 1rem; border: 1px solid #d8e4e8; border-radius: .55rem; background: #f6fafb; }
+.dbscan-details { background: #f8f6fb; border-color: #e0d6e8; }
+.dbscan-panel-heading h2 { margin: 0 0 .3rem; color: #30434d; font-size: 1.15rem; }
+.dbscan-panel-heading p { margin: 0 0 .6rem; color: #61727c; font-size: .9rem; }
+#dbscan-plot { display: block; width: 100%; height: auto; background: #fff; border: 1px solid #e1e9ec; border-radius: .35rem; }
+.dbscan-grid { stroke: #edf1f3; stroke-width: 1; }
+.dbscan-axis { stroke: #7b8c94; stroke-width: 1.2; }
+.dbscan-tick { fill: #667b85; font-size: 14px; }
+.dbscan-axis-label { fill: #405863; font-size: 16px; font-weight: 600; }
+.dbscan-radius { fill: #f3c46e; fill-opacity: .16; stroke: #c68727; stroke-width: 2; stroke-dasharray: 7 5; }
+.dbscan-point { stroke: #fff; stroke-width: 1; }
+.dbscan-neighbor-ring { fill: none; stroke: #d35f56; stroke-width: 1.6; }
+.dbscan-active-ring { fill: none; stroke: #b07819; stroke-width: 3; }
+.dbscan-legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin-top: .8rem; color: #596c76; font-size: .8rem; }
+.dbscan-legend span { display: inline-flex; align-items: center; gap: .35rem; }
+.dbscan-dot, .dbscan-ring, .dbscan-neighbor { width: .72rem; height: .72rem; border-radius: 50%; display: inline-block; }
+.dbscan-unvisited { background: #adbcc3; }.dbscan-cluster { background: #347fc0; }.dbscan-noise { background: #d38953; }
+.dbscan-ring { border: 2px solid #b07819; }.dbscan-neighbor { border: 2px solid #d35f56; }
+.dbscan-action { min-height: 3rem; padding: .8rem; background: #eee8f3; border-left: 4px solid #9672a9; line-height: 1.45; }
+.dbscan-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin-top: .8rem; }
+.dbscan-metrics div { display: grid; gap: .2rem; padding: .6rem; border: 1px solid #e0dce6; border-radius: .35rem; background: white; }
+.dbscan-metrics span { color: #687a84; font-size: .8rem; }
+.dbscan-metrics strong { color: #345d6c; font-size: 1.15rem; }
+.dbscan-explanation, .dbscan-caveat { margin: .8rem 0 0; color: #596e77; font-size: .88rem; }
+.dbscan-caveat { padding-top: .7rem; border-top: 1px solid #e1dce6; }
+.quarto-dark .dbscan-explorer { color: #dbe5e8; }
+.quarto-dark .dbscan-settings, .quarto-dark .dbscan-panel { background: #24323b; border-color: #496473; }
+.quarto-dark .dbscan-details { background: #302b35; border-color: #685578; }
+.quarto-dark .dbscan-panel-heading h2, .quarto-dark .dbscan-metrics strong { color: #e1eaed; }
+.quarto-dark .dbscan-panel-heading p, .quarto-dark .dbscan-progress, .quarto-dark .dbscan-legend, .quarto-dark .dbscan-explanation, .quarto-dark .dbscan-caveat, .quarto-dark .dbscan-metrics span { color: #c0d0d5; }
+.quarto-dark .dbscan-action { background: #44364c; }
+.quarto-dark .dbscan-metrics div { background: #252d31; border-color: #566470; }
+@media (max-width: 900px) { .dbscan-workbench { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .dbscan-settings { grid-template-columns: 1fr; } .dbscan-progress { flex-basis: 100%; margin-left: 0; } }
