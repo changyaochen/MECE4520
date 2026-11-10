@@ -1225,6 +1225,13 @@
     "text": "Principal component analysis\nPrincipal component analysis (PCA) finds directions along which the data vary most. By projecting the data onto a few of these directions, we can explore a lower-dimensional view of its structure.\n\nExplore how PCA chooses a direction\nWork through the gas-sensor PCA notebook"
   },
   {
+    "objectID": "unsupervised-learning/index.html#k-means-clustering",
+    "href": "unsupervised-learning/index.html#k-means-clustering",
+    "title": "Unsupervised learning",
+    "section": "K-means clustering",
+    "text": "K-means clustering\nK-means groups observations around a chosen number of cluster centers. Explore how the centers move, then fit models and compare different choices of \\(K\\) in the notebook.\n\nStep through k-means clustering\nWork through the k-means notebook"
+  },
+  {
     "objectID": "unsupervised-learning/index.html#density-based-clustering",
     "href": "unsupervised-learning/index.html#density-based-clustering",
     "title": "Unsupervised learning",
@@ -1232,11 +1239,53 @@
     "text": "Density-based clustering\nDensity-based clustering groups observations that lie in dense regions of the data, while identifying isolated observations as noise. Explore how DBSCAN builds clusters without specifying their number in advance.\n\nStep through DBSCAN on half moons"
   },
   {
+    "objectID": "unsupervised-learning/02-kmeans-clustering.html",
+    "href": "unsupervised-learning/02-kmeans-clustering.html",
+    "title": "K-means clustering",
+    "section": "",
+    "text": "In this notebook, we will use k-means to group observations without giving the algorithm any labels. We will start with a small two-feature example, fit a model using scikit-learn, and then see what happens when we change the number of clusters.\nK-means assigns each observation to one of \\(K\\) clusters. Each cluster is represented by its centroid, the mean of its assigned points. The algorithm aims to make the sum of squared distances from points to their assigned centroids as small as possible:\n\\[\\sum_{i=1}^{n} \\lVert \\mathbf{x}_i - \\boldsymbol{\\mu}_{c_i} \\rVert^2\\]\nHere, \\(c_i\\) is the cluster assigned to observation \\(i\\), and \\(\\boldsymbol{\\mu}_{c_i}\\) is that cluster’s centroid.\nLloyd’s algorithm is a common way to find a k-means solution: it alternates between assigning points to their nearest centroid and updating the centroids. Other algorithms can also be used for k-means. To see Lloyd’s algorithm one step at a time, try the k-means exploration page."
+  },
+  {
+    "objectID": "unsupervised-learning/02-kmeans-clustering.html#create-and-inspect-the-data",
+    "href": "unsupervised-learning/02-kmeans-clustering.html#create-and-inspect-the-data",
+    "title": "K-means clustering",
+    "section": "1. Create and inspect the data",
+    "text": "1. Create and inspect the data\nWe use the same three-blob example as last semester: 300 points with two features. The plotting colors on the right show the groups used to generate the synthetic data; the model will not receive those labels. For real unlabeled data, such labels are often unavailable.\n\nimport matplotlib.pyplot as plt\nimport numpy as np\nimport seaborn as sns\nfrom sklearn.cluster import KMeans\nfrom sklearn.datasets import make_blobs\n\nsns.set_theme(style=\"whitegrid\", context=\"notebook\")\n\nX, true_group = make_blobs(\n    n_samples=300,\n    centers=[[-5, 0], [5, 5], [5, -5]],\n    cluster_std=2.0,\n    random_state=8,\n)\nprint(f\"Data shape: {X.shape} (samples, features)\")\n\nfig, axes = plt.subplots(1, 2, figsize=(13, 5))\naxes[0].scatter(X[:, 0], X[:, 1], s=24, alpha=0.8)\naxes[0].set_title(\"Observed data (without labels)\")\naxes[1].scatter(X[:, 0], X[:, 1], c=true_group, cmap=\"viridis\", s=24, alpha=0.8)\naxes[1].set_title(\"Groups used to generate the data\")\nfor ax in axes:\n    ax.set(xlabel=\"Feature 1\", ylabel=\"Feature 2\")\n    ax.set_aspect(\"equal\", adjustable=\"box\")\nfig.tight_layout()\nplt.show()\n\nData shape: (300, 2) (samples, features)"
+  },
+  {
+    "objectID": "unsupervised-learning/02-kmeans-clustering.html#fit-a-k-means-model",
+    "href": "unsupervised-learning/02-kmeans-clustering.html#fit-a-k-means-model",
+    "title": "K-means clustering",
+    "section": "2. Fit a k-means model",
+    "text": "2. Fit a k-means model\nWe choose \\(K=3\\) for this example. fit_predict fits the model using only the feature matrix X and returns a cluster assignment for every point. cluster_centers_ contains the fitted centroids, and inertia_ is the within-cluster sum of squared distances. The cluster numbers are arbitrary: cluster 0 does not necessarily correspond to generated group 0.\nK-means can depend on its starting centers. Here, n_init=10 tries multiple initializations and keeps the result with the smallest inertia.\n\nmodel = KMeans(n_clusters=3, n_init=10, random_state=42)\ncluster = model.fit_predict(X)\ncenters = model.cluster_centers_\n\nprint(f\"Centroids:\\n{centers.round(2)}\")\nprint(f\"Within-cluster sum of squares: {model.inertia_:.1f}\")\n\nfig, ax = plt.subplots(figsize=(8, 6))\nax.scatter(X[:, 0], X[:, 1], c=cluster, cmap=\"viridis\", s=24, alpha=0.8)\nax.scatter(centers[:, 0], centers[:, 1], marker=\"X\", s=200,\n           c=\"red\", edgecolor=\"black\", label=\"Centroids\", zorder=3)\nax.set(title=\"K-means result (K=3)\", xlabel=\"Feature 1\", ylabel=\"Feature 2\")\nax.set_aspect(\"equal\", adjustable=\"box\")\nax.legend()\nfig.tight_layout()\nplt.show()\n\nCentroids:\n[[ 5.23 -4.94]\n [-5.17  0.15]\n [ 4.78  5.09]]\nWithin-cluster sum of squares: 2614.2"
+  },
+  {
+    "objectID": "unsupervised-learning/02-kmeans-clustering.html#what-if-we-choose-a-different-k",
+    "href": "unsupervised-learning/02-kmeans-clustering.html#what-if-we-choose-a-different-k",
+    "title": "K-means clustering",
+    "section": "3. What if we choose a different \\(K\\)?",
+    "text": "3. What if we choose a different \\(K\\)?\nIn practice, we usually do not know how many groups are present. To explore the effect of \\(K\\), we will generate a second dataset with four groups, then fit models with \\(K=3\\), \\(4\\), and \\(5\\). The generating labels are not used to fit the models.\nWith too few clusters, some groups may be combined. With more clusters, a group may be split. Inertia generally decreases as \\(K\\) increases, so a smaller inertia alone does not tell us the best \\(K\\).\n\nX_four, true_group_four = make_blobs(\n    n_samples=400,\n    centers=[[-5, 5], [-5, -5], [5, 5], [5, -5]],\n    cluster_std=2.0,\n    random_state=8,\n)\n\nfig, axes = plt.subplots(1, 3, figsize=(16, 5), sharex=True, sharey=True)\nfor ax, k in zip(axes, [3, 4, 5]):\n    model_k = KMeans(n_clusters=k, n_init=10, random_state=42)\n    assignments = model_k.fit_predict(X_four)\n    centers = model_k.cluster_centers_\n    ax.scatter(X_four[:, 0], X_four[:, 1], c=assignments, cmap=\"viridis\",\n               s=20, alpha=0.8)\n    ax.scatter(centers[:, 0], centers[:, 1], marker=\"X\", s=150,\n               c=\"red\", edgecolor=\"black\", zorder=3)\n    ax.set(title=f\"K={k} · inertia={model_k.inertia_:.0f}\",\n           xlabel=\"Feature 1\", ylabel=\"Feature 2\")\n    ax.set_aspect(\"equal\", adjustable=\"box\")\nfig.tight_layout()\nplt.show()"
+  },
+  {
+    "objectID": "unsupervised-learning/02-kmeans-clustering.html#takeaways",
+    "href": "unsupervised-learning/02-kmeans-clustering.html#takeaways",
+    "title": "K-means clustering",
+    "section": "Takeaways",
+    "text": "Takeaways\n\nK-means groups observations around \\(K\\) centroids without using labels.\nThe choice of \\(K\\), the initial centroids, and the scale of the features can affect the result.\nThe synthetic data’s generating groups help us interpret the example, but are not required for clustering.\n\nExplore how Lloyd’s algorithm alternates between assignments and centroid updates in the k-means exploration page.\n← Return to Unsupervised learning"
+  },
+  {
     "objectID": "unsupervised-learning/pca-explorer.html",
     "href": "unsupervised-learning/pca-explorer.html",
     "title": "What does PCA maximize?",
     "section": "",
     "text": "PCA searches for a direction that preserves as much variation as possible. Here, you can rotate a one-dimensional view of a two-dimensional point cloud and see how the projected values spread out.\n\n\n\n\n\n\nTipWhat to watch\n\n\n\nThe rotating line passes through the data mean. As it turns, each point is projected onto it, and the histogram shows the resulting one-dimensional values. The spread is greatest at PC1 and smallest at the perpendicular PC2.\n\n\nThe points were digitized approximately from a static scatter plot. Their coordinates are now a fixed dataset: every view and calculation on this page uses the same observations. The marginal histograms show the original \\(x_1\\) and \\(x_2\\) distributions; the large histogram updates with the current projection.\n\n  \n    Play rotation\n    Show PC1\n    \n      Projection angle, θ\n      \n      0°\n    \n    Loading the point cloud…\n  \n\n  \n    \n      \n        Original points and their projections\n        The thin red segments connect each observation to its perpendicular projection on the rotating direction.\n      \n      \n        \n          \n        \n        \n          \n        \n        \n          \n        \n      \n      \n         Original observation\n         Projection segment\n         Current direction\n      \n    \n\n    \n      \n        Distribution after projection\n        Each point contributes one centered scalar value, z.\n      \n      \n        \n          Projected variance\n          —\n        \n        \n          Variance retained\n          —\n        \n      \n      \n      \n        PC1 · maximum—\n        PC2 · minimum—\n      \n      \n    \n  \n\n  \n    For a unit direction uθ = (cos θ, sin θ), each point is centered at the data mean and projected to zi = (xi,1 − x̄1) cos θ + (xi,2 − x̄2) sin θ. Its variance is uθTΣuθ. PCA chooses the direction that maximizes this quantity; the maximum is the largest eigenvalue of the sample covariance matrix.\n  \n\n\n← Return to Unsupervised learning"
+  },
+  {
+    "objectID": "unsupervised-learning/kmeans-explorer.html",
+    "href": "unsupervised-learning/kmeans-explorer.html",
+    "title": "Explore K-means clustering",
+    "section": "",
+    "text": "K-means groups points around \\(K\\) cluster centers, called centroids. Explore Lloyd’s algorithm on the same three-blob data used in the notebook, with \\(K=3\\).\n\n\n\n\n\n\nTipWhat to watch\n\n\n\nEach iteration alternates between two steps: assign every point to its nearest centroid, then update each centroid to the mean of its assigned points. The colored points show the current assignments; the large crosses show the centroids. After an update, arrows show where the centroids moved.\n\n\nThe initial centroids match the seeded random initialization in last year’s clustering notebook. The accompanying notebook uses multiple k-means++ initializations, so its steps and result may differ. The synthetic labels are not used by the algorithm.\n\n\n  \n    Previous step\n    Next step\n    Play\n    Reset\n    Loading data…\n  \n  \n    \n      Points and centroidsPoint colors are cluster assignments, not the data's original labels.\n      \n      Observation✕Centroid⟶Centroid movement\n    \n    \n      Current step\n      Loading data…\n      \n      Iteration0Within-cluster sum of squares—\n      Points assigned to each cluster\n      \n      The sum of squares is the total squared distance from each point to its assigned centroid. It is shown after points have been assigned.\n    \n  \n\n← Return to Unsupervised learning"
   },
   {
     "objectID": "unsupervised-learning/01-pca-gas-sensor-array.html",

@@ -80,6 +80,35 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -358,6 +387,7 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#principal-component-analysis" id="toc-principal-component-analysis">Principal component analysis</a></li>
+  <li><a href="#k-means-clustering" id="toc-k-means-clustering">K-means clustering</a></li>
   <li><a href="#density-based-clustering" id="toc-density-based-clustering">Density-based clustering</a></li>
   </ul>
 </nav>
@@ -368,6 +398,14 @@ ul.task-list li input[type="checkbox"] {
 <ul>
 <li><a href="../unsupervised-learning/pca-explorer.html">Explore how PCA chooses a direction</a></li>
 <li><a href="../unsupervised-learning/01-pca-gas-sensor-array.html">Work through the gas-sensor PCA notebook</a></li>
+</ul>
+</section>
+<section id="k-means-clustering" class="level2">
+<h2 class="anchored" data-anchor-id="k-means-clustering">K-means clustering</h2>
+<p>K-means groups observations around a chosen number of cluster centers. Explore how the centers move, then fit models and compare different choices of <span class="math inline">\(K\)</span> in the notebook.</p>
+<ul>
+<li><a href="../unsupervised-learning/kmeans-explorer.html">Step through k-means clustering</a></li>
+<li><a href="../unsupervised-learning/02-kmeans-clustering.html">Work through the k-means notebook</a></li>
 </ul>
 </section>
 <section id="density-based-clustering" class="level2">
