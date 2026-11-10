@@ -1,0 +1,47 @@
+.kmeans-explorer { margin-top: 1rem; color: #30434d; }
+.kmeans-toolbar { position: sticky; top: 0.5rem; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; padding: 0.8rem; border: 1px solid #d8e4e8; border-radius: 0.55rem; background: #f2f7fa; box-shadow: 0 2px 7px #263e4b14; }
+.kmeans-toolbar button { min-height: 2.4rem; padding: 0.45rem 0.85rem; border: 1px solid #9db4c0; border-radius: 0.35rem; background: #fff; color: #284d61; font-weight: 600; cursor: pointer; }
+.kmeans-toolbar button.regression-sampling-primary { background: #347b9e; border-color: #347b9e; color: #fff; }
+.kmeans-toolbar button:disabled { opacity: 0.48; cursor: default; }
+.kmeans-toolbar button:focus-visible { outline: 3px solid #f1b64b; outline-offset: 2px; }
+.kmeans-progress { margin-left: auto; font-size: 0.86rem; color: #607580; }
+.kmeans-workbench { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(260px, 0.8fr); gap: 1rem; margin-top: 1rem; }
+.kmeans-panel { min-width: 0; padding: 1rem; border: 1px solid #d8e4e8; border-radius: 0.55rem; background: #f6fafb; }
+.kmeans-details { background: #f8f6fb; border-color: #e0d6e8; }
+.kmeans-panel-heading h2 { margin: 0 0 0.25rem; color: #30434d; font-size: 1.15rem; }
+.kmeans-panel-heading p { margin: 0 0 0.6rem; color: #61727c; font-size: 0.9rem; }
+#kmeans-plot { display: block; width: 100%; height: auto; border: 1px solid #e1eaed; border-radius: 0.35rem; background: #fff; }
+.kmeans-legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 0.6rem; font-size: 0.8rem; color: #586c76; }
+.kmeans-legend span { display: inline-flex; gap: 0.35rem; align-items: center; }
+.kmeans-point-key { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: #5e87a0; }
+.kmeans-center-key { font-style: normal; font-size: 1rem; line-height: 1; font-weight: 700; color: #233843; }
+.kmeans-arrow-key { font-style: normal; font-size: 1.2rem; line-height: 1; color: #556d78; }
+.kmeans-action { padding: 0.8rem; border-left: 4px solid #8662a1; background: #f0eaf5; font-weight: 700; }
+.kmeans-explanation, .kmeans-note { margin: 0.8rem 0; font-size: 0.9rem; line-height: 1.5; color: #4c626d; }
+.kmeans-metrics { display: grid; grid-template-columns: 1fr 1.5fr; gap: 0.5rem; }
+.kmeans-metrics > div { padding: 0.65rem; border: 1px solid #e2dce8; border-radius: 0.35rem; background: #fff; }
+.kmeans-metrics span { display: block; font-size: 0.78rem; color: #687784; }
+.kmeans-metrics strong { display: block; margin-top: 0.2rem; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.kmeans-details h3 { margin: 1rem 0 0.45rem; font-size: 0.94rem; }
+.kmeans-counts { display: grid; gap: 0.35rem; }
+.kmeans-count { display: flex; justify-content: space-between; gap: 1rem; padding: 0.35rem 0.55rem; border-radius: 0.3rem; background: #fff; }
+.kmeans-count-label { display: flex; gap: 0.45rem; align-items: center; }
+.kmeans-count-dot { display: inline-block; width: 0.65rem; height: 0.65rem; border-radius: 50%; }
+.kmeans-grid { stroke: #e4ebee; stroke-width: 1; }
+.kmeans-zero { stroke: #c4d2d8; stroke-width: 1.3; }
+.kmeans-axis { stroke: #71828a; stroke-width: 1.2; }
+.kmeans-tick { fill: #647781; font-size: 13px; }
+.kmeans-axis-label { fill: #405863; font-size: 15px; font-weight: 600; }
+.kmeans-point { stroke: white; stroke-width: 0.6; opacity: 0.82; }
+.kmeans-movement { stroke: #536b76; stroke-width: 2; stroke-dasharray: 5 4; }
+.kmeans-center-halo { fill: white; stroke: white; stroke-width: 5; }
+.kmeans-center { stroke-width: 4; stroke-linecap: round; }
+.quarto-dark .kmeans-toolbar { background: #24323b; border-color: #4a6979; }
+.quarto-dark .kmeans-panel { background: #202d32; border-color: #476270; color: #e2ecee; }
+.quarto-dark .kmeans-details { background: #302b35; border-color: #685578; }
+.quarto-dark .kmeans-panel-heading h2, .quarto-dark .kmeans-details h3 { color: #e2ecee; }
+.quarto-dark .kmeans-panel-heading p, .quarto-dark .kmeans-explanation, .quarto-dark .kmeans-note, .quarto-dark .kmeans-progress, .quarto-dark .kmeans-legend { color: #c2d1d8; }
+.quarto-dark .kmeans-action { color: #eee4f5; background: #493653; }
+.quarto-dark .kmeans-metrics > div, .quarto-dark .kmeans-count { background: #252d31; border-color: #566470; }
+.quarto-dark .kmeans-metrics span { color: #c2d1d8; }
+@media (max-width: 800px) { .kmeans-workbench { grid-template-columns: 1fr; } .kmeans-progress { flex-basis: 100%; margin-left: 0; } }
