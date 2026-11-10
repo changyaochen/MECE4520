@@ -11,6 +11,13 @@ Principal component analysis (PCA) finds directions along which the data vary mo
 - [Explore how PCA chooses a direction](pca-explorer.qmd)
 - [Work through the gas-sensor PCA notebook](01-pca-gas-sensor-array.ipynb)
 
+## K-means clustering
+
+K-means groups observations around a chosen number of cluster centers. Explore how the centers move, then fit models and compare different choices of $K$ in the notebook.
+
+- [Step through k-means clustering](kmeans-explorer.qmd)
+- [Work through the k-means notebook](02-kmeans-clustering.ipynb)
+
 ## Density-based clustering
 
 Density-based clustering groups observations that lie in dense regions of the data, while identifying isolated observations as noise. Explore how DBSCAN builds clusters without specifying their number in advance.

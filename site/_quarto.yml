@@ -19,6 +19,9 @@ project:
     - assets/silverbox-explorer.js
     - assets/pca-explorer.js
     - data/pca-demo-points.csv
+    - assets/kmeans-explorer.js
+    - assets/kmeans-explorer.css
+    - data/kmeans-three-blobs.csv
     - assets/dbscan-explorer.js
     - assets/dbscan-explorer.css
     - data/dbscan-half-moons.csv

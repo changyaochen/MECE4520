@@ -1,0 +1,55 @@
+---
+title: "Explore K-means clustering"
+toc: false
+page-layout: full
+---
+
+K-means groups points around $K$ cluster centers, called **centroids**. Explore
+Lloyd's algorithm on the same three-blob data used in the notebook, with $K=3$.
+
+::: {.callout-tip}
+## What to watch
+
+Each iteration alternates between two steps: **assign** every point to its nearest
+centroid, then **update** each centroid to the mean of its assigned points. The
+colored points show the current assignments; the large crosses show the centroids.
+After an update, arrows show where the centroids moved.
+:::
+
+The initial centroids match the seeded random initialization in last year's
+[clustering notebook](https://github.com/changyaochen/MECE4520/blob/fall_2025/lectures/notebooks/18_clustering.ipynb).
+The accompanying notebook uses multiple k-means++ initializations, so its steps
+and result may differ. The synthetic labels are not used by the algorithm.
+
+```{=html}
+<link rel="stylesheet" href="../assets/kmeans-explorer.css">
+<div id="kmeans-explorer" class="kmeans-explorer" aria-label="Interactive K-means explorer">
+  <div class="kmeans-toolbar clt-buttons" role="group" aria-label="Lloyd's algorithm controls">
+    <button id="kmeans-previous" type="button">Previous step</button>
+    <button id="kmeans-next" type="button" class="regression-sampling-primary">Next step</button>
+    <button id="kmeans-play" type="button">Play</button>
+    <button id="kmeans-reset" type="button">Reset</button>
+    <output id="kmeans-progress" class="kmeans-progress" aria-live="polite">Loading data…</output>
+  </div>
+  <div class="kmeans-workbench">
+    <section class="kmeans-panel kmeans-plot-panel" aria-labelledby="kmeans-plot-heading">
+      <div class="kmeans-panel-heading"><h2 id="kmeans-plot-heading">Points and centroids</h2><p>Point colors are cluster assignments, not the data's original labels.</p></div>
+      <svg id="kmeans-plot" viewBox="0 0 720 620" role="img" aria-label="Two-dimensional observations and K-means centroids"></svg>
+      <div class="kmeans-legend"><span><i class="kmeans-point-key"></i>Observation</span><span><i class="kmeans-center-key">✕</i>Centroid</span><span><i class="kmeans-arrow-key">⟶</i>Centroid movement</span></div>
+    </section>
+    <aside class="kmeans-panel kmeans-details" aria-labelledby="kmeans-details-heading">
+      <div class="kmeans-panel-heading"><h2 id="kmeans-details-heading">Current step</h2></div>
+      <div id="kmeans-action" class="kmeans-action" aria-live="polite">Loading data…</div>
+      <p id="kmeans-explanation" class="kmeans-explanation"></p>
+      <div class="kmeans-metrics"><div><span>Iteration</span><strong id="kmeans-iteration">0</strong></div><div><span>Within-cluster sum of squares</span><strong id="kmeans-objective">—</strong></div></div>
+      <h3>Points assigned to each cluster</h3>
+      <div id="kmeans-counts" class="kmeans-counts"></div>
+      <p class="kmeans-note">The sum of squares is the total squared distance from each point to its assigned centroid. It is shown after points have been assigned.</p>
+    </aside>
+  </div>
+</div>
+```
+
+[← Return to Unsupervised learning](index.qmd)
+
+<script src="../assets/kmeans-explorer.js?v=20261109a"></script>
