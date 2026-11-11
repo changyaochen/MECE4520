@@ -18,8 +18,16 @@ K-means groups observations around a chosen number of cluster centers. Explore h
 - [Step through k-means clustering](kmeans-explorer.qmd)
 - [Work through the k-means notebook](02-kmeans-clustering.ipynb)
 
+## Hierarchical clustering
+
+Agglomerative hierarchical clustering builds nested groups by merging observations or existing clusters. The resulting dendrogram lets us inspect the full hierarchy before choosing where to cut it into final clusters.
+
+- [Step through hierarchical clustering on two moons](hierarchical-clustering-explorer.qmd)
+- [Work through the hierarchical-clustering notebook](03-hierarchical-clustering.ipynb)
+
 ## Density-based clustering
 
 Density-based clustering groups observations that lie in dense regions of the data, while identifying isolated observations as noise. Explore how DBSCAN builds clusters without specifying their number in advance.
 
-- [Step through DBSCAN on half moons](dbscan-explorer.qmd)
+- [Step through DBSCAN on concentric circles](dbscan-explorer.qmd)
+- [Work through the DBSCAN notebook](04-dbscan-clustering.ipynb)

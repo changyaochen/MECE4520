@@ -87,9 +87,11 @@
   const NS = "http://www.w3.org/2000/svg";
   const COLORS = ["#347fc0", "#e47c35", "#8b62ae", "#21977c", "#bc5570", "#b59b2b", "#4e7d92", "#915b45"];
   const state = { points: [], trace: [], step: 0, timer: null };
-  const view = { x0: 140, y0: 450, scale: 140, xmin: -1.5, ymin: -1.2 };
-  const px = (x) => view.x0 + (x - view.xmin) * view.scale;
-  const py = (y) => view.y0 - (y - view.ymin) * view.scale;
+  // A square plotting area preserves the circular geometry of the data.
+  const view = { left: 140, right: 560, top: 42, bottom: 462, xmin: -1.25, xmax: 1.25, ymin: -1.25, ymax: 1.25 };
+  const scale = (view.right - view.left) / (view.xmax - view.xmin);
+  const px = (x) => view.left + (x - view.xmin) * scale;
+  const py = (y) => view.bottom - (y - view.ymin) * scale;
 
   function svg(name, attributes = {}) {
     const node = document.createElementNS(NS, name);
@@ -109,24 +111,24 @@
     const plot = elements.plot;
     plot.replaceChildren();
     const title = svg("title");
-    title.textContent = "DBSCAN clustering of the fixed half-moon dataset";
+    title.textContent = "DBSCAN clustering of the fixed concentric-circle dataset";
     plot.append(title);
-    [-1, 0, 1, 2].forEach((tick) => {
-      plot.append(svg("line", { x1: px(tick), x2: px(tick), y1: 44, y2: 450, class: "dbscan-grid" }));
-      text(plot, String(tick), px(tick), 475, { class: "dbscan-tick", "text-anchor": "middle" });
+    [-1, 0, 1].forEach((tick) => {
+      plot.append(svg("line", { x1: px(tick), x2: px(tick), y1: view.top, y2: view.bottom, class: "dbscan-grid" }));
+      text(plot, String(tick), px(tick), 487, { class: "dbscan-tick", "text-anchor": "middle" });
     });
     [-1, 0, 1].forEach((tick) => {
-      plot.append(svg("line", { x1: 140, x2: 700, y1: py(tick), y2: py(tick), class: "dbscan-grid" }));
+      plot.append(svg("line", { x1: view.left, x2: view.right, y1: py(tick), y2: py(tick), class: "dbscan-grid" }));
       text(plot, String(tick), 128, py(tick) + 4, { class: "dbscan-tick", "text-anchor": "end" });
     });
-    plot.append(svg("line", { x1: 140, x2: 700, y1: 450, y2: 450, class: "dbscan-axis" }));
-    plot.append(svg("line", { x1: 140, x2: 140, y1: 44, y2: 450, class: "dbscan-axis" }));
-    text(plot, "x₁", 420, 510, { class: "dbscan-axis-label", "text-anchor": "middle" });
-    text(plot, "x₂", 92, 250, { class: "dbscan-axis-label", "text-anchor": "middle", transform: "rotate(-90 92 250)" });
+    plot.append(svg("line", { x1: view.left, x2: view.right, y1: view.bottom, y2: view.bottom, class: "dbscan-axis" }));
+    plot.append(svg("line", { x1: view.left, x2: view.left, y1: view.top, y2: view.bottom, class: "dbscan-axis" }));
+    text(plot, "x₁", (view.left + view.right) / 2, 510, { class: "dbscan-axis-label", "text-anchor": "middle" });
+    text(plot, "x₂", 91, (view.top + view.bottom) / 2, { class: "dbscan-axis-label", "text-anchor": "middle", transform: `rotate(-90 91 ${(view.top + view.bottom) / 2})` });
 
     if (event.active !== null) {
       const point = state.points[event.active];
-      plot.append(svg("circle", { cx: px(point.x), cy: py(point.y), r: Number(elements.epsilon.value) * view.scale, class: "dbscan-radius" }));
+      plot.append(svg("circle", { cx: px(point.x), cy: py(point.y), r: Number(elements.epsilon.value) * scale, class: "dbscan-radius" }));
     }
     const neighborSet = new Set(event.neighbors);
     state.points.forEach((point, index) => {
@@ -187,7 +189,7 @@
   elements.epsilon.addEventListener("input", reset);
   elements.min.addEventListener("input", reset);
 
-  fetch("../data/dbscan-half-moons.csv")
+  fetch("../data/dbscan-concentric-circles.csv")
     .then((response) => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.text(); })
     .then((data) => {
       state.points = data.trim().split(/\r?\n/).slice(1).map((line) => {
@@ -197,7 +199,7 @@
       reset();
     })
     .catch(() => {
-      elements.action.textContent = "The half-moon dataset could not be loaded.";
+      elements.action.textContent = "The concentric-circle dataset could not be loaded.";
       [elements.previous, elements.next, elements.play, elements.reset].forEach((button) => { button.disabled = true; });
     });
 })();

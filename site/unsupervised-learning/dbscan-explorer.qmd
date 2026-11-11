@@ -5,8 +5,7 @@ page-layout: full
 ---
 
 DBSCAN builds clusters by expanding through regions where points are sufficiently
-dense. Step through the algorithm on the half-moon data from last year's
-[DBSCAN notebook](https://github.com/changyaochen/MECE4520/blob/fall_2025/lectures/notebooks/19_dbscan.ipynb).
+dense. Step through the algorithm on a noisy concentric-circle dataset.
 
 ::: {.callout-tip}
 ## What to watch
@@ -17,16 +16,16 @@ its neighbors can continue expanding the cluster. A non-core point cannot
 expand a cluster; it may become a border point, or remain noise.
 :::
 
-The fixed dataset matches the notebook's animation: `make_moons(n_samples=150,
-noise=0.05, random_state=42)`. DBSCAN uses the coordinates, not the original
-moon labels. Changing a parameter restarts the algorithm.
+The fixed dataset matches the accompanying notebook: `make_circles(n_samples=100,
+factor=0.5, noise=0.05, random_state=170)`. DBSCAN uses the coordinates, not
+the original ring labels. Changing a parameter restarts the algorithm.
 
 ```{=html}
 <link rel="stylesheet" href="../assets/dbscan-explorer.css">
 <div id="dbscan-explorer" class="dbscan-explorer" aria-label="Interactive DBSCAN explorer">
   <div class="dbscan-settings">
     <label for="dbscan-epsilon"><span>Neighborhood radius, ε</span><input id="dbscan-epsilon" type="range" min="0.08" max="0.50" step="0.01" value="0.30"><output id="dbscan-epsilon-value">0.30</output></label>
-    <label for="dbscan-min-samples"><span>Minimum points, <code>min_samples</code></span><input id="dbscan-min-samples" type="range" min="2" max="12" step="1" value="5"><output id="dbscan-min-value">5</output></label>
+    <label for="dbscan-min-samples"><span>Minimum points, <code>min_samples</code></span><input id="dbscan-min-samples" type="range" min="2" max="12" step="1" value="4"><output id="dbscan-min-value">4</output></label>
   </div>
   <div class="dbscan-toolbar clt-buttons" aria-label="Animation controls">
     <button id="dbscan-previous" type="button">Previous step</button>
@@ -38,7 +37,7 @@ moon labels. Changing a parameter restarts the algorithm.
   <div class="dbscan-workbench">
     <section class="dbscan-panel dbscan-plot-panel" aria-labelledby="dbscan-plot-title">
       <div class="dbscan-panel-heading"><h2 id="dbscan-plot-title">Grow clusters through dense neighborhoods</h2><p>The active point is ringed; its neighbors have a red outline.</p></div>
-      <svg id="dbscan-plot" viewBox="0 0 860 520" role="img" aria-label="Half-moon data and current DBSCAN neighborhood"></svg>
+      <svg id="dbscan-plot" viewBox="0 0 700 520" role="img" aria-label="Concentric-circle data and current DBSCAN neighborhood"></svg>
       <div class="dbscan-legend"><span><i class="dbscan-dot dbscan-unvisited"></i>Unvisited</span><span><i class="dbscan-dot dbscan-cluster"></i>Assigned to a cluster</span><span><i class="dbscan-dot dbscan-noise"></i>Currently noise</span><span><i class="dbscan-ring"></i>Active point</span><span><i class="dbscan-neighbor"></i>Neighbor</span></div>
     </section>
     <aside class="dbscan-panel dbscan-details" aria-labelledby="dbscan-details-title">
@@ -54,4 +53,4 @@ moon labels. Changing a parameter restarts the algorithm.
 
 [← Return to Unsupervised learning](index.qmd)
 
-<script src="../assets/dbscan-explorer.js?v=20261107a"></script>
+<script src="../assets/dbscan-explorer.js?v=20261111a"></script>
