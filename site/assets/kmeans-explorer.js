@@ -1,10 +1,4 @@
 (() => {
-  // Same centroids as np.random.seed(42); np.random.normal(size=(3, 2)).
-  const INITIAL_CENTERS = [
-    [0.4967141530112327, -0.13826430117118466],
-    [0.6476885381006925, 1.5230298564080254],
-    [-0.23415337472333597, -0.23413695694918055],
-  ];
   const COLORS = ["#237cb0", "#dc8d24", "#a65383"];
 
   function distanceSquared(point, center) {
@@ -15,33 +9,60 @@
     return points.reduce((sum, point, i) => sum + distanceSquared(point, centers[labels[i]]), 0);
   }
 
-  function buildTrace(points, initialCenters = INITIAL_CENTERS) {
-    let centers = initialCenters.map((center) => center.slice());
-    const trace = [{ phase: "initial", iteration: 0, centers, labels: null, objective: null, counts: null }];
+  function seededInitialLabels(count, clusterCount) {
+    let state = 42;
+    const labels = Array.from({ length: count }, () => {
+      state = (Math.imul(1664525, state) + 1013904223) >>> 0;
+      return Math.floor(state / 2 ** 32 * clusterCount);
+    });
+    // Guarantee that an initial random group exists for every centroid.
+    labels.slice(0, clusterCount).forEach((_, index) => { labels[index] = index; });
+    return labels;
+  }
+
+  function summarizeAssignments(points, labels, previousCenters = []) {
+    const counts = COLORS.map(() => 0);
+    const sums = COLORS.map(() => [0, 0]);
+    points.forEach((point, index) => {
+      const label = labels[index];
+      counts[label] += 1;
+      sums[label][0] += point[0];
+      sums[label][1] += point[1];
+    });
+    const centers = sums.map((sum, index) => counts[index]
+      ? [sum[0] / counts[index], sum[1] / counts[index]]
+      : previousCenters[index].slice());
+    return { counts, centers };
+  }
+
+  function assignToNearestCenter(points, centers) {
+    return points.map((point) => {
+      let best = 0;
+      for (let index = 1; index < centers.length; index += 1) {
+        if (distanceSquared(point, centers[index]) < distanceSquared(point, centers[best])) best = index;
+      }
+      return best;
+    });
+  }
+
+  function buildTrace(points, initialLabels = seededInitialLabels(points.length, COLORS.length)) {
+    const labels = initialLabels.slice();
+    const initialSummary = summarizeAssignments(points, labels);
+    let centers = initialSummary.centers;
+    const trace = [{ phase: "initial", iteration: 0, centers: [], labels, objective: null, counts: initialSummary.counts }];
+    trace.push({ phase: "initialize-centroids", iteration: 0, centers, labels,
+      counts: initialSummary.counts, objective: cost(points, labels, centers) });
     for (let iteration = 1; iteration <= 100; iteration += 1) {
-      const labels = points.map((point) => {
-        let best = 0;
-        for (let i = 1; i < centers.length; i += 1) {
-          if (distanceSquared(point, centers[i]) < distanceSquared(point, centers[best])) best = i;
-        }
-        return best;
-      });
-      const counts = centers.map(() => 0);
-      const sums = centers.map(() => [0, 0]);
-      points.forEach((point, i) => {
-        const label = labels[i];
-        counts[label] += 1;
-        sums[label][0] += point[0];
-        sums[label][1] += point[1];
-      });
-      trace.push({ phase: "assign", iteration, centers, labels, counts, objective: cost(points, labels, centers) });
+      const nextLabels = assignToNearestCenter(points, centers);
+      const nextSummary = summarizeAssignments(points, nextLabels, centers);
+      trace.push({ phase: "assign", iteration, centers, labels: nextLabels,
+        counts: nextSummary.counts, objective: cost(points, nextLabels, centers) });
 
       // If a cluster is empty, keep its previous center; no mean exists for an empty group.
-      const nextCenters = centers.map((center, i) => counts[i]
-        ? [sums[i][0] / counts[i], sums[i][1] / counts[i]] : center.slice());
+      const nextCenters = nextSummary.centers;
       const converged = centers.every((center, i) => distanceSquared(center, nextCenters[i]) < 1e-20);
       trace.push({ phase: "update", iteration, centers: nextCenters, previousCenters: centers,
-        labels, counts, objective: cost(points, labels, nextCenters), converged });
+        labels: nextLabels, counts: nextSummary.counts, objective: cost(points, nextLabels, nextCenters), converged });
       centers = nextCenters;
       if (converged) return trace;
     }
@@ -50,7 +71,7 @@
   }
 
   // Allow a standalone test to compare the step sequence against another implementation.
-  if (typeof module !== "undefined" && module.exports) module.exports = { buildTrace, INITIAL_CENTERS };
+  if (typeof module !== "undefined" && module.exports) module.exports = { buildTrace, seededInitialLabels };
   if (typeof document === "undefined") return;
   const root = document.getElementById("kmeans-explorer");
   if (!root) return;
@@ -165,8 +186,11 @@
       counts.append(row);
     });
     if (state.phase === "initial") {
-      action.textContent = "Start: choose three initial centroids";
-      explanation.textContent = "The points are not assigned yet. Next, assign each point to its closest centroid.";
+      action.textContent = "Start: randomly assign every point";
+      explanation.textContent = "Each point begins in one of three provisional groups. No centroids have been calculated yet.";
+    } else if (state.phase === "initialize-centroids") {
+      action.textContent = "Initialization: compute the first centroids";
+      explanation.textContent = "Each initial centroid is the mean of its randomly assigned group. Next, reassign each point to its closest centroid.";
     } else if (state.phase === "assign") {
       action.textContent = `Iteration ${state.iteration}: assign points`;
       explanation.textContent = "Each point is assigned to the nearest centroid. The centroid positions have not changed yet.";

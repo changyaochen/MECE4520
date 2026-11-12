@@ -16,10 +16,11 @@ colored points show the current assignments; the large crosses show the centroid
 After an update, arrows show where the centroids moved.
 :::
 
-The initial centroids match the seeded random initialization in last year's
-[clustering notebook](https://github.com/changyaochen/MECE4520/blob/fall_2025/lectures/notebooks/18_clustering.ipynb).
-The accompanying notebook uses multiple k-means++ initializations, so its steps
-and result may differ. The synthetic labels are not used by the algorithm.
+The explorer begins with a fixed seeded random assignment of points to three
+provisional clusters, so its steps are reproducible. It then computes the first
+centroids as the means of those groups. The accompanying notebook uses multiple
+k-means++ initializations, so its steps and result may differ. The synthetic
+labels are not used by the algorithm.
 
 ```{=html}
 <link rel="stylesheet" href="../assets/kmeans-explorer.css">
@@ -52,4 +53,4 @@ and result may differ. The synthetic labels are not used by the algorithm.
 
 [← Return to Unsupervised learning](index.qmd)
 
-<script src="../assets/kmeans-explorer.js?v=20261109a"></script>
+<script src="../assets/kmeans-explorer.js?v=20261112a"></script>
