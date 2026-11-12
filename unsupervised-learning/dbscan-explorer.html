@@ -353,7 +353,7 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>DBSCAN builds clusters by expanding through regions where points are sufficiently dense. Step through the algorithm on the half-moon data from last year’s <a href="https://github.com/changyaochen/MECE4520/blob/fall_2025/lectures/notebooks/19_dbscan.ipynb">DBSCAN notebook</a>.</p>
+<p>DBSCAN builds clusters by expanding through regions where points are sufficiently dense. Step through the algorithm on a noisy concentric-circle dataset.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -364,15 +364,16 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The circle shows the current point’s ε-neighborhood. If it contains at least <code>min_samples</code> points <strong>including the current point</strong>, the point is a core point: its neighbors can continue expanding the cluster. A non-core point cannot expand a cluster; it may become a border point, or remain noise.</p>
+<p>The circle shows the current point’s ε-neighborhood. If it contains at least <code>min_samples</code> points <strong>including the current point</strong>, the point is a core point: its neighbors can continue expanding the cluster. A non-core point cannot expand a cluster. It is a border point if it lies within ε of a core point; otherwise, it is noise.</p>
+<p>Before the animation begins, each point’s outline marks its fixed density type: core or non-core. Its fill color then shows the changing algorithm state. A non-core point becomes a border point only when a core cluster reaches it; a non-core point still unassigned at the end is noise.</p>
 </div>
 </div>
-<p>The fixed dataset matches the notebook’s animation: <code>make_moons(n_samples=150, noise=0.05, random_state=42)</code>. DBSCAN uses the coordinates, not the original moon labels. Changing a parameter restarts the algorithm.</p>
-<link rel="stylesheet" href="../assets/dbscan-explorer.css">
+<p>The fixed dataset matches the accompanying notebook: <code>make_circles(n_samples=100, factor=0.5, noise=0.05, random_state=170)</code>. DBSCAN uses the coordinates, not the original ring labels. Changing a parameter restarts the algorithm.</p>
+<link rel="stylesheet" href="../assets/dbscan-explorer.css?v=20261112a">
 <div id="dbscan-explorer" class="dbscan-explorer page-columns page-full" aria-label="Interactive DBSCAN explorer">
   <div class="dbscan-settings">
     <label for="dbscan-epsilon"><span>Neighborhood radius, ε</span><input id="dbscan-epsilon" type="range" min="0.08" max="0.50" step="0.01" value="0.30"><output id="dbscan-epsilon-value">0.30</output></label>
-    <label for="dbscan-min-samples"><span>Minimum points, <code>min_samples</code></span><input id="dbscan-min-samples" type="range" min="2" max="12" step="1" value="5"><output id="dbscan-min-value">5</output></label>
+    <label for="dbscan-min-samples"><span>Minimum points, <code>min_samples</code></span><input id="dbscan-min-samples" type="range" min="2" max="12" step="1" value="4"><output id="dbscan-min-value">4</output></label>
   </div>
   <div class="dbscan-toolbar clt-buttons" aria-label="Animation controls">
     <button id="dbscan-previous" type="button">Previous step</button>
@@ -383,21 +384,25 @@ ul.task-list li input[type="checkbox"] {
   </div>
   <div class="dbscan-workbench page-columns page-full">
     <section class="dbscan-panel dbscan-plot-panel" aria-labelledby="dbscan-plot-title">
-      <div class="dbscan-panel-heading"><h2 id="dbscan-plot-title" class="anchored">Grow clusters through dense neighborhoods</h2><p>The active point is ringed; its neighbors have a red outline.</p></div>
-      <svg id="dbscan-plot" viewbox="0 0 860 520" role="img" aria-label="Half-moon data and current DBSCAN neighborhood"></svg>
-      <div class="dbscan-legend"><span><i class="dbscan-dot dbscan-unvisited"></i>Unvisited</span><span><i class="dbscan-dot dbscan-cluster"></i>Assigned to a cluster</span><span><i class="dbscan-dot dbscan-noise"></i>Currently noise</span><span><i class="dbscan-ring"></i>Active point</span><span><i class="dbscan-neighbor"></i>Neighbor</span></div>
+      <div class="dbscan-panel-heading"><h2 id="dbscan-plot-title" class="anchored">Grow clusters through dense neighborhoods</h2><p>An outline shows the fixed core/non-core type. Fill color shows the changing algorithm state.</p></div>
+      <svg id="dbscan-plot" viewbox="0 0 700 520" role="img" aria-label="Concentric-circle data and current DBSCAN neighborhood"></svg>
+      <div class="dbscan-legends">
+        <div class="dbscan-legend-row"><span class="dbscan-legend-label">Fixed point type</span><div class="dbscan-legend"><span><i class="dbscan-type-key dbscan-type-key-core"></i>Core</span><span><i class="dbscan-type-key dbscan-type-key-noncore"></i>Non-core</span></div></div>
+        <div class="dbscan-legend-row"><span class="dbscan-legend-label">Algorithm state</span><div class="dbscan-legend"><span><i class="dbscan-dot dbscan-unvisited"></i>Unvisited</span><span><i class="dbscan-dot dbscan-cluster"></i>Assigned to a cluster</span><span><i class="dbscan-dot dbscan-noise"></i>Provisionally noise</span><span><i class="dbscan-ring"></i>Active point</span><span><i class="dbscan-neighbor"></i>Neighbor</span></div></div>
+      </div>
     </section>
     <aside class="dbscan-panel dbscan-details" aria-labelledby="dbscan-details-title">
       <div class="dbscan-panel-heading"><h2 id="dbscan-details-title" class="anchored">Current step</h2></div>
       <div id="dbscan-action" class="dbscan-action" aria-live="polite">Press Next step or Play to begin.</div>
-      <div class="dbscan-metrics"><div><span>Neighbors<br>(including itself)</span><strong id="dbscan-neighbors">—</strong></div><div><span>Current point</span><strong id="dbscan-kind">—</strong></div><div><span>Clusters started</span><strong id="dbscan-clusters">0</strong></div><div><span>Noise so far</span><strong id="dbscan-noise-count">0</strong></div></div>
-      <p id="dbscan-explanation" class="dbscan-explanation">Start by choosing an unvisited point and counting the points within ε.</p>
-      <p class="dbscan-caveat">A point initially marked noise can later become a border point when reached from a core point. Cluster colors are arbitrary.</p>
+      <div class="dbscan-metrics"><div><span>Neighbors<br>(including itself)</span><strong id="dbscan-neighbors">—</strong></div><div><span>Current role</span><strong id="dbscan-kind">—</strong></div><div><span>Clusters started</span><strong id="dbscan-clusters">0</strong></div><div><span>Unassigned<br>so far</span><strong id="dbscan-noise-count">0</strong></div></div>
+      <div class="dbscan-queue-panel"><span class="dbscan-queue-label">Expansion queue <small>front → back</small></span><div id="dbscan-queue" class="dbscan-queue" aria-live="polite">Queue is empty.</div></div>
+      <p id="dbscan-explanation" class="dbscan-explanation">Each point's fixed type is visible before the search begins.</p>
+      <p class="dbscan-caveat">A non-core point reached by a core cluster becomes a border point. A non-core point still unassigned after the full scan is noise. Cluster colors are arbitrary.</p>
     </aside>
   </div>
 </div>
 <p><a href="../unsupervised-learning/index.html">← Return to Unsupervised learning</a></p>
-<script src="../assets/dbscan-explorer.js?v=20261107a"></script>
+<script src="../assets/dbscan-explorer.js?v=20261111d"></script>
 
 
 

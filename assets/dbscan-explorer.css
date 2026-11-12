@@ -18,18 +18,33 @@
 .dbscan-axis-label { fill: #405863; font-size: 16px; font-weight: 600; }
 .dbscan-radius { fill: #f3c46e; fill-opacity: .16; stroke: #c68727; stroke-width: 2; stroke-dasharray: 7 5; }
 .dbscan-point { stroke: #fff; stroke-width: 1; }
+.dbscan-type-core { fill: none; stroke: #236a9f; stroke-width: 2.2; }
+.dbscan-type-noncore { fill: none; stroke: #6b7e88; stroke-width: 2.2; stroke-dasharray: 2.6 1.7; }
 .dbscan-neighbor-ring { fill: none; stroke: #d35f56; stroke-width: 1.6; }
 .dbscan-active-ring { fill: none; stroke: #b07819; stroke-width: 3; }
-.dbscan-legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin-top: .8rem; color: #596c76; font-size: .8rem; }
+.dbscan-legends { display: grid; gap: .4rem; margin-top: .8rem; }
+.dbscan-legend-row { display: flex; align-items: flex-start; gap: .65rem; }
+.dbscan-legend-label { flex: 0 0 7.7rem; color: #405863; font-size: .8rem; font-weight: 700; }
+.dbscan-legend { display: flex; flex: 1; flex-wrap: wrap; gap: .5rem 1rem; color: #596c76; font-size: .8rem; }
 .dbscan-legend span { display: inline-flex; align-items: center; gap: .35rem; }
-.dbscan-dot, .dbscan-ring, .dbscan-neighbor { width: .72rem; height: .72rem; border-radius: 50%; display: inline-block; }
+.dbscan-dot, .dbscan-ring, .dbscan-neighbor, .dbscan-type-key { width: .72rem; height: .72rem; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
 .dbscan-unvisited { background: #adbcc3; }.dbscan-cluster { background: #347fc0; }.dbscan-noise { background: #d38953; }
 .dbscan-ring { border: 2px solid #b07819; }.dbscan-neighbor { border: 2px solid #d35f56; }
+.dbscan-type-key { background: transparent; }
+.dbscan-type-key-core { border: 2px solid #236a9f; }
+.dbscan-type-key-noncore { border: 2px dashed #6b7e88; }
 .dbscan-action { min-height: 3rem; padding: .8rem; background: #eee8f3; border-left: 4px solid #9672a9; line-height: 1.45; }
 .dbscan-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin-top: .8rem; }
-.dbscan-metrics div { display: grid; gap: .2rem; padding: .6rem; border: 1px solid #e0dce6; border-radius: .35rem; background: white; }
+.dbscan-metrics div { display: grid; min-width: 0; gap: .2rem; padding: .6rem; border: 1px solid #e0dce6; border-radius: .35rem; background: white; }
 .dbscan-metrics span { color: #687a84; font-size: .8rem; }
-.dbscan-metrics strong { color: #345d6c; font-size: 1.15rem; }
+.dbscan-metrics strong { min-width: 0; max-inline-size: 100%; overflow-wrap: anywhere; color: #345d6c; font-size: 1.15rem; line-height: 1.15; }
+#dbscan-kind { font-size: clamp(.95rem, 4vw, 1.15rem); }
+.dbscan-queue-panel { margin-top: .8rem; padding: .65rem; border: 1px solid #e0dce6; border-radius: .35rem; background: white; }
+.dbscan-queue-label { display: block; color: #405863; font-size: .82rem; font-weight: 700; }
+.dbscan-queue-label small { color: #687a84; font-size: .76rem; font-weight: 400; }
+.dbscan-queue { display: flex; flex-wrap: wrap; gap: .3rem; max-height: 6.4rem; margin-top: .5rem; overflow-y: auto; color: #687a84; font-size: .8rem; line-height: 1.35; }
+.dbscan-queue-item { min-width: 1.8rem; padding: .16rem .36rem; border: 1px solid #cec3d7; border-radius: .25rem; background: #f4eff7; color: #5e416f; font-size: .78rem; font-variant-numeric: tabular-nums; text-align: center; }
+.dbscan-queue-front { border-color: #9672a9; background: #e7dced; color: #4b2f60; font-weight: 700; }
 .dbscan-explanation, .dbscan-caveat { margin: .8rem 0 0; color: #596e77; font-size: .88rem; }
 .dbscan-caveat { padding-top: .7rem; border-top: 1px solid #e1dce6; }
 .quarto-dark .dbscan-explorer { color: #dbe5e8; }
@@ -37,7 +52,10 @@
 .quarto-dark .dbscan-details { background: #302b35; border-color: #685578; }
 .quarto-dark .dbscan-panel-heading h2, .quarto-dark .dbscan-metrics strong { color: #e1eaed; }
 .quarto-dark .dbscan-panel-heading p, .quarto-dark .dbscan-progress, .quarto-dark .dbscan-legend, .quarto-dark .dbscan-explanation, .quarto-dark .dbscan-caveat, .quarto-dark .dbscan-metrics span { color: #c0d0d5; }
+.quarto-dark .dbscan-legend-label { color: #dbe5e8; }
 .quarto-dark .dbscan-action { background: #44364c; }
-.quarto-dark .dbscan-metrics div { background: #252d31; border-color: #566470; }
+.quarto-dark .dbscan-metrics div, .quarto-dark .dbscan-queue-panel { background: #252d31; border-color: #566470; }
+.quarto-dark .dbscan-queue-label { color: #dbe5e8; }.quarto-dark .dbscan-queue-label small, .quarto-dark .dbscan-queue { color: #c0d0d5; }
+.quarto-dark .dbscan-queue-item { border-color: #78668a; background: #3a3042; color: #eadff0; }.quarto-dark .dbscan-queue-front { border-color: #b89ac6; background: #4c3b58; }
 @media (max-width: 900px) { .dbscan-workbench { grid-template-columns: 1fr; } }
-@media (max-width: 600px) { .dbscan-settings { grid-template-columns: 1fr; } .dbscan-progress { flex-basis: 100%; margin-left: 0; } }
+@media (max-width: 600px) { .dbscan-settings { grid-template-columns: 1fr; } .dbscan-progress { flex-basis: 100%; margin-left: 0; } .dbscan-legend-row { flex-direction: column; gap: .2rem; } .dbscan-legend-label { flex-basis: auto; } }
