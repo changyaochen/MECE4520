@@ -1,0 +1,44 @@
+.hierarchical-explorer { margin: 1.2rem 0 2rem; color: #30434d; }
+.hierarchical-toolbar { align-items: center; }
+.hierarchical-progress { margin-left: auto; color: #607580; font-size: .88rem; }
+.hierarchical-workbench { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
+.hierarchical-panel { min-width: 0; padding: 1rem; border: 1px solid #d8e4e8; border-radius: .55rem; background: #f6fafb; }
+.hierarchical-dendrogram-panel { background: #f8f6fb; border-color: #e0d6e8; }
+.hierarchical-panel-heading h2 { margin: 0 0 .3rem; color: #30434d; font-size: 1.15rem; }
+.hierarchical-panel-heading p { margin: 0 0 .7rem; color: #61727c; font-size: .9rem; }
+#hierarchical-plot, #hierarchical-dendrogram { display: block; width: 100%; height: auto; background: #fff; border: 1px solid #e1e9ec; border-radius: .35rem; }
+.hierarchical-grid { stroke: #edf1f3; stroke-width: 1; }
+.hierarchical-axis { stroke: #7b8c94; stroke-width: 1.2; }
+.hierarchical-tick { fill: #667b85; font-size: 13px; }
+.hierarchical-axis-label { fill: #405863; font-size: 15px; font-weight: 600; }
+.hierarchical-point { stroke: #fff; stroke-width: 1.2; }
+.hierarchical-pair-line { stroke: #a45073; stroke-width: 2.2; stroke-dasharray: 5 4; }
+.hierarchical-pair-left { fill: #4c84b3; stroke: #1e5d91; stroke-width: 2.4; }
+.hierarchical-pair-right { fill: #cf7d42; stroke: #97501f; stroke-width: 2.4; }
+.hierarchical-tree-branch { fill: none; stroke: #8498a3; stroke-width: 1.5; }
+.hierarchical-tree-branch-current { stroke: #9a5a80; stroke-width: 2.5; }
+.hierarchical-tree-leaf { fill: #94a6ae; }
+.hierarchical-tree-leaf-current { fill: #9a5a80; }
+.hierarchical-tree-label { fill: #667b85; font-size: 12px; }
+.hierarchical-legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin-top: .8rem; color: #596c76; font-size: .8rem; }
+.hierarchical-legend span { display: inline-flex; align-items: center; gap: .35rem; }
+.hierarchical-key { display: inline-block; width: .76rem; height: .76rem; border-radius: 50%; background: #95a6ae; }
+.hierarchical-key-left { background: #4c84b3; }.hierarchical-key-right { background: #cf7d42; }
+.hierarchical-key-line { width: 1.2rem; height: 0; border-top: 2px dashed #a45073; border-radius: 0; background: none; }
+.hierarchical-note { margin: .75rem 0 0; color: #596e77; font-size: .86rem; }
+.hierarchical-summary { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(220px, .65fr); gap: 1rem; margin-top: 1rem; padding: 1rem; border: 1px solid #d8e4e8; border-radius: .55rem; background: #f6fafb; }
+.hierarchical-action { min-height: 3rem; padding: .8rem; background: #eee8f3; border-left: 4px solid #9672a9; line-height: 1.45; }
+.hierarchical-explanation { margin: .8rem 0 0; color: #596e77; font-size: .9rem; }
+.hierarchical-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+.hierarchical-metrics div { display: grid; gap: .2rem; padding: .65rem; border: 1px solid #e0dce6; border-radius: .35rem; background: white; }
+.hierarchical-metrics span { color: #687a84; font-size: .78rem; }
+.hierarchical-metrics strong { color: #345d6c; font-size: 1.12rem; }
+.quarto-dark .hierarchical-explorer { color: #dbe5e8; }
+.quarto-dark .hierarchical-panel, .quarto-dark .hierarchical-summary { background: #24323b; border-color: #496473; }
+.quarto-dark .hierarchical-dendrogram-panel { background: #302b35; border-color: #685578; }
+.quarto-dark .hierarchical-panel-heading h2, .quarto-dark .hierarchical-metrics strong { color: #e1eaed; }
+.quarto-dark .hierarchical-panel-heading p, .quarto-dark .hierarchical-progress, .quarto-dark .hierarchical-legend, .quarto-dark .hierarchical-note, .quarto-dark .hierarchical-explanation, .quarto-dark .hierarchical-metrics span { color: #c0d0d5; }
+.quarto-dark .hierarchical-action { background: #44364c; }
+.quarto-dark .hierarchical-metrics div { background: #252d31; border-color: #566470; }
+@media (max-width: 900px) { .hierarchical-workbench, .hierarchical-summary { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .hierarchical-progress { flex-basis: 100%; margin-left: 0; } }

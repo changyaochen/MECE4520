@@ -22,9 +22,12 @@ project:
     - assets/kmeans-explorer.js
     - assets/kmeans-explorer.css
     - data/kmeans-three-blobs.csv
+    - assets/hierarchical-explorer.js
+    - assets/hierarchical-explorer.css
+    - data/hierarchical-two-moons.csv
     - assets/dbscan-explorer.js
     - assets/dbscan-explorer.css
-    - data/dbscan-half-moons.csv
+    - data/dbscan-concentric-circles.csv
     - assets/columbia-engineering-logo.png
     - assets/b7e2a9c4.html
 

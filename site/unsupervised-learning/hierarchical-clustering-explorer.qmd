@@ -1,0 +1,64 @@
+---
+title: "Explore hierarchical clustering"
+toc: false
+page-layout: full
+---
+
+Agglomerative hierarchical clustering starts with every observation in its own
+cluster, then repeatedly merges clusters. This explorer uses **single linkage**:
+the distance between two clusters is the distance between their closest pair of
+points.
+
+::: {.callout-tip}
+## What to watch
+
+The two highlighted groups are the next pair to merge. On the left, their
+closest pair of points is joined by a dashed line. On the right, that same
+merge adds one branch to the dendrogram. A final horizontal cut through a
+dendrogram turns the nested hierarchy into a chosen number of clusters.
+:::
+
+The fixed `make_moons` sample contains 36 observations. Its generating labels
+are not used. Single linkage can follow the two curved groups because it grows
+clusters through nearby points rather than around centroids.
+
+```{=html}
+<link rel="stylesheet" href="../assets/hierarchical-explorer.css">
+<div id="hierarchical-explorer" class="hierarchical-explorer" aria-label="Interactive hierarchical clustering explorer">
+  <div class="hierarchical-toolbar clt-buttons" role="group" aria-label="Hierarchical clustering controls">
+    <button id="hierarchical-previous" type="button">Previous merge</button>
+    <button id="hierarchical-next" type="button" class="regression-sampling-primary">Next merge</button>
+    <button id="hierarchical-play" type="button">Play</button>
+    <button id="hierarchical-reset" type="button">Reset</button>
+    <output id="hierarchical-progress" class="hierarchical-progress" aria-live="polite">Loading data…</output>
+  </div>
+  <div class="hierarchical-workbench">
+    <section class="hierarchical-panel" aria-labelledby="hierarchical-points-title">
+      <div class="hierarchical-panel-heading"><h2 id="hierarchical-points-title">Current clusters</h2><p>Each point starts alone. A merge combines two whole clusters.</p></div>
+      <svg id="hierarchical-plot" viewBox="0 0 620 480" role="img" aria-label="Two-moon observations and the clusters merged at each step"></svg>
+      <div class="hierarchical-legend"><span><i class="hierarchical-key"></i>Current cluster</span><span><i class="hierarchical-key hierarchical-key-left"></i>One merging cluster</span><span><i class="hierarchical-key hierarchical-key-right"></i>Other merging cluster</span><span><i class="hierarchical-key hierarchical-key-line"></i>Closest pair</span></div>
+    </section>
+    <section class="hierarchical-panel hierarchical-dendrogram-panel" aria-labelledby="hierarchical-tree-title">
+      <div class="hierarchical-panel-heading"><h2 id="hierarchical-tree-title">Dendrogram</h2><p>Branch height records the distance at which a merge occurred.</p></div>
+      <svg id="hierarchical-dendrogram" viewBox="0 0 620 480" role="img" aria-label="Growing single-linkage dendrogram"></svg>
+      <p class="hierarchical-note">The leaf order only makes the tree readable; it is not an additional feature of the data.</p>
+    </section>
+  </div>
+  <section class="hierarchical-summary" aria-labelledby="hierarchical-summary-title">
+    <div>
+      <div id="hierarchical-action" class="hierarchical-action" aria-live="polite">Loading data…</div>
+      <p id="hierarchical-explanation" class="hierarchical-explanation"></p>
+    </div>
+    <div class="hierarchical-metrics">
+      <div><span>Clusters remaining</span><strong id="hierarchical-cluster-count">—</strong></div>
+      <div><span>Most recent merge distance</span><strong id="hierarchical-distance">—</strong></div>
+      <div><span>Linkage</span><strong>Single</strong></div>
+      <div><span>Merges completed</span><strong id="hierarchical-merge-count">—</strong></div>
+    </div>
+  </section>
+</div>
+```
+
+[← Return to Unsupervised learning](index.qmd)
+
+<script src="../assets/hierarchical-explorer.js?v=20261110a"></script>
