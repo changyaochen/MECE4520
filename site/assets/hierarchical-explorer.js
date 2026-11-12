@@ -168,8 +168,10 @@
     }
     const leaves = leavesInOrder(root.id);
     const leafX = new Map();
-    const left = 34; const right = 22; const top = 32; const bottom = 436;
-    leaves.forEach((leaf, index) => leafX.set(leaf, left + (right + 564 - left) * index / Math.max(1, leaves.length - 1)));
+    // Reserve enough left margin to keep the vertical title clear of tick labels.
+    const width = 620; const left = 72; const right = 22; const top = 32; const bottom = 436;
+    const tickX = left - 10; const axisLabelX = 18;
+    leaves.forEach((leaf, index) => leafX.set(leaf, left + (width - right - left) * index / Math.max(1, leaves.length - 1)));
     const maxHeight = Math.max(root.height, 1e-9);
     const position = new Map();
     function locate(nodeId) {
@@ -182,7 +184,7 @@
       return result;
     }
     state.nodes.forEach((node) => locate(node.id));
-    return { position, top, bottom, maxHeight };
+    return { position, top, bottom, maxHeight, left, right: width - right, tickX, axisLabelX };
   }
 
   function drawTree(snapshot) {
@@ -194,10 +196,10 @@
     const layout = treeLayout();
     [0, layout.maxHeight / 2, layout.maxHeight].forEach((value) => {
       const y = layout.bottom - value / layout.maxHeight * (layout.bottom - layout.top);
-      tree.append(svg("line", { x1: 34, x2: 598, y1: y, y2: y, class: "hierarchical-grid" }));
-      text(tree, value.toFixed(value < 1 ? 2 : 1), 28, y + 4, { class: "hierarchical-tick", "text-anchor": "end" });
+      tree.append(svg("line", { x1: layout.left, x2: layout.right, y1: y, y2: y, class: "hierarchical-grid" }));
+      text(tree, value.toFixed(value < 1 ? 2 : 1), layout.tickX, y + 4, { class: "hierarchical-tick", "text-anchor": "end" });
     });
-    text(tree, "merge distance", 13, (layout.top + layout.bottom) / 2, { class: "hierarchical-axis-label", "text-anchor": "middle", transform: `rotate(-90 13 ${(layout.top + layout.bottom) / 2})` });
+    text(tree, "merge distance", layout.axisLabelX, (layout.top + layout.bottom) / 2, { class: "hierarchical-axis-label", "text-anchor": "middle", transform: `rotate(-90 ${layout.axisLabelX} ${(layout.top + layout.bottom) / 2})` });
     state.nodes.filter((node) => !Object.hasOwn(node, "left")).forEach((leaf) => {
       const point = layout.position.get(leaf.id);
       tree.append(svg("circle", { cx: point.x, cy: point.y, r: 2.3, class: "hierarchical-tree-leaf" }));
