@@ -396,7 +396,7 @@ window.Quarto = {
 <p>Each iteration alternates between two steps: <strong>assign</strong> every point to its nearest centroid, then <strong>update</strong> each centroid to the mean of its assigned points. The colored points show the current assignments; the large crosses show the centroids. After an update, arrows show where the centroids moved.</p>
 </div>
 </div>
-<p>The initial centroids match the seeded random initialization in last year’s <a href="https://github.com/changyaochen/MECE4520/blob/fall_2025/lectures/notebooks/18_clustering.ipynb">clustering notebook</a>. The accompanying notebook uses multiple k-means++ initializations, so its steps and result may differ. The synthetic labels are not used by the algorithm.</p>
+<p>The explorer begins with a fixed seeded random assignment of points to three provisional clusters, so its steps are reproducible. It then computes the first centroids as the means of those groups. The accompanying notebook uses multiple k-means++ initializations, so its steps and result may differ. The synthetic labels are not used by the algorithm.</p>
 <link rel="stylesheet" href="../assets/kmeans-explorer.css">
 <div id="kmeans-explorer" class="kmeans-explorer page-columns page-full" aria-label="Interactive K-means explorer">
   <div class="kmeans-toolbar clt-buttons" role="group" aria-label="Lloyd's algorithm controls">
@@ -424,7 +424,7 @@ window.Quarto = {
   </div>
 </div>
 <p><a href="../unsupervised-learning/index.html">← Return to Unsupervised learning</a></p>
-<script src="../assets/kmeans-explorer.js?v=20261109a"></script>
+<script src="../assets/kmeans-explorer.js?v=20261112a"></script>
 
 
 
