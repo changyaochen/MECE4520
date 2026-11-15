@@ -14,3 +14,4 @@ separate the central tradeoff between gathering information and exploiting the
 best option found so far.
 
 - [Explore bandit policies](bandit-explorer.qmd)
+- [Work through the multi-armed bandit notebook](01-multi-armed-bandits.ipynb)
