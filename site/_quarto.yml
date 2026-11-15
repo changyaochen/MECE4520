@@ -27,6 +27,8 @@ project:
     - data/hierarchical-two-moons.csv
     - assets/dbscan-explorer.js
     - assets/dbscan-explorer.css
+    - assets/bandit-explorer.js
+    - assets/bandit-explorer.css
     - data/dbscan-concentric-circles.csv
     - assets/columbia-engineering-logo.png
     - assets/b7e2a9c4.html
@@ -55,6 +57,8 @@ website:
         text: Sequential models
       - href: unsupervised-learning/index.qmd
         text: Unsupervised learning
+      - href: reinforcement-learning/index.qmd
+        text: Reinforcement learning
   page-footer:
     left: "MECE 4520 · Data Science for Mechanical Systems"
     right: "Fall 2026"

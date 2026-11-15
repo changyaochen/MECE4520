@@ -1,0 +1,100 @@
+---
+title: "Explore multi-armed bandit policies"
+toc: false
+page-layout: full
+---
+
+At each decision, an agent selects one of four actions, or **arms**, and receives
+a noisy reward. The arms have stable but initially unknown reward distributions.
+The agent must learn which one is best while also earning reward along the way.
+
+::: {.callout-tip}
+## What to watch
+
+The estimate $Q_t(a)$ for an arm becomes more reliable after repeated pulls, but
+only for arms the agent actually tries. Compare a purely greedy policy with
+$\epsilon$-greedy and upper-confidence-bound (UCB) policies. The policy never
+uses the simulation's true means when selecting an arm.
+:::
+
+```{=html}
+<link rel="stylesheet" href="../assets/bandit-explorer.css">
+<div id="bandit-explorer" class="bandit-explorer" aria-label="Interactive multi-armed bandit policy explorer">
+  <div class="bandit-toolbar clt-buttons" aria-label="Bandit simulation controls">
+    <div class="bandit-policy-group" role="group" aria-label="Choose a policy">
+      <span class="bandit-control-label">Policy</span>
+      <button id="bandit-policy-greedy" type="button" data-policy="greedy" aria-pressed="true">Greedy</button>
+      <button id="bandit-policy-epsilon" type="button" data-policy="epsilon" aria-pressed="false">ε-greedy</button>
+      <button id="bandit-policy-ucb" type="button" data-policy="ucb" aria-pressed="false">UCB</button>
+    </div>
+    <button id="bandit-next" type="button" class="bandit-primary">Next decision</button>
+    <button id="bandit-run" type="button">Run 25</button>
+    <button id="bandit-reset" type="button">Reset</button>
+    <output id="bandit-progress" class="bandit-progress" aria-live="polite">Decision 0</output>
+  </div>
+
+  <section class="bandit-controls" aria-label="Policy settings">
+    <label class="bandit-range-control" for="bandit-epsilon">
+      <span><strong>ε</strong> for ε-greedy</span>
+      <input id="bandit-epsilon" type="range" min="0" max="0.5" step="0.05" value="0.20">
+      <output id="bandit-epsilon-value">0.20</output>
+    </label>
+    <label class="bandit-range-control" for="bandit-c">
+      <span><strong>c</strong> for UCB</span>
+      <input id="bandit-c" type="range" min="0.25" max="3" step="0.25" value="0.50">
+      <output id="bandit-c-value">0.50</output>
+    </label>
+    <label class="bandit-checkbox-control" for="bandit-reveal">
+      <input id="bandit-reveal" type="checkbox">
+      Reveal the simulation's true arm means
+    </label>
+  </section>
+
+  <div class="bandit-workbench">
+    <section class="bandit-panel bandit-plot-panel" aria-labelledby="bandit-plot-heading">
+      <div class="bandit-panel-heading">
+        <h2 id="bandit-plot-heading">Rewards and learning trace</h2>
+        <p>Dots are noisy observed rewards. The dark line is the running average reward.</p>
+      </div>
+      <svg id="bandit-trace" viewBox="0 0 760 410" role="img" aria-label="Observed rewards and running average over decisions"></svg>
+      <div class="bandit-legend">
+        <span><i class="bandit-observation-key"></i>Observed reward</span>
+        <span><i class="bandit-average-key"></i>Running average</span>
+        <span><i class="bandit-reference-key"></i>Best arm mean</span>
+      </div>
+    </section>
+
+    <aside class="bandit-panel bandit-details" aria-labelledby="bandit-details-heading">
+      <div class="bandit-panel-heading"><h2 id="bandit-details-heading">Current decision</h2></div>
+      <div id="bandit-action" class="bandit-action" aria-live="polite">Choose a policy, then make the first decision.</div>
+      <p id="bandit-explanation" class="bandit-explanation">All estimates start at zero because the agent has not observed any rewards yet.</p>
+      <div class="bandit-metrics">
+        <div><span>Last reward</span><strong id="bandit-last-reward">—</strong></div>
+        <div><span>Running average</span><strong id="bandit-running-average">—</strong></div>
+        <div><span>Most pulled arm</span><strong id="bandit-most-pulled">—</strong></div>
+      </div>
+      <h3>What the agent knows</h3>
+      <div id="bandit-arm-table" class="bandit-arm-table" aria-live="polite"></div>
+      <p class="bandit-note"><em>Q<sub>t</sub>(a)</em> is the sample-average reward for arm <em>a</em>. UCB adds an uncertainty bonus that shrinks as an arm is pulled more often.</p>
+    </aside>
+  </div>
+
+  <section class="bandit-panel bandit-comparison" aria-labelledby="bandit-comparison-heading">
+    <div class="bandit-panel-heading">
+      <h2 id="bandit-comparison-heading">Same bandit, three policies</h2>
+      <p>Each curve uses the same fixed reward stream for each arm. The policies differ only in the actions they choose.</p>
+    </div>
+    <svg id="bandit-comparison" viewBox="0 0 1020 330" role="img" aria-label="Comparison of average reward for greedy, epsilon-greedy, and UCB policies"></svg>
+    <div class="bandit-legend bandit-comparison-legend">
+      <span><i class="bandit-line-key bandit-greedy-key"></i>Greedy</span>
+      <span><i class="bandit-line-key bandit-epsilon-key"></i>ε-greedy</span>
+      <span><i class="bandit-line-key bandit-ucb-key"></i>UCB</span>
+      <span><i class="bandit-reference-key"></i>Best arm mean</span>
+    </div>
+  </section>
+</div>
+```
+
+[← Return to Reinforcement learning](index.qmd)
+
+<script src="../assets/bandit-explorer.js?v=20261114a"></script>
