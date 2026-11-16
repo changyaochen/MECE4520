@@ -22,7 +22,7 @@ agent one cell with reward 0. The red boundary, and the special states
 :::
 
 ```{=html}
-<link rel="stylesheet" href="../assets/gridworld-environment-explorer.css">
+<link rel="stylesheet" href="../assets/gridworld-environment-explorer.css?v=20261115c">
 <div id="gridworld-environment-explorer" class="gridworld-environment-explorer" aria-label="Interactive Gridworld environment explorer">
   <div class="gridworld-toolbar clt-buttons" aria-label="Gridworld controls">
     <button id="gridworld-reset" type="button" class="gridworld-primary">Reset agent</button>
@@ -39,7 +39,7 @@ agent one cell with reward 0. The red boundary, and the special states
       </div>
       <div id="gridworld-grid" class="gridworld-grid" role="grid" aria-label="Five by five Gridworld"></div>
       <div class="gridworld-legend" aria-label="Gridworld legend">
-        <span><i class="gridworld-key gridworld-agent-key"></i>Current state</span>
+        <span><i class="gridworld-key gridworld-agent-key">🤖</i>Current state</span>
         <span><i class="gridworld-key gridworld-special-a-key"></i>Special state A</span>
         <span><i class="gridworld-key gridworld-special-b-key"></i>Special state B</span>
         <span><i class="gridworld-key gridworld-target-key"></i>Teleport destination</span>
@@ -53,17 +53,17 @@ agent one cell with reward 0. The red boundary, and the special states
       </div>
       <div class="gridworld-action-buttons" role="group" aria-label="Available actions">
         <button id="gridworld-action-up" type="button" data-action="up" aria-label="Move up">↑<span>Up</span></button>
+        <div class="gridworld-action-agent" aria-hidden="true">🤖</div>
         <button id="gridworld-action-right" type="button" data-action="right" aria-label="Move right">→<span>Right</span></button>
         <button id="gridworld-action-down" type="button" data-action="down" aria-label="Move down">↓<span>Down</span></button>
         <button id="gridworld-action-left" type="button" data-action="left" aria-label="Move left">←<span>Left</span></button>
       </div>
       <div class="gridworld-transition-card" aria-live="polite">
-        <h3>Last transition</h3>
-        <p id="gridworld-transition-summary" class="gridworld-transition-summary">Choose an action to observe the next state and immediate reward.</p>
+        <h3>Transition</h3>
         <dl class="gridworld-transition-values">
-          <div><dt>State</dt><dd id="gridworld-state-value">row 3, column 3</dd></div>
-          <div><dt>Action</dt><dd id="gridworld-action-value">—</dd></div>
-          <div><dt>Next state</dt><dd id="gridworld-next-state-value">—</dd></div>
+          <div><dt>Previous state (<i>s</i>)</dt><dd id="gridworld-state-value">(3, 3)</dd></div>
+          <div><dt>Action (<i>a</i>)</dt><dd id="gridworld-action-value">—</dd></div>
+          <div><dt>Current state (<i>s</i>′)</dt><dd id="gridworld-next-state-value">—</dd></div>
           <div><dt>Reward</dt><dd id="gridworld-reward-value">—</dd></div>
         </dl>
         <p id="gridworld-transition-rule" class="gridworld-transition-rule">For an ordinary state, moving inside the grid gives reward 0.</p>
@@ -102,4 +102,4 @@ agent one cell with reward 0. The red boundary, and the special states
 
 [← Return to Reinforcement learning](index.qmd)
 
-<script src="../assets/gridworld-environment-explorer.js?v=20261115a"></script>
+<script src="../assets/gridworld-environment-explorer.js?v=20261115b"></script>

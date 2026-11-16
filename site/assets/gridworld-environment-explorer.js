@@ -47,6 +47,10 @@
     return `${name} (row ${state.row + 1}, column ${state.column + 1})`;
   }
 
+  function gridCoordinate(state) {
+    return `(${state.row + 1}, ${state.column + 1})`;
+  }
+
   function formatReward(reward) {
     return reward > 0 ? `+${reward}` : String(reward);
   }
@@ -100,7 +104,6 @@
   const get = (id) => document.getElementById(`gridworld-${id}`);
   const grid = get("grid");
   const status = get("status");
-  const summary = get("transition-summary");
   const stateValue = get("state-value");
   const actionValue = get("action-value");
   const nextStateValue = get("next-state-value");
@@ -109,19 +112,6 @@
   const actionButtons = [...root.querySelectorAll("[data-action]")];
   let currentState = copyState(INITIAL_STATE);
   let lastTransition = null;
-
-  function syncStickyOffset() {
-    const header = document.getElementById("quarto-header");
-    const headerHeight = header ? header.getBoundingClientRect().height : 0;
-    root.style.setProperty("--gridworld-navbar-height", `${headerHeight}px`);
-  }
-
-  const header = document.getElementById("quarto-header");
-  if (header && "ResizeObserver" in window) {
-    new ResizeObserver(syncStickyOffset).observe(header);
-  }
-  window.addEventListener("resize", syncStickyOffset);
-  syncStickyOffset();
 
   function cellLabel(state) {
     const sourceSpecial = sourceSpecialAt(state);
@@ -162,17 +152,19 @@
         cell.setAttribute("aria-label", `${cellLabel(state)}${isCurrent ? ", current agent state" : ""}`);
         cell.title = `Place the agent at ${cellLabel(state)}`;
 
+        addCellText(cell, "gridworld-cell-coordinate", `(${row + 1}, ${column + 1})`);
         if (sourceSpecial) {
-          addCellText(cell, "gridworld-cell-name", sourceSpecial.label);
-          addCellText(cell, "gridworld-cell-detail", `→ ${sourceSpecial.targetLabel} · ${formatReward(sourceSpecial.reward)}`);
+          addCellText(cell, "gridworld-cell-reward gridworld-cell-zero-reward", "0");
+          addCellText(cell, "gridworld-cell-state-label", sourceSpecial.label);
         } else if (targetSpecial) {
-          addCellText(cell, "gridworld-cell-name", targetSpecial.targetLabel);
-          addCellText(cell, "gridworld-cell-detail", `destination from ${targetSpecial.label}`);
-        } else {
-          addCellText(cell, "gridworld-cell-coordinate", `${row + 1}, ${column + 1}`);
+          addCellText(cell, "gridworld-cell-reward", formatReward(targetSpecial.reward));
+          addCellText(cell, "gridworld-cell-state-label", targetSpecial.targetLabel);
+        }
+        else {
+          addCellText(cell, "gridworld-cell-reward gridworld-cell-zero-reward", "0");
         }
 
-        if (isCurrent) addCellText(cell, "gridworld-agent-marker", "agent");
+        if (isCurrent) addCellText(cell, "gridworld-agent-marker", "🤖");
         cell.addEventListener("click", () => {
           currentState = copyState(state);
           lastTransition = null;
@@ -187,8 +179,7 @@
 
   function renderTransition() {
     if (!lastTransition) {
-      summary.textContent = "Choose an action to observe the next state and immediate reward.";
-      stateValue.textContent = stateDescription(currentState);
+      stateValue.textContent = gridCoordinate(currentState);
       actionValue.textContent = "—";
       nextStateValue.textContent = "—";
       rewardValue.textContent = "—";
@@ -198,10 +189,9 @@
 
     const action = ACTIONS[lastTransition.action];
     const { state, nextState, reward, kind, special } = lastTransition;
-    summary.textContent = `${stateName(state)} + ${action.label.toLowerCase()} → ${stateName(nextState)}, reward ${formatReward(reward)}`;
-    stateValue.textContent = stateDescription(state);
+    stateValue.textContent = gridCoordinate(state);
     actionValue.textContent = `${action.arrow} ${action.label}`;
-    nextStateValue.textContent = stateDescription(nextState);
+    nextStateValue.textContent = gridCoordinate(nextState);
     rewardValue.textContent = formatReward(reward);
     rewardValue.className = reward > 0 ? "gridworld-positive-reward"
       : reward < 0 ? "gridworld-negative-reward" : "";

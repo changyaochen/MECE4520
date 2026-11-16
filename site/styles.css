@@ -762,7 +762,7 @@
 
 .tree-gini-table-wrap th {
   position: sticky;
-  top: 0;
+  top: var(--course-header-visible-bottom, 0px);
   z-index: 1;
   background: #f5f7f8;
   color: #35444c;
@@ -1419,7 +1419,7 @@
   align-items: center;
   gap: 0.7rem;
   position: sticky;
-  top: 2.8rem;
+  top: var(--course-header-visible-bottom, 0px);
   z-index: 5;
   max-width: 68rem;
   margin: 0 auto 0.85rem;
@@ -3325,7 +3325,7 @@
   align-items: center;
   gap: 0.7rem;
   position: sticky;
-  top: 2.8rem;
+  top: var(--course-header-visible-bottom, 0px);
   z-index: 5;
   width: 100%;
   margin-bottom: 0.75rem;
@@ -3665,7 +3665,7 @@
 
 .bagging-feature-table thead th {
   position: sticky;
-  top: 0;
+  top: var(--course-header-visible-bottom, 0px);
   background: #edf4f7;
   color: #52616a;
   font-size: 0.7rem;
@@ -5659,7 +5659,7 @@
 
 #convolution-explorer .convolution-toolbar {
   position: sticky;
-  top: 2.8rem;
+  top: var(--course-header-visible-bottom, 0px);
   z-index: 5;
   padding: 0.45rem 0;
   border-bottom: 1px solid #d9e1e5;
@@ -6219,7 +6219,7 @@
 
 .convolution-2d-toolbar {
   position: sticky;
-  top: 2.8rem;
+  top: var(--course-header-visible-bottom, 0px);
   z-index: 5;
   align-items: center;
   margin: 0.82rem 0;
@@ -7001,7 +7001,7 @@
 
 .bptt-toolbar {
   position: sticky;
-  top: 0.5rem;
+  top: var(--course-header-visible-bottom, 0px);
   z-index: 5;
   align-items: center;
   margin: 0 0 1rem;
@@ -7466,7 +7466,7 @@
 
 .bptt-table-wrap th {
   position: sticky;
-  top: 0;
+  top: var(--course-header-visible-bottom, 0px);
   z-index: 1;
   background: #eef4f7;
   color: #40525b;
