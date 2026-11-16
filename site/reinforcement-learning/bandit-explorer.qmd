@@ -44,8 +44,8 @@ uses the simulation's true means when selecting an arm.
     </label>
     <label class="bandit-range-control" for="bandit-c">
       <span><strong>c</strong> for UCB</span>
-      <input id="bandit-c" type="range" min="0.25" max="3" step="0.25" value="0.50">
-      <output id="bandit-c-value">0.50</output>
+      <input id="bandit-c" type="range" min="0.25" max="3" step="0.25" value="1.00">
+      <output id="bandit-c-value">1.00</output>
     </label>
     <label class="bandit-checkbox-control" for="bandit-reveal">
       <input id="bandit-reveal" type="checkbox">
@@ -119,4 +119,4 @@ uses the simulation's true means when selecting an arm.
 
 [← Return to Reinforcement learning](index.qmd)
 
-<script src="../assets/bandit-explorer.js?v=20261115c"></script>
+<script src="../assets/bandit-explorer.js?v=20261115e"></script>
