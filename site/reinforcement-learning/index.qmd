@@ -1,0 +1,17 @@
+---
+title: "Reinforcement learning"
+---
+
+Reinforcement learning studies how an agent can choose actions through trial and
+error in order to maximize long-term reward. Unlike supervised learning, the
+agent's actions influence which rewards and future situations it experiences.
+
+## Multi-armed bandits
+
+In a multi-armed bandit, the agent repeatedly chooses among actions with
+unknown, noisy rewards. This smallest reinforcement-learning setting lets us
+separate the central tradeoff between gathering information and exploiting the
+best option found so far.
+
+- [Explore bandit policies](bandit-explorer.qmd)
+- [Work through the multi-armed bandit notebook](01-multi-armed-bandits.ipynb)
