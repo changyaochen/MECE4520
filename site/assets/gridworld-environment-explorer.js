@@ -128,6 +128,81 @@
     cell.append(element);
   }
 
+  function svgElement(name, attributes = {}) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, String(value)));
+    return element;
+  }
+
+  function gridCenter(state) {
+    const cellSize = 500 / GRID_SIZE;
+    return {
+      x: (state.column + 0.5) * cellSize,
+      y: (state.row + 0.5) * cellSize,
+    };
+  }
+
+  function addTeleportOverlay() {
+    const overlay = svgElement("svg", {
+      class: "gridworld-teleport-overlay",
+      viewBox: "0 0 500 500",
+      "aria-hidden": "true",
+      focusable: "false",
+    });
+    const definitions = svgElement("defs");
+    overlay.append(definitions);
+
+    SPECIAL_TRANSITIONS.forEach((special) => {
+      const markerId = `gridworld-teleport-arrow-${special.color}`;
+      const marker = svgElement("marker", {
+        id: markerId,
+        viewBox: "0 0 8 8",
+        refX: 6.8,
+        refY: 4,
+        markerWidth: 7,
+        markerHeight: 7,
+        orient: "auto",
+      });
+      marker.append(svgElement("path", {
+        d: "M 0 0 L 8 4 L 0 8 z",
+        class: `gridworld-teleport-arrowhead gridworld-teleport-${special.color}`,
+      }));
+      definitions.append(marker);
+
+      const source = gridCenter(special.source);
+      const target = gridCenter(special.target);
+      // Draw both arrows on the right side of their source/destination cells,
+      // mirroring the conventional Gridworld diagram.  The longer A arrow
+      // bends farther so it stays clear of its labels.
+      const isA = special.color === "a";
+      const startX = source.x + (isA ? 30 : 25);
+      const endX = target.x + (isA ? 30 : 25);
+      const startY = source.y + (isA ? 30 : 27);
+      const endY = target.y - (isA ? 30 : 27);
+      const controlX = source.x + (isA ? 150 : 95);
+      const middleY = (startY + endY) / 2;
+      const rewardX = source.x + (isA ? 60 : 42);
+      const arc = svgElement("path", {
+        d: `M ${startX} ${startY} C ${controlX} ${startY + 42}, ${controlX} ${endY - 42}, ${endX} ${endY}`,
+        class: `gridworld-teleport-arc gridworld-teleport-${special.color}`,
+        "marker-end": `url(#${markerId})`,
+      });
+      overlay.append(arc);
+
+      const reward = svgElement("text", {
+        x: rewardX,
+        y: middleY,
+        class: `gridworld-teleport-reward gridworld-teleport-${special.color}`,
+        "text-anchor": "middle",
+        "dominant-baseline": "middle",
+      });
+      reward.textContent = formatReward(special.reward);
+      overlay.append(reward);
+    });
+
+    grid.append(overlay);
+  }
+
   function renderGrid() {
     grid.replaceChildren();
     for (let row = 0; row < GRID_SIZE; row += 1) {
@@ -157,7 +232,7 @@
           addCellText(cell, "gridworld-cell-reward gridworld-cell-zero-reward", "0");
           addCellText(cell, "gridworld-cell-state-label", sourceSpecial.label);
         } else if (targetSpecial) {
-          addCellText(cell, "gridworld-cell-reward", formatReward(targetSpecial.reward));
+          addCellText(cell, "gridworld-cell-reward gridworld-cell-zero-reward", "0");
           addCellText(cell, "gridworld-cell-state-label", targetSpecial.targetLabel);
         }
         else {
@@ -175,6 +250,7 @@
       }
       grid.append(gridRow);
     }
+    addTeleportOverlay();
   }
 
   function renderTransition() {

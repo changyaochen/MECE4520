@@ -10,9 +10,15 @@
 .gridworld-panel, .gridworld-rules, .gridworld-next { min-width: 0; padding: 1rem; border: 1px solid #d8e4e8; border-radius: 0.55rem; background: #f6fafb; }
 .gridworld-panel-heading h2, .gridworld-rules h2, .gridworld-next h2 { margin: 0 0 0.25rem; color: #30434d; font-size: 1.15rem; }
 .gridworld-panel-heading p, .gridworld-next p { margin: 0 0 0.8rem; color: #61727c; font-size: 0.9rem; line-height: 1.5; }
-.gridworld-grid { display: grid; width: min(100%, 620px); aspect-ratio: 1; grid-template-rows: repeat(5, minmax(0, 1fr)); gap: 1px; border: 7px solid #d26363; border-radius: 0.25rem; background: #627781; box-shadow: 0 0 0 2px #f6fafb; }
+.gridworld-grid { position: relative; display: grid; width: min(100%, 620px); aspect-ratio: 1; grid-template-rows: repeat(5, minmax(0, 1fr)); gap: 1px; border: 7px solid #d26363; border-radius: 0.25rem; background: #627781; box-shadow: 0 0 0 2px #f6fafb; }
 .gridworld-row { display: grid; min-height: 0; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; }
 .gridworld-cell { position: relative; display: flex; min-width: 0; min-height: 0; align-items: center; justify-content: center; padding: 0.35rem; border: 0; border-radius: 0; background: #fff; color: #526a74; cursor: pointer; transition: background 120ms ease, box-shadow 120ms ease, transform 120ms ease; }
+.gridworld-teleport-overlay { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.gridworld-teleport-arc { fill: none; stroke: currentColor; stroke-width: 4; vector-effect: non-scaling-stroke; }
+.gridworld-teleport-arrowhead { fill: currentColor; }
+.gridworld-teleport-reward { fill: currentColor; stroke: #fff; stroke-width: 5px; paint-order: stroke; font-size: 27px; font-weight: 800; }
+.gridworld-teleport-a { color: #3d839f; }
+.gridworld-teleport-b { color: #8a639a; }
 .gridworld-cell:hover { z-index: 1; background: #eaf4f8; box-shadow: inset 0 0 0 2px #77a9c0; }
 .gridworld-cell-coordinate { position: absolute; top: 0.32rem; left: 0.36rem; color: #84969e; font-size: clamp(0.56rem, 1.6vw, 0.78rem); font-variant-numeric: tabular-nums; }
 .gridworld-cell-state-label { position: absolute; right: 0.38rem; bottom: 0.3rem; color: #294757; font-size: clamp(0.94rem, 3vw, 1.35rem); font-weight: 800; line-height: 1; }
@@ -75,6 +81,9 @@
 .quarto-dark .gridworld-cell-state-label { color: #edf5f7; }
 .quarto-dark .gridworld-cell-reward { color: #75c692; }
 .quarto-dark .gridworld-cell-zero-reward { color: #a2b1b7; }
+.quarto-dark .gridworld-teleport-a { color: #7fc3dc; }
+.quarto-dark .gridworld-teleport-b { color: #c4a0d3; }
+.quarto-dark .gridworld-teleport-reward { stroke: #202d32; }
 .quarto-dark .gridworld-legend, .quarto-dark .gridworld-transition-rule { color: #c2d1d8; }
 .quarto-dark .gridworld-transition-card, .quarto-dark .gridworld-rule-grid article { border-color: #566470; background: #252d31; }
 .quarto-dark .gridworld-transition-card h3, .quarto-dark .gridworld-rule-grid h3 { color: #e2ecee; }
