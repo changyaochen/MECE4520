@@ -291,7 +291,7 @@
       swatch.className = "bandit-arm-swatch";
       swatch.style.backgroundColor = arm.color;
       const name = document.createElement("span");
-      name.innerHTML = reveal.checked ? `<strong>${arm.name}</strong> <small>μ=${arm.mean.toFixed(2)}</small>` : `<strong>${arm.name}</strong>`;
+      name.innerHTML = `<strong>${arm.name}</strong>`;
       const estimate = document.createElement("strong");
       estimate.textContent = simulation.estimates[index].toFixed(2);
       const count = document.createElement("strong");
