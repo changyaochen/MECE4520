@@ -1,0 +1,86 @@
+.gridworld-environment-explorer { margin-top: 1rem; color: #30434d; }
+.gridworld-toolbar { position: sticky; top: var(--course-header-visible-bottom, 0px); z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; padding: 0.8rem; border: 1px solid #d8e4e8; border-radius: 0.55rem; background: #f2f7fa; box-shadow: 0 2px 7px #263e4b14; }
+.gridworld-toolbar button, .gridworld-action-buttons button { min-height: 2.4rem; padding: 0.45rem 0.85rem; border: 1px solid #9db4c0; border-radius: 0.35rem; background: #fff; color: #284d61; font-weight: 600; cursor: pointer; }
+.gridworld-toolbar button:hover, .gridworld-action-buttons button:hover { border-color: #347b9e; background: #f7fbfd; }
+.gridworld-toolbar button.gridworld-primary { border-color: #347b9e; background: #347b9e; color: #fff; }
+.gridworld-toolbar button.gridworld-primary:hover { background: #286b8d; color: #fff; }
+.gridworld-toolbar button:focus-visible, .gridworld-action-buttons button:focus-visible, .gridworld-cell:focus-visible { outline: 3px solid #f1b64b; outline-offset: 3px; }
+.gridworld-status { margin-left: auto; color: #607580; font-size: 0.86rem; }
+.gridworld-workbench { display: grid; grid-template-columns: minmax(390px, 1.35fr) minmax(280px, 0.85fr); gap: 1rem; margin-top: 1rem; }
+.gridworld-panel, .gridworld-rules, .gridworld-next { min-width: 0; padding: 1rem; border: 1px solid #d8e4e8; border-radius: 0.55rem; background: #f6fafb; }
+.gridworld-panel-heading h2, .gridworld-rules h2, .gridworld-next h2 { margin: 0 0 0.25rem; color: #30434d; font-size: 1.15rem; }
+.gridworld-panel-heading p, .gridworld-next p { margin: 0 0 0.8rem; color: #61727c; font-size: 0.9rem; line-height: 1.5; }
+.gridworld-grid { display: grid; width: min(100%, 620px); aspect-ratio: 1; grid-template-rows: repeat(5, minmax(0, 1fr)); gap: 1px; border: 7px solid #d26363; border-radius: 0.25rem; background: #627781; box-shadow: 0 0 0 2px #f6fafb; }
+.gridworld-row { display: grid; min-height: 0; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; }
+.gridworld-cell { position: relative; display: flex; min-width: 0; min-height: 0; align-items: center; justify-content: center; padding: 0.35rem; border: 0; border-radius: 0; background: #fff; color: #526a74; cursor: pointer; transition: background 120ms ease, box-shadow 120ms ease, transform 120ms ease; }
+.gridworld-cell:hover { z-index: 1; background: #eaf4f8; box-shadow: inset 0 0 0 2px #77a9c0; }
+.gridworld-cell-coordinate { position: absolute; top: 0.32rem; left: 0.36rem; color: #84969e; font-size: clamp(0.56rem, 1.6vw, 0.78rem); font-variant-numeric: tabular-nums; }
+.gridworld-cell-state-label { position: absolute; right: 0.38rem; bottom: 0.3rem; color: #294757; font-size: clamp(0.94rem, 3vw, 1.35rem); font-weight: 800; line-height: 1; }
+.gridworld-cell-reward { color: #238452; font-size: clamp(1.45rem, 5.1vw, 2.6rem); font-weight: 850; line-height: 1; }
+.gridworld-cell-zero-reward { color: #a2afb5; font-size: clamp(1.05rem, 3.7vw, 1.75rem); font-weight: 700; }
+.gridworld-special-a { background: #e3f0f7; box-shadow: inset 0 0 0 2px #6da0ba; }
+.gridworld-special-b { background: #f3ebf7; box-shadow: inset 0 0 0 2px #a481b6; }
+.gridworld-target { background: #ecf6ef; box-shadow: inset 0 0 0 2px #83b795; }
+.gridworld-current { z-index: 2; background: #fff6d8; box-shadow: inset 0 0 0 3px #e5a93e; }
+.gridworld-current.gridworld-special-a { background: #deedf6; }
+.gridworld-current.gridworld-special-b { background: #f0e5f4; }
+.gridworld-current.gridworld-target { background: #e6f3e9; }
+.gridworld-agent-marker { position: absolute; top: 0.26rem; right: 0.3rem; z-index: 3; font-size: clamp(0.95rem, 3.3vw, 1.55rem); line-height: 1; }
+.gridworld-legend { display: flex; flex-wrap: wrap; gap: 0.45rem 0.9rem; margin-top: 0.75rem; color: #586c76; font-size: 0.78rem; }
+.gridworld-legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
+.gridworld-key { width: 0.74rem; height: 0.74rem; border: 1px solid #b7c8cf; border-radius: 0.16rem; }
+.gridworld-agent-key { display: inline-flex; align-items: center; justify-content: center; background: #fff6d8; box-shadow: inset 0 0 0 2px #e5a93e; font-size: 0.55rem; font-style: normal; }
+.gridworld-special-a-key { background: #e3f0f7; box-shadow: inset 0 0 0 2px #6da0ba; }
+.gridworld-special-b-key { background: #f3ebf7; box-shadow: inset 0 0 0 2px #a481b6; }
+.gridworld-target-key { background: #ecf6ef; box-shadow: inset 0 0 0 2px #83b795; }
+.gridworld-action-panel { align-self: start; background: #f8f6fb; border-color: #e0d6e8; }
+.gridworld-action-buttons { display: grid; width: min(100%, 340px); grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(3.7rem, auto)); gap: 0.5rem; margin: 0 auto; }
+.gridworld-action-buttons button { display: flex; min-height: 0; flex-direction: column; align-items: center; justify-content: center; gap: 0.05rem; border-color: #afc5d1; color: #285b76; font-size: 1.45rem; line-height: 1; }
+.gridworld-action-buttons button span { font-size: 0.76rem; }
+.gridworld-action-buttons [data-action="up"] { grid-column: 2; grid-row: 1; }
+.gridworld-action-buttons [data-action="left"] { grid-column: 1; grid-row: 2; }
+.gridworld-action-buttons [data-action="right"] { grid-column: 3; grid-row: 2; }
+.gridworld-action-buttons [data-action="down"] { grid-column: 2; grid-row: 3; }
+.gridworld-action-agent { display: flex; grid-column: 2; grid-row: 2; align-items: center; justify-content: center; font-size: 2rem; }
+.gridworld-transition-card { margin-top: 1rem; padding: 0.9rem; border: 1px solid #e3ddec; border-radius: 0.4rem; background: #fff; }
+.gridworld-transition-card h3 { margin: 0 0 0.45rem; color: #405863; font-size: 0.98rem; }
+.gridworld-transition-values { display: grid; grid-template-columns: 1fr; gap: 0.5rem; margin: 0.75rem 0; }
+.gridworld-transition-values div { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.65rem 0.75rem; border: 1px solid #e5e1eb; border-radius: 0.35rem; background: #fcfcfd; }
+.gridworld-transition-values dt { color: #637681; font-size: 0.78rem; font-weight: 750; }
+.gridworld-transition-values dd { margin: 0; color: #314f61; font-size: 1.12rem; font-variant-numeric: tabular-nums; font-weight: 750; white-space: nowrap; }
+.gridworld-transition-values dd.gridworld-positive-reward { color: #238452; font-weight: 800; }
+.gridworld-transition-values dd.gridworld-negative-reward { color: #bd4b4b; font-weight: 800; }
+.gridworld-transition-rule { margin: 0; color: #4c626d; font-size: 0.86rem; line-height: 1.45; }
+.gridworld-rules { margin-top: 1rem; background: #fbfcfd; }
+.gridworld-rule-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+.gridworld-rule-grid article { padding: 0.8rem; border: 1px solid #dce6ea; border-radius: 0.4rem; background: #fff; }
+.gridworld-rule-grid h3 { margin: 0 0 0.32rem; color: #405863; font-size: 0.9rem; }
+.gridworld-rule-grid p { margin: 0; color: #5c707a; font-size: 0.82rem; line-height: 1.45; }
+.gridworld-next { margin-top: 1rem; background: #eef6f1; border-color: #cce1d3; }
+.gridworld-next p { margin-bottom: 0; }
+.quarto-dark .gridworld-toolbar { border-color: #4a6979; background: #24323b; }
+.quarto-dark .gridworld-toolbar button, .quarto-dark .gridworld-action-buttons button { border-color: #617d8c; background: #2e414b; color: #e5eff2; }
+.quarto-dark .gridworld-toolbar button.gridworld-primary { border-color: #4c9cc3; background: #347b9e; color: #fff; }
+.quarto-dark .gridworld-status, .quarto-dark .gridworld-panel-heading p, .quarto-dark .gridworld-next p { color: #c2d1d8; }
+.quarto-dark .gridworld-panel, .quarto-dark .gridworld-rules { border-color: #476270; background: #202d32; color: #e2ecee; }
+.quarto-dark .gridworld-action-panel { border-color: #685578; background: #302b35; }
+.quarto-dark .gridworld-panel-heading h2, .quarto-dark .gridworld-rules h2, .quarto-dark .gridworld-next h2 { color: #e2ecee; }
+.quarto-dark .gridworld-grid { border-color: #cf6f6f; background: #71838a; box-shadow: 0 0 0 2px #202d32; }
+.quarto-dark .gridworld-cell { background: #26363d; color: #d6e2e5; }
+.quarto-dark .gridworld-cell-coordinate { color: #a6b8be; }
+.quarto-dark .gridworld-special-a { background: #294757; box-shadow: inset 0 0 0 2px #5b9ab8; }
+.quarto-dark .gridworld-special-b { background: #493653; box-shadow: inset 0 0 0 2px #b492c4; }
+.quarto-dark .gridworld-target { background: #264836; box-shadow: inset 0 0 0 2px #70a585; }
+.quarto-dark .gridworld-current { box-shadow: inset 0 0 0 3px #efbd59; }
+.quarto-dark .gridworld-cell-state-label { color: #edf5f7; }
+.quarto-dark .gridworld-cell-reward { color: #75c692; }
+.quarto-dark .gridworld-cell-zero-reward { color: #a2b1b7; }
+.quarto-dark .gridworld-legend, .quarto-dark .gridworld-transition-rule { color: #c2d1d8; }
+.quarto-dark .gridworld-transition-card, .quarto-dark .gridworld-rule-grid article { border-color: #566470; background: #252d31; }
+.quarto-dark .gridworld-transition-card h3, .quarto-dark .gridworld-rule-grid h3 { color: #e2ecee; }
+.quarto-dark .gridworld-transition-values div { border-color: #566470; background: #20282c; }
+.quarto-dark .gridworld-transition-values dt, .quarto-dark .gridworld-rule-grid p { color: #c2d1d8; }
+.quarto-dark .gridworld-transition-values dd { color: #e2ecee; }
+.quarto-dark .gridworld-next { border-color: #466b55; background: #20382a; }
+@media (max-width: 900px) { .gridworld-workbench { grid-template-columns: 1fr; } .gridworld-action-panel { width: min(100%, 620px); } .gridworld-status { flex-basis: 100%; margin-left: 0; } .gridworld-rule-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 540px) { .gridworld-toolbar button { flex: 1 1 auto; } .gridworld-rule-grid { grid-template-columns: 1fr; } .gridworld-cell-detail { display: none; } .gridworld-transition-values { grid-template-columns: 1fr; } }

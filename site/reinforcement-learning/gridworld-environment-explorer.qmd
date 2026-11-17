@@ -1,0 +1,105 @@
+---
+title: "Explore the Gridworld"
+toc: false
+page-layout: full
+---
+
+This page introduces the **environment** that we will reuse to study Markov
+reward processes and Markov decision processes. An agent occupies one cell in a
+5-by-5 grid and chooses one of four actions: up, right, down, or left.
+
+The environment is deterministic: once the current state and action are known,
+the next state and immediate reward are fixed. There is no policy or value
+function yet—just the transition and reward rules that later algorithms will
+use.
+
+::: {.callout-tip}
+## What to watch
+
+Click a cell to place the agent, then choose an action. Most actions move the
+agent one cell with reward 0. The red boundary, and the special states
+**A** and **B**, follow different rules.
+:::
+
+```{=html}
+<link rel="stylesheet" href="../assets/gridworld-environment-explorer.css?v=20261115c">
+<div id="gridworld-environment-explorer" class="gridworld-environment-explorer" aria-label="Interactive Gridworld environment explorer">
+  <div class="gridworld-toolbar clt-buttons" aria-label="Gridworld controls">
+    <button id="gridworld-reset" type="button" class="gridworld-primary">Reset agent</button>
+    <button id="gridworld-go-a" type="button">Place agent at A</button>
+    <button id="gridworld-go-b" type="button">Place agent at B</button>
+    <output id="gridworld-status" class="gridworld-status" aria-live="polite">Agent starts at row 3, column 3.</output>
+  </div>
+
+  <div class="gridworld-workbench">
+    <section class="gridworld-panel gridworld-board-panel" aria-labelledby="gridworld-board-heading">
+      <div class="gridworld-panel-heading">
+        <h2 id="gridworld-board-heading">State space and special transitions</h2>
+        <p>Each square is a state. Click any square to move the agent there before trying an action.</p>
+      </div>
+      <div id="gridworld-grid" class="gridworld-grid" role="grid" aria-label="Five by five Gridworld"></div>
+      <div class="gridworld-legend" aria-label="Gridworld legend">
+        <span><i class="gridworld-key gridworld-agent-key">🤖</i>Current state</span>
+        <span><i class="gridworld-key gridworld-special-a-key"></i>Special state A</span>
+        <span><i class="gridworld-key gridworld-special-b-key"></i>Special state B</span>
+        <span><i class="gridworld-key gridworld-target-key"></i>Teleport destination</span>
+      </div>
+    </section>
+
+    <section class="gridworld-panel gridworld-action-panel" aria-labelledby="gridworld-action-heading">
+      <div class="gridworld-panel-heading">
+        <h2 id="gridworld-action-heading">Choose one action</h2>
+        <p>The action is an input to the environment. It is not a policy yet.</p>
+      </div>
+      <div class="gridworld-action-buttons" role="group" aria-label="Available actions">
+        <button id="gridworld-action-up" type="button" data-action="up" aria-label="Move up">↑<span>Up</span></button>
+        <div class="gridworld-action-agent" aria-hidden="true">🤖</div>
+        <button id="gridworld-action-right" type="button" data-action="right" aria-label="Move right">→<span>Right</span></button>
+        <button id="gridworld-action-down" type="button" data-action="down" aria-label="Move down">↓<span>Down</span></button>
+        <button id="gridworld-action-left" type="button" data-action="left" aria-label="Move left">←<span>Left</span></button>
+      </div>
+      <div class="gridworld-transition-card" aria-live="polite">
+        <h3>Transition</h3>
+        <dl class="gridworld-transition-values">
+          <div><dt>Previous state (<i>s</i>)</dt><dd id="gridworld-state-value">(3, 3)</dd></div>
+          <div><dt>Action (<i>a</i>)</dt><dd id="gridworld-action-value">—</dd></div>
+          <div><dt>Current state (<i>s</i>′)</dt><dd id="gridworld-next-state-value">—</dd></div>
+          <div><dt>Reward</dt><dd id="gridworld-reward-value">—</dd></div>
+        </dl>
+        <p id="gridworld-transition-rule" class="gridworld-transition-rule">For an ordinary state, moving inside the grid gives reward 0.</p>
+      </div>
+    </section>
+  </div>
+
+  <section class="gridworld-rules" aria-labelledby="gridworld-rules-heading">
+    <h2 id="gridworld-rules-heading">Transition and reward rules</h2>
+    <div class="gridworld-rule-grid">
+      <article>
+        <h3>Ordinary move</h3>
+        <p>Move one cell in the chosen direction. The immediate reward is <strong>0</strong>.</p>
+      </article>
+      <article>
+        <h3>Boundary</h3>
+        <p>An action that would leave the grid keeps the agent in the same state and gives reward <strong>−1</strong>.</p>
+      </article>
+      <article>
+        <h3>State A</h3>
+        <p>Any action from <strong>A</strong> sends the agent to <strong>A′</strong> and gives reward <strong>+10</strong>.</p>
+      </article>
+      <article>
+        <h3>State B</h3>
+        <p>Any action from <strong>B</strong> sends the agent to <strong>B′</strong> and gives reward <strong>+5</strong>.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="gridworld-next">
+    <h2>What comes next?</h2>
+    <p>Later, a policy will specify how the agent chooses these actions. Once a policy is fixed, this same environment becomes a Markov reward process that we can evaluate.</p>
+  </section>
+</div>
+```
+
+[← Return to Reinforcement learning](index.qmd)
+
+<script src="../assets/gridworld-environment-explorer.js?v=20261115b"></script>

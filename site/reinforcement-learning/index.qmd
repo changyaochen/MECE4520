@@ -15,3 +15,11 @@ best option found so far.
 
 - [Explore bandit policies](bandit-explorer.qmd)
 - [Work through the multi-armed bandit notebook](01-multi-armed-bandits.ipynb)
+
+## Gridworld: states, actions, and rewards
+
+The Gridworld is a small deterministic environment that we will reuse to
+introduce state transitions, immediate rewards, fixed-policy evaluation, and
+eventually optimal control.
+
+- [Explore the Gridworld environment](gridworld-environment-explorer.qmd)

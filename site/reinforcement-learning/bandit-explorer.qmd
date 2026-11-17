@@ -51,6 +51,10 @@ uses the simulation's true means when selecting an arm.
       <input id="bandit-reveal" type="checkbox">
       Reveal the simulation's true mean rewards
     </label>
+    <label class="bandit-checkbox-control" for="bandit-optimistic">
+      <input id="bandit-optimistic" type="checkbox">
+      Optimistic initialization: start all <i>Q</i>(<i>a</i>) at 10
+    </label>
   </section>
 
   <div class="bandit-workbench">
@@ -92,31 +96,9 @@ uses the simulation's true means when selecting an arm.
     <div id="bandit-answer-table" class="bandit-answer-table"></div>
   </details>
 
-  <section class="bandit-panel bandit-comparison" aria-labelledby="bandit-comparison-heading">
-    <div class="bandit-panel-heading">
-      <h2 id="bandit-comparison-heading">Typical behavior across 300 simulations</h2>
-      <p>The trace above is one realization. These charts average 300 independent 200-decision simulations of the current fixed reward distributions. The right-hand chart reports the percentage choosing the true best arm at each decision.</p>
-    </div>
-    <div class="bandit-aggregate-grid">
-      <div class="bandit-aggregate-chart">
-        <h3>Cumulative average reward</h3>
-        <svg id="bandit-comparison" viewBox="0 0 520 330" role="img" aria-label="Average reward across 300 simulations for greedy, epsilon-greedy, and UCB policies"></svg>
-      </div>
-      <div class="bandit-aggregate-chart">
-        <h3>Selecting the true best arm</h3>
-        <svg id="bandit-best-arm-rate" viewBox="0 0 520 330" role="img" aria-label="Percent of 300 independent simulations selecting the true best arm at each decision for greedy, epsilon-greedy, and UCB policies"></svg>
-      </div>
-    </div>
-    <div class="bandit-legend bandit-comparison-legend">
-      <span><i class="bandit-line-key bandit-greedy-key"></i>Greedy</span>
-      <span><i class="bandit-line-key bandit-epsilon-key"></i>ε-greedy</span>
-      <span><i class="bandit-line-key bandit-ucb-key"></i>UCB</span>
-      <span id="bandit-comparison-reference-legend" hidden><i class="bandit-reference-key"></i>Best arm mean</span>
-    </div>
-  </section>
 </div>
 ```
 
 [← Return to Reinforcement learning](index.qmd)
 
-<script src="../assets/bandit-explorer.js?v=20261115e"></script>
+<script src="../assets/bandit-explorer.js?v=20261116a"></script>

@@ -29,6 +29,8 @@ project:
     - assets/dbscan-explorer.css
     - assets/bandit-explorer.js
     - assets/bandit-explorer.css
+    - assets/gridworld-environment-explorer.js
+    - assets/gridworld-environment-explorer.css
     - data/dbscan-concentric-circles.csv
     - assets/columbia-engineering-logo.png
     - assets/b7e2a9c4.html
