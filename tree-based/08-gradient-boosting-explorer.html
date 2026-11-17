@@ -932,6 +932,44 @@ trees; it does not train models in the browser.
 </main> <!-- /main -->
 <script>
   (() => {
+    function installVisibleHeaderOffset() {
+      const header = document.querySelector("#quarto-header");
+      if (!header) return;
+
+      let animationFrame = null;
+      function sync() {
+        // Quarto moves its fixed header with a CSS transform as the reader
+        // scrolls. Its layout height is not a useful sticky offset; its
+        // visible bottom edge is zero when hidden and correct when present.
+        const visibleBottom = Math.max(0, header.getBoundingClientRect().bottom);
+        document.documentElement.style.setProperty(
+          "--course-header-visible-bottom",
+          `${visibleBottom}px`,
+        );
+      }
+
+      function scheduleSync() {
+        if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+        let framesRemaining = 18;
+        const update = () => {
+          sync();
+          framesRemaining -= 1;
+          if (framesRemaining > 0) animationFrame = requestAnimationFrame(update);
+          else animationFrame = null;
+        };
+        animationFrame = requestAnimationFrame(update);
+      }
+
+      new ResizeObserver(scheduleSync).observe(header);
+      new MutationObserver(scheduleSync).observe(header, {
+        attributes: true,
+        attributeFilter: ["class", "style"],
+      });
+      window.addEventListener("scroll", scheduleSync, { passive: true });
+      window.addEventListener("resize", scheduleSync);
+      scheduleSync();
+    }
+
     function fitNavbar() {
       const header = document.querySelector("#quarto-header");
       const navbar = header?.querySelector(".navbar");
@@ -993,10 +1031,15 @@ trees; it does not train models in the browser.
       window.requestAnimationFrame(update);
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", fitNavbar, { once: true });
-    } else {
+    function initializeNavbar() {
       fitNavbar();
+      installVisibleHeaderOffset();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initializeNavbar, { once: true });
+    } else {
+      initializeNavbar();
     }
   })();
 </script>

@@ -1,5 +1,5 @@
 .kmeans-explorer { margin-top: 1rem; color: #30434d; }
-.kmeans-toolbar { position: sticky; top: 0.5rem; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; padding: 0.8rem; border: 1px solid #d8e4e8; border-radius: 0.55rem; background: #f2f7fa; box-shadow: 0 2px 7px #263e4b14; }
+.kmeans-toolbar { position: sticky; top: var(--course-header-visible-bottom, 0px); z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; padding: 0.8rem; border: 1px solid #d8e4e8; border-radius: 0.55rem; background: #f2f7fa; box-shadow: 0 2px 7px #263e4b14; }
 .kmeans-toolbar button { min-height: 2.4rem; padding: 0.45rem 0.85rem; border: 1px solid #9db4c0; border-radius: 0.35rem; background: #fff; color: #284d61; font-weight: 600; cursor: pointer; }
 .kmeans-toolbar button.regression-sampling-primary { background: #347b9e; border-color: #347b9e; color: #fff; }
 .kmeans-toolbar button:disabled { opacity: 0.48; cursor: default; }

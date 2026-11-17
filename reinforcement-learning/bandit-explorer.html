@@ -431,6 +431,10 @@ window.Quarto = {
       <input id="bandit-reveal" type="checkbox">
       Reveal the simulation's true mean rewards
     </label>
+    <label class="bandit-checkbox-control" for="bandit-optimistic">
+      <input id="bandit-optimistic" type="checkbox">
+      Optimistic initialization: start all <i>Q</i>(<i>a</i>) at 10
+    </label>
   </section>
 
   <div class="bandit-workbench">
@@ -472,37 +476,53 @@ window.Quarto = {
     <div id="bandit-answer-table" class="bandit-answer-table"></div>
   </details>
 
-  <section class="bandit-panel bandit-comparison" aria-labelledby="bandit-comparison-heading">
-    <div class="bandit-panel-heading">
-      <h2 id="bandit-comparison-heading" class="anchored">Typical behavior across 300 simulations</h2>
-      <p>The trace above is one realization. These charts average 300 independent 200-decision simulations of the current fixed reward distributions. The right-hand chart reports the percentage choosing the true best arm at each decision.</p>
-    </div>
-    <div class="bandit-aggregate-grid">
-      <div class="bandit-aggregate-chart">
-        <h3 class="anchored">Cumulative average reward</h3>
-        <svg id="bandit-comparison" viewbox="0 0 520 330" role="img" aria-label="Average reward across 300 simulations for greedy, epsilon-greedy, and UCB policies"></svg>
-      </div>
-      <div class="bandit-aggregate-chart">
-        <h3 class="anchored">Selecting the true best arm</h3>
-        <svg id="bandit-best-arm-rate" viewbox="0 0 520 330" role="img" aria-label="Percent of 300 independent simulations selecting the true best arm at each decision for greedy, epsilon-greedy, and UCB policies"></svg>
-      </div>
-    </div>
-    <div class="bandit-legend bandit-comparison-legend">
-      <span><i class="bandit-line-key bandit-greedy-key"></i>Greedy</span>
-      <span><i class="bandit-line-key bandit-epsilon-key"></i>ε-greedy</span>
-      <span><i class="bandit-line-key bandit-ucb-key"></i>UCB</span>
-      <span id="bandit-comparison-reference-legend" hidden=""><i class="bandit-reference-key"></i>Best arm mean</span>
-    </div>
-  </section>
 </div>
 <p><a href="../reinforcement-learning/index.html">← Return to Reinforcement learning</a></p>
-<script src="../assets/bandit-explorer.js?v=20261115e"></script>
+<script src="../assets/bandit-explorer.js?v=20261116a"></script>
 
 
 
 </main> <!-- /main -->
 <script>
   (() => {
+    function installVisibleHeaderOffset() {
+      const header = document.querySelector("#quarto-header");
+      if (!header) return;
+
+      let animationFrame = null;
+      function sync() {
+        // Quarto moves its fixed header with a CSS transform as the reader
+        // scrolls. Its layout height is not a useful sticky offset; its
+        // visible bottom edge is zero when hidden and correct when present.
+        const visibleBottom = Math.max(0, header.getBoundingClientRect().bottom);
+        document.documentElement.style.setProperty(
+          "--course-header-visible-bottom",
+          `${visibleBottom}px`,
+        );
+      }
+
+      function scheduleSync() {
+        if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+        let framesRemaining = 18;
+        const update = () => {
+          sync();
+          framesRemaining -= 1;
+          if (framesRemaining > 0) animationFrame = requestAnimationFrame(update);
+          else animationFrame = null;
+        };
+        animationFrame = requestAnimationFrame(update);
+      }
+
+      new ResizeObserver(scheduleSync).observe(header);
+      new MutationObserver(scheduleSync).observe(header, {
+        attributes: true,
+        attributeFilter: ["class", "style"],
+      });
+      window.addEventListener("scroll", scheduleSync, { passive: true });
+      window.addEventListener("resize", scheduleSync);
+      scheduleSync();
+    }
+
     function fitNavbar() {
       const header = document.querySelector("#quarto-header");
       const navbar = header?.querySelector(".navbar");
@@ -564,10 +584,15 @@ window.Quarto = {
       window.requestAnimationFrame(update);
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", fitNavbar, { once: true });
-    } else {
+    function initializeNavbar() {
       fitNavbar();
+      installVisibleHeaderOffset();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initializeNavbar, { once: true });
+    } else {
+      initializeNavbar();
     }
   })();
 </script>

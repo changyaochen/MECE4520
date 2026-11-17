@@ -8,13 +8,11 @@
     { name: "D", mean: 3, std: 1, color: "#af7aa1" },
   ];
   // Start with the same reproducible four-arm environment used in the notebook.
-  // Later "New simulation" clicks replace these values with a fresh bandit.
+  // Later "New simulation" clicks reassign these same readable means to the arms.
   const ARMS = DEFAULT_ARMS.map((arm) => ({ ...arm }));
-  const POLICY_COLORS = { greedy: "#8764a0", epsilon: "#347b9e", ucb: "#31946b" };
-  const COMPARE_TRIALS = 200;
-  const AGGREGATE_RUNS = 300;
   // The notebook and this explorer both use a 200-decision horizon.
-  const TRACE_TRIALS = COMPARE_TRIALS;
+  const TRACE_TRIALS = 200;
+  const OPTIMISTIC_INITIAL_ESTIMATE = 10;
   let environmentIndex = 0;
 
   class SeededRandom {
@@ -33,10 +31,11 @@
   function regenerateArmDistributions() {
     environmentIndex += 1;
     const rng = new SeededRandom(225403 + environmentIndex * 104729);
-    const bestArmIndex = Math.floor(rng.uniform() * ARMS.length);
-    const means = ARMS.map(() => Number((1 + 2 * rng.uniform()).toFixed(1)));
-    // Keep one clearly better arm, so each fresh example remains instructive.
-    means[bestArmIndex] = Number((4 + rng.uniform()).toFixed(1));
+    const means = [1, 2, 3, 4];
+    for (let index = means.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(rng.uniform() * (index + 1));
+      [means[index], means[swapIndex]] = [means[swapIndex], means[index]];
+    }
     const nextArms = ARMS.map((arm, index) => ({
       ...arm,
       mean: means[index],
@@ -45,7 +44,7 @@
     ARMS.splice(0, ARMS.length, ...nextArms);
   }
 
-  function buildRewardStreams(length = COMPARE_TRIALS, replicate = 0) {
+  function buildRewardStreams(length = TRACE_TRIALS, replicate = 0) {
     return ARMS.map((arm, index) => {
       const rng = new SeededRandom(
         104729 + environmentIndex * 104729 + replicate * 196613 + index * 7919,
@@ -66,13 +65,18 @@
     }, []);
   }
 
-  function createSimulation(policy, epsilon, c, streamLength = COMPARE_TRIALS, replicate = 0) {
+  function createSimulation(policy, epsilon, c, {
+    initialEstimate = 0,
+    streamLength = TRACE_TRIALS,
+    replicate = 0,
+  } = {}) {
     return {
       policy,
       epsilon,
       c,
       step: 0,
-      estimates: ARMS.map(() => 0),
+      initialEstimate,
+      estimates: ARMS.map(() => initialEstimate),
       counts: ARMS.map(() => 0),
       history: [],
       streams: buildRewardStreams(streamLength, replicate),
@@ -110,7 +114,14 @@
     const previousCount = state.counts[choice.action];
     const reward = state.streams[choice.action][previousCount];
     state.counts[choice.action] += 1;
-    state.estimates[choice.action] += (reward - state.estimates[choice.action]) / state.counts[choice.action];
+    // With the sample-average update, the first observed reward is the whole
+    // estimate for that arm. Writing it explicitly also makes optimistic
+    // initialization easy to see: 10 is replaced by the first reward.
+    if (state.counts[choice.action] === 1) {
+      state.estimates[choice.action] = reward;
+    } else {
+      state.estimates[choice.action] += (reward - state.estimates[choice.action]) / state.counts[choice.action];
+    }
     state.totalReward += reward;
     state.step += 1;
     state.history.push({
@@ -124,36 +135,11 @@
     return state.history.at(-1);
   }
 
-  function runSimulation(policy, epsilon, c, trials = COMPARE_TRIALS, replicate = 0) {
-    const state = createSimulation(policy, epsilon, c, trials, replicate);
-    for (let index = 0; index < trials; index += 1) stepSimulation(state);
-    return state;
-  }
-
   function trueBestArmIndex() {
     return ARMS.reduce(
       (bestIndex, arm, index) => arm.mean > ARMS[bestIndex].mean ? index : bestIndex,
       0,
     );
-  }
-
-  function averagePolicyBehavior(epsilon, c, runs = AGGREGATE_RUNS) {
-    const bestArmIndex = trueBestArmIndex();
-    return Object.fromEntries(["greedy", "epsilon", "ucb"].map((policy) => {
-      const averageRewards = Array(COMPARE_TRIALS).fill(0);
-      const bestArmRates = Array(COMPARE_TRIALS).fill(0);
-      for (let replicate = 0; replicate < runs; replicate += 1) {
-        const state = runSimulation(policy, epsilon, c, COMPARE_TRIALS, replicate);
-        state.history.forEach((entry, index) => {
-          averageRewards[index] += entry.runningAverage;
-          bestArmRates[index] += Number(entry.action === bestArmIndex);
-        });
-      }
-      return [policy, {
-        averageReward: averageRewards.map((value) => value / runs),
-        bestArmRate: bestArmRates.map((value) => value / runs),
-      }];
-    }));
   }
 
   // Permit a lightweight test outside the browser.
@@ -162,10 +148,9 @@
       ARMS,
       createSimulation,
       stepSimulation,
-      runSimulation,
       ucbScores,
       regenerateArmDistributions,
-      averagePolicyBehavior,
+      OPTIMISTIC_INITIAL_ESTIMATE,
     };
   }
   if (typeof document === "undefined") return;
@@ -175,8 +160,6 @@
   const get = (id) => document.getElementById(`bandit-${id}`);
   const svgNamespace = "http://www.w3.org/2000/svg";
   const trace = get("trace");
-  const comparison = get("comparison");
-  const bestArmRatePlot = get("best-arm-rate");
   const next = get("next");
   const run = get("run");
   const runAll = get("run-all");
@@ -187,6 +170,7 @@
   const epsilonValue = get("epsilon-value");
   const cValue = get("c-value");
   const reveal = get("reveal");
+  const optimistic = get("optimistic");
   const action = get("action");
   const explanation = get("explanation");
   const lastReward = get("last-reward");
@@ -196,29 +180,22 @@
   const answerTable = get("answer-table");
   const answerDetails = root.querySelector(".bandit-answer");
   const referenceLegend = get("reference-legend");
-  const comparisonReferenceLegend = get("comparison-reference-legend");
   const policyButtons = [...root.querySelectorAll("[data-policy]")];
   let policy = "greedy";
-  let simulation = createSimulation(policy, Number(epsilonInput.value), Number(cInput.value));
+  function initialEstimate() {
+    return optimistic.checked ? OPTIMISTIC_INITIAL_ESTIMATE : 0;
+  }
+
+  function makeSimulation() {
+    return createSimulation(policy, Number(epsilonInput.value), Number(cInput.value), {
+      initialEstimate: initialEstimate(),
+    });
+  }
+
+  let simulation = makeSimulation();
   let timer = null;
   let runTarget = null;
   let runningMode = null;
-  let aggregateCache = { key: null, data: null };
-  let renderedAggregateKey = null;
-
-  function syncStickyOffset() {
-    const header = document.getElementById("quarto-header");
-    const headerHeight = header ? header.getBoundingClientRect().height : 0;
-    root.style.setProperty("--bandit-navbar-height", `${headerHeight}px`);
-  }
-
-  const header = document.getElementById("quarto-header");
-  if (header && "ResizeObserver" in window) {
-    new ResizeObserver(syncStickyOffset).observe(header);
-  }
-  window.addEventListener("resize", syncStickyOffset);
-  syncStickyOffset();
-
   function svg(name, attributes = {}) {
     const element = document.createElementNS(svgNamespace, name);
     Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, String(value)));
@@ -234,10 +211,6 @@
 
   function linePath(history, x, y, accessor) {
     return history.map((entry, index) => `${index ? "L" : "M"}${x(entry.trial)},${y(accessor(entry))}`).join(" ");
-  }
-
-  function curvePath(values, x, y) {
-    return values.map((value, index) => `${index ? "L" : "M"}${x(index + 1)},${y(value)}`).join(" ");
   }
 
   function drawAxes(target, dimensions, xMax, yMin, yMax, {
@@ -357,11 +330,14 @@
     mostPulled.textContent = maxCount ? ARMS[simulation.counts.indexOf(maxCount)].name : "—";
     if (!last) {
       action.textContent = "Awaiting the first reward";
+      const initialValueNote = simulation.initialEstimate === OPTIMISTIC_INITIAL_ESTIMATE
+        ? `All estimates start at ${OPTIMISTIC_INITIAL_ESTIMATE}. The first sampled reward for an arm replaces that arm's estimate; untried arms remain optimistic.`
+        : "All estimates start at zero because the agent has not observed any rewards yet.";
       explanation.textContent = policy === "greedy"
-        ? "All estimates are tied at zero, so the first arm is chosen at random. After that, greedy selects the arm with the largest observed estimate."
+        ? `${initialValueNote} The first arm is chosen at random because the estimates are tied; afterward, greedy selects the arm with the largest estimate.`
         : policy === "epsilon"
-          ? `With probability ε = ${simulation.epsilon.toFixed(2)}, the policy explores a random arm. Otherwise, it chooses the arm with the largest estimate.`
-          : "UCB gives an infinite score to each untried arm, so it samples every arm before comparing estimates and uncertainty bonuses.";
+          ? `${initialValueNote} With probability ε = ${simulation.epsilon.toFixed(2)}, the policy explores a random arm. Otherwise, it chooses the arm with the largest estimate.`
+          : `${initialValueNote} UCB gives an infinite score to each untried arm, so it samples every arm before comparing estimates and uncertainty bonuses.`;
       return;
     }
     const chosen = ARMS[last.action].name;
@@ -381,65 +357,6 @@
     }
   }
 
-  function getAggregateComparison(epsilon, c) {
-    const key = `${environmentIndex}|${epsilon}|${c}`;
-    if (aggregateCache.key !== key) {
-      aggregateCache = { key, data: averagePolicyBehavior(epsilon, c) };
-    }
-    return aggregateCache;
-  }
-
-  function drawBestArmRate(policyBehavior) {
-    bestArmRatePlot.replaceChildren();
-    const title = svg("title");
-    title.textContent = "Percent of simulations choosing the true best arm";
-    bestArmRatePlot.append(title);
-    const dimensions = { width: 520, height: 330, left: 68, right: 22, top: 28, bottom: 45 };
-    const { x, y } = drawAxes(bestArmRatePlot, dimensions, COMPARE_TRIALS, 0, 100, {
-      yLabel: "Percent of simulations",
-      formatY: (value) => `${Math.round(value)}%`,
-    });
-    ["greedy", "epsilon", "ucb"].forEach((policyName) => {
-      const values = policyBehavior[policyName].bestArmRate.map((value) => 100 * value);
-      bestArmRatePlot.append(svg("path", {
-        d: curvePath(values, x, y),
-        class: "bandit-comparison-line",
-        stroke: POLICY_COLORS[policyName],
-      }));
-    });
-  }
-
-  function drawComparison() {
-    const epsilon = Number(epsilonInput.value);
-    const c = Number(cInput.value);
-    const aggregate = getAggregateComparison(epsilon, c);
-    const renderKey = `${aggregate.key}|${reveal.checked}`;
-    if (renderedAggregateKey === renderKey) return;
-
-    comparison.replaceChildren();
-    const title = svg("title");
-    title.textContent = "Average reward over independent bandit simulations";
-    comparison.append(title);
-    const dimensions = { width: 520, height: 330, left: 62, right: 22, top: 28, bottom: 45 };
-    const maximumMean = Math.max(...ARMS.map((arm) => arm.mean));
-    const { x, y } = drawAxes(comparison, dimensions, COMPARE_TRIALS, -1, Math.max(5, Math.ceil(maximumMean + 1)), {
-      yLabel: "Average reward",
-    });
-    ["greedy", "epsilon", "ucb"].forEach((policyName) => {
-      comparison.append(svg("path", {
-        d: curvePath(aggregate.data[policyName].averageReward, x, y),
-        class: "bandit-comparison-line",
-        stroke: POLICY_COLORS[policyName],
-      }));
-    });
-    if (reveal.checked) {
-      const bestMean = Math.max(...ARMS.map((arm) => arm.mean));
-      comparison.append(svg("line", { x1: x(0), x2: x(COMPARE_TRIALS), y1: y(bestMean), y2: y(bestMean), class: "bandit-reference-line" }));
-    }
-    drawBestArmRate(aggregate.data);
-    renderedAggregateKey = renderKey;
-  }
-
   function render() {
     updateRunButtons();
     policyButtons.forEach((button) => {
@@ -450,12 +367,10 @@
     epsilonValue.textContent = Number(epsilonInput.value).toFixed(2);
     cValue.textContent = Number(cInput.value).toFixed(2);
     referenceLegend.hidden = !reveal.checked;
-    comparisonReferenceLegend.hidden = !reveal.checked;
     drawTrace();
     drawArmTable();
     drawAnswerTable();
     updateDetails();
-    drawComparison();
   }
 
   function updateRunButtons() {
@@ -481,7 +396,7 @@
       reveal.checked = false;
       answerDetails.open = false;
     }
-    simulation = createSimulation(policy, Number(epsilonInput.value), Number(cInput.value));
+    simulation = makeSimulation();
     render();
   }
 
@@ -498,6 +413,7 @@
   }));
   epsilonInput.addEventListener("input", resetSimulation);
   cInput.addEventListener("input", resetSimulation);
+  optimistic.addEventListener("change", resetSimulation);
   reveal.addEventListener("change", render);
   next.addEventListener("click", () => { stopRunning(); makeDecision(); });
   reset.addEventListener("click", () => resetSimulation({ newEnvironment: true }));
