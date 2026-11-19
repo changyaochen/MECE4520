@@ -48,9 +48,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-49e26b04a05e6609cdba9e3cf14dbcb3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-32280d01ff3a7ff5cbe701a37ed6ca11.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-49e26b04a05e6609cdba9e3cf14dbcb3.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d11302936c1a5d5b2a063db9b2023ac7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-b348d5b559a602027a1f18095d1d555f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d11302936c1a5d5b2a063db9b2023ac7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -362,7 +362,8 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#multi-armed-bandits" id="toc-multi-armed-bandits">Multi-armed bandits</a></li>
-  <li><a href="#gridworld-states-actions-and-rewards" id="toc-gridworld-states-actions-and-rewards">Gridworld: states, actions, and rewards</a></li>
+  <li><a href="#gridworld-fixed-policy-evaluation" id="toc-gridworld-fixed-policy-evaluation">Gridworld: fixed-policy evaluation</a></li>
+  <li><a href="#gridworld-optimal-control" id="toc-gridworld-optimal-control">Gridworld: optimal control</a></li>
   </ul>
 </nav>
 <p>Reinforcement learning studies how an agent can choose actions through trial and error in order to maximize long-term reward. Unlike supervised learning, the agent’s actions influence which rewards and future situations it experiences.</p>
@@ -374,11 +375,20 @@ ul.task-list li input[type="checkbox"] {
 <li><a href="../reinforcement-learning/01-multi-armed-bandits.html">Work through the multi-armed bandit notebook</a></li>
 </ul>
 </section>
-<section id="gridworld-states-actions-and-rewards" class="level2">
-<h2 class="anchored" data-anchor-id="gridworld-states-actions-and-rewards">Gridworld: states, actions, and rewards</h2>
-<p>The Gridworld is a small deterministic environment that we will reuse to introduce state transitions, immediate rewards, fixed-policy evaluation, and eventually optimal control.</p>
+<section id="gridworld-fixed-policy-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="gridworld-fixed-policy-evaluation">Gridworld: fixed-policy evaluation</h2>
+<p>The Gridworld is a small deterministic environment that we will reuse to study state transitions, immediate rewards, and state values under a fixed policy.</p>
 <ul>
 <li><a href="../reinforcement-learning/gridworld-environment-explorer.html">Explore the Gridworld environment</a></li>
+<li><a href="../reinforcement-learning/gridworld-policy-evaluation-explorer.html">Explore random-policy evaluation</a></li>
+<li><a href="../reinforcement-learning/02-gridworld-policy-evaluation.html">Work through the Gridworld policy-evaluation notebook</a></li>
+</ul>
+</section>
+<section id="gridworld-optimal-control" class="level2">
+<h2 class="anchored" data-anchor-id="gridworld-optimal-control">Gridworld: optimal control</h2>
+<p>Once the agent can improve its policy, the same Gridworld becomes a compact setting for policy iteration and value iteration.</p>
+<ul>
+<li><a href="../reinforcement-learning/03-gridworld-control.html">Work through the Gridworld control notebook</a></li>
 </ul>
 
 
