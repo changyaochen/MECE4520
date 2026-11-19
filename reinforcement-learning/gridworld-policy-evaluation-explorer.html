@@ -80,6 +80,35 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -357,9 +386,11 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>The Gridworld now has a fixed policy: from every state, the agent chooses up, right, down, or left with probability (0.25). With the policy fixed, the environment is a Markov reward process. The state value (V_k(s)) estimates the expected discounted return from state (s) after (k) synchronous Bellman backups.</p>
-<p>For this random policy and (gamma=0.9), one backup is</p>
-<p>[ V_{k+1}(s)=_a. ]</p>
+<p>The Gridworld now has a fixed policy: from every state, the agent chooses up, right, down, or left with probability (0.25). With the policy fixed, the environment is a Markov reward process. The state value <span class="math inline">\(V_k(s)\)</span> estimates the expected discounted return from state <span class="math inline">\(s\)</span> after <span class="math inline">\(k\)</span> synchronous Bellman backups.</p>
+<p>For this random policy and <span class="math inline">\(\gamma=0.9\)</span>, one backup is</p>
+<p><span class="math display">\[
+V_{k+1}(s)=\frac{1}{4}\sum_a\left[r(s,a,s')+0.9V_k(s')\right].
+\]</span></p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -370,7 +401,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Begin with (V_0(s)=0). A Bellman sweep updates every state from the <em>previous</em> value grid. Watch the positive values from A and B, and the boundary penalty, spread through the grid over repeated sweeps.</p>
+<p>Begin with <span class="math inline">\(V_0(s)=0\)</span>. A Bellman sweep updates every state from the <em>previous</em> value grid. Watch the positive values from A and B, and the boundary penalty, spread through the grid over repeated sweeps.</p>
 </div>
 </div>
 <link rel="stylesheet" href="../assets/gridworld-policy-evaluation-explorer.css?v=20261118b">
@@ -441,9 +472,9 @@ ul.task-list li input[type="checkbox"] {
   <section class="gridworld-evaluation-reading" aria-labelledby="gridworld-evaluation-reading-heading">
     <h2 id="gridworld-evaluation-reading-heading" class="anchored">How to read a Bellman sweep</h2>
     <ol>
-      <li>Use the complete current grid (V_k) for every state.</li>
+      <li>Use the complete current grid <i>V</i><sub>k</sub> for every state.</li>
       <li>Average the four random-policy action outcomes.</li>
-      <li>Replace the whole grid with (V_{k+1}) simultaneously.</li>
+      <li>Replace the whole grid with <i>V</i><sub>k + 1</sub> simultaneously.</li>
     </ol>
   </section>
 </div>

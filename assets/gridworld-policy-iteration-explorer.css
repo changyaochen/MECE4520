@@ -1,0 +1,102 @@
+.gridworld-policy-iteration-explorer { margin-top: 1rem; color: #30434d; }
+.gridworld-iteration-toolbar { position: sticky; top: var(--course-header-visible-bottom, 0px); z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; padding: 0.8rem; border: 1px solid #d8e4e8; border-radius: 0.55rem; background: #f2f7fa; box-shadow: 0 2px 7px #263e4b14; }
+.gridworld-iteration-toolbar button { min-height: 2.4rem; padding: 0.45rem 0.85rem; border: 1px solid #9db4c0; border-radius: 0.35rem; background: #fff; color: #284d61; font-weight: 600; cursor: pointer; }
+.gridworld-iteration-toolbar button:hover:not(:disabled) { border-color: #347b9e; background: #f7fbfd; }
+.gridworld-iteration-toolbar button:disabled { cursor: not-allowed; opacity: 0.55; }
+.gridworld-iteration-toolbar button.gridworld-iteration-primary { border-color: #347b9e; background: #347b9e; color: #fff; }
+.gridworld-iteration-toolbar button.gridworld-iteration-primary:hover:not(:disabled) { background: #286b8d; }
+.gridworld-iteration-toolbar button:focus-visible, .gridworld-iteration-cell:focus-visible { outline: 3px solid #f1b64b; outline-offset: 3px; }
+.gridworld-iteration-status { margin-left: auto; color: #607580; font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+
+.gridworld-iteration-cycle { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.8rem 1.2rem; margin-top: 1rem; padding: 0.9rem 1rem; border: 1px solid #c9dce6; border-radius: 0.55rem; background: #f4fafc; }
+.gridworld-iteration-cycle h2, .gridworld-iteration-reading h2 { margin: 0 0 0.2rem; color: #30434d; font-size: 1.08rem; }
+.gridworld-iteration-cycle p { max-width: 39rem; margin: 0; color: #607580; font-size: 0.9rem; }
+.gridworld-iteration-cycle-steps { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
+.gridworld-iteration-cycle-steps li { display: flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.55rem; border: 1px solid #c9dce6; border-radius: 0.3rem; background: #fff; color: #3f6070; font-size: 0.84rem; white-space: nowrap; }
+.gridworld-iteration-cycle-steps strong { display: grid; width: 1.25rem; height: 1.25rem; place-items: center; border-radius: 50%; background: #dcecf4; color: #2e6f90; font-size: 0.75rem; }
+
+.gridworld-iteration-workbench { display: grid; grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 1rem; margin-top: 1rem; align-items: start; }
+.gridworld-iteration-panel, .gridworld-iteration-inspector, .gridworld-iteration-reading { min-width: 0; padding: 1rem; border: 1px solid #d8e4e8; border-radius: 0.55rem; background: #f6fafb; }
+.gridworld-iteration-policy-panel { background: #f4f9fc; border-color: #c9dce6; }
+.gridworld-iteration-value-panel { background: #f8f6fb; border-color: #e0d6e8; }
+.gridworld-iteration-panel-heading h2, .gridworld-iteration-inspector-heading h2 { margin: 0 0 0.25rem; color: #30434d; font-size: 1.15rem; }
+.gridworld-iteration-panel-heading p, .gridworld-iteration-inspector-heading p { margin: 0 0 0.8rem; color: #61727c; font-size: 0.9rem; line-height: 1.45; }
+.gridworld-iteration-grid { display: grid; width: min(100%, 640px); aspect-ratio: 1; grid-template-rows: repeat(5, minmax(0, 1fr)); gap: 1px; border: 7px solid #d26363; border-radius: 0.25rem; background: #627781; box-shadow: 0 0 0 2px #f6fafb; }
+.gridworld-iteration-policy-grid { background: #7192a1; }
+.gridworld-iteration-value-grid { transition: filter 180ms ease; }
+.gridworld-iteration-value-grid.is-stale { filter: saturate(0.55); }
+.gridworld-iteration-row { display: grid; min-height: 0; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; }
+.gridworld-iteration-cell { position: relative; display: flex; min-width: 0; min-height: 0; align-items: center; justify-content: center; padding: 0.25rem; border: 0; border-radius: 0; color: #29444f; cursor: pointer; transition: box-shadow 120ms ease, transform 120ms ease, background 180ms ease; }
+.gridworld-iteration-cell:hover { z-index: 1; box-shadow: inset 0 0 0 2px #347b9e; }
+.gridworld-iteration-cell.is-selected { z-index: 2; box-shadow: inset 0 0 0 3px #e5a93e; }
+.gridworld-iteration-cell.changed { animation: gridworld-policy-change 1.4s ease-in-out infinite; }
+@keyframes gridworld-policy-change { 0%, 100% { box-shadow: inset 0 0 0 2px #f1b64b; } 50% { box-shadow: inset 0 0 0 5px #f1b64b; } }
+.gridworld-iteration-coordinate { position: absolute; top: 0.28rem; left: 0.34rem; color: #526e78; font-size: clamp(0.52rem, 1.35vw, 0.72rem); font-variant-numeric: tabular-nums; }
+.gridworld-iteration-policy-cell { background: #fff; }
+.gridworld-iteration-policy-cell.special-a { background: #eaf5fa; }
+.gridworld-iteration-policy-cell.special-b { background: #f5edf8; }
+.gridworld-iteration-policy-cell.target { background: #edf7ef; }
+.gridworld-iteration-action-layout { position: relative; width: min(70%, 4.2rem); aspect-ratio: 1; color: #285b76; font-size: clamp(0.82rem, 2.8vw, 1.38rem); font-weight: 800; line-height: 1; }
+.gridworld-iteration-arrow { position: absolute; display: grid; width: 1.25em; height: 1.25em; place-items: center; }
+.gridworld-iteration-arrow-up { top: 0; left: 50%; transform: translateX(-50%); }
+.gridworld-iteration-arrow-right { top: 50%; right: 0; transform: translateY(-50%); }
+.gridworld-iteration-arrow-down { bottom: 0; left: 50%; transform: translateX(-50%); }
+.gridworld-iteration-arrow-left { top: 50%; left: 0; transform: translateY(-50%); }
+.gridworld-iteration-action-layout.is-single .gridworld-iteration-arrow { top: 50%; left: 50%; right: auto; bottom: auto; transform: translate(-50%, -50%); }
+.gridworld-iteration-state-marker { position: absolute; right: 0.32rem; bottom: 0.25rem; color: #294757; font-size: clamp(0.75rem, 2.15vw, 1.05rem); font-weight: 800; }
+.gridworld-iteration-value { color: #203941; font-size: clamp(0.92rem, 3.35vw, 1.65rem); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+.gridworld-iteration-value.is-empty { color: #83969f; font-size: clamp(1rem, 3vw, 1.35rem); font-weight: 600; }
+.gridworld-iteration-value-cell.is-stale::after { position: absolute; right: 0.24rem; bottom: 0.2rem; padding: 0.1rem 0.22rem; border-radius: 0.2rem; background: #fff9; color: #596e78; content: "prior"; font-size: clamp(0.46rem, 1.1vw, 0.6rem); font-weight: 750; letter-spacing: 0.02em; }
+.gridworld-iteration-grid-note { margin: 0.7rem 0 0; color: #61727c; font-size: 0.82rem; line-height: 1.4; }
+.gridworld-iteration-legend { display: flex; align-items: center; justify-content: center; gap: 0.55rem; margin-top: 0.75rem; color: #586c76; font-size: 0.78rem; }
+.gridworld-iteration-legend i { width: min(11rem, 36vw); height: 0.7rem; border-radius: 999px; background: linear-gradient(90deg, #8faebe 0%, #f7fafb 50%, #9bcaa8 100%); }
+
+.gridworld-iteration-inspector { margin-top: 1rem; background: #fbfcfd; }
+.gridworld-iteration-inspector-heading { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: 0.4rem 1.5rem; }
+.gridworld-iteration-inspector-note { max-width: 32rem; color: #586c76; font-size: 0.86rem; }
+.gridworld-iteration-table-wrap { overflow-x: auto; }
+.gridworld-iteration-table { width: 100%; min-width: 39rem; border-collapse: collapse; color: #405963; font-size: 0.86rem; }
+.gridworld-iteration-table th, .gridworld-iteration-table td { padding: 0.5rem 0.55rem; border-bottom: 1px solid #e1e6ea; text-align: left; vertical-align: middle; }
+.gridworld-iteration-table th { color: #596e78; font-size: 0.74rem; font-weight: 750; }
+.gridworld-iteration-table td:nth-last-child(-n+2), .gridworld-iteration-table th:nth-last-child(-n+2) { text-align: right; font-variant-numeric: tabular-nums; }
+.gridworld-iteration-action { color: #285b76; font-size: 1rem; font-weight: 800; }
+.gridworld-iteration-reward-positive { color: #238452; font-weight: 750; }
+.gridworld-iteration-reward-negative { color: #bd4b4b; font-weight: 750; }
+.gridworld-iteration-greedy { background: #e8f5eb; color: #236d43; font-weight: 750; }
+.gridworld-iteration-policy-choice { box-shadow: inset 3px 0 0 #4f8db0; }
+
+.gridworld-iteration-reading { margin-top: 1rem; background: #fbfcfd; }
+.gridworld-iteration-reading ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem; margin: 0.8rem 0 0; padding: 0; counter-reset: reading-step; list-style: none; }
+.gridworld-iteration-reading li { position: relative; padding: 0.7rem 0.75rem 0.7rem 2.65rem; border: 1px solid #dce6ea; border-radius: 0.4rem; background: #fff; color: #5c707a; font-size: 0.86rem; line-height: 1.45; }
+.gridworld-iteration-reading li::before { position: absolute; top: 0.65rem; left: 0.7rem; display: grid; width: 1.4rem; height: 1.4rem; place-items: center; border-radius: 50%; background: #dcecf4; color: #2e6f90; content: counter(reading-step); counter-increment: reading-step; font-size: 0.8rem; font-weight: 800; }
+
+.quarto-dark .gridworld-iteration-toolbar, .quarto-dark .gridworld-iteration-cycle { border-color: #4a6979; background: #24323b; }
+.quarto-dark .gridworld-iteration-toolbar button, .quarto-dark .gridworld-iteration-cycle-steps li { border-color: #617d8c; background: #2e414b; color: #e5eff2; }
+.quarto-dark .gridworld-iteration-toolbar button.gridworld-iteration-primary { border-color: #4c9cc3; background: #347b9e; color: #fff; }
+.quarto-dark .gridworld-iteration-status, .quarto-dark .gridworld-iteration-cycle p, .quarto-dark .gridworld-iteration-panel-heading p, .quarto-dark .gridworld-iteration-grid-note, .quarto-dark .gridworld-iteration-inspector-note { color: #c2d1d8; }
+.quarto-dark .gridworld-iteration-cycle h2, .quarto-dark .gridworld-iteration-panel-heading h2, .quarto-dark .gridworld-iteration-inspector-heading h2, .quarto-dark .gridworld-iteration-reading h2 { color: #e2ecee; }
+.quarto-dark .gridworld-iteration-cycle-steps strong { background: #294b5e; color: #d9eef7; }
+.quarto-dark .gridworld-iteration-panel, .quarto-dark .gridworld-iteration-inspector, .quarto-dark .gridworld-iteration-reading { border-color: #476270; background: #202d32; color: #e2ecee; }
+.quarto-dark .gridworld-iteration-policy-panel { background: #20343f; border-color: #476b7d; }
+.quarto-dark .gridworld-iteration-value-panel { background: #302b35; border-color: #685578; }
+.quarto-dark .gridworld-iteration-grid { border-color: #cf6f6f; background: #71838a; box-shadow: 0 0 0 2px #202d32; }
+.quarto-dark .gridworld-iteration-policy-cell { background: #2e414b; }
+.quarto-dark .gridworld-iteration-policy-cell.special-a { background: #294b5e; }
+.quarto-dark .gridworld-iteration-policy-cell.special-b { background: #473653; }
+.quarto-dark .gridworld-iteration-policy-cell.target { background: #2d4a38; }
+.quarto-dark .gridworld-iteration-coordinate { color: #d2e0e4; }
+.quarto-dark .gridworld-iteration-action-layout { color: #d9eef7; }
+.quarto-dark .gridworld-iteration-state-marker, .quarto-dark .gridworld-iteration-value { color: #eff7f8; }
+.quarto-dark .gridworld-iteration-value.is-empty { color: #b5c9d0; }
+.quarto-dark .gridworld-iteration-value-cell.is-stale::after { background: #26353d; color: #d2e0e4; }
+.quarto-dark .gridworld-iteration-legend { color: #c2d1d8; }
+.quarto-dark .gridworld-iteration-table { color: #dce7ea; }
+.quarto-dark .gridworld-iteration-table th, .quarto-dark .gridworld-iteration-table td { border-color: #566470; }
+.quarto-dark .gridworld-iteration-table th { color: #c2d1d8; }
+.quarto-dark .gridworld-iteration-greedy { background: #28513a; color: #e5f7ea; }
+.quarto-dark .gridworld-iteration-policy-choice { box-shadow: inset 3px 0 0 #67b6d8; }
+.quarto-dark .gridworld-iteration-reading li { border-color: #566470; background: #252d31; color: #c2d1d8; }
+.quarto-dark .gridworld-iteration-reading li::before { background: #294b5e; color: #d9eef7; }
+
+@media (max-width: 840px) { .gridworld-iteration-workbench { grid-template-columns: 1fr; } .gridworld-iteration-status { flex-basis: 100%; margin-left: 0; } .gridworld-iteration-reading ol { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .gridworld-iteration-toolbar button { flex: 1 1 auto; } .gridworld-iteration-cycle { align-items: stretch; } .gridworld-iteration-cycle-steps { justify-content: center; } .gridworld-iteration-cycle-steps li { flex: 1 1 9rem; justify-content: center; } .gridworld-iteration-table { min-width: 35rem; } }
