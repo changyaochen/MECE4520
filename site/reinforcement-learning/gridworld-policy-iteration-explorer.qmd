@@ -1,0 +1,102 @@
+---
+title: "Explore Gridworld policy iteration"
+toc: false
+page-layout: full
+---
+
+Policy iteration alternates between two operations. First, evaluate the current
+policy to obtain its state-value function. Then improve the policy by choosing
+the action with the largest one-step return at every state. This page treats
+policy evaluation as a completed operation; use the preceding random-policy
+explorer to step through its Bellman updates.
+
+$$
+\pi_{k+1}(s) \in \arg\max_a
+\left[r(s,a,s') + \gamma V^{\pi_k}(s')\right].
+$$
+
+::: {.callout-tip}
+## What to watch
+
+The left grid holds the current policy $\pi_k$. The right grid holds the
+value function that was most recently evaluated. After an improvement, the
+right grid is intentionally marked as stale: it still represents
+$V^{\pi_k}$, while the left grid has advanced to $\pi_{k+1}$. Evaluate
+the new policy to complete the next cycle.
+:::
+
+```{=html}
+<link rel="stylesheet" href="../assets/gridworld-policy-iteration-explorer.css?v=20261119b">
+<div id="gridworld-policy-iteration-explorer" class="gridworld-policy-iteration-explorer" aria-label="Interactive Gridworld policy iteration explorer">
+  <div class="gridworld-iteration-toolbar clt-buttons" aria-label="Policy iteration controls">
+    <button id="gridworld-iteration-reset" type="button">Reset to random policy</button>
+    <button id="gridworld-iteration-evaluate" type="button" class="gridworld-iteration-primary">Evaluate current policy</button>
+    <button id="gridworld-iteration-improve" type="button">Greedy improvement</button>
+    <button id="gridworld-iteration-run" type="button">Run to optimum</button>
+    <output id="gridworld-iteration-status" class="gridworld-iteration-status" aria-live="polite">Policy π₀ is ready to evaluate.</output>
+  </div>
+
+  <section class="gridworld-iteration-cycle" aria-labelledby="gridworld-iteration-cycle-heading">
+    <div>
+      <h2 id="gridworld-iteration-cycle-heading">Policy-iteration cycle</h2>
+      <p>Start from the uniform random policy. Evaluate it, improve it greedily, then evaluate the updated policy.</p>
+    </div>
+    <ol class="gridworld-iteration-cycle-steps" aria-label="Policy iteration steps">
+      <li><strong>1</strong><span>Policy <i>π</i><sub>k</sub></span></li>
+      <li><strong>2</strong><span>Evaluate <i>V</i><sup>π<sub>k</sub></sup></span></li>
+      <li><strong>3</strong><span>Improve to <i>π</i><sub>k + 1</sub></span></li>
+    </ol>
+  </section>
+
+  <div class="gridworld-iteration-workbench">
+    <section class="gridworld-iteration-panel gridworld-iteration-policy-panel" aria-labelledby="gridworld-iteration-policy-heading">
+      <div class="gridworld-iteration-panel-heading">
+        <h2 id="gridworld-iteration-policy-heading">Current policy</h2>
+        <p id="gridworld-iteration-policy-caption">π₀: each arrow has probability 0.25.</p>
+      </div>
+      <div id="gridworld-iteration-policy-grid" class="gridworld-iteration-grid gridworld-iteration-policy-grid" role="grid" aria-label="Current Gridworld policy"></div>
+      <p class="gridworld-iteration-grid-note">Arrows show actions with nonzero policy probability. Click a cell to inspect it below.</p>
+    </section>
+
+    <section class="gridworld-iteration-panel gridworld-iteration-value-panel" aria-labelledby="gridworld-iteration-value-heading">
+      <div class="gridworld-iteration-panel-heading">
+        <h2 id="gridworld-iteration-value-heading">State-value function</h2>
+        <p id="gridworld-iteration-value-caption">Evaluate π₀ to fill this grid.</p>
+      </div>
+      <div id="gridworld-iteration-value-grid" class="gridworld-iteration-grid gridworld-iteration-value-grid" role="grid" aria-label="State values for the current or previous policy"></div>
+      <div class="gridworld-iteration-legend" aria-label="State value color legend"><span>Lower value</span><i></i><span>Higher value</span></div>
+    </section>
+  </div>
+
+  <section class="gridworld-iteration-inspector" aria-labelledby="gridworld-iteration-inspector-heading">
+    <div class="gridworld-iteration-inspector-heading">
+      <div>
+        <h2 id="gridworld-iteration-inspector-heading">Greedy improvement at one state</h2>
+        <p id="gridworld-iteration-selected-state">Selected state: (2, 2)</p>
+      </div>
+      <p id="gridworld-iteration-inspector-note" class="gridworld-iteration-inspector-note">Evaluate a policy to inspect its action values.</p>
+    </div>
+    <div class="gridworld-iteration-table-wrap">
+      <table class="gridworld-iteration-table">
+        <thead>
+          <tr><th>Action</th><th>Next state</th><th>Reward</th><th>One-step value</th><th>Policy probability</th></tr>
+        </thead>
+        <tbody id="gridworld-iteration-action-values"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="gridworld-iteration-reading" aria-labelledby="gridworld-iteration-reading-heading">
+    <h2 id="gridworld-iteration-reading-heading">How to read the explorer</h2>
+    <ol>
+      <li>Evaluation runs the same synchronous Bellman expectation updates shown on the previous page until the value estimates converge.</li>
+      <li>Improvement compares the four values <i>r</i> + γ<i>V</i><sup>π<sub>k</sub></sup>(<i>s</i>′) at every state and replaces the policy with its greedy version.</li>
+      <li>If no arrows change during improvement, the policy is stable and therefore optimal for this finite Gridworld.</li>
+    </ol>
+  </section>
+</div>
+```
+
+[← Return to Reinforcement learning](index.qmd)
+
+<script src="../assets/gridworld-policy-iteration-explorer.js?v=20261119b"></script>

@@ -6,20 +6,20 @@ page-layout: full
 
 The Gridworld now has a fixed policy: from every state, the agent chooses up,
 right, down, or left with probability (0.25). With the policy fixed, the
-environment is a Markov reward process. The state value (V_k(s)) estimates
-the expected discounted return from state (s) after (k) synchronous Bellman
+environment is a Markov reward process. The state value $V_k(s)$ estimates
+the expected discounted return from state $s$ after $k$ synchronous Bellman
 backups.
 
-For this random policy and (gamma=0.9), one backup is
+For this random policy and $\gamma=0.9$, one backup is
 
-\[
+$$
 V_{k+1}(s)=\frac{1}{4}\sum_a\left[r(s,a,s')+0.9V_k(s')\right].
-\]
+$$
 
 ::: {.callout-tip}
 ## What to watch
 
-Begin with (V_0(s)=0). A Bellman sweep updates every state from the *previous*
+Begin with $V_0(s)=0$. A Bellman sweep updates every state from the *previous*
 value grid. Watch the positive values from A and B, and the boundary penalty,
 spread through the grid over repeated sweeps.
 :::
@@ -85,9 +85,9 @@ spread through the grid over repeated sweeps.
   <section class="gridworld-evaluation-reading" aria-labelledby="gridworld-evaluation-reading-heading">
     <h2 id="gridworld-evaluation-reading-heading">How to read a Bellman sweep</h2>
     <ol>
-      <li>Use the complete current grid (V_k) for every state.</li>
+      <li>Use the complete current grid <i>V</i><sub>k</sub> for every state.</li>
       <li>Average the four random-policy action outcomes.</li>
-      <li>Replace the whole grid with (V_{k+1}) simultaneously.</li>
+      <li>Replace the whole grid with <i>V</i><sub>k + 1</sub> simultaneously.</li>
     </ol>
   </section>
 </div>
