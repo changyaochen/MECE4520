@@ -31,6 +31,8 @@ project:
     - assets/bandit-explorer.css
     - assets/gridworld-environment-explorer.js
     - assets/gridworld-environment-explorer.css
+    - assets/gridworld-policy-evaluation-explorer.js
+    - assets/gridworld-policy-evaluation-explorer.css
     - data/dbscan-concentric-circles.csv
     - assets/columbia-engineering-logo.png
     - assets/b7e2a9c4.html
