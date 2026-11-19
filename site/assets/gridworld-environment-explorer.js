@@ -38,17 +38,17 @@
     if (sourceSpecial) return sourceSpecial.label;
     const targetSpecial = targetSpecialAt(state);
     if (targetSpecial) return targetSpecial.targetLabel;
-    return `row ${state.row + 1}, column ${state.column + 1}`;
+    return `row ${state.row}, column ${state.column}`;
   }
 
   function stateDescription(state) {
     const name = stateName(state);
     if (name.startsWith("row")) return name;
-    return `${name} (row ${state.row + 1}, column ${state.column + 1})`;
+    return `${name} (row ${state.row}, column ${state.column})`;
   }
 
   function gridCoordinate(state) {
-    return `(${state.row + 1}, ${state.column + 1})`;
+    return `(${state.row}, ${state.column})`;
   }
 
   function formatReward(reward) {
@@ -118,7 +118,7 @@
     if (sourceSpecial) return `${sourceSpecial.label}, special state: every action goes to ${sourceSpecial.targetLabel} with reward ${formatReward(sourceSpecial.reward)}`;
     const targetSpecial = targetSpecialAt(state);
     if (targetSpecial) return `${targetSpecial.targetLabel}, destination of special state ${targetSpecial.label}`;
-    return `row ${state.row + 1}, column ${state.column + 1}`;
+    return `row ${state.row}, column ${state.column}`;
   }
 
   function addCellText(cell, className, value) {
@@ -227,7 +227,7 @@
         cell.setAttribute("aria-label", `${cellLabel(state)}${isCurrent ? ", current agent state" : ""}`);
         cell.title = `Place the agent at ${cellLabel(state)}`;
 
-        addCellText(cell, "gridworld-cell-coordinate", `(${row + 1}, ${column + 1})`);
+        addCellText(cell, "gridworld-cell-coordinate", `(${row}, ${column})`);
         if (sourceSpecial) {
           addCellText(cell, "gridworld-cell-reward gridworld-cell-zero-reward", "0");
           addCellText(cell, "gridworld-cell-state-label", sourceSpecial.label);
@@ -297,7 +297,7 @@
     currentState = copyState(INITIAL_STATE);
     lastTransition = null;
     render();
-    status.textContent = "Agent reset to row 3, column 3.";
+    status.textContent = "Agent reset to row 2, column 2.";
   });
   get("go-a").addEventListener("click", () => {
     currentState = copyState(SPECIAL_TRANSITIONS[0].source);

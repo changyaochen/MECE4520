@@ -22,13 +22,13 @@ agent one cell with reward 0. The red boundary, and the special states
 :::
 
 ```{=html}
-<link rel="stylesheet" href="../assets/gridworld-environment-explorer.css?v=20261117b">
+<link rel="stylesheet" href="../assets/gridworld-environment-explorer.css?v=20261118a">
 <div id="gridworld-environment-explorer" class="gridworld-environment-explorer" aria-label="Interactive Gridworld environment explorer">
   <div class="gridworld-toolbar clt-buttons" aria-label="Gridworld controls">
     <button id="gridworld-reset" type="button" class="gridworld-primary">Reset agent</button>
     <button id="gridworld-go-a" type="button">Place agent at A</button>
     <button id="gridworld-go-b" type="button">Place agent at B</button>
-    <output id="gridworld-status" class="gridworld-status" aria-live="polite">Agent starts at row 3, column 3.</output>
+    <output id="gridworld-status" class="gridworld-status" aria-live="polite">Agent starts at row 2, column 2.</output>
   </div>
 
   <div class="gridworld-workbench">
@@ -61,7 +61,7 @@ agent one cell with reward 0. The red boundary, and the special states
       <div class="gridworld-transition-card" aria-live="polite">
         <h3>Transition</h3>
         <dl class="gridworld-transition-values">
-          <div><dt>Previous state (<i>s</i>)</dt><dd id="gridworld-state-value">(3, 3)</dd></div>
+          <div><dt>Previous state (<i>s</i>)</dt><dd id="gridworld-state-value">(2, 2)</dd></div>
           <div><dt>Action (<i>a</i>)</dt><dd id="gridworld-action-value">—</dd></div>
           <div><dt>Current state (<i>s</i>′)</dt><dd id="gridworld-next-state-value">—</dd></div>
           <div><dt>Reward</dt><dd id="gridworld-reward-value">—</dd></div>
@@ -102,4 +102,4 @@ agent one cell with reward 0. The red boundary, and the special states
 
 [← Return to Reinforcement learning](index.qmd)
 
-<script src="../assets/gridworld-environment-explorer.js?v=20261117b"></script>
+<script src="../assets/gridworld-environment-explorer.js?v=20261118a"></script>

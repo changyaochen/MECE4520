@@ -16,10 +16,19 @@ best option found so far.
 - [Explore bandit policies](bandit-explorer.qmd)
 - [Work through the multi-armed bandit notebook](01-multi-armed-bandits.ipynb)
 
-## Gridworld: states, actions, and rewards
+## Gridworld: fixed-policy evaluation
 
 The Gridworld is a small deterministic environment that we will reuse to
-introduce state transitions, immediate rewards, fixed-policy evaluation, and
-eventually optimal control.
+study state transitions, immediate rewards, and state values under a fixed
+policy.
 
 - [Explore the Gridworld environment](gridworld-environment-explorer.qmd)
+- [Explore random-policy evaluation](gridworld-policy-evaluation-explorer.qmd)
+- [Work through the Gridworld policy-evaluation notebook](02-gridworld-policy-evaluation.ipynb)
+
+## Gridworld: optimal control
+
+Once the agent can improve its policy, the same Gridworld becomes a compact
+setting for policy iteration and value iteration.
+
+- [Work through the Gridworld control notebook](03-gridworld-control.ipynb)

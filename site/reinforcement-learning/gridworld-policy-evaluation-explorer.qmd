@@ -1,0 +1,98 @@
+---
+title: "Evaluate a random Gridworld policy"
+toc: false
+page-layout: full
+---
+
+The Gridworld now has a fixed policy: from every state, the agent chooses up,
+right, down, or left with probability (0.25). With the policy fixed, the
+environment is a Markov reward process. The state value (V_k(s)) estimates
+the expected discounted return from state (s) after (k) synchronous Bellman
+backups.
+
+For this random policy and (gamma=0.9), one backup is
+
+\[
+V_{k+1}(s)=\frac{1}{4}\sum_a\left[r(s,a,s')+0.9V_k(s')\right].
+\]
+
+::: {.callout-tip}
+## What to watch
+
+Begin with (V_0(s)=0). A Bellman sweep updates every state from the *previous*
+value grid. Watch the positive values from A and B, and the boundary penalty,
+spread through the grid over repeated sweeps.
+:::
+
+```{=html}
+<link rel="stylesheet" href="../assets/gridworld-policy-evaluation-explorer.css?v=20261118b">
+<div id="gridworld-policy-evaluation-explorer" class="gridworld-policy-evaluation-explorer" aria-label="Interactive random-policy evaluation explorer">
+  <div class="gridworld-evaluation-toolbar clt-buttons" aria-label="Policy evaluation controls">
+    <button id="gridworld-evaluation-reset" type="button">Reset V<sub>0</sub> = 0</button>
+    <button id="gridworld-evaluation-step" type="button" class="gridworld-evaluation-primary">One Bellman sweep</button>
+    <button id="gridworld-evaluation-run" type="button">Run to convergence</button>
+    <output id="gridworld-evaluation-status" class="gridworld-evaluation-status" aria-live="polite">Sweep 0 · max change —</output>
+  </div>
+
+  <section class="gridworld-evaluation-policy" aria-labelledby="gridworld-evaluation-policy-heading">
+    <div>
+      <h2 id="gridworld-evaluation-policy-heading">Fixed random policy</h2>
+      <p>At every state, the policy chooses each action with probability 0.25.</p>
+    </div>
+    <div class="gridworld-evaluation-actions" aria-label="Random policy action probabilities">
+      <span>↑ <strong>0.25</strong></span>
+      <span>→ <strong>0.25</strong></span>
+      <span>↓ <strong>0.25</strong></span>
+      <span>← <strong>0.25</strong></span>
+      <span class="gridworld-evaluation-gamma">γ = <strong>0.9</strong></span>
+    </div>
+  </section>
+
+  <div class="gridworld-evaluation-workbench">
+    <section class="gridworld-evaluation-panel gridworld-evaluation-board-panel" aria-labelledby="gridworld-evaluation-board-heading">
+      <div class="gridworld-evaluation-panel-heading">
+        <h2 id="gridworld-evaluation-board-heading">Current state-value estimates</h2>
+        <p>Click a state to inspect the four action outcomes used in its next Bellman backup.</p>
+      </div>
+      <div id="gridworld-evaluation-grid" class="gridworld-evaluation-grid" role="grid" aria-label="Five by five Gridworld state value estimates"></div>
+      <div class="gridworld-evaluation-legend" aria-label="Value color legend">
+        <span>Lower value</span><i></i><span>Higher value</span>
+      </div>
+    </section>
+
+    <section class="gridworld-evaluation-panel gridworld-evaluation-detail-panel" aria-labelledby="gridworld-evaluation-detail-heading">
+      <div class="gridworld-evaluation-panel-heading">
+        <h2 id="gridworld-evaluation-detail-heading">One-step backup</h2>
+        <p id="gridworld-evaluation-selected-state">Selected state: (2, 2)</p>
+      </div>
+      <p class="gridworld-evaluation-detail-intro">Each row contributes one quarter of the selected state's next value.</p>
+      <div class="gridworld-evaluation-table-wrap">
+        <table class="gridworld-evaluation-table">
+          <thead>
+            <tr><th>Action</th><th>Next state</th><th>Reward</th><th>Contribution</th></tr>
+          </thead>
+          <tbody id="gridworld-evaluation-contributions"></tbody>
+        </table>
+      </div>
+      <div class="gridworld-evaluation-result" aria-live="polite">
+        <span id="gridworld-evaluation-result-label">V<sub>1</sub>(2, 2)</span>
+        <strong id="gridworld-evaluation-result-value">0.00</strong>
+      </div>
+      <p id="gridworld-evaluation-detail-note" class="gridworld-evaluation-detail-note">The displayed calculation uses V<sub>0</sub> from the grid.</p>
+    </section>
+  </div>
+
+  <section class="gridworld-evaluation-reading" aria-labelledby="gridworld-evaluation-reading-heading">
+    <h2 id="gridworld-evaluation-reading-heading">How to read a Bellman sweep</h2>
+    <ol>
+      <li>Use the complete current grid (V_k) for every state.</li>
+      <li>Average the four random-policy action outcomes.</li>
+      <li>Replace the whole grid with (V_{k+1}) simultaneously.</li>
+    </ol>
+  </section>
+</div>
+```
+
+[← Return to Reinforcement learning](index.qmd)
+
+<script src="../assets/gridworld-policy-evaluation-explorer.js?v=20261118c"></script>
