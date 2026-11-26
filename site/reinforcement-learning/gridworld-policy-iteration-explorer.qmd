@@ -99,4 +99,4 @@ the new policy to complete the next cycle.
 
 [← Return to Reinforcement learning](index.qmd)
 
-<script src="../assets/gridworld-policy-iteration-explorer.js?v=20261119b"></script>
+<script src="../assets/gridworld-policy-iteration-explorer.js?v=20261126a"></script>

@@ -35,6 +35,8 @@ project:
     - assets/gridworld-policy-evaluation-explorer.css
     - assets/gridworld-policy-iteration-explorer.js
     - assets/gridworld-policy-iteration-explorer.css
+    - assets/gridworld-value-iteration-explorer.js
+    - assets/gridworld-value-iteration-explorer.css
     - data/dbscan-concentric-circles.csv
     - assets/columbia-engineering-logo.png
     - assets/b7e2a9c4.html

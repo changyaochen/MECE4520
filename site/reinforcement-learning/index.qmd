@@ -32,4 +32,5 @@ Once the agent can improve its policy, the same Gridworld becomes a compact
 setting for policy iteration and value iteration.
 
 - [Explore Gridworld policy iteration](gridworld-policy-iteration-explorer.qmd)
+- [Explore Gridworld value iteration](gridworld-value-iteration-explorer.qmd)
 - [Work through the Gridworld control notebook](03-gridworld-control.ipynb)
