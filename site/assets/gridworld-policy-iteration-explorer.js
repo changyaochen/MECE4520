@@ -1,7 +1,7 @@
 (() => {
   const GRID_SIZE = 5;
   const GAMMA = 0.9;
-  const EVALUATION_TOLERANCE = 1e-5;
+  const EVALUATION_TOLERANCE = 1e-4;
   const POLICY_TIE_TOLERANCE = 1e-10;
   const ACTIONS = [
     { key: "up", row: -1, column: 0, label: "Up", arrow: "↑" },
