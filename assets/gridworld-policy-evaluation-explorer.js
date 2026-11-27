@@ -2,7 +2,7 @@
   const GRID_SIZE = 5;
   const GAMMA = 0.9;
   const POLICY_PROBABILITY = 0.25;
-  const CONVERGENCE_TOLERANCE = 1e-5;
+  const CONVERGENCE_TOLERANCE = 1e-4;
   const ACTIONS = [
     { key: "up", row: -1, column: 0, label: "Up", arrow: "↑" },
     { key: "right", row: 0, column: 1, label: "Right", arrow: "→" },

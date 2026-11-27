@@ -446,7 +446,7 @@ window.Quarto = {
 <li>Use <strong>value iteration</strong> to fold those two ideas into one Bellman-optimality update.</li>
 </ol>
 <p>The preceding Gridworld notebook studies policy evaluation in detail. This notebook includes the same evaluator so that the control algorithms remain self-contained.</p>
-<div id="fef0e7c3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-19T03:31:45.472589Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-19T03:31:45.472381Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-19T03:31:46.711626Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-19T03:31:46.711238Z&quot;}}" data-execution_count="1">
+<div id="fef0e7c3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-26T12:52:46.317935Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-26T12:52:46.317849Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-26T12:52:47.436028Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-26T12:52:47.435674Z&quot;}}" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -460,7 +460,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="the-zero-indexed-gridworld">1. The zero-indexed Gridworld</h2>
 <p>At any state, the available actions are up, right, down, and left. An action that would leave the board keeps the agent in the same state and gives reward (-1). Every ordinary in-grid move has reward 0. At (A) and (B), every action triggers the listed teleport transition.</p>
 <p>The functions below provide the <strong>known model</strong> needed by policy iteration and value iteration: given ((s,a)), they return the deterministic next state (s’) and reward (r).</p>
-<div id="a93ce070" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-19T03:31:46.714700Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-19T03:31:46.714473Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-19T03:31:46.719599Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-19T03:31:46.719325Z&quot;}}" data-execution_count="2">
+<div id="a93ce070" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-26T12:52:47.438932Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-26T12:52:47.438788Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-26T12:52:47.443438Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-26T12:52:47.443195Z&quot;}}" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>GRID_SIZE <span class="op">=</span> <span class="dv">5</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>GAMMA <span class="op">=</span> <span class="fl">0.9</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -519,7 +519,7 @@ B at (0, 3) → B′ at (2, 3), reward +5</code></pre>
 q_\pi(s,a) = r(s,a,s') + \gamma v_\pi(s').
 \]</span></p>
 <p>The Gridworld is deterministic, so each ((s,a)) has exactly one (s’) and one immediate reward. The code computes all four action values at a state, then policy evaluation averages them according to the current policy.</p>
-<div id="79e5d389" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-19T03:31:46.721823Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-19T03:31:46.721714Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-19T03:31:46.755181Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-19T03:31:46.754849Z&quot;}}" data-execution_count="3">
+<div id="79e5d389" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-26T12:52:47.444706Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-26T12:52:47.444636Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-26T12:52:47.457212Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-26T12:52:47.456949Z&quot;}}" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> uniform_random_policy():</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''Return π(a|s)=1/4 for every state and every action.'''</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.full((GRID_SIZE, GRID_SIZE, N_ACTIONS), <span class="fl">1.0</span> <span class="op">/</span> N_ACTIONS)</span>
@@ -534,7 +534,7 @@ q_\pi(s,a) = r(s,a,s') + \gamma v_\pi(s').
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> q_values</span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate_policy(policy, tolerance<span class="op">=</span><span class="fl">1e-9</span>, max_sweeps<span class="op">=</span><span class="dv">10_000</span>):</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate_policy(policy, tolerance<span class="op">=</span><span class="fl">1e-4</span>, max_sweeps<span class="op">=</span><span class="dv">10_000</span>):</span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''Evaluate a fixed policy by synchronous Bellman expectation backups.'''</span></span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> np.zeros((GRID_SIZE, GRID_SIZE))</span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    changes <span class="op">=</span> []</span>
@@ -565,16 +565,16 @@ q_\pi(s,a) = r(s,a,s') + \gamma v_\pi(s').
 <span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Action values at </span><span class="sc">{</span>example_state<span class="sc">}</span><span class="ss">:'</span>)</span>
 <span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pd.Series(action_values(random_values, example_state), index<span class="op">=</span>ACTION_NAMES).<span class="bu">round</span>(<span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Random-policy evaluation converged in 156 sweeps.
+<pre><code>Random-policy evaluation converged in 47 sweeps.
 Action values at (2, 2):
-up       2.025
-right    0.322
+up       2.026
+right    0.323
 down    -0.319
-left     0.664
+left     0.665
 dtype: float64</code></pre>
 </div>
 </div>
-<div id="8b60abfa" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-19T03:31:46.756881Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-19T03:31:46.756764Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-19T03:31:47.085820Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-19T03:31:47.085527Z&quot;}}" data-execution_count="4">
+<div id="8b60abfa" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-26T12:52:47.458452Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-26T12:52:47.458375Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-26T12:52:47.600215Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-26T12:52:47.599928Z&quot;}}" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_values(values, title):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''Show a state-value table with zero-indexed row and column ticks.'''</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">5.5</span>))</span>
@@ -646,7 +646,7 @@ dtype: float64</code></pre>
 \pi_{\mathrm{new}}(s) = \arg\max_a q_\pi(s,a).
 \]</span></p>
 <p>This step does not yet guarantee an optimal policy: it improves the policy relative to the values of the <em>current</em> policy. At (A) and (B), every action ties because the special transition ignores the chosen direction; the code retains all tied actions equally.</p>
-<div id="dc88d5d0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-19T03:31:47.087430Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-19T03:31:47.087316Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-19T03:31:47.476183Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-19T03:31:47.475798Z&quot;}}" data-execution_count="5">
+<div id="dc88d5d0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-26T12:52:47.601578Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-26T12:52:47.601472Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-26T12:52:47.679902Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-26T12:52:47.679644Z&quot;}}" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greedy_policy(values):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''Return a policy that splits probability equally across tied best actions.'''</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    policy <span class="op">=</span> np.zeros((GRID_SIZE, GRID_SIZE, N_ACTIONS))</span>
@@ -677,8 +677,8 @@ dtype: float64</code></pre>
 <li><strong>Policy improvement:</strong> replace that policy with ((v_)).</li>
 </ol>
 <p>When the greedy step leaves the policy unchanged, the policy is optimal. This works here because we know the transition and reward model exactly.</p>
-<div id="9ed47842" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-19T03:31:47.478511Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-19T03:31:47.478376Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-19T03:31:47.906653Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-19T03:31:47.906346Z&quot;}}" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> policy_iteration(tolerance<span class="op">=</span><span class="fl">1e-9</span>, max_policy_updates<span class="op">=</span><span class="dv">50</span>):</span>
+<div id="9ed47842" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-26T12:52:47.681368Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-26T12:52:47.681262Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-26T12:52:47.898072Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-26T12:52:47.897806Z&quot;}}" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> policy_iteration(tolerance<span class="op">=</span><span class="fl">1e-4</span>, max_policy_updates<span class="op">=</span><span class="dv">50</span>):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''Alternate complete policy evaluation and greedy policy improvement.'''</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    policy <span class="op">=</span> uniform_random_policy()</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    history <span class="op">=</span> []</span>
@@ -705,11 +705,11 @@ dtype: float64</code></pre>
 <span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>plot_policy(optimal_policy_pi, <span class="st">'Optimal policy from policy iteration'</span>, optimal_values_pi)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> policy update  evaluation sweeps  policy stable
-             0                156          False
-             1                220          False
-             2                220          False
-             3                220          False
-             4                220           True</code></pre>
+             0                 47          False
+             1                111          False
+             2                111          False
+             3                111          False
+             4                111           True</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <div>
@@ -734,8 +734,8 @@ dtype: float64</code></pre>
 v_{k+1}(s) = \max_a \left[r(s,a,s') + \gamma v_k(s')\right].
 \]</span></p>
 <p>There is no explicit policy during the updates. After the values converge, we extract the policy by taking the greedy action at each state.</p>
-<div id="0e117189" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-19T03:31:47.908741Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-19T03:31:47.908611Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-19T03:31:48.373566Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-19T03:31:48.373087Z&quot;}}" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> value_iteration(tolerance<span class="op">=</span><span class="fl">1e-9</span>, max_sweeps<span class="op">=</span><span class="dv">10_000</span>):</span>
+<div id="0e117189" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-11-26T12:52:47.899394Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-11-26T12:52:47.899315Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-11-26T12:52:48.415175Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-11-26T12:52:48.414825Z&quot;}}" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> value_iteration(tolerance<span class="op">=</span><span class="fl">1e-4</span>, max_sweeps<span class="op">=</span><span class="dv">10_000</span>):</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''Apply synchronous Bellman optimality backups until the values converge.'''</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> np.zeros((GRID_SIZE, GRID_SIZE))</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    changes <span class="op">=</span> []</span>
@@ -770,7 +770,7 @@ v_{k+1}(s) = \max_a \left[r(s,a,s') + \gamma v_k(s')\right].
 <span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>       title<span class="op">=</span><span class="st">'Value iteration convergence'</span>)</span>
 <span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Value iteration converged in 220 sweeps.
+<pre><code>Value iteration converged in 111 sweeps.
 Maximum difference from policy iteration: 0.00e+00</code></pre>
 </div>
 <div class="cell-output cell-output-display">
