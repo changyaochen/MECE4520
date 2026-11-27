@@ -65,6 +65,8 @@
   const get = (id) => document.getElementById(`gridworld-value-${id}`);
   const valueGrid = get("value-grid");
   const policyGrid = get("policy-grid");
+  const backupPanel = get("backup-panel");
+  const policyPanel = get("policy-panel");
   const selectedLabel = get("selected");
   const actionsBody = get("actions");
   const result = get("result");
@@ -150,17 +152,23 @@
     for (const outcome of outcomes) {
       const row = document.createElement("tr");
       if (Math.abs(outcome.value - best) < TIE_TOLERANCE) row.classList.add("gridworld-iteration-greedy");
-      const cells = [`${outcome.action.arrow} ${outcome.action.label}`, stateLabel(outcome.nextState), outcome.reward > 0 ? `+${outcome.reward}` : String(outcome.reward), displayValue(values[outcome.nextState.row][outcome.nextState.column]), displayValue(outcome.value)];
+      const cells = [`${outcome.action.arrow} ${outcome.action.label}`, stateLabel(outcome.nextState), outcome.reward > 0 ? `+${outcome.reward}` : String(outcome.reward), displayValue(outcome.value)];
       cells.forEach((text) => { const td = document.createElement("td"); td.textContent = text; row.append(td); });
       actionsBody.append(row);
     }
-    result.textContent = `Next value at ${coordinate(selected)}: ${displayValue(best)} (using sweep ${sweep})`;
+    result.textContent = `Next value: ${displayValue(best)} (maximum of the four returns)`;
   }
   function render() {
     renderGrid(valueGrid, "value");
-    renderGrid(policyGrid, "policy");
-    renderInspector();
-    status.textContent = `Sweep ${sweep} · max change ${maxChange === null ? "—" : maxChange.toExponential(2)}${converged ? " · converged" : ""}`;
+    backupPanel.hidden = converged;
+    policyPanel.hidden = !converged;
+    if (converged) {
+      renderGrid(policyGrid, "policy");
+    } else {
+      policyGrid.replaceChildren();
+      renderInspector();
+    }
+    status.textContent = `Sweep ${sweep} · max change ${maxChange === null ? "—" : maxChange.toExponential(2)}${converged ? " · converged; greedy policy shown" : ""}`;
     step.disabled = timer !== null || converged;
     run.disabled = timer === null && converged;
     run.textContent = timer === null ? "Run to convergence" : "Pause";

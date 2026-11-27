@@ -1,3 +1,4 @@
 .gridworld-value-iteration-explorer .gridworld-iteration-panel-heading { min-height: 4rem; }
+.gridworld-value-backup-panel .gridworld-iteration-table { min-width: 0; }
 .gridworld-value-result { margin: 0.8rem 0 0; padding: 0.7rem 0.85rem; border-left: 4px solid #53a77b; background: #e8f5eb; color: #236d43; font-weight: 700; font-variant-numeric: tabular-nums; }
 .quarto-dark .gridworld-value-result { background: #28513a; color: #e5f7ea; }

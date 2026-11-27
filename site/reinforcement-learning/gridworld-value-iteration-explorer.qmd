@@ -17,16 +17,14 @@ $$
 ## What to watch
 
 Start with all values equal to zero. Each sweep updates all 25 states using
-the **previous** value grid. The arrows show actions that are greedy with
-respect to the values currently displayed; tied actions are all shown. At the
-start, the zero values are only estimates, so the arrows are not necessarily
-optimal. Unlike
-policy iteration, we do not fully evaluate a policy between improvements.
+the **previous** value grid. Click a state to see how its next value is
+computed. Value iteration does not maintain a policy between sweeps; the
+greedy policy is extracted from the values after they converge.
 :::
 
 ```{=html}
 <link rel="stylesheet" href="../assets/gridworld-policy-iteration-explorer.css?v=20261119b">
-<link rel="stylesheet" href="../assets/gridworld-value-iteration-explorer.css?v=20261126a">
+<link rel="stylesheet" href="../assets/gridworld-value-iteration-explorer.css?v=20261127a">
 <div id="gridworld-value-iteration-explorer" class="gridworld-policy-iteration-explorer gridworld-value-iteration-explorer" aria-label="Interactive Gridworld value iteration explorer">
   <div class="gridworld-iteration-toolbar clt-buttons" aria-label="Value iteration controls">
     <button id="gridworld-value-reset" type="button">Reset values</button>
@@ -45,39 +43,36 @@ policy iteration, we do not fully evaluate a policy between improvements.
       <div class="gridworld-iteration-legend" aria-label="Value color legend"><span>Lower value</span><i></i><span>Higher value</span></div>
     </section>
 
-    <section class="gridworld-iteration-panel gridworld-iteration-policy-panel" aria-labelledby="gridworld-value-policy-heading">
+    <section id="gridworld-value-backup-panel" class="gridworld-iteration-panel gridworld-value-backup-panel" aria-labelledby="gridworld-value-inspector-heading">
       <div class="gridworld-iteration-panel-heading">
-        <h2 id="gridworld-value-policy-heading">Greedy actions</h2>
-        <p>Best actions according to the current values on the left.</p>
-      </div>
-      <div id="gridworld-value-policy-grid" class="gridworld-iteration-grid gridworld-iteration-policy-grid" role="grid" aria-label="Actions greedy with respect to the displayed values"></div>
-      <p class="gridworld-iteration-grid-note">All tied best actions are shown. Click either grid to inspect a state.</p>
-    </section>
-  </div>
-
-  <section class="gridworld-iteration-inspector" aria-labelledby="gridworld-value-inspector-heading">
-    <div class="gridworld-iteration-inspector-heading">
-      <div>
         <h2 id="gridworld-value-inspector-heading">Next backup at one state</h2>
         <p id="gridworld-value-selected">Selected state: (2, 2)</p>
       </div>
-        <p class="gridworld-iteration-inspector-note">Compare the four candidate returns <i>r</i> + γ<i>V</i><sub>k</sub>(<i>s</i>′) using the current grid. Their maximum is <i>V</i><sub>k + 1</sub> for this state.</p>
-    </div>
-    <div class="gridworld-iteration-table-wrap">
-      <table class="gridworld-iteration-table">
-        <thead><tr><th>Action</th><th>Next state</th><th>Reward</th><th>Current value of next state</th><th>One-step return</th></tr></thead>
-        <tbody id="gridworld-value-actions"></tbody>
-      </table>
-    </div>
-    <p id="gridworld-value-result" class="gridworld-value-result" aria-live="polite"></p>
-  </section>
+      <div class="gridworld-iteration-table-wrap">
+        <table class="gridworld-iteration-table">
+          <thead><tr><th>Action</th><th>Next state</th><th>Reward</th><th><i>r</i> + γ<i>V</i><sub>k</sub>(<i>s</i>′)</th></tr></thead>
+          <tbody id="gridworld-value-actions"></tbody>
+        </table>
+      </div>
+      <p id="gridworld-value-result" class="gridworld-value-result" aria-live="polite"></p>
+    </section>
+
+    <section id="gridworld-value-policy-panel" class="gridworld-iteration-panel gridworld-iteration-policy-panel" aria-labelledby="gridworld-value-policy-heading" hidden>
+      <div class="gridworld-iteration-panel-heading">
+        <h2 id="gridworld-value-policy-heading">Greedy policy</h2>
+        <p>Best actions from the converged values.</p>
+      </div>
+      <div id="gridworld-value-policy-grid" class="gridworld-iteration-grid gridworld-iteration-policy-grid" role="grid" aria-label="Actions greedy with respect to the converged values"></div>
+      <p class="gridworld-iteration-grid-note">All tied best actions are shown.</p>
+    </section>
+  </div>
 
   <section class="gridworld-iteration-reading" aria-labelledby="gridworld-value-reading-heading">
     <h2 id="gridworld-value-reading-heading">How to read a sweep</h2>
     <ol>
       <li>For each action, add its immediate reward to the discounted value of the next state.</li>
       <li>Keep the maximum for each state; calculate all new values from the same previous grid.</li>
-      <li>Repeat until values approximately converge. The greedy arrows then approximate an optimal policy.</li>
+      <li>Once the largest change in a sweep falls below 0.0001, extract the greedy policy.</li>
     </ol>
   </section>
 </div>
@@ -85,4 +80,4 @@ policy iteration, we do not fully evaluate a policy between improvements.
 
 [← Return to Reinforcement learning](index.qmd)
 
-<script src="../assets/gridworld-value-iteration-explorer.js?v=20261126b"></script>
+<script src="../assets/gridworld-value-iteration-explorer.js?v=20261127a"></script>
